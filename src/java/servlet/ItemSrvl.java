@@ -4,6 +4,8 @@
  */
 package servlet;
 
+import dao.DAOFactory;
+import dao.DaoItem;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletException;
@@ -11,14 +13,21 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import rssagregator.beans.Item;
+import rssagregator.beans.form.ItemForm;
+import rssagregator.services.ListeFluxCollecteEtConfigConrante;
+import static servlet.FluxSrvl.ATT_FLUX;
 
 /**
  *
  * @author clem
  */
 @WebServlet(name = "Item", urlPatterns = {"/item"})
-public class Item extends HttpServlet {
+public class ItemSrvl extends HttpServlet {
+
     public static final String VUE = "/WEB-INF/itemjsp.jsp";
+    public static final String ATT_ITEM = "item";
+
     /**
      * Processes requests for both HTTP
      * <code>GET</code> and
@@ -31,11 +40,43 @@ public class Item extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         response.setContentType("text/html;charset=UTF-8");
-        PrintWriter out = response.getWriter();
-     
+        response.setCharacterEncoding("UTF-8");
+        request.setCharacterEncoding("UTF-8");
+
+        String action = request.getParameter("action");
+        if (action == null) {
+            action = "list";
+        }
+        request.setAttribute("action", action);
+
+
+        //DAO
+
+        DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
+        ItemForm form = new ItemForm();
+
+
+        Item item = null;
+
+        // On récupère l'item si un id est demandé dans le get
+        String idString = request.getParameter("id");
+        if (idString != null && !idString.equals("")) {
+            Long id = new Long(request.getParameter("id"));
+            request.setAttribute("id", id);
+            item = (Item) daoItem.find(id);
+//            flux = (Flux) daoFlux.find(id);
+
+        }
+        request.setAttribute(ATT_ITEM, item);
+
+
+
+
+
         request.setAttribute("navmenu", "item");
-         this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
+        this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

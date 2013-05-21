@@ -35,7 +35,7 @@ public class Item implements Serializable {
      * stocke ici le contenu RSS de l'élément description. Pour les flux ATOM,
      * on a une déparation entre description et contenu
      */
-    @Column(name = "description",length = 5000)
+    @Column(name = "description",length = 8000)
     private String description;
     /**
      * *
@@ -48,28 +48,28 @@ public class Item implements Serializable {
      * *
      * La date de publication de récupére dans le XML
      */
-    @Temporal(javax.persistence.TemporalType.DATE)
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     @Column(name = "datePub")
     private Date datePub;
     /**
      * *
      * La date de récupération de l'article
      */
-    @Temporal(javax.persistence.TemporalType.DATE)
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     @Column(name = "dateRecup")
     private Date dateRecup;
     /**
      * *
      * Stockage de l'élément guid de l'item
      */
-    @Column(name = "guid")
+    @Column(name = "guid", length = 1000)
     private String guid;
     /**
      * *
      * La catégorie. On a choisi de pas créer une nouvelle entitée pour les
      * catégories. Toutes les catégories sont concaténée dans ce champs
      */
-    @Column(name = "categorie")
+    @Column(name = "categorie", length = 500)
     private String categorie;
     /**
      * *

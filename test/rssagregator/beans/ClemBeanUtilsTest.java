@@ -76,7 +76,7 @@ public class ClemBeanUtilsTest {
         HttpServletRequest req = ic.getRequest();
 
         Journal j2 = new Journal();
-        JournalForm form = new JournalForm(DAOFactory.getInstance().getDaoJournal());
+        JournalForm form = new JournalForm();
         ClemBeanUtils.populate(j2, req, form);
 
 
@@ -93,8 +93,8 @@ public class ClemBeanUtilsTest {
     @Test
     public void testCheck() throws Exception {
 
-        DaoJournal dao = DAOFactory.getInstance().getDaoJournal();
-        AbstrForm objetFormulaire = new JournalForm(dao);
+//        DaoJournal dao = DAOFactory.getInstance().getDaoJournal();
+        AbstrForm objetFormulaire = new JournalForm();
 
         Journal jou = new Journal();
         jou.setNom("Lemonde");

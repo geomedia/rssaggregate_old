@@ -5,9 +5,13 @@
 --%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+
+<%@taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>  <!--Il faut bien utiliser la vesion 1.1 d ela jstl l'autre ne permet pas d'utiliser les EL-->
+<%--<%@taglib uri="http://java.sun.com/jstl/fmt" prefix="fmt" %>--%>
 <%--<%@page contentType="text/html" pageEncoding="UTF-8"%>--%>
 <!--Inclusion du menu haut-->
 <c:import url="/WEB-INF/headerjsp.jsp" />
+
 
 <div id="header-wrapper">
     <div id="header">
@@ -31,13 +35,14 @@
                         </c:forEach>
                 </ul>
             </c:when>
-            <c:when test="${action=='read' or action=='mod' or action=='maj'}">
+            <c:when test="${action=='read-item' or action=='mod' or action=='maj' or action=='read-incident'}">
                 <h1>Administration du flux : ${flux.url}</h1>
                 <ul>
-                    <li><a href="flux?action=read&id=${flux.ID}">Parcourir les items du flux</a></li>
+                    <li><a href="flux?action=read-item&id=${flux.ID}">Parcourir les items du flux</a></li>
                     <li><a href="flux?action=mod&id=${flux.ID}">Configurer le flux</a></li>
                     <li><a href="flux?action=maj&id=${flux.ID}">Mettre à jour manuellement</a></li>
                     <li><a href="flux?action=rem&id=${flux.ID}">Supprimer le flux</a></li>
+                    <li><a href="flux?action=read-incident&id=${flux.ID}">Parcourir les incidents</a></li>
                 </ul>
               
                 
@@ -95,18 +100,39 @@
             </c:when>
 
 
-            <c:when test="${action=='read'}">
+            <c:when test="${action=='read-item'}">
                                
                 <h2>Parcourir les items</h2>
                 <ul>
                     <c:forEach items="${flux.item}" var="it">
-                        <li class="item"><h3>${it.titre}</h3>
-                            <p>${it.description}</p>
+                        <li class="item"><h3><a href="item?action=read&id=${it.ID}">${it.titre}</a></h3>
+                  
+                            <p>Date mise en ligne : <fmt:formatDate value="${it.datePub}" pattern="dd/MM/yyyy hh:mm:ss"/></p>
+                            
+                           
+                            <!--<p>${it.description}</p>-->
                         </li>
                     </c:forEach>
                 </ul>
             </c:when>
+                
+                
+                
+                <c:when test="${action=='read-incident'}">
+                    <h2>Liste des incidets du flux</h2>
+                    <c:forEach items="${flux.incident}" var="incid">
+                        <li class="item">
+                            <h3>indid</h3>
+                            <p>Début : ${incid.dateDebut} fin : ${incid.dateFin}</p>
+                            <p>${incid.messageEreur}</p>
+                            
+                        </li>
+                        
+                    </c:forEach>
+                </c:when>
+                
                 <c:when test="${action=='maj'}">
+                    
                     MAJ
                     <h2>Nouvelles items capturés : </h2>
                     <ul>

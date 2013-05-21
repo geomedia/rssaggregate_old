@@ -2,7 +2,7 @@ package rssagregator.beans;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Date;
 import rssagregator.beans.traitement.MediatorCollecteAction;
 import java.util.List;
 import java.util.Observable;
@@ -21,6 +21,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import rssagregator.beans.incident.AbstrIncident;
 
 /**
  * Une des entités les plus importantes... Il s'agit d'un flux de syndication
@@ -61,7 +62,7 @@ public class Flux extends Bean implements Observer, Serializable {
     /**
      * Les dernières empruntes md5 des items du flux. On les garde en mémoire
      * pour faire du dédoublonage sans effectuer de requetes dans la base de
-     * données. On ne persiste pas dans la base de donnée
+     * données. On ne persiste pas dans la base de donnée (TRANSISIENT NORMAL)
      */
     @Transient
     private List<String> lastEmpruntes;
@@ -97,14 +98,13 @@ public class Flux extends Bean implements Observer, Serializable {
 //    @OneToMany(mappedBy = "flux", cascade = CascadeType.ALL)
     
   
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true,fetch = FetchType.LAZY)
     private List<AbstrFluxIncident> incident;
     /** 
      *
      * @element-type InfoCollecte
      */
 
-    
     
 //Cascade remove : On va utiliser la dao flux pour sauvegarder les infos collecte. 
 //    @OneToMany(mappedBy = "flux", cascade = {CascadeType.ALL})
@@ -305,6 +305,64 @@ public class Flux extends Bean implements Observer, Serializable {
         this.ID = ID;
     }
     
+    /***
+     * Parcours les incidents et retourne ceux qui ne sont pas clos, cad ceux qui n'ont pas de date de fin
+     * @return 
+     */
+    public List<AbstrFluxIncident> getIncidentEnCours(){
+        List<AbstrFluxIncident> iRetour = new ArrayList<AbstrFluxIncident>();
+        
+        int i;
+        for(i=0; i<this.incident.size(); i++){
+        
+            if(this.incident.get(i).getDateFin()==null){
+                iRetour.add(this.incident.get(i));
+            }
+        }
+             
+        return iRetour;
+    }
+    
+    /***
+     * Parcours les incident ouvert et retourne le premier incident ouvert du même type que la class envoyé en argument. 
+     * @param c
+     * @return L'incident ouvert du même type que Classc ou null si rien n'a été trouvé
+     */
+    public AbstrFluxIncident getIncidentOuverType(Class c){
+//        List<AbstrFluxIncident> listRetour = new ArrayList<AbstrFluxIncident>();
+        
+        List<AbstrFluxIncident> list = this.getIncidentEnCours();
+        int i;
+        for(i=0; i<list.size(); i++){
+            if(list.get(i).getClass().equals(c)){
+                return list.get(i);
+//                listRetour.add(list.get(i));
+            }
+        }
+        
+        return null;
+    }
+    
+    
+    /***
+     * Parcours les incidents du flux et inscrit la date courante en date de fin d'un evenuel incident ouvert. Cette méthode est éxecuté pour chaque flux losque la levée s'est déroulé avec succes
+     */
+    public void fermerLesIncidentOuvert(){
+        
+        int i;
+        List<AbstrFluxIncident> incidentOuvert = this.getIncidentEnCours();
+        
+        for(i=0; i<incidentOuvert.size(); i++){
+
+            // On vérifi quand même que la date de fin est bien null
+            if(incidentOuvert.get(i).getDateFin()==null){
+                incidentOuvert.get(i).setDateFin(new Date());
+            }
+            
+        }
+        
+        
+    }
     
     
 }

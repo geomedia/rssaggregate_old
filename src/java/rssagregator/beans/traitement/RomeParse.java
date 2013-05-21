@@ -1,5 +1,6 @@
 package rssagregator.beans.traitement;
 
+import com.sun.syndication.feed.synd.SyndCategoryImpl;
 import com.sun.syndication.feed.synd.SyndContentImpl;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
@@ -16,6 +17,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import rssagregator.beans.Item;
 import com.sun.syndication.io.XmlReader;
+import java.util.Date;
 /**
  * test
  */
@@ -74,6 +76,7 @@ public class RomeParse extends AbstrParseur implements IfsObjetDeTraitement, Ifs
             if (entry.getDescription() != null) {
                 result += "Dexcription : " + entry.getDescription().getValue() + "\n";
                 new_item.setDescription(entry.getDescription().getValue());
+
             }
 
             if (entry.getContents() != null) {
@@ -87,14 +90,56 @@ public class RomeParse extends AbstrParseur implements IfsObjetDeTraitement, Ifs
 
 // Si c'est un feed rss, captation du GUID
             if (entry.getWireEntry() instanceof com.sun.syndication.feed.rss.Item) {
-                com.sun.syndication.feed.rss.Item s;
-                s = (com.sun.syndication.feed.rss.Item) entry.getWireEntry();
-                if(s!= null && s.getGuid()!=null){
-                                    result += "GUID : " + s.getGuid().getValue();
-                new_item.setGuid(s.getGuid().getValue());
+              
+                
+                if (entry.getWireEntry() instanceof com.sun.syndication.feed.rss.Item) {
+//                    import com.sun.syndication.feed.rss.Item;
+                    com.sun.syndication.feed.rss.Item it;
+                    it = (com.sun.syndication.feed.rss.Item) entry.getWireEntry();
+                   if(it.getGuid() != null){
+//                    result += "GUID : " + s.getGuid().getValue();                      
+                       new_item.setGuid(it.getGuid().getValue());
+                   }
                 }
-
+                
+//                
+//                if(s!= null && s.getGuid()!=null){
+//                    System.out.println("ICI");
+//                                    result += "GUID : " + s.getGuid().getValue();
+////                                    new_item.setGuid("lala");
+//                new_item.setGuid(s.getGuid().getValue());
+//                }
             }
+            
+            
+            
+            
+            
+            // Gesion de la date
+            if(entry.getPublishedDate() != null){
+                System.out.println("DATE DE LITEM : " + entry.getPublishedDate());
+                new_item.setDatePub(entry.getPublishedDate());
+            }
+            
+            //Concat de toutes les catégories
+            
+            if(entry.getCategories()!= null && entry.getCategories().size()>0){
+
+                int j;
+                String concat ="";
+                for(j=0; j<entry.getCategories().size(); j++){
+                    SyndCategoryImpl cat = (SyndCategoryImpl) entry.getCategories().get(j);
+                    concat+=cat.getName()+"; ";
+                }
+                concat = concat.substring(0, concat.length()-2);
+                new_item.setCategorie(concat);
+                
+            }
+            
+            // On inscrit la date de récupération
+            Date datecourante = new Date();
+            new_item.setDateRecup(datecourante);
+            
 
             result += "\n------------------------------------------\n";
 //            System.out.println(result);

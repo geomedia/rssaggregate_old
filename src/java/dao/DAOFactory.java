@@ -14,9 +14,6 @@ import rssagregator.beans.form.DAOGenerique;
  * @author clem
  */
 public class DAOFactory {
-
-//    protected EntityManager em;
-//    protected EntityManagerFactory emf;
     protected String PERSISTENCE_UNIT_NAME = "RSSAgregatePU2";
     private static DAOFactory instance = new DAOFactory();
 

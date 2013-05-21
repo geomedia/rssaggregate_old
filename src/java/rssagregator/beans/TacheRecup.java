@@ -54,10 +54,10 @@ List<Item> nouvellesItems;
                 this.flux.getItem().add(nouvellesItems.get(i));
             }
     
+            
+            flux.fermerLesIncidentOuvert();
                 ListeFluxCollecteEtConfigConrante.getInstance().modifierFlux(flux);
             
-//            DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
-//            daoFlux.modifier(flux); 
             System.out.println("NBR item en définitive : " + flux.getItem().size());
 
         } catch (MalformedURLException ex) {

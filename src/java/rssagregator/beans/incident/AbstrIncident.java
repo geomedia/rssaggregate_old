@@ -19,10 +19,10 @@ public abstract class AbstrIncident implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long ID;
     
-    @Temporal(javax.persistence.TemporalType.DATE)
+    @Temporal(javax.persistence.TemporalType.TIME)
     private Date dateDebut;
     
-    @Temporal(javax.persistence.TemporalType.DATE)
+    @Temporal(javax.persistence.TemporalType.TIME)
     private Date dateFin;
     
     @Column(name = "messageEreur")

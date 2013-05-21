@@ -123,8 +123,15 @@ public class ListeFluxCollecteEtConfigConrante extends Observable {
 //            listFlux.remove(0);
         System.out.println("");
 
+        
+        
+        
+        
+         
         DaoFlux dao = DAOFactory.getInstance().getDAOFlux();
-        dao.remove(flux);
+        Flux fl = (Flux) dao.find(flux.getID());
+        
+        dao.remove(fl);
         forceChange();
 
         notifyObservers();
@@ -163,7 +170,7 @@ public class ListeFluxCollecteEtConfigConrante extends Observable {
     }
     
     /***
-     * Enregistre les modification du flux dans la base de donnée
+     * Enregistre les modification du flux dans la base de donnée.
      * @param flux 
      */
     public void modifierFlux(Flux flux){
@@ -172,12 +179,15 @@ public class ListeFluxCollecteEtConfigConrante extends Observable {
         daoFlux.modifier(flux);
         
         // Il faut recharger le collecteur. En effet, si la périodicité de collecte du flux a été modifié, il est utile de recréer le pool de thread schedulé.
+        
+        
+        
         notifyObservers();
     }
     
     /***
      * Enregistre la conf courante dans la base de donnée en utilisant ue DAO générique; la mofification est ensuite motifiée aux observeurs.
-     *  
+     *   
      * @param conf 
      */
     public void modifierConf(Conf conf){
