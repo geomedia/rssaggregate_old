@@ -117,7 +117,6 @@ public class RomeParse extends AbstrParseur implements IfsObjetDeTraitement, Ifs
             
             // Gesion de la date
             if(entry.getPublishedDate() != null){
-                System.out.println("DATE DE LITEM : " + entry.getPublishedDate());
                 new_item.setDatePub(entry.getPublishedDate());
             }
             

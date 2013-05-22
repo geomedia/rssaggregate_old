@@ -16,48 +16,129 @@
             <h1>Administration des <span>Item</span></h1></div></div>
 
 </div>
+<!--<script src="simplePagination/jquery-1.7.2.min.js"></script>-->
 
+<!--<script src="js/scripts.js"></script>-->
+<link type="text/css" rel="stylesheet" href="simplePagination/simplePagination.css"/>
 
 <div id="content">
 
 
-    <div class="post">
-        <h1>Administration des Item</h1>
-        <p>Truc</p>
-    </div>
+
+
+
 
 
     <c:choose>
         <c:when test="${action=='read'}">
+            <div class="post">
             <h2>${item.titre}</h2>
-            
             <p>
                 Provenance : 
             <ul>
-                
+
                 <c:forEach items="${item.listFlux}" var="flux">
                     <li><a href="flux?action=read-item&id=${flux.ID}">${flux.url}</a></li>
-           
-                </c:forEach>
-                
+                    </c:forEach>
+
             </ul>
-            </p>
-            
-            
-            <p>Date pub : <fmt:formatDate value="${item.datePub}" pattern="dd/MM/yyyy hh:mm:ss"/></p>
-            <p>Date récup <fmt:formatDate value="${item.dateRecup}" pattern="dd/MM/yyyy hh:mm:ss"/></p>
-            <p>Guid : ${item.guid}</p>
-            <p>contenu : ${item.contenu}</p>
+        </p>
+        <p>Date pub : <fmt:formatDate value="${item.datePub}" pattern="dd/MM/yyyy hh:mm:ss"/></p>
+        <p>Date récup <fmt:formatDate value="${item.dateRecup}" pattern="dd/MM/yyyy hh:mm:ss"/></p>
+        <p>Guid : ${item.guid}</p>
+        <p>contenu : ${item.contenu}</p>
 
 
-            <p>Description ${item.description}</p>
+        <p>Description ${item.description}</p>
+        <p></p>
+            </div>
+    </c:when>
+
+        
+        
+    <c:when test="${action=='list'}">
+        <div class="post">
+                <h1>Liste des items</h1>
+            <ul>
+                <c:forEach items="${listItem}" var="ite">
+                    <li>
+                        <a href="item?action=read&id=${ite.ID}">${ite.titre}</a>
+                        <c:forEach items="${ite.listFlux}" var="fl">
+                            "${fl.journalLie.nom} - ${fl.typeFlux.denomination}" 
+                        </c:forEach>
+                    </li>
+                </c:forEach>
+            </ul>
+
             <p></p>
 
 
-        </c:when>
+            <div class="pagination">
+                <a href="#" class="first" data-action="first">&laquo;</a>
+                <a href="#" class="previous" data-action="previous">&lsaquo;</a>
+                <input type="text" readonly="readonly" data-max-page="3" />
+                <a href="#" class="next" data-action="next">&rsaquo;</a>
+                <a href="#" class="last" data-action="last">&raquo;</a>
+            </div>
 
-    </c:choose>
+            <form action="item" method="POST">
+                <label>Item par page</label>
+                <select name="nbrItemPrPage" onChange="this.form.submit();"> 
+
+                    <option value=""></option> 
+                    <option value="5">10</option> 
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option> 
+                    <option value="200">200</option> 
+                    <option value="500">500</option> 
+                </select> 
+                <noscript>
+                <input type="submit" value="Changer"  />
+                </noscript>
+            </form>
+        </div>
+    </c:when>
+
+</c:choose>
+
+
+
+
+
+
+
+
+
+
+<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+<script src="jqPagination/js/jquery.jqpagination.js"></script>
+
+
+
+
 
 </div>
 
+
+
+<script>
+
+
+                    $(document).ready(function() {
+
+                        $('.pagination').jqPagination({
+                            link_string: 'item?page={page_number}',
+                            max_page: ${maxPage},
+                            current_page: ${pageCourante},
+                            paged: function(page) {
+                                $('.log').prepend('<li>Requested page ' + page + '</li>');
+                                document.location.href = "item?page=" + page;
+                            }
+                        });
+
+                    });
+
+
+</script>
 <c:import url="/WEB-INF/footerjsp.jsp" />

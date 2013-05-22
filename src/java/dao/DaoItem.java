@@ -28,7 +28,12 @@ public class DaoItem extends AbstrDao {
     }
     private static final String REQ_FIND_BY_HASH = "SELECT i FROM Item i where i.hashContenu=:hash";
     private static final String REQ_FIND_BY_HASH_AND_FLUX = "SELECT item FROM Item item JOIN item.listFlux flux where item.hashContenu IN (:hash) AND flux.ID=:fluxid";
-//    private static final String REQ_FIND_BY_HASH_AND_FLUX = "SELECT item FROM Item item JOIN item.listFlux flux where flux.ID=:fluxid";
+//    private static final String REQ_FIND_ALL_AC_LIMIT = "SELECT item FROM Item LIMIT :prem, :nbr";
+    private static final String REQ_FIND_ALL_AC_LIMIT = "SELECT item FROM Item item JOIN item.listFlux flux";
+    private static final String REQ_COUNT_ALL = "SELECT count(item.ID) FROM Item item";
+    
+    
+    //    private static final String REQ_FIND_BY_HASH_AND_FLUX = "SELECT item FROM Item item JOIN item.listFlux flux where flux.ID=:fluxid";
 //    private static final String REQ_FIND_BY_HASH_AND_FLUX = "SELECT item FROM Item item";
 //    private static final String REQ_FIND_BY_HASH_AND_FLUX = "SELECT i FROM Item i, Flux f where i.hashContenu IN (:hash) AND f.ID=:fluxid";
 
@@ -65,6 +70,23 @@ public class DaoItem extends AbstrDao {
         em.close();
         return result;
     }
+    
+    
+    public List<Item> findAllLimit(Long premier, Long nombre){
+        
+        em = dAOFactory.getEntityManager();
+        em.getTransaction().begin();
+        Query query = em.createQuery(REQ_FIND_ALL_AC_LIMIT);
+        query.setFirstResult(premier.intValue());
+        query.setMaxResults(nombre.intValue());
+        
+//        query.setParameter("prem", premier);
+//        query.setParameter("nbr", nombre);
+        List<Item> listResult = query.getResultList();
+        
+        return listResult;
+    }
+    
 
     public static void main(String[] args) {
         DaoItem daoItem = new DaoItem(DAOFactory.getInstance());
@@ -103,5 +125,18 @@ public class DaoItem extends AbstrDao {
         resuList = query.getResultList();
          em.close();
         return resuList;
+    }
+/***
+ * Retourne le nombre total d'item dans la base de données
+ * @return 
+ */
+    public Integer findNbMax() {
+                em = dAOFactory.getEntityManager();
+        em.getTransaction().begin();
+      Query query =  em.createQuery(REQ_COUNT_ALL);
+        Object result = query.getSingleResult();
+        
+        return  new Integer(result.toString());
+        
     }
 }

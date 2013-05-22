@@ -8,6 +8,8 @@ import dao.DAOFactory;
 import dao.DaoItem;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Enumeration;
+import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -66,9 +68,52 @@ public class ItemSrvl extends HttpServlet {
             Long id = new Long(request.getParameter("id"));
             request.setAttribute("id", id);
             item = (Item) daoItem.find(id);
+
 //            flux = (Flux) daoFlux.find(id);
 
         }
+
+
+        if (action.equals("list")) {
+
+            //On récupère le nombre max d'item
+            Integer nbItem = daoItem.findNbMax();
+            request.setAttribute("nbitem", nbItem);
+
+            // récupération du numérocourant de page
+            Integer numPage;
+            try {
+                numPage = new Integer(request.getParameter("page"));
+            } catch (Exception e) {
+                numPage = 1;
+            }
+            request.setAttribute("pageCourante", numPage);
+
+
+            Integer nbrItemPrPage;
+            try {
+                nbrItemPrPage = new Integer(request.getParameter("nbrItemPrPage"));
+            } catch (Exception e) {
+                nbrItemPrPage = 20;
+            }
+            request.setAttribute("nbrItemPrPage", nbrItemPrPage);
+
+            // Calcul du nombre max de page
+            Double maxPage = Math.ceil((nbItem.doubleValue() / nbrItemPrPage.doubleValue()));
+            request.setAttribute("maxPage", maxPage.intValue());
+
+            request.setAttribute("nbitemTotal", nbItem);
+
+            // recheche des items à afficher
+            Integer itDebut = (numPage * nbrItemPrPage) - nbrItemPrPage;
+
+
+
+            List<Item> listItem = daoItem.findAllLimit(new Long(itDebut), new Long(nbrItemPrPage));
+            request.setAttribute("listItem", listItem);
+        }
+
+
         request.setAttribute(ATT_ITEM, item);
 
 

@@ -37,6 +37,9 @@ public class Flux extends Bean implements Observer, Serializable {
     private Long ID;
     
     
+    
+    
+    
     /**
      * URL du flux rss. inclure si possible le protocole (http://). Mais, lors
      * de l'ajout une regexp vérifie si l'url est correcte et la modifie
@@ -116,7 +119,7 @@ public class Flux extends Bean implements Observer, Serializable {
      */
 //    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.DETACH})
     
-    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.DETACH})
+    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.DETACH}, fetch = FetchType.LAZY)
     private FluxType typeFlux;
     /**
      * Un flux peut appratenir à un journal. Un journal peut contenir plusieurs
