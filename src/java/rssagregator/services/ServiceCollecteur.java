@@ -116,13 +116,10 @@ public class ServiceCollecteur implements Observer {
                         this.poolSchedule.scheduleAtFixedRate(tmpTache, 0, tmpList.get(i).getPeriodiciteCollecte(), TimeUnit.SECONDS);
                     }
                 }
-
             } else {
                 stopCollecte();
             }
             System.out.println("###### Rechargement du collecteur Terminé ######");
-
-
         }
     }
 
@@ -154,7 +151,5 @@ public class ServiceCollecteur implements Observer {
         } catch (TimeoutException ex) {
             Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
         }
-
-
     }
 }

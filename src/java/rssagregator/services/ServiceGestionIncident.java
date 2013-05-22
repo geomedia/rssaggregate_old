@@ -4,17 +4,13 @@
  */
 package rssagregator.services;
 
-import dao.DAOFactory;
-import dao.DaoFlux;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.xml.ws.http.HTTPException;
 import rssagregator.beans.Flux;
-import rssagregator.beans.incident.AbstrFluxIncident;
-import rssagregator.beans.incident.AbstrIncident;
-import rssagregator.beans.incident.HTTPIndident;
+import rssagregator.beans.incident.FluxIncident;
+
 
 /**
  * Cette classe permet d'interpréter les exeption renvoyé et de générer des
@@ -56,11 +52,12 @@ public class ServiceGestionIncident {
         // Gestion des incident de flux
         if (objEnErreur instanceof Flux) {
             Flux flux = (Flux) objEnErreur;
+            System.out.println("ID du FLUX ENVOYE : " + flux.getID());
 
 
             // On récupère les incidents non clos du flux.
             int i;
-            List<AbstrFluxIncident> incidenEnCours = flux.getIncidentEnCours();
+            List<FluxIncident> incidenEnCours = flux.getIncidentEnCours();
 
 
             // Gestion de HTTPExeption
@@ -72,34 +69,32 @@ public class ServiceGestionIncident {
             if (exception instanceof UnknownHostException) {
                 System.out.println("Impossible de joindre l'host");
                 // Si on a déjà un incident ouvert de même type
-                AbstrFluxIncident ouvert = flux.getIncidentOuverType(HTTPIndident.class);
+                FluxIncident ouvert = flux.getIncidentOuverType(FluxIncident.class);
                 if (ouvert == null) {
-                    HTTPIndident hTTPIndident = new HTTPIndident();
+                    FluxIncident hTTPIndident = new FluxIncident();
                     hTTPIndident.setMessageEreur("Il est impossible de joindre l'host du flux");
                     Date dateDebut = new Date();
                     System.out.println("DATE COURANTE : " + dateDebut);
                     hTTPIndident.setDateDebut(dateDebut);
                     hTTPIndident.setNombreTentativeEnEchec(1);
-                    flux.getIncident().add(hTTPIndident);
+                    
+                    flux.getIncidentsLie().add(hTTPIndident);
+                    hTTPIndident.setFluxLie(flux);
+                    
                 } else {
                     int nbr = ouvert.getNombreTentativeEnEchec();
                     nbr++;
                     ouvert.setNombreTentativeEnEchec(nbr);
                                        
                 }
-
-
-
-
-
                 ListeFluxCollecteEtConfigConrante.getInstance().modifierFlux(flux);
-//                DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
+//                DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux(); 
 //                daoFlux.modifier(flux);
 
             }
 
 
-            //gestion d'une erreur HTTP
+            //gestion d'une erreur HTTP  
             if (exception.getMessage().equals("Erreur HTTP")) {
                 // récup du code erreur
                 int codeErreur = flux.getMediatorFlux().getRequesteur().getHttpStatut();

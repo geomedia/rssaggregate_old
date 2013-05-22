@@ -9,7 +9,7 @@ import java.util.Observable;
 import java.util.Observer;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import rssagregator.beans.incident.AbstrFluxIncident;
+import rssagregator.beans.incident.FluxIncident;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -21,7 +21,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import rssagregator.beans.incident.AbstrIncident;
 
 /**
  * Une des entités les plus importantes... Il s'agit d'un flux de syndication
@@ -36,10 +35,7 @@ public class Flux extends Bean implements Observer, Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long ID;
     
-    
-    
-    
-    
+        
     /**
      * URL du flux rss. inclure si possible le protocole (http://). Mais, lors
      * de l'ajout une regexp vérifie si l'url est correcte et la modifie
@@ -96,18 +92,20 @@ public class Flux extends Bean implements Observer, Serializable {
      * Un objet flux peut posséder différents incidents. Un incident ne possède
      * qu'un flux.
      * 
-     * @element-type AbstrFluxIncident
+     * @element-type FluxIncident
      */
 //    @OneToMany(mappedBy = "flux", cascade = CascadeType.ALL)
     
   
-    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true,fetch = FetchType.LAZY)
-    private List<AbstrFluxIncident> incident;
-    /** 
+//    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true,fetch = FetchType.LAZY)
+    
+    @OneToMany(mappedBy = "fluxLie", cascade = {CascadeType.ALL}, orphanRemoval = true, fetch = FetchType.LAZY, targetEntity = FluxIncident.class)
+    private List<FluxIncident> incidentsLie;
+    /**  
      *
      * @element-type InfoCollecte
      */
-
+ 
     
 //Cascade remove : On va utiliser la dao flux pour sauvegarder les infos collecte. 
 //    @OneToMany(mappedBy = "flux", cascade = {CascadeType.ALL})
@@ -231,13 +229,7 @@ public class Flux extends Bean implements Observer, Serializable {
         this.item = items;
     }
 
-    public List<AbstrFluxIncident> getIncident() {
-        return incident;
-    }
 
-    public void setIncident(List<AbstrFluxIncident> incident) {
-        this.incident = incident;
-    }
 
     public List<InfoCollecte> getInfoCollecteFlux() {
         return infoCollecteFlux;
@@ -276,7 +268,7 @@ public class Flux extends Bean implements Observer, Serializable {
         this.lastEmpruntes = new ArrayList<String>();
         
         this.MediatorFlux = MediatorCollecteAction.getDefaultCollectAction();
-        this.incident = new ArrayList<AbstrFluxIncident>();
+        this.incidentsLie = new ArrayList<FluxIncident>();
     }
 
     @Override
@@ -307,19 +299,29 @@ public class Flux extends Bean implements Observer, Serializable {
     public void setID(Long ID) {
         this.ID = ID;
     }
+
+    public List<FluxIncident> getIncidentsLie() {
+        return incidentsLie;
+    }
+
+    public void setIncidentsLie(List<FluxIncident> incidentsLie) {
+        this.incidentsLie = incidentsLie;
+    }
+    
+    
     
     /***
      * Parcours les incidents et retourne ceux qui ne sont pas clos, cad ceux qui n'ont pas de date de fin
      * @return 
      */
-    public List<AbstrFluxIncident> getIncidentEnCours(){
-        List<AbstrFluxIncident> iRetour = new ArrayList<AbstrFluxIncident>();
+    public List<FluxIncident> getIncidentEnCours(){
+        List<FluxIncident> iRetour = new ArrayList<FluxIncident>();
         
         int i;
-        for(i=0; i<this.incident.size(); i++){
+        for(i=0; i<this.incidentsLie.size(); i++){
         
-            if(this.incident.get(i).getDateFin()==null){
-                iRetour.add(this.incident.get(i));
+            if(this.incidentsLie.get(i).getDateFin()==null){
+                iRetour.add(this.incidentsLie.get(i));
             }
         }
              
@@ -331,10 +333,10 @@ public class Flux extends Bean implements Observer, Serializable {
      * @param c
      * @return L'incident ouvert du même type que Classc ou null si rien n'a été trouvé
      */
-    public AbstrFluxIncident getIncidentOuverType(Class c){
+    public FluxIncident getIncidentOuverType(Class c){
 //        List<AbstrFluxIncident> listRetour = new ArrayList<AbstrFluxIncident>();
         
-        List<AbstrFluxIncident> list = this.getIncidentEnCours();
+        List<FluxIncident> list = this.getIncidentEnCours();
         int i;
         for(i=0; i<list.size(); i++){
             if(list.get(i).getClass().equals(c)){
@@ -353,7 +355,7 @@ public class Flux extends Bean implements Observer, Serializable {
     public void fermerLesIncidentOuvert(){
         
         int i;
-        List<AbstrFluxIncident> incidentOuvert = this.getIncidentEnCours();
+        List<FluxIncident> incidentOuvert = this.getIncidentEnCours();
         
         for(i=0; i<incidentOuvert.size(); i++){
 

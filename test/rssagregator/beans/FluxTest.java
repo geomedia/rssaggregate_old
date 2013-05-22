@@ -13,7 +13,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import rssagregator.beans.incident.AbstrFluxIncident;
+import rssagregator.beans.incident.FluxIncident;
 import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.HTTPIndident;
 import rssagregator.beans.traitement.MediatorCollecteAction;
@@ -122,15 +122,15 @@ public class FluxTest {
         System.out.println("getIncidentEnCours");
         Flux instance = new Flux();
         
-        AbstrFluxIncident incid1 = new HTTPIndident();
-        AbstrFluxIncident incid2 = new HTTPIndident();
+        FluxIncident incid1 = new HTTPIndident();
+        FluxIncident incid2 = new HTTPIndident();
         
         incid1.setDateFin(new Date(new Long(6000)));
         
         instance.getIncident().add(incid1);
         instance.getIncident().add(incid2);
         
-        List<AbstrFluxIncident> incidentEncours = instance.getIncidentEnCours();
+        List<FluxIncident> incidentEncours = instance.getIncidentEnCours();
         
         
         if(incidentEncours.size()!=1){

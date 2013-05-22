@@ -9,8 +9,6 @@ import dao.DaoFlux;
 import dao.DaoJournal;
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -50,7 +48,7 @@ public class FluxSrvl extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
         request.setCharacterEncoding("UTF-8");
-
+              
         // Un simple attribut pour que le menu brille sur la navigation courante
         request.setAttribute("navmenu", "flux");
 
@@ -60,9 +58,6 @@ public class FluxSrvl extends HttpServlet {
             action = "list";
         }
         request.setAttribute("action", action);
-
-
-
 
         DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
         FluxForm fluxForm = new FluxForm(/*daoFlux*/);
@@ -75,7 +70,7 @@ public class FluxSrvl extends HttpServlet {
             Long id = new Long(request.getParameter("id"));
             request.setAttribute("id", id);
             flux = ListeFluxCollecteEtConfigConrante.getInstance().getflux(id);
-//            flux = (Flux) daoFlux.find(id);
+//            flux = (Flux) daoFlux.find(id); 
         }
 
         // Si l'utilisateur à demander la mise à jour 
@@ -90,9 +85,6 @@ public class FluxSrvl extends HttpServlet {
 
         if (action.equals("list")) {
             
-//            ListeFluxCollecteEtConfigConrante.getInstance().getAllFlux();
-            
-            //List<Object> listFlux = daoFlux.findall();
             request.setAttribute(ATT_LIST_FLUX, ListeFluxCollecteEtConfigConrante.getInstance().getListFlux());
         } else if (action.equals("rem")) {
             //On stop la collecte
@@ -100,7 +92,6 @@ public class FluxSrvl extends HttpServlet {
             
             ListeFluxCollecteEtConfigConrante.getInstance().removeFlux(flux);
             System.out.println("REVOME FIN");
-//            daoFlux.remove(flux);
         }
 
 

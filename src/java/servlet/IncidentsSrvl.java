@@ -4,20 +4,30 @@
  */
 package servlet;
 
+import dao.DAOFactory;
+import dao.DAOIncident;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import rssagregator.beans.Flux;
+import rssagregator.beans.form.IncidentForm;
+import rssagregator.beans.incident.FluxIncident;
 
 /**
  *
  * @author clem
  */
 @WebServlet(name = "Incidents", urlPatterns = {"/incidents"})
-public class Incidents extends HttpServlet {
+public class IncidentsSrvl extends HttpServlet {
+
+    public static final String ATT_LIST = "listobj";
+    public static final String ATT_FORM = "form";
+    public static final String ATT_OBJ = "incident";
+    public static final String VUE = "/WEB-INF/incidentJsp.jsp";
 
     /**
      * Processes requests for both HTTP
@@ -31,21 +41,57 @@ public class Incidents extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         response.setContentType("text/html;charset=UTF-8");
-        PrintWriter out = response.getWriter();
-        try {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet Incidents</title>");            
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet Incidents at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        } finally {            
-            out.close();
+        response.setCharacterEncoding("UTF-8");
+        request.setCharacterEncoding("UTF-8");
+
+        // Un simple attribut pour que le menu brille sur la navigation courante
+        request.setAttribute("navmenu", "incident");
+
+        // récupération de l'action
+        String action = request.getParameter("action");
+        if (action == null) {
+            action = "list";
         }
+        request.setAttribute("action", action);
+
+
+        DAOIncident dao = DAOFactory.getInstance().getDAOIncident();
+        IncidentForm form = new IncidentForm();
+        FluxIncident incident = null;
+
+
+        String idString = request.getParameter("id");
+        if (idString != null && !idString.equals("")) {
+            Long id = new Long(request.getParameter("id"));
+            request.setAttribute("id", id);
+            incident = (FluxIncident) dao.find(id);
+           
+            System.out.println("NB FLUX : " + incident.getFluxLie().getUrl());
+//            flux = (Flux) daoFlux.find(id);
+        }
+        
+
+        
+
+        if (request.getMethod().equals("POST")) {
+            incident = (FluxIncident) form.bind(request, incident, Flux.class);
+        }
+
+        if (action.equals("list")) {
+            //recup de la list des incidents
+       
+            List<FluxIncident> listAll = dao.findAllLimit(new Long(0), new Long(100));
+            request.setAttribute(ATT_LIST, listAll);
+        }
+
+
+        request.setAttribute(ATT_FORM, form);
+        request.setAttribute(ATT_OBJ, incident);
+
+        this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
+
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

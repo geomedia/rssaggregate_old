@@ -116,10 +116,6 @@ public abstract class AbstrDao {
             em = dAOFactory.getEntityManager();
             em.getTransaction().begin();
 
-            // Construction de la requete.
-            //    private static String REQ_FIND_ALL="SELECT f FROM Flux f";
-//            Method getter = this.getClass().getMethod("getClassAssocie");
-//            Class classasso = (Class) getter.invoke(this);
             Class classasso = this.getClassAssocie();
 
             String req = "SELECT f FROM " + classasso.getSimpleName() + " f";
@@ -130,18 +126,11 @@ public abstract class AbstrDao {
             Logger.getLogger(AbstrDao.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IllegalArgumentException ex) {
             Logger.getLogger(AbstrDao.class.getName()).log(Level.SEVERE, null, ex);
-        } //         catch (NoSuchMethodException ex) {
-        //            Logger.getLogger(AbstrDao.class.getName()).log(Level.SEVERE, null, ex);
-        //        } catch (IllegalAccessException ex) {
-        //            Logger.getLogger(AbstrDao.class.getName()).log(Level.SEVERE, null, ex);
-        //        } catch (InvocationTargetException ex) {
-        //            Logger.getLogger(AbstrDao.class.getName()).log(Level.SEVERE, null, ex);
-        //        }
+        } 
         finally {
             if (em != null) {
                 em.close();
             }
-
         }
         return null;
     }

@@ -187,7 +187,6 @@ public class ClemBeanUtils {
                 Method getter = beans.getClass().getMethod(nomGetter);
                 beans.getClass().getMethod(nomGetter);
                 Object contenuFieldBean = getter.invoke(beans);
-                System.out.println("Contenu Fields : " + contenuFieldBean);
                 // On lanche la methode de check
                 if (mCheck != null) {
                     try {

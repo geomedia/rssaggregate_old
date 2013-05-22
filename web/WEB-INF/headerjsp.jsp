@@ -28,7 +28,7 @@
                     <li<c:if test="${navmenu=='flux'}"> class="current_page_item"</c:if>><a href="flux">Flux</a></li>
                     <li<c:if test="${navmenu=='journaux'}"> class="current_page_item"</c:if>><a href="journaux">Jounaux</a></li>
                     <li><a href="recapActiviteGenerale">Récapitulatif de l'activité</a></li>
-                    <li><a href="incidents">Incidents</a></li>
+                    <li<c:if test="${navmenu=='incident'}"> class="current_page_item"</c:if>><a href="incidents">Incidents</a></li>
                     <li<c:if test="${navmenu=='config'}"> class="current_page_item"</c:if>><a href="config">Configuration générale</a></li>
                 </ul>
             </div>

@@ -33,28 +33,7 @@ public class DaoItem extends AbstrDao {
     private static final String REQ_COUNT_ALL = "SELECT count(item.ID) FROM Item item";
     
     
-    //    private static final String REQ_FIND_BY_HASH_AND_FLUX = "SELECT item FROM Item item JOIN item.listFlux flux where flux.ID=:fluxid";
-//    private static final String REQ_FIND_BY_HASH_AND_FLUX = "SELECT item FROM Item item";
-//    private static final String REQ_FIND_BY_HASH_AND_FLUX = "SELECT i FROM Item i, Flux f where i.hashContenu IN (:hash) AND f.ID=:fluxid";
 
-//    public void creer(Item item) {
-//        initEntityManager();
-//        em.getTransaction().begin();
-//        em.persist(item); 
-//        em.getTransaction().commit();   
-//    }
-//    public void modifier(Item item) {
-//        initEntityManager();
-//        em.getTransaction().begin();
-//        em.merge(item); 
-//        em.getTransaction().commit();
-//    }
-//    public void supprimer(Item item) {
-//        initEntityManager();
-//        em.getTransaction().begin();
-//        em.remove(item);
-//        em.getTransaction().commit();
-//    }
     /**
      * *
      * Permet de trouver un item à partir de son hash
@@ -117,7 +96,6 @@ public class DaoItem extends AbstrDao {
 // TODO : C'est laid de faire des requete mon préparée en plein milieu du code. Mais on n'arive pas a préparer une requete basée su une liste de string
         Query query = em.createQuery("SELECT item FROM Item item JOIN item.listFlux flux where item.hashContenu IN ("+hashParamSQL+") AND flux.ID=:fluxid");
 
-//        query.setParameter("hash", hashParamSQL);
         query.setParameter("fluxid", flux.getID());
 
          List<Item> resuList;

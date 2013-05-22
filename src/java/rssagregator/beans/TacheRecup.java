@@ -39,7 +39,7 @@ List<Item> nouvellesItems;
      */
     @Override
     public void run() {
-        synchronized(this.flux){
+//        synchronized(this.flux){
             try {
              nouvellesItems = this.flux.getMediatorFlux().executeActions(this.flux);
             System.out.println("###############################################################");
@@ -69,7 +69,7 @@ List<Item> nouvellesItems;
         } catch (Exception ex) {
             Logger.getLogger(TacheRecup.class.getName()).log(Level.SEVERE, null, ex);
         }
-        }
+//        }
     }
 
     public List<Item> getNouvellesItems() {

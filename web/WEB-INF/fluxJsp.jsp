@@ -120,7 +120,7 @@
                 
                 <c:when test="${action=='read-incident'}">
                     <h2>Liste des incidets du flux</h2>
-                    <c:forEach items="${flux.incident}" var="incid">
+                    <c:forEach items="${flux.incidentsLie}" var="incid">
                         <li class="item">
                             <h3>indid</h3>
                             <p>Début : ${incid.dateDebut} fin : ${incid.dateFin}</p>

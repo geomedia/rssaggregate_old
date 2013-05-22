@@ -46,6 +46,10 @@ public class DAOFactory {
         return new DAOGenerique(this);
     }
     
+    public DAOIncident getDAOIncident(){
+        return new DAOIncident(this);
+    }
+    
     protected EntityManager getEntityManager() {
         //TODO : faire le point la créaion du EntityManager, il n'est peut être pas nécessaire de le créer à chaque fois. 
         EntityManagerFactory emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
