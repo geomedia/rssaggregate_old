@@ -4,36 +4,35 @@
  */
 package servlet;
 
-import com.mysql.jdbc.util.TimezoneDump;
 import dao.DAOFactory;
-import dao.DaoJournal;
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.util.Arrays;
+import java.io.PrintWriter;
 import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.tomcat.jni.Local;
+import rssagregator.beans.FluxType;
 import rssagregator.beans.Journal;
-import rssagregator.beans.form.JournalForm;
-import utils.CodePays;
+import rssagregator.beans.form.DAOGenerique;
+import rssagregator.beans.form.FluxTypeForm;
+import static servlet.ConfigSrvl.VUE;
+import static servlet.JournauxSrvl.ATT_FORM;
+import static servlet.JournauxSrvl.ATT_JOURNAL;
+import static servlet.JournauxSrvl.ATT_LIST_JOURNAUX;
 
 /**
  *
  * @author clem
  */
-@WebServlet(name = "Journaux", urlPatterns = {"/journaux"})
-public class JournauxSrvl extends HttpServlet {
+@WebServlet(name = "TypeFluxSrvl", urlPatterns = {"/TypeFluxSrvl"})
+public class TypeFluxSrvl extends HttpServlet {
 
-    public static final String VUE = "/WEB-INF/journaljsp.jsp";
+    public static final String VUE = "/WEB-INF/typefluxjsp.jsp";
     public static final String ATT_FORM = "form";
-    public static final String ATT_JOURNAL = "journal";
-    public static final String ATT_LIST_JOURNAUX = "listjournaux";
+    public static final String ATT_BEAN = "obj";
+    public static final String ATT_LIST_OBJ = "list";
 
     /**
      * Processes requests for both HTTP
@@ -47,23 +46,13 @@ public class JournauxSrvl extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         response.setContentType("text/html;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
         request.setCharacterEncoding("UTF-8");
 
-        
-        request.setAttribute("listLocal", CodePays.getLanMap().entrySet().iterator());
-        request.setAttribute("listCountry", CodePays.getCountryMap().entrySet().iterator());
-        
-        String[] timeZonetab= TimeZone.getAvailableIDs();
-        Arrays.sort(timeZonetab);
-        
-        request.setAttribute("fuseau", timeZonetab);
-//        
-        
-        
-        // Un simple attribut pour que le menu brille sur la navigation courante
-        request.setAttribute("navmenu", "journaux");
+        request.setAttribute("navmenu", "config");
+
 
         // récupération de l'action
         String action = request.getParameter("action");
@@ -72,55 +61,53 @@ public class JournauxSrvl extends HttpServlet {
         }
         request.setAttribute("action", action);
 
-        DaoJournal daoJournal = DAOFactory.getInstance().getDaoJournal();
-        JournalForm journalForm = new JournalForm(/*daoJournal*/);
-        Journal journal = null;
+
+        DAOGenerique dao = DAOFactory.getInstance().getDAOGenerique();
+        dao.setClassAssocie(FluxType.class);
+        FluxType fluxType = null;
+        FluxTypeForm form = new FluxTypeForm();
 
         //        // On récupère le flux dans la base de donnée si il est précisé
         String idString = request.getParameter("id");
         if (idString != null && !idString.equals("")) {
             Long id = new Long(idString);
             request.setAttribute("id", id);
-            journal = (Journal) daoJournal.find(id);
+            fluxType = (FluxType) dao.find(id);
         }
-       
-        
+
+
         // Si il y a du post on récupère les données saisies par l'utilisateur pour éviter la resaisie de l'information
         if (request.getMethod().equals("POST")) {
-            journal = (Journal) journalForm.bind(request, journal, Journal.class);
+            fluxType = (FluxType) form.bind(request, fluxType, FluxType.class);
         }
 
         if (action.equals("list")) {
-            List<Object> listJournaux = daoJournal.findall();
-            request.setAttribute(ATT_LIST_JOURNAUX, listJournaux);
+            List<Object> list = dao.findall();
+            request.setAttribute(ATT_LIST_OBJ, list);
+        }
+
+        if (action.equals("rem")) {
+            dao.remove(fluxType);
         }
         
+                request.setAttribute(ATT_FORM, form);
+        request.setAttribute(ATT_BEAN, fluxType);
         
-        if(action.equals("rem")){
-            
-            daoJournal.remove(journal);
-        }
         
-
-        request.setAttribute(ATT_FORM, journalForm);
-        request.setAttribute(ATT_JOURNAL, journal);
-
-        // SAUVEGARDE SI INFOS 
-        if (journalForm.getValide()) {
+                // SAUVEGARDE SI INFOS 
+        if (form.getValide()) {
             if (action.equals("add")) {
-                daoJournal.creer(journal);
+                dao.creer(fluxType);
             } else if (action.equals("mod")) {
-                daoJournal.modifier(journal);
+                System.out.println("");
+                dao.modifier(fluxType);
             }
         }
 
 
-// redirection de l'utilisateur
-        if (action.equals("add") && journalForm.getValide()) {
-            response.sendRedirect("journaux?action=mod&id=" + journal.getID());
-        } else {
-            this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
-        }
+        this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
+
+
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

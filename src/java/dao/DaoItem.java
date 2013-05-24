@@ -94,9 +94,12 @@ public class DaoItem extends AbstrDao {
             hashParamSQL = hashParamSQL.substring(0, hashParamSQL.length() - 2);
         }
 // TODO : C'est laid de faire des requete mon préparée en plein milieu du code. Mais on n'arive pas a préparer une requete basée su une liste de string
-        Query query = em.createQuery("SELECT item FROM Item item JOIN item.listFlux flux where item.hashContenu IN ("+hashParamSQL+") AND flux.ID=:fluxid");
-
-        query.setParameter("fluxid", flux.getID());
+//        Query query = em.createQuery("SELECT item FROM Item item JOIN item.listFlux flux where item.hashContenu IN ("+hashParamSQL+") AND flux.ID=:fluxid");
+        Query query = em.createQuery("SELECT item FROM Item item where item.hashContenu IN ("+hashParamSQL+")");
+ 
+        
+        
+//        query.setParameter("fluxid", flux.getID());
 
          List<Item> resuList;
   

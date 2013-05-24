@@ -36,12 +36,17 @@ public class Journal extends Bean implements Serializable {
      * dans les balises XML
      */
     @Column(name = "fuseauHorraire")
-    private TimeZone fuseauHorraire;
+    private String fuseauHorraire;
     /**
      * La langue d'écriture du journal
      */
     @Column(name = "langue", length = 4)
     private String langue;
+    
+    
+    @Column(name = "pays", length = 60)
+    private String pays;
+    
     /**
      * Un journal possède plusieurs flux.
      */
@@ -68,11 +73,12 @@ public class Journal extends Bean implements Serializable {
         this.nom = nom;
     }
 
-    public TimeZone getFuseauHorraire() {
+    public String getFuseauHorraire() {
+        
         return fuseauHorraire;
     }
 
-    public void setFuseauHorraire(TimeZone fuseauHorraire) {
+    public void setFuseauHorraire(String fuseauHorraire) {
         this.fuseauHorraire = fuseauHorraire;
     }
 
@@ -92,6 +98,17 @@ public class Journal extends Bean implements Serializable {
         this.fluxLie = fluxLie;
     }
 
+    public String getPays() {
+        return pays;
+    }
+
+    public void setPays(String pays) {
+        this.pays = pays;
+    }
+
+    
+    
+    
     //    @Override
     //    public boolean equals(Object obj) {
     //        return false;

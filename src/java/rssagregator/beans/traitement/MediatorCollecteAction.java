@@ -116,11 +116,11 @@ public class MediatorCollecteAction implements Serializable {
 
 //        System.out.println(retourHTTP);
         
-        // On parse le retour du serveur
+        // On parse le retour du serveur 
         List<Item> listItem = parseur.execute(retourInputStream);
 
         // On dédoublonne
-        //TODO : Il faut dédoublonner dans le médiator collecte action
+        //TODO : Il faut dédoublonner dans le médiator collecte action. La liste retounée corespond aux items devant être lié au flux. Il peut s'agir d'item nouvelles ou d'item déjà enregistrée mais pas encore lié au flux traité
         listItem = this.dedoubloneur.dedoublonne(listItem, flux);
 
         // Pour toutes les nouvelles item, on ajoute les empuntes aux dernière empuntes gadées en mémoire. Utile pou simplifier le prochain dédoublonnage

@@ -26,16 +26,23 @@ import rssagregator.beans.form.AbstrForm;
 public class ClemBeanUtils {
 
     protected static String PERSISTENCE_UNIT_NAME = "RSSAgregatePU2";
-/***
- * Permet de peuples un bean avec les données une request au travers d'un formulaire. Fonctione pour tous les types de beans du projet
- * @param bean
- * @param request
- * @param form
- * @throws IllegalAccessException
- * @throws IllegalArgumentException
- * @throws InvocationTargetException 
- */
+
+    /**
+     * *
+     * Permet de peuples un bean avec les données une request au travers d'un
+     * formulaire. Fonctione pour tous les types de beans du projet
+     *
+     * @param bean
+     * @param request
+     * @param form
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws InvocationTargetException
+     */
     public static void populate(Object bean, HttpServletRequest request, AbstrForm form) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+
+        System.out.println("");
+
 
         // On initialise le hashmap d'erreur;
         form.setErreurs(new HashMap<String, String[]>());
@@ -103,6 +110,7 @@ public class ClemBeanUtils {
             }
 
         }
+        System.out.println("");
     }
 
     /**
@@ -172,7 +180,7 @@ public class ClemBeanUtils {
 //    }
     public static void check(AbstrForm objetFormulaire, Object beans) throws SecurityException, NoSuchMethodException {
 //        Map<String, String> erreurs = new HashMap<String, String>();
-
+        System.out.println("CHECK");
         // On parcours chaque champs du beans
         Field[] beanFields = beans.getClass().getDeclaredFields();
 
@@ -187,17 +195,19 @@ public class ClemBeanUtils {
                 Method getter = beans.getClass().getMethod(nomGetter);
                 beans.getClass().getMethod(nomGetter);
                 Object contenuFieldBean = getter.invoke(beans);
+                System.out.println("");
                 // On lanche la methode de check
                 if (mCheck != null) {
                     try {
                         Object retour = mCheck.invoke(objetFormulaire, contenuFieldBean);
                     } catch (IllegalAccessException ex) {
-//                        Logger.getLogger(ClemBeanUtils.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(ClemBeanUtils.class.getName()).log(Level.SEVERE, null, ex);
                     } catch (IllegalArgumentException ex) {
-//                        Logger.getLogger(ClemBeanUtils.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(ClemBeanUtils.class.getName()).log(Level.SEVERE, null, ex);
                     } catch (InvocationTargetException ex) {
 //                        erreurs.put(beanFields[i].getName(), ex.getTargetException().getMessage());
-                        objetFormulaire.getErreurs().put(beanFields[i].getName(), new String[]{contenuFieldBean.toString(), ex.getTargetException().getMessage()} );
+                        System.out.println("ereur sur : " + beanFields[i].getName());
+                            objetFormulaire.getErreurs().put(beanFields[i].getName(), new String[]{contenuFieldBean.toString(), ex.getTargetException().getMessage()});
                     } catch (Exception ex) {
                     }
                 }

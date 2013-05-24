@@ -38,6 +38,8 @@ public abstract class AbstrDao {
     }
 
     public void modifier(Object obj) {
+        
+                System.out.println("");
         try {
             // Test si le flux possède bien un id
 
@@ -48,6 +50,7 @@ public abstract class AbstrDao {
             if (retour != null && retour instanceof Long && (Long) retour >= 0) {
                 em = dAOFactory.getEntityManager();
                 em.getTransaction().begin();
+      
                 em.merge(obj);
                 em.getTransaction().commit();
             }
@@ -55,6 +58,7 @@ public abstract class AbstrDao {
             //        if (obj.getID() != null && obj.getID() >= 0) {
             //        }
             //        }
+          
         } catch (NoSuchMethodException ex) {
             Logger.getLogger(AbstrDao.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SecurityException ex) {

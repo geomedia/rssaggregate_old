@@ -69,42 +69,79 @@ public abstract class AbstrDedoublonneur {
         listRetour.addAll(listItemCapture);
 
 
-
-        // dédoublonnage basé sur les hash en mémoire.
-        while (i < flux.getLastEmpruntes().size()) {
-            String umprunteItemDsFlux = flux.getLastEmpruntes().get(i);
-
-
-            
-            while (j < listItemCapture.size()) {
-                Item item = listItemCapture.get(j);
-                if (item.getHashContenu().equals(umprunteItemDsFlux)) {
-                    listRetour.remove(item);
-                  
-                }
-                j++;
-            }
-            i++;
-        }
+//
+//        // dédoublonnage basé sur les hash en mémoire.
+//        while (i < flux.getLastEmpruntes().size()) {
+//            String umprunteItemDsFlux = flux.getLastEmpruntes().get(i);
+//
+//
+//            
+//            while (j < listItemCapture.size()) {
+//                Item item = listItemCapture.get(j);
+//                if (item.getHashContenu().equals(umprunteItemDsFlux)) {
+//                    listRetour.remove(item);
+//                  
+//                }
+//                j++;
+//            }
+//            i++;
+//        }
 
         // Si il reste encore des items, on pocède à une vérification à partir de la base de données
         if (listRetour.size() > 0) {
             System.out.println("On va devoir faire une requête BDD de dédoublonage");
-
+            System.out.println("FLUX ID : " + flux.getID());
             // Dédoublonnage basé sur la BDD
+            //Supression de toutes les items déjà lié au flux
             DaoItem dao = DAOFactory.getInstance().getDaoItem();
-            List<Item> itemDejaPresenteBDD = dao.findHashFlux(listRetour, flux);
-            
-            for (i = 0; i < itemDejaPresenteBDD.size(); i++) {
-                for(j=0;j<listRetour.size();j++){
-                    if(itemDejaPresenteBDD.get(i).getHashContenu().equals(listRetour.get(j).getHashContenu())){
-                        listRetour.remove(j);
+            //On cherche dans la base de donnée, la liste des flux possédant un hash similaire à cux capturée
+            List<Item> ListitemDejaPresenteBDD = dao.findHashFlux(listRetour, flux);
+            for (i = 0; i < ListitemDejaPresenteBDD.size(); i++) {
+                  Item ItemBdd = ListitemDejaPresenteBDD.get(i);
+
+                for (j = 0; j < listRetour.size(); j++) {
+//                     System.out.println("IT J");
+                    Item itemRetour = listRetour.get(j);
+
+                    //Si les hash sont similaires
+                    if (ItemBdd.getHashContenu().equals(itemRetour.getHashContenu())) {
+                        
+                        //Il est nécéssaire de supprimer l'item du retour si il est déjà lié.
+                         // On récupère les id des flux des items présente dans la BDD
+                        List<Flux> listfluxItemBDD = ItemBdd.getListFlux();
+                        int k;
+                        boolean trouve = false;
+                       
+                        for (k = 0; k < listfluxItemBDD.size(); k++) {
+                            System.out.println("ITEM BDD ID : " + listfluxItemBDD.get(k).getID()+ " flux obs : " + flux.getID());
+                            // SI l'item courante possède la même id que dans la base de donnée, on supprime de la liste courante
+                                if(listfluxItemBDD.get(k).getID().equals(flux.getID())){
+                                        System.out.println("IT k SUPPRESSION <<<<<<<<<");
+                                     listRetour.remove(itemRetour);
+                                     trouve = true;
+                                }
+                              
+                        }
+                        // L'item analysé existe dans la base de donnée mais n'est pas encore lié à notre flux. Il faut remplacer par l'item trouvé dans la base de donnée (concevation de  l'id et des paticulaité de l'item existant)
+                            
+                        if(!trouve){
+                            listRetour.add(j, ItemBdd);
+                            listRetour.remove(itemRetour);
+                            System.out.println("Il faut lier");
+                       
+                               
+                            }
+                           
+                        }
                     }
-                } 
+                }
             }
-             System.out.println("NOMBRE ITEM OBTENU PAR REQUETE BDD : " + itemDejaPresenteBDD.size());
-        }
- 
+
+            // Il nous reste des items déjà enregisré, mais pas encore lié
+
+
+        
+
         return listRetour;
     }
 }

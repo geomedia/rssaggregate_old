@@ -19,6 +19,7 @@
 <div id="sidebar">
     <p><a href="config">générale</a></p>
     <p><a href="comportementcollecte">Gérer les compotement </a></p>
+    <p><a href="TypeFluxSrvl">Gérer les types de flux </a></p>
 </div>
 
 <div id="content">

@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import rssagregator.beans.Item;
 import rssagregator.beans.form.ItemForm;
 import rssagregator.services.ListeFluxCollecteEtConfigConrante;
-import static servlet.FluxSrvl.ATT_FLUX;
+import static servlet.FluxSrvl.ATT_OBJ;
 
 /**
  *

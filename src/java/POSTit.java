@@ -17,17 +17,30 @@ public class POSTit {
     
     public static void main(String[] args) {
         
-        Double nb1 = 46.0;
-        Double nb2 = 20.0;
-        
-        Double result = Math.ceil(nb1/nb2);
-        System.out.println("result double : " + result);
-        
-        Integer intval = result.intValue();
-        System.out.println("en int : " + intval);
-        
-        System.out.println("ARR : " + Math.ceil((nb1/nb2)));
+        System.out.println("enum : " + Langage.JAVA);
     }
     
+public enum Langage {
+    
+JAVA("Langage JAVA", 
+        "Eclipse"),
+  C ("Lanage C", "Code Block"),
+  CPlus ("Langage C++", "Visual studio"),
+  PHP ("Langage PHP", "PS Pad");
+    private String name = "";
+  private String editor = "";
+  
+   Langage(String name, String editor){
+    this.name = name;
+    this.editor = editor;
+  }
+     public void getEditor(){
+    System.out.println("Editeur : " + editor);
+  }
+    
+  public String toString(){
+    return name;
+  }
+}
 }
 

@@ -27,7 +27,7 @@ public class AbstrForm {
 //    protected AbstrDao dao;
 
     /**
-     * sauvegarde le flux dans la base de donnée en utilisant les paramettres
+     * Rempli l'objet envoyé avec les donnée du formulaire
      * envoyés
      *
      * @param request

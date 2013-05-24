@@ -8,7 +8,9 @@ import dao.DAOFactory;
 import dao.DaoFlux;
 import dao.DaoJournal;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -29,8 +31,9 @@ import rssagregator.services.ServiceCollecteur;
 public class FluxSrvl extends HttpServlet {
 
     public static final String ATT_FORM = "form";
-    public static final String ATT_FLUX = "flux";
-    public static final String ATT_LIST_FLUX = "listflux";
+    public static final String ATT_OBJ = "flux";
+    public static final String ATT_ACTION = "action";
+    public static final String ATT_LISTOBJ = "listflux";
     public static final String VUE = "/WEB-INF/fluxJsp.jsp";
 
     /**
@@ -45,12 +48,18 @@ public class FluxSrvl extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         response.setContentType("text/html;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
         request.setCharacterEncoding("UTF-8");
-              
+        
+        Map<String, String> redirmap=null;
+        
+
         // Un simple attribut pour que le menu brille sur la navigation courante
-        request.setAttribute("navmenu", "flux");
+        request.setAttribute("navmenu", ATT_OBJ);
+        Flux flux = null;
+        FluxForm fluxForm = null;
 
         // récupération de l'action
         String action = request.getParameter("action");
@@ -59,78 +68,90 @@ public class FluxSrvl extends HttpServlet {
         }
         request.setAttribute("action", action);
 
-        DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
-        FluxForm fluxForm = new FluxForm(/*daoFlux*/);
-        Flux flux = null;
 
-
-//        // On récupère le flux dans la base de donnée si il est précisé
+//        // On récupère le flux dans la base de donnée si l'id est précisé et qu'on n'a pas de parametre en post
+//        if (!request.getMethod().equals("POST")) {
         String idString = request.getParameter("id");
         if (idString != null && !idString.equals("")) {
             Long id = new Long(request.getParameter("id"));
             request.setAttribute("id", id);
             flux = ListeFluxCollecteEtConfigConrante.getInstance().getflux(id);
-//            flux = (Flux) daoFlux.find(id); 
+        }
+//        
+
+        //Si action mod ou add on crée un fomulaire 
+        if (action.equals("mod") || action.equals("add")) {
+
+            fluxForm = new FluxForm();
+//            fluxForm.setErreurs(new HashMap<String, String[]>());
+            request.setAttribute(ATT_FORM, fluxForm);
+            DaoJournal daoJournal = DAOFactory.getInstance().getDaoJournal();
+            List<Object> journals = daoJournal.findall();
+            request.setAttribute("listjournaux", journals);
+
+            // On a besoin de la liste des types de flux 
+            DAOGenerique dAOGenerique = DAOFactory.getInstance().getDAOGenerique();
+            dAOGenerique.setClassAssocie(FluxType.class);
+            List<Object> listTypeFlux = dAOGenerique.findall();
+            request.setAttribute("listtypeflux", listTypeFlux);
+
+//            // Si il y a du post on récupère les données saisies par l'utilisateur pour éviter la resaisie de l'information
+            if (request.getMethod().equals("POST")) {
+                
+//                flux = (Flux) fluxForm.bind(request, flux, Flux.class);
+                // On tente de binder un flux avec les données du formulaire. Ceci a pour but d'étudier les erreur du formulaire
+                Flux fluxTmp = new Flux(); 
+                fluxForm.bind(request, fluxTmp, Flux.class);
+            } 
         }
 
-        // Si l'utilisateur à demander la mise à jour 
-        if (action.equals("maj")) {
-            ServiceCollecteur.getInstance().majManuelle(flux);
-        }
+        // Si l'utilisateur à demander la mise à jour manuelle du flux  
+        if (action.equals("add")) {
 
-        // Si il y a du post on récupère les données saisies par l'utilisateur pour éviter la resaisie de l'information
-        if (request.getMethod().equals("POST")) {
-            flux = (Flux) fluxForm.bind(request, flux, Flux.class);
-        }
-
-        if (action.equals("list")) {
-            
-            request.setAttribute(ATT_LIST_FLUX, ListeFluxCollecteEtConfigConrante.getInstance().getListFlux());
-        } else if (action.equals("rem")) {
-            //On stop la collecte
-            
-            
-            ListeFluxCollecteEtConfigConrante.getInstance().removeFlux(flux);
-            System.out.println("REVOME FIN");
-        }
-
-
-        request.setAttribute(ATT_FORM, fluxForm);
-        request.setAttribute(ATT_FLUX, flux);
-
-        // SAUVEGARDE SI INFOS 
-        if (fluxForm.getValide()) {
-            if (action.equals("add")) {
+            if (fluxForm.getValide()) {
+                flux = (Flux) fluxForm.bind(request, flux, Flux.class);
                 ListeFluxCollecteEtConfigConrante.getInstance().addFlux(flux);
-
-            } else if (action.equals("mod")) {
-
-                daoFlux.modifier(flux);
+                redirmap = new HashMap<String, String>();
+                redirmap.put("url", "flux?action=mod&id=" + flux.getID());
+                redirmap.put("msg", "Ajout du Flux effectué.");
+                request.setAttribute("redirmap", redirmap);
+            }
+        } else if (action.equals("mod")) {
+            if (fluxForm.getValide()) {
+                
+                redirmap = new HashMap<String, String>();
+                redirmap.put("url", "flux?action=mod&id=" + flux.getID());
+                redirmap.put("msg", "Modification du flux effecué.");
+                request.setAttribute("redirmap", redirmap);
+                
+                
+                DaoFlux dao = DAOFactory.getInstance().getDAOFlux();
+                
+                flux = (Flux) fluxForm.bind(request, flux, Flux.class);
+                dao.modifier(flux);
                 //La liste des flux doit notifier ses observeur (le collecteur) D'un changement
                 ListeFluxCollecteEtConfigConrante.getInstance().forceChange();
                 ListeFluxCollecteEtConfigConrante.getInstance().notifyObservers();
             }
+        } else if (action.equals("maj")) {
+            ServiceCollecteur.getInstance().majManuelle(flux);
+        } // Si l'action est liste, on récupère la liste des flux
+        else if (action.equals("list")) {
+            request.setAttribute(ATT_LISTOBJ, ListeFluxCollecteEtConfigConrante.getInstance().getListFlux());
+        } else if (action.equals("rem")) {
+            ListeFluxCollecteEtConfigConrante.getInstance().removeFlux(flux);
+            //On rediige vers la page de listing des flux.
+            redirmap = new HashMap<String, String>();
+                redirmap.put("url", "flux");
+                redirmap.put("msg", "Suppression du flux effecué.");
+                request.setAttribute("redirmap", redirmap);
+            
         }
 
-        // On a besoin de la liste des journaux pour effectuer la liste des choix
-        DaoJournal daoJournal = DAOFactory.getInstance().getDaoJournal();
-        List<Object> journals = daoJournal.findall();
-        request.setAttribute("listjournaux", journals);
+        request.setAttribute(ATT_OBJ, flux);
 
+        this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
 
-        // On a besoin de la liste des types de flux 
-        DAOGenerique dAOGenerique = DAOFactory.getInstance().getDAOGenerique();
-        dAOGenerique.setClassAssocie(FluxType.class);
-        List<Object> listTypeFlux = dAOGenerique.findall();
-        request.setAttribute("listtypeflux", listTypeFlux);
-
-
-// redirection de l'utilisateur
-        if (action.equals("add") && fluxForm.getValide()) {
-            response.sendRedirect("flux?action=mod&id=" + flux.getID());
-        } else {
-            this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
-        }
     }
 // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
 

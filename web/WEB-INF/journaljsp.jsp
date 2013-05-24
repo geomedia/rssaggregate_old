@@ -26,9 +26,9 @@
     <div class="post">
 
         <p>
-   
+
         </p>
-        
+
         <c:choose>
             <c:when test="${action=='list'}">
                 <ul>
@@ -37,11 +37,11 @@
 
                     </c:forEach>
                 </ul>
-            </c:when>
+            </c:when> 
 
             <c:when test="${action=='mod' or action=='add'}">
-                            <h2>Administration du journal : ${journal.nom}</h2>
-                         <a href="journaux?action=rem&id=${journal.ID}">Supprimer journal</a>
+                <h2>Administration du journal : ${journal.nom}</h2>
+                <a href="journaux?action=rem&id=${journal.ID}">Supprimer journal</a>
                 ${form.resultat}
                 <form method="post" action="journaux?action=<c:out value="${action}"></c:out>">
                         <fieldset>
@@ -50,12 +50,38 @@
                             <input type="text" id="nom" name="nom" value="<c:out value="${journal.nom}" />" size="20" maxlength="60" />
                         <span class="erreur"> ${form.erreurs['nom']}</span>
 
-                        <label for="langue">Langue du journal<span class="requis">*</span></label>
-                        <input type="text" id="nom" name="langue" value="<c:out value="${journal.langue}" />" size="20" maxlength="60" />
-                        <span class="erreur"> ${form.erreurs['langue']}</span>
+
+                        <br>
+                        <label for="langue">Langue : </label>
+                        <select name="langue" id="langue">
+                            <c:forEach items="${listLocal}" var="loc">
+
+                                <option value="${loc.key}" <c:if test="${loc.key==journal.langue}"> selected="true"</c:if>>${loc.value}</option>>
+
+                            </c:forEach>
+                        </select>
+
 
                         <br />
-                        <label for="note">Note <span class="requis">*</span></label>
+                        <label for="pays">Pays :</label>
+                        <select name="pays" id="pays">
+                            <c:forEach items="${listCountry}" var="country">
+                                <option value="${country.key}" <c:if test="${country.key==journal.pays}"> selected="true"</c:if>>${country.value}</option>
+                            </c:forEach>
+
+                        </select>
+
+                        <br />
+
+                        <label for="">Fuseau Horaire : </label>
+                        <select name="fuseauHorraire">
+                            <c:forEach items="${fuseau}" var="fus">
+                                <option value="${fus}" <c:if test="${fus==journal.fuseauHorraire}"> selected="true"</c:if> >${fus}</option>
+
+                            </c:forEach>
+                        </select>
+
+                     
                         <br />
                         <input type="hidden" name="id" value="${journal.ID}">
 

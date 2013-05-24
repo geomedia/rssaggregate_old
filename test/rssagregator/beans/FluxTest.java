@@ -14,9 +14,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import rssagregator.beans.incident.FluxIncident;
-import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.HTTPIndident;
-import rssagregator.beans.traitement.MediatorCollecteAction;
 
 /**
  *
