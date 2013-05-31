@@ -134,6 +134,12 @@ public class FluxSrvl extends HttpServlet {
                 ListeFluxCollecteEtConfigConrante.getInstance().notifyObservers();
             }
         } else if (action.equals("maj")) {
+//            DaoFlux daof = DAOFactory.getInstance().getDAOFlux();
+//            String idd= request.getParameter("id");
+//            
+//            flux = (Flux) daof.find(new Long(idd));
+            
+            
             ServiceCollecteur.getInstance().majManuelle(flux);
         } // Si l'action est liste, on récupère la liste des flux
         else if (action.equals("list")) {

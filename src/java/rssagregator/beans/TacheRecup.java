@@ -13,7 +13,8 @@ import rssagregator.services.ListeFluxCollecteEtConfigConrante;
 import rssagregator.services.ServiceGestionIncident;
 
 public class TacheRecup extends Observable implements Runnable {
-List<Item> nouvellesItems;
+
+    List<Item> nouvellesItems;
     /**
      * *
      * Le flux de la tache
@@ -39,37 +40,47 @@ List<Item> nouvellesItems;
      */
     @Override
     public void run() {
-//        synchronized(this.flux){
+        synchronized (this.flux) {
             try {
-             nouvellesItems = this.flux.getMediatorFlux().executeActions(this.flux);
-            System.out.println("###############################################################");
-            System.out.println("Lancement de la tache : " + flux.getUrl());
-            System.out.println("Nombre d'item rapporté pa le médiatoAction (nouvelles ou a lier) : " + nouvellesItems.size());
-            System.out.println("###############################################################");
-            // On enregistre ces nouvelles items
-    
-            int i;
-           
-            for (i = 0; i < nouvellesItems.size(); i++) {
-                this.flux.getItem().add(nouvellesItems.get(i));
-            }
-    
-            
-            flux.fermerLesIncidentOuvert();
-                ListeFluxCollecteEtConfigConrante.getInstance().modifierFlux(flux);
-            
-            System.out.println("NBR item en définitive : " + flux.getItem().size());
+                nouvellesItems = this.flux.getMediatorFlux().executeActions(this.flux);
 
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(TacheRecup.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            
+                System.out.println("###############################################################");
+                System.out.println("Lancement de la tache : " + flux.getUrl());
+                System.out.println("Nombre d'item rapporté pa le médiatoAction (nouvelles ou a lier) : " + nouvellesItems.size());
+                System.out.println("###############################################################");
+                // On enregistre ces nouvelles items
+
+                int i;
+                for (i = 0; i < nouvellesItems.size(); i++) {
+                    this.flux.getItem().add(nouvellesItems.get(i));
+                    this.flux.getLastEmpruntes().add(nouvellesItems.get(i).getHashContenu());
+                }
+
+                // On supprime des hash pour éviter l'accumulation. On en laisse 20 en plus du nombre d'item contenues dans le flux.
+
+                Integer nbr = flux.getMediatorFlux().getNbrItemCollecte() +19 ;
+                if (nbr > 0 && nbr<flux.getLastEmpruntes().size()) {
+                    for (i = nbr; i < flux.getLastEmpruntes().size(); i++) {
+
+                        flux.getLastEmpruntes().remove(i);
+                        System.out.println("TACHE RECUP : SUPPRESSION D'UN HASH");
+                    }
+                }
+
+                flux.fermerLesIncidentOuvert();
+
+                ListeFluxCollecteEtConfigConrante.getInstance().modifierFlux(flux);
+                System.out.println("Tache RECUP : NBR item Collecté après dédoublonage : " + flux.getItem().size());
+                
+            } catch (MalformedURLException ex) {
+                Logger.getLogger(TacheRecup.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
                 ServiceGestionIncident.getInstance().gererIncident(ex, this.flux);
-            Logger.getLogger(TacheRecup.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
-            Logger.getLogger(TacheRecup.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(TacheRecup.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (Exception ex) {
+                Logger.getLogger(TacheRecup.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
-//        }
     }
 
     public List<Item> getNouvellesItems() {
@@ -79,7 +90,4 @@ List<Item> nouvellesItems;
     public void setNouvellesItems(List<Item> nouvellesItems) {
         this.nouvellesItems = nouvellesItems;
     }
-    
-    
-    
 }

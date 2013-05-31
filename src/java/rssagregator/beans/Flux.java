@@ -30,6 +30,10 @@ import javax.persistence.Transient;
 @Entity
 @Table(name = "flux")
 public class Flux extends Bean implements Observer, Serializable {
+   
+    
+//    @PersistenceContext(type= PersistenceContextType.EXTENDED)
+//private EntityManager em;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -86,7 +90,8 @@ public class Flux extends Bean implements Observer, Serializable {
      * Liste des Item du flux. Permet de matérialiser la relation entre flux et
      * Item
      */
-    @ManyToMany(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY)
+
+    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, fetch = FetchType.LAZY)
     private List<Item> item;
     /**
      * Un objet flux peut posséder différents incidents. Un incident ne possède
@@ -99,7 +104,7 @@ public class Flux extends Bean implements Observer, Serializable {
   
 //    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true,fetch = FetchType.LAZY)
     
-    @OneToMany(mappedBy = "fluxLie", cascade = {CascadeType.ALL}, orphanRemoval = true, fetch = FetchType.LAZY, targetEntity = FluxIncident.class)
+    @OneToMany(mappedBy = "fluxLie", cascade = {CascadeType.ALL}, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<FluxIncident> incidentsLie;
     /**  
      *
@@ -307,6 +312,8 @@ public class Flux extends Bean implements Observer, Serializable {
     public void setIncidentsLie(List<FluxIncident> incidentsLie) {
         this.incidentsLie = incidentsLie;
     }
+
+
     
     
     

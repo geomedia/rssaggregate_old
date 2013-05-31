@@ -89,6 +89,9 @@ public class MediatorCollecteAction implements Serializable {
      */
     @Transient
     private AbstrDedoublonneur dedoubloneur;
+    
+    @Transient
+    private Integer nbrItemCollecte;
 
     /**
      * Le médiator utilise tout les objets de service pour effectuer l'action
@@ -102,6 +105,8 @@ public class MediatorCollecteAction implements Serializable {
     public List<Item> executeActions(Flux flux) throws MalformedURLException, IOException, Exception {
 // On vérifie si le collecteur est actif. Pour lancer la collecte
         // On commence par récupérer le flux
+        
+        
         this.requesteur.requete(flux.getUrl());
 
 //        String retourHTTP = this.requesteur.getHttpResult();
@@ -118,19 +123,22 @@ public class MediatorCollecteAction implements Serializable {
         
         // On parse le retour du serveur 
         List<Item> listItem = parseur.execute(retourInputStream);
+        this.nbrItemCollecte = listItem.size();
 
         // On dédoublonne
         //TODO : Il faut dédoublonner dans le médiator collecte action. La liste retounée corespond aux items devant être lié au flux. Il peut s'agir d'item nouvelles ou d'item déjà enregistrée mais pas encore lié au flux traité
         listItem = this.dedoubloneur.dedoublonne(listItem, flux);
 
-        // Pour toutes les nouvelles item, on ajoute les empuntes aux dernière empuntes gadées en mémoire. Utile pou simplifier le prochain dédoublonnage
-        int i;
-        for (i = 0; i < listItem.size(); i++) {
-            flux.getLastEmpruntes().add(listItem.get(i).getHashContenu());
-        }
+//        // Pour toutes les nouvelles item, on ajoute les empuntes aux dernière empuntes gadées en mémoire. Utile pou simplifier le prochain dédoublonnage
+//        int i;
+//        for (i = 0; i < listItem.size(); i++) {
+//            flux.getLastEmpruntes().add(listItem.get(i).getHashContenu());
+//        }  --> C'est dans la Tache Recup
 
         // On enregistre les items dans le flux
 //        flux.setItem(listItem);
+        
+        this.requesteur.disconnect();
         return listItem;
     }
 
@@ -237,4 +245,15 @@ public class MediatorCollecteAction implements Serializable {
     public void setDedoubloneur(Dedoubloneur dedoubloneur) {
         this.dedoubloneur = dedoubloneur;
     }
+
+    public Integer getNbrItemCollecte() {
+        return nbrItemCollecte;
+    }
+
+    public void setNbrItemCollecte(Integer nbrItemCollecte) {
+        this.nbrItemCollecte = nbrItemCollecte;
+    }
+    
+    
+    
 }

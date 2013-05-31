@@ -5,10 +5,12 @@
 package rssagregator.beans.traitement;
 
 import dao.DAOFactory;
+import dao.DaoFlux;
 import dao.DaoItem;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.EntityManager;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 
@@ -69,79 +71,59 @@ public abstract class AbstrDedoublonneur {
         listRetour.addAll(listItemCapture);
 
 
-//
-//        // dédoublonnage basé sur les hash en mémoire.
-//        while (i < flux.getLastEmpruntes().size()) {
-//            String umprunteItemDsFlux = flux.getLastEmpruntes().get(i);
-//
-//
-//            
-//            while (j < listItemCapture.size()) {
-//                Item item = listItemCapture.get(j);
-//                if (item.getHashContenu().equals(umprunteItemDsFlux)) {
-//                    listRetour.remove(item);
-//                  
-//                }
-//                j++;
-//            }
-//            i++;
-//        }
 
-        // Si il reste encore des items, on pocède à une vérification à partir de la base de données
+        // dédoublonnage basé sur les hash en mémoire.
+        for (i = 0; i < flux.getLastEmpruntes().size(); i++) {
+            String umprunteItemDsFlux = flux.getLastEmpruntes().get(i);
+            for (j = 0; j < listItemCapture.size(); j++) {
+                Item item = listItemCapture.get(j);
+                if (item.getHashContenu().equals(umprunteItemDsFlux)) {
+                    listRetour.remove(item);
+                    System.out.println("DEDOUBLONNEUR : SUPPRESSION d'un Flux après calcul HASH");
+
+                }
+            }
+        }
+
+        // Si il reste encore des items, on pocède à une vérification à partir de la BASE DE DONNEE
         if (listRetour.size() > 0) {
-            System.out.println("On va devoir faire une requête BDD de dédoublonage");
-            System.out.println("FLUX ID : " + flux.getID());
-            // Dédoublonnage basé sur la BDD
+            System.out.println("DEDOUBLONNEUR : dédoublonage BDD du flux ID : " + flux.getID()+ ". Il y a : " + listRetour.size()+" item à vérifier");
             //Supression de toutes les items déjà lié au flux
             DaoItem dao = DAOFactory.getInstance().getDaoItem();
-            //On cherche dans la base de donnée, la liste des flux possédant un hash similaire à cux capturée
             List<Item> ListitemDejaPresenteBDD = dao.findHashFlux(listRetour, flux);
             for (i = 0; i < ListitemDejaPresenteBDD.size(); i++) {
-                  Item ItemBdd = ListitemDejaPresenteBDD.get(i);
-
+                Item ItemBdd = ListitemDejaPresenteBDD.get(i);
                 for (j = 0; j < listRetour.size(); j++) {
-//                     System.out.println("IT J");
                     Item itemRetour = listRetour.get(j);
 
                     //Si les hash sont similaires
                     if (ItemBdd.getHashContenu().equals(itemRetour.getHashContenu())) {
-                        
-                        //Il est nécéssaire de supprimer l'item du retour si il est déjà lié.
-                         // On récupère les id des flux des items présente dans la BDD
+
+                        //Il est nécéssaire de supprimer l'item du retour si il est déjà lié au flux analysé.
+                        // On récupère les id des flux des items présente dans la BDD
                         List<Flux> listfluxItemBDD = ItemBdd.getListFlux();
                         int k;
                         boolean trouve = false;
-                       
                         for (k = 0; k < listfluxItemBDD.size(); k++) {
-                            System.out.println("ITEM BDD ID : " + listfluxItemBDD.get(k).getID()+ " flux obs : " + flux.getID());
+
                             // SI l'item courante possède la même id que dans la base de donnée, on supprime de la liste courante
-                                if(listfluxItemBDD.get(k).getID().equals(flux.getID())){
-                                        System.out.println("IT k SUPPRESSION <<<<<<<<<");
-                                     listRetour.remove(itemRetour);
-                                     trouve = true;
-                                }
-                              
+                            if (listfluxItemBDD.get(k).getID().equals(flux.getID())) {
+                                System.out.println("DEDOUB : Suppression d'une Item car elle déjà lié au flux");
+                                listRetour.remove(itemRetour);
+                                trouve = true;
+                            }
                         }
                         // L'item analysé existe dans la base de donnée mais n'est pas encore lié à notre flux. Il faut remplacer par l'item trouvé dans la base de donnée (concevation de  l'id et des paticulaité de l'item existant)
-                            
-                        if(!trouve){
+                        if (!trouve) {
                             listRetour.add(j, ItemBdd);
                             listRetour.remove(itemRetour);
-                            System.out.println("Il faut lier");
-                       
-                               
-                            }
-                           
+                            System.out.println("DEDOUB : Lien réalisé entre une item déjà enregistrée et le flux observé");
+
                         }
                     }
                 }
             }
-
-            // Il nous reste des items déjà enregisré, mais pas encore lié
-
-
-        
-
+        }
         return listRetour;
     }
 }

@@ -103,4 +103,10 @@ public class AbstrRequesteur implements Serializable {
     public void setHttpInputStream(InputStream httpInputStream) {
         this.httpInputStream = httpInputStream;
     }
+    
+    
+    public void disconnect(){
+    
+}
+
 }

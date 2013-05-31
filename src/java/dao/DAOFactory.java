@@ -4,6 +4,8 @@
  */
 package dao;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -16,7 +18,9 @@ import rssagregator.beans.form.DAOGenerique;
 public class DAOFactory {
     protected String PERSISTENCE_UNIT_NAME = "RSSAgregatePU2";
     private static DAOFactory instance = new DAOFactory();
-
+    public List<EntityManager> listEm = new ArrayList<EntityManager>();
+    EntityManager em;
+EntityManagerFactory emf;
     public static DAOFactory getInstance() {
         if (instance == null) {
             instance = new DAOFactory();
@@ -25,6 +29,8 @@ public class DAOFactory {
     }
 
     private DAOFactory() {
+        emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
+        em=emf.createEntityManager();
     }
 
     public DaoFlux getDAOFlux() {
@@ -50,11 +56,30 @@ public class DAOFactory {
         return new DAOIncident(this);
     }
     
-    protected EntityManager getEntityManager() {
+    public EntityManager getEntityManager() {
         //TODO : faire le point la créaion du EntityManager, il n'est peut être pas nécessaire de le créer à chaque fois. 
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
-        EntityManager em = emf.createEntityManager();
         
-        return em;
+//        int i = 0;
+//
+//        
+//        
+//        System.out.println("DDE EME");
+//        System.out.println("################################");
+//        for(i=0; i<listEm.size(); i++){
+//            System.out.println("OPEN : "+listEm.get(i).isOpen());;
+//        }
+       
+//        em = emf.createEntityManager();
+//        listEm.add(em);
+        if(this.em==null || !this.em.isOpen()){
+            System.out.println("INSTANCIATION DE l EM");
+            em=emf.createEntityManager();
+        }
+
+        return this.em;
     }
+    
+    public void closeem(){
+    this.em.close();
+}
 }

@@ -84,6 +84,7 @@ public class Requester extends AbstrRequesteur {
 
 
         this.httpInputStream = conn.getInputStream();
+        
 
 
 
@@ -160,7 +161,12 @@ public class Requester extends AbstrRequesteur {
 
 
 
-
+    @Override
+    public void disconnect(){
+    conn.disconnect();
+    
+        System.out.println(">>>>>>>>>>>>>>> DECONNECTION ");
+}
 
     @Override
     protected void finalize() throws Throwable {

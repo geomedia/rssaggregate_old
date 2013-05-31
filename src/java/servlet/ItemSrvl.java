@@ -7,8 +7,6 @@ package servlet;
 import dao.DAOFactory;
 import dao.DaoItem;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Enumeration;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -17,8 +15,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import rssagregator.beans.Item;
 import rssagregator.beans.form.ItemForm;
-import rssagregator.services.ListeFluxCollecteEtConfigConrante;
-import static servlet.FluxSrvl.ATT_OBJ;
 
 /**
  *
@@ -107,11 +103,13 @@ public class ItemSrvl extends HttpServlet {
             // recheche des items à afficher
             Integer itDebut = (numPage * nbrItemPrPage) - nbrItemPrPage;
 
-
+            System.out.println("lala");
 
             List<Item> listItem = daoItem.findAllLimit(new Long(itDebut), new Long(nbrItemPrPage));
             request.setAttribute("listItem", listItem);
+                System.out.println("NBIT : " + listItem.size());
         }
+    
 
 
         request.setAttribute(ATT_ITEM, item);

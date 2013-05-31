@@ -3,9 +3,11 @@ package rssagregator.services;
 import dao.AbstrDao;
 import dao.DAOFactory;
 import dao.DaoFlux;
+import dao.DaoItem;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
+import javax.persistence.LockModeType;
 import rssagregator.beans.Conf;
 import rssagregator.beans.Flux;
 import rssagregator.beans.form.DAOGenerique;
@@ -105,13 +107,24 @@ public class ListeFluxCollecteEtConfigConrante extends Observable {
             Flux fl = (Flux) listflux.get(i);
             fl.setPeriodiciteCollecte(60);
             this.listFlux.add(fl);
+            
+            // Pour chaque flux, on va charger les 100 dernier hash 
+            DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
+            List<String> dernierHash = daoItem.findLastHash(fl, 100);
+            fl.setLastEmpruntes(dernierHash);
+            
+             
+            
         }
     }
 
-    
-    /***
-     * Supprime le flux de la liste des flux collecté en mémoire, et persiste dans la base de données, la modification est notifié aux observeur (le Collecteur)
-     * @param flux 
+    /**
+     * *
+     * Supprime le flux de la liste des flux collecté en mémoire, et persiste
+     * dans la base de données, la modification est notifié aux observeur (le
+     * Collecteur)
+     *
+     * @param flux
      */
     public void removeFlux(Flux flux) {
 
@@ -123,15 +136,15 @@ public class ListeFluxCollecteEtConfigConrante extends Observable {
 //            listFlux.remove(0);
         System.out.println("");
 
-        
-        
-        
-        
-         
+
+
+
+
+
         DaoFlux dao = DAOFactory.getInstance().getDAOFlux();
-        Flux fl = (Flux) dao.find(flux.getID());
-        
-        dao.remove(fl);
+//        Flux fl = (Flux) dao.find(flux.getID());
+ 
+        dao.remove(flux);
         forceChange();
 
         notifyObservers();
@@ -139,15 +152,27 @@ public class ListeFluxCollecteEtConfigConrante extends Observable {
         System.out.println("Nombre de flux dans la liste de ref : " + listFlux.size());
 
     }
-/***
- * Ajoute un flux à la liste des flux collecté puis persiste dans la base de donées. La modification est ensuite notifiée aux observeur (le service de collecte collecteurs)
- * @param f 
- */
+
+    /**
+     * *
+     * Ajoute un flux à la liste des flux collecté puis persiste dans la base de
+     * donées. La modification est ensuite notifiée aux observeur (le service de
+     * collecte collecteurs)
+     *
+     * @param f
+     */
     public void addFlux(Flux f) {
-        System.out.println("Nombre d'observateur : " + this.countObservers());
-        listFlux.add(f);
         DaoFlux dao = DAOFactory.getInstance().getDAOFlux();
         dao.creer(f);
+
+ 
+//        System.out.println("Nombre d'observateur : " + this.countObservers());
+        listFlux.add(f);
+        
+        
+       
+
+
         forceChange();
         notifyObservers();
     }
@@ -168,35 +193,40 @@ public class ListeFluxCollecteEtConfigConrante extends Observable {
         }
         return null;
     }
-    
-    /***
+
+    /**
+     * *
      * Enregistre les modification du flux dans la base de donnée.
-     * @param flux 
+     *
+     * @param flux
      */
-    public void modifierFlux(Flux flux){
-        
+    public void modifierFlux(Flux flux) {
+
         DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
         daoFlux.modifier(flux);
-        
+
+
         // Il faut recharger le collecteur. En effet, si la périodicité de collecte du flux a été modifié, il est utile de recréer le pool de thread schedulé.
-        
-        
-        
+
+        forceChange();
+
         notifyObservers();
     }
-    
-    /***
-     * Enregistre la conf courante dans la base de donnée en utilisant ue DAO générique; la mofification est ensuite motifiée aux observeurs.
-     *   
-     * @param conf 
+
+    /**
+     * *
+     * Enregistre la conf courante dans la base de donnée en utilisant ue DAO
+     * générique; la mofification est ensuite motifiée aux observeurs.
+     *
+     * @param conf
      */
-    public void modifierConf(Conf conf){
+    public void modifierConf(Conf conf) {
         AbstrDao dao = DAOFactory.getInstance().getDAOGenerique();
         dao.setClassAssocie(Conf.class);
-        
+
         dao.modifier(conf);
-        
+        forceChange();
+
         notifyObservers();
     }
-    
 }

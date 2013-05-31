@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 
@@ -31,15 +32,19 @@ public abstract class AbstrDao {
         //Il faut initialiser le em
         em = dAOFactory.getEntityManager();
         em.getTransaction().begin();
+      
         em.persist(obj);
+        
+      
         em.getTransaction().commit();
 
-        em.close();
+
+//        em.close();
     }
 
     public void modifier(Object obj) {
         
-                System.out.println("");
+      
         try {
             // Test si le flux possède bien un id
 
@@ -50,13 +55,14 @@ public abstract class AbstrDao {
             if (retour != null && retour instanceof Long && (Long) retour >= 0) {
                 em = dAOFactory.getEntityManager();
                 em.getTransaction().begin();
-      
+                
                 em.merge(obj);
                 em.getTransaction().commit();
+                System.out.println("FIN DE SAUVEGARDE FLUX");
             }
 
             //        if (obj.getID() != null && obj.getID() >= 0) {
-            //        }
+            //        } 
             //        }
           
         } catch (NoSuchMethodException ex) {
@@ -71,7 +77,9 @@ public abstract class AbstrDao {
             Logger.getLogger(AbstrDao.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             if (em != null) {
-                em.close();
+//                  em.close();
+                System.out.println("FINALYYYY");
+//                em.close();
             }
         }
     }
@@ -85,21 +93,26 @@ public abstract class AbstrDao {
      */
     public Object find(Long id) {
         em = dAOFactory.getEntityManager();
-        em.getTransaction().begin();
+//        em.getTransaction().begin();
 
         
         Class laclass = this.getClassAssocie();
 
-        Object resu = em.find(laclass, id);
-        em.getTransaction().commit();
-        em.close();
+        try {
+        Object resu = em.find(laclass, id);  
         return resu;
+        } catch (Exception e) {
+        }
+
+//        em.getTransaction().commit();
+//        em.close();
+        return null;
 
     }
 
     /**
      * *
-     * Supprimer le flux et tous ses objets liées (item, incident,
+     * Supprimer le un objet
      * Infocollecte...)
      *
      * @param obj
@@ -108,23 +121,30 @@ public abstract class AbstrDao {
         em = dAOFactory.getEntityManager();
         em.getTransaction().begin();
 //        em.remove(obj);
+             System.out.println("Il y a bien une suppression");
+            
         em.remove(em.merge(obj));
+   
         
 
         em.getTransaction().commit();
-        em.close();
+//        em.close();
     }
 
     public List<Object> findall() {
         try {
             em = dAOFactory.getEntityManager();
-            em.getTransaction().begin();
+//            em.getTransaction().begin();
+            
 
             Class classasso = this.getClassAssocie();
 
             String req = "SELECT f FROM " + classasso.getSimpleName() + " f";
             Query query = em.createQuery(req);
             List<Object> result = query.getResultList();
+        
+            
+            
             return result;
         } catch (SecurityException ex) {
             Logger.getLogger(AbstrDao.class.getName()).log(Level.SEVERE, null, ex);
@@ -132,8 +152,10 @@ public abstract class AbstrDao {
             Logger.getLogger(AbstrDao.class.getName()).log(Level.SEVERE, null, ex);
         } 
         finally {
-            if (em != null) {
-                em.close();
+            if (em != null  ) {
+//                em.close();
+//      em.close();
+                System.out.println("FINALLYY");
             }
         }
         return null;

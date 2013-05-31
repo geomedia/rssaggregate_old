@@ -9,7 +9,6 @@ import java.sql.DriverManager;
 import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import rssagregator.services.ListeFluxCollecteEtConfigConrante;

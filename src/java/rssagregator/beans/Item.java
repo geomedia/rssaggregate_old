@@ -1,8 +1,10 @@
 package rssagregator.beans;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import javax.persistence.CascadeType;
 
 
 import javax.persistence.Column;
@@ -15,6 +17,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(name = "item")
@@ -75,7 +78,7 @@ public class Item implements Serializable {
      * *
      * Le hash permettant d'identifier de manière unique l'item
      */
-    @Column(name = "hashContenu")
+    @Column(name = "hashContenu", unique = true, nullable = false)
     private String hashContenu;
     /**
      * *
@@ -110,7 +113,7 @@ public class Item implements Serializable {
 
 
 
-    @ManyToMany(mappedBy = "item", fetch = FetchType.EAGER)
+    @ManyToMany(mappedBy = "item", fetch = FetchType.LAZY, cascade = { CascadeType.REFRESH},targetEntity = Flux.class)
     private List<Flux> listFlux;
     /**
      * *
@@ -138,6 +141,7 @@ public class Item implements Serializable {
      * Constructeur vide
      */
     public Item() {
+        this.listFlux = new ArrayList<Flux>();
     }
 
     /**
@@ -267,4 +271,7 @@ public class Item implements Serializable {
     public void setID(Long ID) {
         this.ID = ID;
     }
+    
+    
+    
 }

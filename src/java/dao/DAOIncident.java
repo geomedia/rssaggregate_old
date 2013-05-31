@@ -25,14 +25,15 @@ public class DAOIncident extends AbstrDao {
 
     public List<FluxIncident> findAllLimit(Long premier, Long nombre) {
         em = dAOFactory.getEntityManager();
-        em.getTransaction().begin();
+//        em.getTransaction().begin();
         Query query = em.createQuery(REQ_FIND_ALL_AC_LIMIT);
         query.setFirstResult(premier.intValue());
         query.setMaxResults(nombre.intValue());
         
 
         List<FluxIncident> listResult = query.getResultList();
-
+        System.out.println("Premier : " + premier+ ". nombre : " + nombre);
+        System.out.println("NOMBRE INCIDENT  : " + listResult.size());
 
         System.out.println("ICI");
         int i;
@@ -41,6 +42,7 @@ public class DAOIncident extends AbstrDao {
             System.out.println("Incid message : " + listResult.get(i).getMessageEreur());
         }
         System.out.println("FIN");
+//        em.close();
 
         return listResult;
 

@@ -5,7 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 
 @Entity
-public class ServeurIncident implements Serializable {
+public class ServeurIncident extends AbstrIncident implements Serializable {
     @Id
     private Long ID;
 

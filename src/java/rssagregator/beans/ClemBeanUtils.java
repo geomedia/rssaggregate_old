@@ -4,6 +4,7 @@
  */
 package rssagregator.beans;
 
+import dao.DAOFactory;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -41,7 +42,6 @@ public class ClemBeanUtils {
      */
     public static void populate(Object bean, HttpServletRequest request, AbstrForm form) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
-        System.out.println("");
 
 
         // On initialise le hashmap d'erreur;
@@ -99,18 +99,20 @@ public class ClemBeanUtils {
 
                         EntityManager em;
                         EntityManagerFactory emf;
-                        emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
-                        em = emf.createEntityManager();
-                        em.getTransaction().begin();
+                        
+                   
+//                        emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
+//                        em = emf.createEntityManager();
+                        em = DAOFactory.getInstance().getEntityManager();
+//                        em.getTransaction().begin();
                         Object objTrouve = em.find(typeArgSetter, id);
-                        em.getTransaction().commit();
+//                        em.getTransaction().commit();
                         setter.invoke(bean, objTrouve);
                     }
                 }
             }
 
         }
-        System.out.println("");
     }
 
     /**
@@ -180,7 +182,6 @@ public class ClemBeanUtils {
 //    }
     public static void check(AbstrForm objetFormulaire, Object beans) throws SecurityException, NoSuchMethodException {
 //        Map<String, String> erreurs = new HashMap<String, String>();
-        System.out.println("CHECK");
         // On parcours chaque champs du beans
         Field[] beanFields = beans.getClass().getDeclaredFields();
 

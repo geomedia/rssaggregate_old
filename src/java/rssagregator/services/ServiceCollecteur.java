@@ -4,6 +4,7 @@
  */
 package rssagregator.services;
 
+import dao.DAOFactory;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -73,6 +74,9 @@ public class ServiceCollecteur implements Observer {
 
         if (o instanceof ListeFluxCollecteEtConfigConrante) {
 
+            
+//            ListeFluxCollecteEtConfigConrante.getInstance().chargerDepuisBd();
+            
             // Si la config est active
             if (fluxCollecte.getConfCourante().getActive()) {
 
@@ -82,27 +86,11 @@ public class ServiceCollecteur implements Observer {
 
                 this.poolSchedule.shutdownNow();
                 this.poolSchedule.shutdown();
-//                try {
-//                    Thread.sleep(10000);
-//                } catch (InterruptedException ex) {
-//                    Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-                
-                
-                 //On attend que le pool soit bien mort
-//                while(this.poolSchedule.isTerminated()){
-//                    try {
-//                        Thread.sleep(500);
-//                    } catch (InterruptedException ex) {
-//                        Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
-//                    }
-//                }
-                
-                // On recré un pool
+
             
                 this.poolSchedule = Executors.newScheduledThreadPool(nbThread);
                 List<Flux> tmpList = fluxCollecte.getListFlux();
-                
+                 
                 
                 // On inscrit les taches actives au pool
                 int i;
@@ -143,6 +131,9 @@ public class ServiceCollecteur implements Observer {
             Future<TacheRecup> t = (Future<TacheRecup>) this.poolPrioritaire.submit(flux.getTacheRechup());
 
             t.get(30, TimeUnit.SECONDS);
+            
+            // A la fin de la tache, il faut rafraichir le context objet et la base de donnée.
+            DAOFactory.getInstance().getEntityManager().refresh(flux);
 
         } catch (InterruptedException ex) {
             Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
@@ -153,3 +144,4 @@ public class ServiceCollecteur implements Observer {
         }
     }
 }
+ 
