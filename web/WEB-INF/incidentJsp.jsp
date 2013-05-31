@@ -27,23 +27,42 @@
             <c:when test="${action=='list'}">
                 <h2>Liste des incidents</h2>
                 <ul>
-                <c:forEach items="${listobj}" var="incid">
-                    
-                    
-                    <li><a href="incidents?action=read&id=${incid.ID}">${incid.messageEreur}</a> ${incid.fluxLie.url}
-                    </li>
-                </c:forEach>
+                    <c:forEach items="${listobj}" var="incid">
+
+
+                        <li><a href="incidents?action=mod&id=${incid.ID}">${incid.fluxLie} : ${incid.messageEreur}</a>
+                            <p>   Date début : <fmt:formatDate value="${incid.dateDebut}" pattern="dd/MM/yyyy hh:mm:ss"/>
+                                Date fin : <c:if test="${empty incid.dateFin}">Incident non clos</c:if><fmt:formatDate value="${incid.dateFin}" pattern="dd/MM/yyyy hh:mm:ss"/></p>
+                   
+                        </li>
+                    </c:forEach>
                 </ul>
-                
+
             </c:when>
-                
-                <c:when test="${action=='read'}">
-                    ${incident.messageEreur}
-                    ${incid.fluxLie.url}
-                </c:when>
-            
-            
-            
+
+
+            <c:when test="${action=='mod'}">
+
+                <h2>Description de l'incident</h2>
+                <p>Flux Impacté : <a href="flux?action=mod&id=${incident.fluxLie.ID}">${incident.fluxLie}</a></p>
+                <p>Date début : <fmt:formatDate value="${incident.dateDebut}" pattern="dd/MM/yyyy hh:mm:ss"/></p>
+                <p>Date fin : <fmt:formatDate value="${incident.dateFin}" pattern="dd/MM/yyyy hh:mm:ss"/></p>
+
+
+                <p>Message d'erreur : ${incident.messageEreur}</p>
+                <p>Log JAVA de l'erreur : ${incident.logErreur}</p>
+
+                <form method="POST" action="incidents?action=mod&id=${incident.ID}">
+                    <textarea name="noteIndicent" id="noteIndicent" cols="80" rows="30">${incident.noteIndicent}</textarea><br />
+                    <input type="submit">
+
+                </form>
+
+
+            </c:when>
+
+
+
         </c:choose>
     </div>
 </div>

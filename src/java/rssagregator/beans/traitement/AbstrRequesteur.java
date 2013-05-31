@@ -8,12 +8,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.net.UnknownHostException;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.xml.ws.http.HTTPException;
 
 /**
  *
@@ -93,7 +95,7 @@ public class AbstrRequesteur implements Serializable {
         this.HttpResult = HttpResult;
     }
 
-    public void requete(String urlArg) throws MalformedURLException, IOException {
+    public void requete(String urlArg) throws MalformedURLException, HTTPException, IOException {
     }
 
     public InputStream getHttpInputStream() {

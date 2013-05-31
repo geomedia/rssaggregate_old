@@ -39,16 +39,7 @@ public class RomeParse extends AbstrParseur implements IfsObjetDeTraitement, Ifs
     @Override
     public List<Item> execute(InputStream xmlIS) throws IOException, IllegalArgumentException, FeedException {
         List<Item> listItems = new ArrayList<Item>();
-
-        
         XmlReader reader = new XmlReader(xmlIS);
-//        int z =0;
-//        char c='a';
-//        while((c=(char) reader.read())!=-1){
-//            System.out.println(""+c);
-//        }
-       
-        
 
         SyndFeedInput feedInput = new SyndFeedInput();
 
@@ -61,6 +52,7 @@ public class RomeParse extends AbstrParseur implements IfsObjetDeTraitement, Ifs
         for (Iterator i = feed.getEntries().iterator(); i.hasNext();) {
             // Création d'un nouveau beans Item
             Item new_item = new Item();
+            
             SyndEntry entry = (SyndEntry) i.next();
 
             if (entry.getTitle() != null) {
@@ -102,17 +94,7 @@ public class RomeParse extends AbstrParseur implements IfsObjetDeTraitement, Ifs
                    }
                 }
                 
-//                
-//                if(s!= null && s.getGuid()!=null){
-//                    System.out.println("ICI");
-//                                    result += "GUID : " + s.getGuid().getValue();
-////                                    new_item.setGuid("lala");
-//                new_item.setGuid(s.getGuid().getValue());
-//                }
             }
-            
-            
-            
             
             
             // Gesion de la date
@@ -145,7 +127,6 @@ public class RomeParse extends AbstrParseur implements IfsObjetDeTraitement, Ifs
 
             listItems.add(new_item);
         }
-  
         
         // Calcul des hash
         int i;

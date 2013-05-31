@@ -4,6 +4,7 @@
  */
 package rssagregator.services;
 
+import com.sun.syndication.io.FeedException;
 import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.List;
@@ -13,7 +14,7 @@ import rssagregator.beans.incident.FluxIncident;
 
 
 /**
- * Cette classe permet d'interpréter les exeption renvoyé et de générer des
+ * Cette classe permet d'interpréter les exeptions renvoyées et de générer des
  * incidents qui seront persistés dans la base de données.
  *
  * @author clem
@@ -28,6 +29,39 @@ public class ServiceGestionIncident {
      */
     private ServiceGestionIncident() {
     }
+    
+    
+    /***
+     * Methode pour factoriser la création de l'incident flux. Crée un flux incident avec le message envoyé pour le flux envoyé
+     * @param msg
+     * @param flux 
+     */
+    private  static void creeIncidentFLux(String msg, Flux flux, Exception ex){
+             
+                // Si on a déjà un incident ouvert de même type
+                FluxIncident ouvert = flux.getIncidentOuverType(FluxIncident.class);
+                if (ouvert == null) {
+                    FluxIncident incident = new FluxIncident();
+                    incident.setMessageEreur(msg);
+                    
+                    Date dateDebut = new Date();
+                    incident.setDateDebut(dateDebut);
+                    incident.setNombreTentativeEnEchec(1);
+                    
+                    incident.setLogErreur(ex.getClass().getSimpleName()+" : "+ ex.getLocalizedMessage());
+                    
+                    flux.getIncidentsLie().add(incident);
+                    incident.setFluxLie(flux);
+                    
+                } else {
+                    int nbr = ouvert.getNombreTentativeEnEchec();
+                    nbr++;
+                    ouvert.setNombreTentativeEnEchec(nbr);
+                                       
+                }
+                ListeFluxCollecteEtConfigConrante.getInstance().modifierFlux(flux);
+    }
+    
 
     /**
      * *
@@ -44,16 +78,21 @@ public class ServiceGestionIncident {
 
     /**
      * *
-     *
+     *  Permet de transformer les exeption en incident. Les incidents sont des beans persités dans la base de données
      * @param exception : L'exeption généré
-     * @param objEnErreur Le beens pour lequel l'exemption a été généré
+     * @param objEnErreur Le beens pour lequel l'exemption a été généré (un flux un serveur ...
      */
     public void gererIncident(Exception exception, Object objEnErreur) {
-        // Gestion des incident de flux
+        
+        
+        
+        //=====================================
+        //      GESTION DES ERREURS DE FLUX
+        //====================================
+        
         if (objEnErreur instanceof Flux) {
             Flux flux = (Flux) objEnErreur;
             System.out.println("ID du FLUX ENVOYE : " + flux.getID());
-
 
             // On récupère les incidents non clos du flux.
             int i;
@@ -62,51 +101,17 @@ public class ServiceGestionIncident {
 
             // Gestion de HTTPExeption
             if (exception instanceof HTTPException) {
-                System.out.println("HTTPExeption");
+                HTTPException ex = (HTTPException) exception;
+                     creeIncidentFLux("HTTPException : Erreur sur le flux "+flux+". Le serveur est joingnable mais retour d'un code erreur : " + ex.getStatusCode(), flux, exception);
             }
 
             // URL MAL FORMATE
             if (exception instanceof UnknownHostException) {
-                System.out.println("Impossible de joindre l'host");
-                // Si on a déjà un incident ouvert de même type
-                FluxIncident ouvert = flux.getIncidentOuverType(FluxIncident.class);
-                if (ouvert == null) {
-                    FluxIncident hTTPIndident = new FluxIncident();
-                    hTTPIndident.setMessageEreur("Il est impossible de joindre l'host du flux");
-                    Date dateDebut = new Date();
-                    System.out.println("DATE COURANTE : " + dateDebut);
-                    hTTPIndident.setDateDebut(dateDebut);
-                    hTTPIndident.setNombreTentativeEnEchec(1);
-                    
-                    flux.getIncidentsLie().add(hTTPIndident);
-                    hTTPIndident.setFluxLie(flux);
-                    
-                } else {
-                    int nbr = ouvert.getNombreTentativeEnEchec();
-                    nbr++;
-                    ouvert.setNombreTentativeEnEchec(nbr);
-                                       
-                }
-                ListeFluxCollecteEtConfigConrante.getInstance().modifierFlux(flux);
-//                DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux(); 
-//                daoFlux.modifier(flux);
-
+                creeIncidentFLux("UnknownHostException : Il est impossible de joindre l'host du flux", flux, exception);
             }
-
-
-            //gestion d'une erreur HTTP  
-            if (exception.getMessage().equals("Erreur HTTP")) {
-                // récup du code erreur
-                int codeErreur = flux.getMediatorFlux().getRequesteur().getHttpStatut();
-
-
-                //Si le flux était en erreur lors de la dernière levée
-
-                if (flux.getErreurDerniereLevee()) {
-                    // On récupère les incidents du flux.
-                    // Si on trouve un incident non clos du même type que l'incident en cours, alors on va agir sur l'incident non clos
-                    //TODO : On n'a pas fini l'objet de gestion des exeptions
-                }
+            
+            if(exception instanceof FeedException){ // Erreur de parsage du flux
+                creeIncidentFLux("FeedException : Impossible de parser le flux XML : " + flux, flux, exception);
             }
         }
     }

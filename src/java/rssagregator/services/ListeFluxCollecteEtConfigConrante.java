@@ -201,7 +201,7 @@ public class ListeFluxCollecteEtConfigConrante extends Observable {
      * @param flux
      */
     public void modifierFlux(Flux flux) {
-
+        System.out.println("");
         DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
         daoFlux.modifier(flux);
 

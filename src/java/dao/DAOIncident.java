@@ -14,7 +14,7 @@ import rssagregator.beans.incident.FluxIncident;
  */
 public class DAOIncident extends AbstrDao {
 
-    private static final String REQ_FIND_ALL_AC_LIMIT = "SELECT i FROM incidentflux i LEFT JOIN i.fluxLie flux";
+    private static final String REQ_FIND_ALL_AC_LIMIT = "SELECT i FROM incidentflux i LEFT JOIN i.fluxLie flux ORDER BY i.dateFin DESC";
 //        private static final String REQ_FIND = "SELECT i FROM incidentflux i LEFT JOIN i.fluxLie flux WHERE id=:id";
 
 //JOIN item.listFlux flux

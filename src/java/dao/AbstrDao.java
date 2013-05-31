@@ -44,15 +44,16 @@ public abstract class AbstrDao {
 
     public void modifier(Object obj) {
         
-      
+
         try {
             // Test si le flux possède bien un id
 
             // On récupère l'id
             Method getter = obj.getClass().getMethod("getID");
             Object retour = getter.invoke(obj);
-
+ 
             if (retour != null && retour instanceof Long && (Long) retour >= 0) {
+                     
                 em = dAOFactory.getEntityManager();
                 em.getTransaction().begin();
                 

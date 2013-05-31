@@ -1,5 +1,6 @@
 package rssagregator.beans.traitement;
 
+import com.sun.syndication.io.FeedException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -102,24 +103,19 @@ public class MediatorCollecteAction implements Serializable {
      * liste des hash n'est pas mise à jour. Seul la listDernierItemCollecte est
      * mis à jours afin que coté JEE on puisse présenter des résultats.
      */
-    public List<Item> executeActions(Flux flux) throws MalformedURLException, IOException, Exception {
+    public List<Item> executeActions(Flux flux) throws MalformedURLException, IOException, HTTPException, FeedException, HTTPException, Exception {
 // On vérifie si le collecteur est actif. Pour lancer la collecte
         // On commence par récupérer le flux
         
         
         this.requesteur.requete(flux.getUrl());
+      
 
 //        String retourHTTP = this.requesteur.getHttpResult();
         
         InputStream retourInputStream = this.requesteur.getHttpInputStream();
-        Integer codeRetour = this.requesteur.getHttpStatut();
-
-        //TODO : Test de la requete, levée des exeptions
-        if (codeRetour != 200) {
-            throw new HTTPException(codeRetour);
-        }
-
-//        System.out.println(retourHTTP);
+        
+      
         
         // On parse le retour du serveur 
         List<Item> listItem = parseur.execute(retourInputStream);
@@ -129,14 +125,7 @@ public class MediatorCollecteAction implements Serializable {
         //TODO : Il faut dédoublonner dans le médiator collecte action. La liste retounée corespond aux items devant être lié au flux. Il peut s'agir d'item nouvelles ou d'item déjà enregistrée mais pas encore lié au flux traité
         listItem = this.dedoubloneur.dedoublonne(listItem, flux);
 
-//        // Pour toutes les nouvelles item, on ajoute les empuntes aux dernière empuntes gadées en mémoire. Utile pou simplifier le prochain dédoublonnage
-//        int i;
-//        for (i = 0; i < listItem.size(); i++) {
-//            flux.getLastEmpruntes().add(listItem.get(i).getHashContenu());
-//        }  --> C'est dans la Tache Recup
 
-        // On enregistre les items dans le flux
-//        flux.setItem(listItem);
         
         this.requesteur.disconnect();
         return listItem;

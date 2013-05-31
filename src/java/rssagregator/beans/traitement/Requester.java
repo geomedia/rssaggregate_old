@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.xml.ws.http.HTTPException;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.persistence.internal.oxm.record.XMLReader;
 import rssagregator.beans.Item;
@@ -65,11 +66,13 @@ public class Requester extends AbstrRequesteur {
      * une exeption contenant l'erreur http
      */
     @Override
-    public void requete(String urlArg) throws MalformedURLException, IOException {
+    public void requete(String urlArg) throws MalformedURLException, HTTPException,IOException {
 
         URL url = new URL(urlArg);
 
         conn = (HttpURLConnection) url.openConnection();
+       
+        
         conn.setRequestMethod("GET");
 
         if (this.requestProperty != null && requestProperty.length == 2) {
@@ -79,7 +82,15 @@ public class Requester extends AbstrRequesteur {
         conn.setInstanceFollowRedirects(true);
 
         conn.connect();
+        
+        
+        
         this.httpStatut = conn.getResponseCode();
+        System.out.println("CODE : " + httpStatut);
+        if(httpStatut!=200){
+            throw new HTTPException(httpStatut);
+            
+        }
 
 
 

@@ -30,21 +30,17 @@ import javax.persistence.Transient;
 @Entity
 @Table(name = "flux")
 public class Flux extends Bean implements Observer, Serializable {
-   
-    
+
 //    @PersistenceContext(type= PersistenceContextType.EXTENDED)
 //private EntityManager em;
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long ID;
-    
-        
     /**
      * URL du flux rss. inclure si possible le protocole (http://). Mais, lors
      * de l'ajout une regexp vérifie si l'url est correcte et la modifie
      */
-    @Column(name = "url", length = 2000)
+    @Column(name = "url", length = 2000, nullable = false, unique = true)
     private String url;
     /**
      * Nombre de secondes séparant deux moissonage du flux
@@ -90,28 +86,22 @@ public class Flux extends Bean implements Observer, Serializable {
      * Liste des Item du flux. Permet de matérialiser la relation entre flux et
      * Item
      */
-
     @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, fetch = FetchType.LAZY)
     private List<Item> item;
     /**
      * Un objet flux peut posséder différents incidents. Un incident ne possède
      * qu'un flux.
-     * 
+     *
      * @element-type FluxIncident
      */
 //    @OneToMany(mappedBy = "flux", cascade = CascadeType.ALL)
-    
-  
 //    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true,fetch = FetchType.LAZY)
-    
-    @OneToMany(mappedBy = "fluxLie", cascade = {CascadeType.ALL}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "fluxLie", cascade = {CascadeType.ALL}, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<FluxIncident> incidentsLie;
-    /**  
+    /**
      *
      * @element-type InfoCollecte
      */
- 
-    
 //Cascade remove : On va utiliser la dao flux pour sauvegarder les infos collecte. 
 //    @OneToMany(mappedBy = "flux", cascade = {CascadeType.ALL})
     @Transient
@@ -121,7 +111,6 @@ public class Flux extends Bean implements Observer, Serializable {
      * des beans. ils sont persisté dans la base de données
      */
 //    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.DETACH})
-    
     @OneToOne(cascade = {CascadeType.MERGE, CascadeType.DETACH}, fetch = FetchType.LAZY)
     private FluxType typeFlux;
     /**
@@ -129,7 +118,7 @@ public class Flux extends Bean implements Observer, Serializable {
      * flux
      */
 // On veut que le flux ne puisse pas créer de journaux mais simplment se lier. Ce n'est pas à la dao du flux de de créer des journaux.
-    @ManyToOne(cascade = {CascadeType.MERGE}) 
+    @ManyToOne(cascade = {CascadeType.MERGE})
     private Journal journalLie;
     /**
      * Le mediator flux permet d'assigner un flux un comportement de collecte.
@@ -139,7 +128,6 @@ public class Flux extends Bean implements Observer, Serializable {
 //    @OneToOne(cascade = CascadeType.MERGE)
     @Transient
     private MediatorCollecteAction MediatorFlux;
-    
     /**
      * On ne persiste pas ce champs
      */
@@ -234,8 +222,6 @@ public class Flux extends Bean implements Observer, Serializable {
         this.item = items;
     }
 
-
-
     public List<InfoCollecte> getInfoCollecteFlux() {
         return infoCollecteFlux;
     }
@@ -271,7 +257,7 @@ public class Flux extends Bean implements Observer, Serializable {
     public Flux() {
         this.item = new ArrayList<Item>();
         this.lastEmpruntes = new ArrayList<String>();
-        
+
         this.MediatorFlux = MediatorCollecteAction.getDefaultCollectAction();
         this.incidentsLie = new ArrayList<FluxIncident>();
     }
@@ -313,68 +299,80 @@ public class Flux extends Bean implements Observer, Serializable {
         this.incidentsLie = incidentsLie;
     }
 
-
-    
-    
-    
-    /***
-     * Parcours les incidents et retourne ceux qui ne sont pas clos, cad ceux qui n'ont pas de date de fin
-     * @return 
+    /**
+     * *
+     * Parcours les incidents et retourne ceux qui ne sont pas clos, cad ceux
+     * qui n'ont pas de date de fin
+     *
+     * @return
      */
-    public List<FluxIncident> getIncidentEnCours(){
+    public List<FluxIncident> getIncidentEnCours() {
         List<FluxIncident> iRetour = new ArrayList<FluxIncident>();
-        
+
         int i;
-        for(i=0; i<this.incidentsLie.size(); i++){
-        
-            if(this.incidentsLie.get(i).getDateFin()==null){
+        for (i = 0; i < this.incidentsLie.size(); i++) {
+
+            if (this.incidentsLie.get(i).getDateFin() == null) {
                 iRetour.add(this.incidentsLie.get(i));
             }
         }
-             
         return iRetour;
     }
-    
-    /***
-     * Parcours les incident ouvert et retourne le premier incident ouvert du même type que la class envoyé en argument. 
+
+    /**
+     * *
+     * Parcours les incident ouvert et retourne le premier incident ouvert du
+     * même type que la class envoyé en argument.
+     *
      * @param c
-     * @return L'incident ouvert du même type que Classc ou null si rien n'a été trouvé
+     * @return L'incident ouvert du même type que Classc ou null si rien n'a été
+     * trouvé
      */
-    public FluxIncident getIncidentOuverType(Class c){
+    public FluxIncident getIncidentOuverType(Class c) {
 //        List<AbstrFluxIncident> listRetour = new ArrayList<AbstrFluxIncident>();
-        
+
         List<FluxIncident> list = this.getIncidentEnCours();
         int i;
-        for(i=0; i<list.size(); i++){
-            if(list.get(i).getClass().equals(c)){
+        for (i = 0; i < list.size(); i++) {
+            if (list.get(i).getClass().equals(c)) {
                 return list.get(i);
 //                listRetour.add(list.get(i));
             }
         }
-        
         return null;
     }
-    
-    
-    /***
-     * Parcours les incidents du flux et inscrit la date courante en date de fin d'un evenuel incident ouvert. Cette méthode est éxecuté pour chaque flux losque la levée s'est déroulé avec succes
+
+    /**
+     * *
+     * Parcours les incidents du flux et inscrit la date courante en date de fin
+     * d'un evenuel incident ouvert. Cette méthode est éxecuté pour chaque flux
+     * losque la levée s'est déroulé avec succes
      */
-    public void fermerLesIncidentOuvert(){
-        
+    public void fermerLesIncidentOuvert() {
         int i;
         List<FluxIncident> incidentOuvert = this.getIncidentEnCours();
-        
-        for(i=0; i<incidentOuvert.size(); i++){
 
+        for (i = 0; i < incidentOuvert.size(); i++) {
             // On vérifi quand même que la date de fin est bien null
-            if(incidentOuvert.get(i).getDateFin()==null){
+            if (incidentOuvert.get(i).getDateFin() == null) {
                 incidentOuvert.get(i).setDateFin(new Date());
             }
-            
         }
-        
-        
     }
-    
-    
+
+    @Override
+    /***
+     * Retourne le nom du journal ainsi que le type du flux. Si ces variables ne sont pas définient, on retourne l'url.
+     */
+    public String toString() {
+//        return "zouzou";
+        String nomRetour = "";
+        if (this.getJournalLie() != null && this.getTypeFlux().getDenomination() != null) {
+            nomRetour += this.getJournalLie().getNom() + " - " + this.getTypeFlux().getDenomination();
+        } else {
+            nomRetour = this.getUrl();
+        }
+        return nomRetour;
+
+    }
 }

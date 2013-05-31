@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import rssagregator.beans.Flux;
 import rssagregator.beans.form.IncidentForm;
+import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.FluxIncident;
 
 /**
@@ -68,7 +69,6 @@ public class IncidentsSrvl extends HttpServlet {
             request.setAttribute("id", id);
             incident = (FluxIncident) dao.find(id);
            
-            System.out.println("NB FLUX : " + incident.getFluxLie().getUrl());
 //            flux = (Flux) daoFlux.find(id);
         }
         
@@ -76,7 +76,7 @@ public class IncidentsSrvl extends HttpServlet {
         
 
         if (request.getMethod().equals("POST")) {
-            incident = (FluxIncident) form.bind(request, incident, Flux.class);
+            form.bind(request, incident, FluxIncident.class);
         }
 
         if (action.equals("list")) {
@@ -84,6 +84,12 @@ public class IncidentsSrvl extends HttpServlet {
        
             List<FluxIncident> listAll = dao.findAllLimit(new Long(0), new Long(100));
             request.setAttribute(ATT_LIST, listAll);
+        }
+        else if (action.equals("mod")) {
+             if (form.getValide()) {
+                 dao.modifier(incident);
+                 
+             }
         }
 
 

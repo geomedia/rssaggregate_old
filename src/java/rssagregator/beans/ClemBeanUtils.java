@@ -5,6 +5,7 @@
 package rssagregator.beans;
 
 import dao.DAOFactory;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -18,6 +19,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Persistence;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.catalina.tribes.util.Arrays;
 import rssagregator.beans.form.AbstrForm;
 
 /**
@@ -41,7 +43,7 @@ public class ClemBeanUtils {
      * @throws InvocationTargetException
      */
     public static void populate(Object bean, HttpServletRequest request, AbstrForm form) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-
+ System.out.println("EXE");
 
 
         // On initialise le hashmap d'erreur;
@@ -52,8 +54,31 @@ public class ClemBeanUtils {
         // on parcours chaque champ du beans
 
         Field[] tabfield = bean.getClass().getDeclaredFields();
-        int i;
+        
+//        // Il faut ajouter les field de la classe parente si elle exite
+//        
+//        //System.out.println("Classe mère : "+ bean.getClass().getSuperclass().getSimpleName());
+//        Field[] tabfieldmere=  bean.getClass().getSuperclass().getDeclaredFields();
+//           int i;
+//           
+//           Field[] tabfield = new Field[tabfieldcurrent.length  + tabfieldmere.length ];
+//           for(i=0; i<tabfieldcurrent.length;i++){
+//               tabfield[i]= tabfieldcurrent[i];
+//           }
+//           
+//           int j = 0;
+//           for (j=0;j<tabfieldmere.length;j++){
+//               tabfield[i] = tabfieldmere[j];
+//               i++;
+//           }
+//        
+        
+        
+int i;
+        System.out.println("Nombre de fiels : " + tabfield.length);
+     
         for (i = 0; i < tabfield.length; i++) {
+            System.out.println("Nom du fields" + tabfield[i].getName());
             String nomVariable = tabfield[i].getName();
             String nomSetter = "set" + nomVariable.substring(0, 1).toUpperCase() + nomVariable.substring(1, nomVariable.length());
             Method setter = simpleGetMethod(bean, nomSetter);

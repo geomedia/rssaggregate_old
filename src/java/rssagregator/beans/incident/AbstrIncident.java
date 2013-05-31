@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
@@ -19,6 +21,7 @@ import javax.persistence.Temporal;
 public class AbstrIncident implements Serializable {
 
     @Id
+      @GeneratedValue(strategy = GenerationType.AUTO)
     private Long ID;
 
     public void AbstrIncident() {
@@ -41,20 +44,20 @@ public class AbstrIncident implements Serializable {
     }
     @Column(name = "messageEreur")
     protected String messageEreur;
-    @Column(name = "noteIndicent")
-    private String noteIndicent;
+    @Column(name = "noteIndicent", length = 3000)
+    protected String noteIndicent;
     @Column(name = "logErreur")
-    private String logErreur;
+    protected String logErreur;
     @Column(name = "bloquant")
-    private Boolean bloquant;
+    protected Boolean bloquant;
     @Column(name = "nombreTentativeEnEchec")
-    private Integer nombreTentativeEnEchec;
-    @Temporal(javax.persistence.TemporalType.DATE)
-    private Date lastNotification;
-    @Temporal(javax.persistence.TemporalType.TIME)
-    private Date dateDebut;
-    @Temporal(javax.persistence.TemporalType.TIME)
-    private Date dateFin;
+    protected Integer nombreTentativeEnEchec;
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    protected Date lastNotification;
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    protected Date dateDebut;
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    protected Date dateFin;
     
         /**
      * nombre de 1 à 5 . 0 = normal : On ne notifie l'erreur qu'une fois par
@@ -138,8 +141,5 @@ public class AbstrIncident implements Serializable {
     public void setGravite(Integer gravite) {
         this.gravite = gravite;
     }
-    
-    
-    
     
 }

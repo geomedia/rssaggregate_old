@@ -1,17 +1,10 @@
 package rssagregator.beans.incident;
 
 import java.io.Serializable;
-import java.util.Date;
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
-import javax.persistence.Temporal;
 import rssagregator.beans.Flux;
 
 /** 
@@ -27,13 +20,6 @@ public class FluxIncident extends AbstrIncident implements Serializable  {
 //
 //    public FluxIncident() {
 //    }
-    
-
-    
-
-    
-   
-
     
     
   /** 

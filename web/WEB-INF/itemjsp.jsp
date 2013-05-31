@@ -38,7 +38,7 @@
             <ul>
 
                 <c:forEach items="${item.listFlux}" var="flux">
-                    <li><a href="flux?action=read-item&id=${flux.ID}">${flux.url}</a></li>
+                    <li><a href="flux?action=read-item&id=${flux.ID}">${flux}</a></li>
                     </c:forEach>
 
             </ul>
@@ -61,11 +61,13 @@
                 <h1>Liste des items</h1>
             <ul>
                 <c:forEach items="${listItem}" var="ite">
-                    <li>
+                    <li><p>
                         <a href="item?action=read&id=${ite.ID}">${ite.titre}</a>
                         <c:forEach items="${ite.listFlux}" var="fl">
-                            "${fl.journalLie.nom} - ${fl.typeFlux.denomination}" 
-                        </c:forEach>
+                            "${fl}" 
+                        </c:forEach><fmt:formatDate value="${ite.dateRecup}" pattern="dd/MM/yyyy hh:mm:ss"/>
+                            </p>
+                            <p>${ite.description}</p>
                     </li>
                 </c:forEach>
             </ul>
