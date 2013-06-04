@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.List;
 import javax.xml.ws.http.HTTPException;
 import rssagregator.beans.Flux;
+import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.FluxIncident;
 
 
@@ -32,16 +33,16 @@ public class ServiceGestionIncident {
     
     
     /***
-     * Methode pour factoriser la création de l'incident flux. Crée un flux incident avec le message envoyé pour le flux envoyé
+     * Methode pour factoriser la création de l'incident flux. Crée un flux incident avec le message envoyé pour le flux envoyé. L'incident est persisté par la méthode, puis une référence vers l'objet crée est retournée
      * @param msg
      * @param flux 
      */
-    private  static void creeIncidentFLux(String msg, Flux flux, Exception ex){
+    private  static AbstrIncident creeIncidentFLux(String msg, Flux flux, Exception ex){
              
                 // Si on a déjà un incident ouvert de même type
-                FluxIncident ouvert = flux.getIncidentOuverType(FluxIncident.class);
-                if (ouvert == null) {
-                    FluxIncident incident = new FluxIncident();
+                FluxIncident incident = flux.getIncidentOuverType(FluxIncident.class);
+                if (incident == null) {
+                    incident = new FluxIncident();
                     incident.setMessageEreur(msg);
                     
                     Date dateDebut = new Date();
@@ -54,12 +55,13 @@ public class ServiceGestionIncident {
                     incident.setFluxLie(flux);
                     
                 } else {
-                    int nbr = ouvert.getNombreTentativeEnEchec();
+                    int nbr = incident.getNombreTentativeEnEchec();
                     nbr++;
-                    ouvert.setNombreTentativeEnEchec(nbr);
+                    incident.setNombreTentativeEnEchec(nbr);
                                        
                 }
                 ListeFluxCollecteEtConfigConrante.getInstance().modifierFlux(flux);
+                return incident;
     }
     
 
@@ -82,7 +84,7 @@ public class ServiceGestionIncident {
      * @param exception : L'exeption généré
      * @param objEnErreur Le beens pour lequel l'exemption a été généré (un flux un serveur ...
      */
-    public void gererIncident(Exception exception, Object objEnErreur) {
+    public AbstrIncident gererIncident(Exception exception, Object objEnErreur) {
         
         
         
@@ -102,17 +104,19 @@ public class ServiceGestionIncident {
             // Gestion de HTTPExeption
             if (exception instanceof HTTPException) {
                 HTTPException ex = (HTTPException) exception;
-                     creeIncidentFLux("HTTPException : Erreur sur le flux "+flux+". Le serveur est joingnable mais retour d'un code erreur : " + ex.getStatusCode(), flux, exception);
+                     return creeIncidentFLux("HTTPException : Erreur sur le flux "+flux+". Le serveur est joingnable mais retour d'un code erreur : " + ex.getStatusCode(), flux, exception);
+                     
             }
 
             // URL MAL FORMATE
             if (exception instanceof UnknownHostException) {
-                creeIncidentFLux("UnknownHostException : Il est impossible de joindre l'host du flux", flux, exception);
+                return creeIncidentFLux("UnknownHostException : Il est impossible de joindre l'host du flux", flux, exception);
             }
             
             if(exception instanceof FeedException){ // Erreur de parsage du flux
-                creeIncidentFLux("FeedException : Impossible de parser le flux XML : " + flux, flux, exception);
+                return creeIncidentFLux("FeedException : Impossible de parser le flux XML : " + flux, flux, exception);
             }
         }
+        return null;
     }
 }

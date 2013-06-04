@@ -1,3 +1,4 @@
+<%@taglib prefix="sql" uri="http://java.sun.com/jsp/jstl/sql"%>
 <%-- 
     Document   : index
     Created on : 22 avr. 2013, 14:36:12
@@ -53,6 +54,24 @@
                 <c:choose>
 
                     <c:when test="${action=='list'}">
+
+
+
+                        <form method="POST">
+                            <fieldset>
+                                <legend>Affiner la recherche</legend>
+                                <label>Appartenant au journal : </label>
+                                <select name="journal-id">
+                                    <option value="">TOUS</option>
+                                    <c:forEach items="${listjournaux}" var="j">
+                                        <option value="${j.ID}" <c:if test="${j.ID==journalid}"> selected="true"</c:if>>${j.nom}</option>    
+                                    </c:forEach>
+                                </select>
+                                <input type="submit" value="Affiner">
+                            </fieldset>
+                        </form>
+
+
                         <ul>
                             <c:forEach items="${listflux}" var="flux">
                                 <li><a href="flux?action=mod&id=${flux.ID}"><c:out value="${flux.url}"></c:out></a></li>
@@ -62,7 +81,7 @@
                     <c:when test="${action=='read-item' or action=='mod' or action=='maj' or action=='read-incident'}">
                         <h1>Administration du flux : ${flux.url}</h1>
                         <ul>
-                            <li><a href="flux?action=read-item&id=${flux.ID}">Parcourir les items du flux</a></li>
+                            <li><a href="item?id-flux=${flux.ID}">Parcourir les items du flux</a></li>
                             <li><a href="flux?action=mod&id=${flux.ID}">Configurer le flux</a></li>
                             <li><a href="flux?action=maj&id=${flux.ID}">Mettre à jour manuellement</a></li>
                             <li><a href="flux?action=rem&id=${flux.ID}">Supprimer le flux</a></li>
@@ -144,12 +163,25 @@
                     <c:when test="${action=='maj'}">
                         <h2>Nouvelles items capturés : </h2>
                         <ul>
-                            <c:forEach items="${flux.tacheRechup.nouvellesItems}" var="it">
+                            <c:set var="rien" value="<li>Collecte terminée avec succès. Aucune Item n'a cependant été trouvé dans le flux.</li>"></c:set>
+                            <c:forEach items="${flux.tacheRechup.nouvellesItems}" var="it" varStatus="varstat">
                                 <li class="item"><h3>${it.titre}</h3>
                                     <p>${it.description}</p>
                                 </li>
+                                <c:set var="rien" value=""></c:set>
                             </c:forEach>
+                                ${rien}
                         </ul>
+                       
+                        
+                        <c:if test="${flux.tacheRechup.incident!=null}">
+                            
+                            <p>Erreur lors de la collecte du FLUX</p>
+                            ${flux.tacheRechup.incident.messageEreur}
+                            <a href="incidents?action=mod&id=${flux.tacheRechup.incident.ID}">Voir le détail de l'incident</a>
+                            
+                        </c:if>
+                        
                     </c:when>
                 </c:choose>
             </c:when>

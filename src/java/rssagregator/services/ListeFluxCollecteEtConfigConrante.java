@@ -8,8 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import javax.persistence.LockModeType;
+import javax.persistence.TransactionRequiredException;
 import rssagregator.beans.Conf;
 import rssagregator.beans.Flux;
+import rssagregator.beans.Journal;
 import rssagregator.beans.form.DAOGenerique;
 
 /**
@@ -107,14 +109,11 @@ public class ListeFluxCollecteEtConfigConrante extends Observable {
             Flux fl = (Flux) listflux.get(i);
             fl.setPeriodiciteCollecte(60);
             this.listFlux.add(fl);
-            
+
             // Pour chaque flux, on va charger les 100 dernier hash 
             DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
             List<String> dernierHash = daoItem.findLastHash(fl, 100);
             fl.setLastEmpruntes(dernierHash);
-            
-             
-            
         }
     }
 
@@ -126,31 +125,20 @@ public class ListeFluxCollecteEtConfigConrante extends Observable {
      *
      * @param flux
      */
-    public void removeFlux(Flux flux) {
+    public void removeFlux(Flux flux) throws IllegalArgumentException, TransactionRequiredException, Exception {
 
+        try {
+            DaoFlux dao = DAOFactory.getInstance().getDAOFlux();
+            
+            dao.remove(flux);
+            listFlux.remove(flux);
+            forceChange();
+            notifyObservers();
 
-        System.out.println("");
-
-        System.out.println("Nombre de flux dans la liste de ref : " + listFlux.size());
-        listFlux.remove(flux);
-//            listFlux.remove(0);
-        System.out.println("");
-
-
-
-
-
-
-        DaoFlux dao = DAOFactory.getInstance().getDAOFlux();
-//        Flux fl = (Flux) dao.find(flux.getID());
- 
-        dao.remove(flux);
-        forceChange();
-
-        notifyObservers();
-
-        System.out.println("Nombre de flux dans la liste de ref : " + listFlux.size());
-
+        } catch (Exception e) {
+            // On réenvoie l'exeption, c'est à la servlet d'informer et rediriger l'utilisateur
+            throw e;
+        }
     }
 
     /**
@@ -165,14 +153,9 @@ public class ListeFluxCollecteEtConfigConrante extends Observable {
         DaoFlux dao = DAOFactory.getInstance().getDAOFlux();
         dao.creer(f);
 
- 
+
 //        System.out.println("Nombre d'observateur : " + this.countObservers());
         listFlux.add(f);
-        
-        
-       
-
-
         forceChange();
         notifyObservers();
     }
@@ -192,6 +175,27 @@ public class ListeFluxCollecteEtConfigConrante extends Observable {
             i++;
         }
         return null;
+    }
+
+    /**
+     * *
+     * Retourne la liste des journaux appartenant au journal envoyé en argument
+     *
+     * @param j Le journal servant de base à la recherche
+     * @return Une liste de flux résultat de la recherche
+     */
+    public List<Flux> findFluxParJournaux(Journal j) {
+
+        int i;
+        List<Flux> retourList = new ArrayList<Flux>();
+        for (i = 0; i < listFlux.size(); i++) {
+
+            if (listFlux.get(i).getJournalLie().equals(j)) {
+                retourList.add(listFlux.get(i));
+            }
+        }
+
+        return retourList;
     }
 
     /**

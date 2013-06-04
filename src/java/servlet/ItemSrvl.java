@@ -13,8 +13,10 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.beans.form.ItemForm;
+import rssagregator.services.ListeFluxCollecteEtConfigConrante;
 
 /**
  *
@@ -49,6 +51,9 @@ public class ItemSrvl extends HttpServlet {
         }
         request.setAttribute("action", action);
 
+        // On récupère le type de sélection.
+        String type = request.getParameter("type");
+
 
         //DAO
 
@@ -64,62 +69,92 @@ public class ItemSrvl extends HttpServlet {
             Long id = new Long(request.getParameter("id"));
             request.setAttribute("id", id);
             item = (Item) daoItem.find(id);
-
-//            flux = (Flux) daoFlux.find(id);
-
         }
 
 
         if (action.equals("list")) {
 
+            /**
+             * *
+             * Entrée des parametres pour compléter la vue
+             */
+            Integer nbrItemPrPage;
+            try {
+                nbrItemPrPage = new Integer(request.getParameter("itPrPage"));
+            } catch (Exception e) {
+                nbrItemPrPage = 20;
+            }
+            request.setAttribute("itPrPage", nbrItemPrPage);
+            daoItem.setMaxResult(nbrItemPrPage);
+
+
+            //Récupération du firs result
+            Integer firsResult;
+            try {
+                firsResult = new Integer(request.getParameter("firstResult"));
+                daoItem.setFistResult(firsResult);
+
+            } catch (Exception e) {
+                firsResult = 0;
+            }
+            request.setAttribute("firsResult", nbrItemPrPage);
+            daoItem.setFistResult(firsResult);
+
+            // On récupère la liste des flux
+            request.setAttribute("listflux", ListeFluxCollecteEtConfigConrante.getInstance().listFlux);
+
+            // SI on doit restreindre la sélection à un flux 
+            try {
+                Flux f = ListeFluxCollecteEtConfigConrante.getInstance().getflux(new Long(request.getParameter("id-flux")));
+                daoItem.setWhere_clause_flux(f);
+
+                request.setAttribute("idflux", f.getID().toString());
+            } catch (Exception e) {
+                daoItem.setWhere_clause_flux(null);
+            }
+
+            //Selection de l'ordre
+            try {
+                String s = request.getParameter("order");
+                String desc = request.getParameter("desc");
+                if (!s.equals("")) {
+                    if (s.equals("dateRecup") || s.equals("datePub")) {
+                        daoItem.setOrder_by(s);
+                        if (desc.equals("true")) {
+                            daoItem.setOrder_desc(Boolean.TRUE);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+            }
+
+
             //On récupère le nombre max d'item
             Integer nbItem = daoItem.findNbMax();
             request.setAttribute("nbitem", nbItem);
 
-            // récupération du numérocourant de page
-            Integer numPage;
-            try {
-                numPage = new Integer(request.getParameter("page"));
-            } catch (Exception e) {
-                numPage = 1;
-            }
-            request.setAttribute("pageCourante", numPage);
 
-
-            Integer nbrItemPrPage;
-            try {
-                nbrItemPrPage = new Integer(request.getParameter("nbrItemPrPage"));
-            } catch (Exception e) {
-                nbrItemPrPage = 20;
-            }
-            request.setAttribute("nbrItemPrPage", nbrItemPrPage);
-
-            // Calcul du nombre max de page
-            Double maxPage = Math.ceil((nbItem.doubleValue() / nbrItemPrPage.doubleValue()));
-            request.setAttribute("maxPage", maxPage.intValue());
-
-            request.setAttribute("nbitemTotal", nbItem);
-
-            // recheche des items à afficher
-            Integer itDebut = (numPage * nbrItemPrPage) - nbrItemPrPage;
-
-            System.out.println("lala");
-
-            List<Item> listItem = daoItem.findAllLimit(new Long(itDebut), new Long(nbrItemPrPage));
+            //En fonction de la sélection demander on formule la bonne recherche
+            List<Item> listItem;
+            listItem = daoItem.findCretaria();
             request.setAttribute("listItem", listItem);
-                System.out.println("NBIT : " + listItem.size());
+            System.out.println("NBIT : " + listItem.size());
         }
-    
-
-
         request.setAttribute(ATT_ITEM, item);
-
-
-
-
 
         request.setAttribute("navmenu", "item");
         this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
+    }
+
+    public static String getParam(String param, HttpServletRequest request) {
+
+        String s = request.getParameter(param);
+        if (s != null && !s.equals("")) {
+            System.out.println("laa");
+            return s;
+
+        }
+        return "";
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

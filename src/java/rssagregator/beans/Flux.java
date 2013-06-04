@@ -367,7 +367,8 @@ public class Flux extends Bean implements Observer, Serializable {
     public String toString() {
 //        return "zouzou";
         String nomRetour = "";
-        if (this.getJournalLie() != null && this.getTypeFlux().getDenomination() != null) {
+        if (this.getJournalLie() != null && this.getTypeFlux() != null) {
+            
             nomRetour += this.getJournalLie().getNom() + " - " + this.getTypeFlux().getDenomination();
         } else {
             nomRetour = this.getUrl();

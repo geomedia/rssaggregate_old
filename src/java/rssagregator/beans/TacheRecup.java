@@ -11,11 +11,16 @@ import java.util.Observable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.ws.http.HTTPException;
+import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.services.ListeFluxCollecteEtConfigConrante;
 import rssagregator.services.ServiceGestionIncident;
 
 public class TacheRecup extends Observable implements Runnable {
 
+    /**
+     * *
+     * Les items capturées par la tache
+     */
     List<Item> nouvellesItems;
     /**
      * *
@@ -27,10 +32,16 @@ public class TacheRecup extends Observable implements Runnable {
      * Cette variable est ainsi modifié au lancement de la méthode run
      */
     public Date DateDerniereRecup;
+    /**
+     * *
+     * Lorsqu'une exeption survient, on stocke sa référence ici
+     */
+    public AbstrIncident incident;
 
     public TacheRecup(Flux flux) {
         this.flux = flux;
         this.addObserver(flux);
+        incident = null;
     }
 
     /**
@@ -45,7 +56,7 @@ public class TacheRecup extends Observable implements Runnable {
         synchronized (this.flux) {
             try {
                 nouvellesItems = this.flux.getMediatorFlux().executeActions(this.flux);
-                  
+
 
                 System.out.println("###############################################################");
                 System.out.println("Lancement de la tache : " + flux.getUrl());
@@ -61,8 +72,8 @@ public class TacheRecup extends Observable implements Runnable {
 
                 // On supprime des hash pour éviter l'accumulation. On en laisse 20 en plus du nombre d'item contenues dans le flux.
 
-                Integer nbr = flux.getMediatorFlux().getNbrItemCollecte() +19 ;
-                if (nbr > 0 && nbr<flux.getLastEmpruntes().size()) {
+                Integer nbr = flux.getMediatorFlux().getNbrItemCollecte() + 19;
+                if (nbr > 0 && nbr < flux.getLastEmpruntes().size()) {
                     for (i = nbr; i < flux.getLastEmpruntes().size(); i++) {
 
                         flux.getLastEmpruntes().remove(i);
@@ -74,30 +85,28 @@ public class TacheRecup extends Observable implements Runnable {
 
                 ListeFluxCollecteEtConfigConrante.getInstance().modifierFlux(flux);
                 System.out.println("Tache RECUP : NBR item Collecté après dédoublonage : " + flux.getItem().size());
-                
-            }
-            
-//            catch (MalformedURLException ex) { // Serveur injoignable
-//                System.out.println("TACHE RECUP : Capture d'une MalformedURLException");
-//                ServiceGestionIncident.getInstance().gererIncident(ex, this.flux);
-////                Logger.getLogger(TacheRecup.class.getName()).log(Level.SEVERE, null, ex);
-//            } catch (IOException ex) {
-//                ServiceGestionIncident.getInstance().gererIncident(ex, this.flux);
-//                Logger.getLogger(TacheRecup.class.getName()).log(Level.SEVERE, null, ex);
-//            } 
-//            catch ( HTTPException ex){ // Erreur si code http != 200
-//                System.out.println("TACHE RECUP : Capture d'une HTTPException");
-//                ServiceGestionIncident.getInstance().gererIncident(ex, this.flux);
-//            }
-//            catch(FeedException ex){ // Les erreur de parsinf
-//                System.out.println("TACHE RECUP : Capture d'une FeedException");
-//                ServiceGestionIncident.getInstance().gererIncident(ex, this.flux);
-//            }
+
+            } //            catch (MalformedURLException ex) { // Serveur injoignable
+            //                System.out.println("TACHE RECUP : Capture d'une MalformedURLException");
+            //                ServiceGestionIncident.getInstance().gererIncident(ex, this.flux);
+            ////                Logger.getLogger(TacheRecup.class.getName()).log(Level.SEVERE, null, ex);
+            //            } catch (IOException ex) {
+            //                ServiceGestionIncident.getInstance().gererIncident(ex, this.flux);
+            //                Logger.getLogger(TacheRecup.class.getName()).log(Level.SEVERE, null, ex);
+            //            } 
+            //            catch ( HTTPException ex){ // Erreur si code http != 200
+            //                System.out.println("TACHE RECUP : Capture d'une HTTPException");
+            //                ServiceGestionIncident.getInstance().gererIncident(ex, this.flux);
+            //            }
+            //            catch(FeedException ex){ // Les erreur de parsinf
+            //                System.out.println("TACHE RECUP : Capture d'une FeedException");
+            //                ServiceGestionIncident.getInstance().gererIncident(ex, this.flux);
+            //            }
             catch (Exception ex) { // On capture toute erreur pour l'envoyer au gestionnaire de d'incident
-                ServiceGestionIncident.getInstance().gererIncident(ex, this.flux);
-                           System.out.println("TACHE RECUP : Capture d'une Exception");
+                this.incident = ServiceGestionIncident.getInstance().gererIncident(ex, this.flux);
+                System.out.println("TACHE RECUP : Capture d'une Exception");
                 Logger.getLogger(TacheRecup.class.getName()).log(Level.SEVERE, null, ex);
-              
+
             }
         }
     }
@@ -108,5 +117,29 @@ public class TacheRecup extends Observable implements Runnable {
 
     public void setNouvellesItems(List<Item> nouvellesItems) {
         this.nouvellesItems = nouvellesItems;
+    }
+
+    public Flux getFlux() {
+        return flux;
+    }
+
+    public void setFlux(Flux flux) {
+        this.flux = flux;
+    }
+
+    public Date getDateDerniereRecup() {
+        return DateDerniereRecup;
+    }
+
+    public void setDateDerniereRecup(Date DateDerniereRecup) {
+        this.DateDerniereRecup = DateDerniereRecup;
+    }
+
+    public AbstrIncident getIncident() {
+        return incident;
+    }
+
+    public void setIncident(AbstrIncident incident) {
+        this.incident = incident;
     }
 }

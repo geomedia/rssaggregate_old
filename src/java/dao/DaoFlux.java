@@ -6,6 +6,7 @@ package dao;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.TransactionRequiredException;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 
@@ -58,25 +59,15 @@ public class DaoFlux extends AbstrDao {
      *
      * @param flux
      */
-    public void remove(Flux flux) {
+    public void remove(Flux flux) throws IllegalArgumentException, TransactionRequiredException, Exception{
         em = DAOFactory.getInstance().getEntityManager();
-
 
         // On doit suppimer les items liées si il sont orphelin
         List<Item> items = flux.getItem(); //....
-        //999
         DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
-
-        System.out.println("NOMBRE DE d'Item : " + items.size());
-        System.out.println("");
-
-
-//        System.out.println("L'em gere le flux  : " + em.contains(flux));
 
         int i;
         for (i = 0; i < items.size(); i++) {
-//System.out.println("L'em gere l'item : " + em.contains(items.get(i)));
-
             //Supppression des items qui vont devenir orphelines
             if (items.get(i).getListFlux().size() < 2) {
                 daoItem.remove(items.get(i));
@@ -86,26 +77,12 @@ public class DaoFlux extends AbstrDao {
                 items.get(i).getListFlux().remove(flux);
                 daoItem.modifier(items.get(i));
 
-//                int j;
-//                List<Flux> flList = items.get(i).getListFlux();
-//                for (j = 0; j < flList.size(); j++) {
-//                    if (flList.get(j).getID() == flux.getID()) {
-//                        items.get(i).getListFlux().remove(flList.get(j));
-//                        daoItem.modifier(items.get(i));
-//                        System.out.println("IN THE IF");
-//                        
-//
-//                    }
-//                }
             }
         }
 
         // On supprime la liste de flux du flux
         flux.setItem(new ArrayList<Item>());
-
-//        em.merge(flux);
         em.getTransaction().begin();
-
         em.remove(em.merge(flux));
         em.getTransaction().commit();
     }
