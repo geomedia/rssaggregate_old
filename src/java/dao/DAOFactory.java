@@ -20,6 +20,11 @@ public class DAOFactory {
     private static DAOFactory instance = new DAOFactory();
     public List<EntityManager> listEm = new ArrayList<EntityManager>();
     EntityManager em;
+    
+    private DaoFlux daoflux = new DaoFlux(this);
+    
+    
+    
 EntityManagerFactory emf;
     public static DAOFactory getInstance() {
         if (instance == null) {
@@ -34,8 +39,10 @@ EntityManagerFactory emf;
     }
 
     public DaoFlux getDAOFlux() {
-        DaoFlux daoFlux = new DaoFlux(this);
-        return daoFlux;
+//        DaoFlux daoFlux = new DaoFlux(this);
+        // La daoflux est une instance unique
+        return daoflux;
+//        return daoFlux;
     }
 
     public DaoJournal getDaoJournal() {

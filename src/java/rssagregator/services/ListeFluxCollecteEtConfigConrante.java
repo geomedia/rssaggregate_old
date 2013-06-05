@@ -7,7 +7,6 @@ import dao.DaoItem;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
-import javax.persistence.LockModeType;
 import javax.persistence.TransactionRequiredException;
 import rssagregator.beans.Conf;
 import rssagregator.beans.Flux;
