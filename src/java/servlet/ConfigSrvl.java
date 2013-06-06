@@ -6,8 +6,6 @@ package servlet;
 
 import dao.DAOFactory;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -15,9 +13,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import rssagregator.beans.Conf;
 import rssagregator.beans.form.ConfForm;
-import rssagregator.beans.form.DAOGenerique;
-import rssagregator.services.ListeFluxCollecteEtConfigConrante;
-import static servlet.JournauxSrvl.VUE;
 
 /**
  *
@@ -64,8 +59,9 @@ public class ConfigSrvl extends HttpServlet {
 //        List<Object> listconf = dao.findall();
 //        confGenerale = (Conf) listconf.get(0);
 
-        confGenerale = ListeFluxCollecteEtConfigConrante.getInstance().getConfCourante();
-
+//        confGenerale = ListeFluxCollecteEtConfigConrante.getInstance().getConfCourante();
+        confGenerale = DAOFactory.getInstance().getDAOConf().getConfCourante();
+                
 
 //Si l'utilisateur à posté on bind
         if (request.getMethod().equals("POST")) {
@@ -81,8 +77,9 @@ public class ConfigSrvl extends HttpServlet {
 //            dao.modifier(confGenerale);
 //            ListeFluxCollecteEtConfigConrante.getInstance().setConfCourante(confGenerale);
 //            ListeFluxCollecteEtConfigConrante.getInstance().notifyObservers();
-            
-            ListeFluxCollecteEtConfigConrante.getInstance().modifierConf(confGenerale);
+            //            ListeFluxCollecteEtConfigConrante.getInstance().modifierConf(confGenerale);
+            DAOFactory.getInstance().getDAOConf().modifierConf(confGenerale);
+
             // Il faut notifier le changement 
             
         }

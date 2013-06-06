@@ -4,8 +4,11 @@
  */
 package utils;
 
+import dao.DAOFactory;
+import dao.DaoFlux;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import rssagregator.beans.Flux;
-import rssagregator.services.ListeFluxCollecteEtConfigConrante;
 
 /**
  *
@@ -31,12 +34,29 @@ public class SetDonnee {
         fl3.setPeriodiciteCollecte(600);
         fl3.setActive(false);
  
-        ListeFluxCollecteEtConfigConrante.getInstance().addFlux(fl1);
-        ListeFluxCollecteEtConfigConrante.getInstance().addFlux(fl2);
-        ListeFluxCollecteEtConfigConrante.getInstance().addFlux(fl3);
-        
-//        ListeFluxCollecteEtConfigConrante.getInstance().addFlux(fl2); 
-//        ListeFluxCollecteEtConfigConrante.getInstance().addFlux(fl3);
+        DaoFlux dao = DAOFactory.getInstance().getDAOFlux();
+        try {
+            dao.addFlux(fl1);
+        } catch (Exception ex) {
+            Logger.getLogger(SetDonnee.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+            dao.addFlux(fl2);
+        } catch (Exception ex) {
+            Logger.getLogger(SetDonnee.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+            dao.addFlux(fl3);
+            
+    //        ListeFluxCollecteEtConfigConrante.getInstance().addFlux(fl1);
+    //        ListeFluxCollecteEtConfigConrante.getInstance().addFlux(fl2);
+    //        ListeFluxCollecteEtConfigConrante.getInstance().addFlux(fl3);
+            
+    //        ListeFluxCollecteEtConfigConrante.getInstance().addFlux(fl3);
+    //        ListeFluxCollecteEtConfigConrante.getInstance().addFlux(fl3);
+        } catch (Exception ex) {
+            Logger.getLogger(SetDonnee.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
 
 

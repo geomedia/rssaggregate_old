@@ -21,6 +21,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import org.eclipse.persistence.annotations.CascadeOnDelete;
 
 /**
  * Une des entités les plus importantes... Il s'agit d'un flux de syndication
@@ -104,28 +105,34 @@ public class Flux extends Bean implements Observer, Serializable {
      */
 //Cascade remove : On va utiliser la dao flux pour sauvegarder les infos collecte. 
 //    @OneToMany(mappedBy = "flux", cascade = {CascadeType.ALL})
-    @Transient
-    private List<InfoCollecte> infoCollecteFlux;
+//    @Deprecated // Idée abandonnée. Il est déjà possible de commenter les incident qui sont daté; Le commentaire sur le flux sera finalement un simple champ texte
+//    @Transient
+//    private List<InfoCollecte> infoCollecteFlux;
+    @Column(name = "infoCollecte", columnDefinition = "text")
+    private String infoCollecte;
+    
+    
     /**
      * Le type du flux (international, a la une etc...). Les types de flux sont
      * des beans. ils sont persisté dans la base de données
      */
 //    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.DETACH})
-    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.DETACH}, fetch = FetchType.LAZY)
+    @CascadeOnDelete
+    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH}, fetch = FetchType.LAZY)
     private FluxType typeFlux;
     /**
      * Un flux peut appratenir à un journal. Un journal peut contenir plusieurs
      * flux
      */
 // On veut que le flux ne puisse pas créer de journaux mais simplment se lier. Ce n'est pas à la dao du flux de de créer des journaux.
-    @ManyToOne(cascade = {CascadeType.MERGE})
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private Journal journalLie;
-    /**
+    /** 
      * Le mediator flux permet d'assigner un flux un comportement de collecte.
-     * Un médiator est une configuration de parseur Raffineur etc.
+     * Un médiator est une configuration de parseur Raffineur etc. 
      */
     //TODO : pas encore géré
-//    @OneToOne(cascade = CascadeType.MERGE)
+//    @OneToOne(cascade = CascadeType.MERGE) 
     @Transient
     private MediatorCollecteAction MediatorFlux;
     /**
@@ -222,13 +229,17 @@ public class Flux extends Bean implements Observer, Serializable {
         this.item = items;
     }
 
-    public List<InfoCollecte> getInfoCollecteFlux() {
-        return infoCollecteFlux;
+    public String getInfoCollecte() {
+        return infoCollecte;
     }
 
-    public void setInfoCollecteFlux(List<InfoCollecte> infoCollecteFlux) {
-        this.infoCollecteFlux = infoCollecteFlux;
+    public void setInfoCollecte(String infoCollecte) {
+        this.infoCollecte = infoCollecte;
     }
+
+  
+
+
 
     public FluxType getTypeFlux() {
         return typeFlux;

@@ -5,9 +5,12 @@
 package rssagregator.services;
 
 import com.sun.syndication.io.FeedException;
+import dao.DAOFactory;
 import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.ws.http.HTTPException;
 import rssagregator.beans.Flux;
 import rssagregator.beans.incident.AbstrIncident;
@@ -60,7 +63,12 @@ public class ServiceGestionIncident {
                     incident.setNombreTentativeEnEchec(nbr);
                                        
                 }
-                ListeFluxCollecteEtConfigConrante.getInstance().modifierFlux(flux);
+        try {
+            DAOFactory.getInstance().getDAOFlux().modifierFlux(flux);
+        } catch (Exception ex1) {
+            Logger.getLogger(ServiceGestionIncident.class.getName()).log(Level.SEVERE, null, ex1);
+        }
+
                 return incident;
     }
     

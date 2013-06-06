@@ -1,18 +1,12 @@
 package rssagregator.beans;
 
-import com.sun.syndication.io.FeedException;
 import dao.DAOFactory;
-import dao.DaoFlux;
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Observable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.xml.ws.http.HTTPException;
 import rssagregator.beans.incident.AbstrIncident;
-import rssagregator.services.ListeFluxCollecteEtConfigConrante;
 import rssagregator.services.ServiceGestionIncident;
 
 public class TacheRecup extends Observable implements Runnable {
@@ -83,30 +77,16 @@ public class TacheRecup extends Observable implements Runnable {
 
                 flux.fermerLesIncidentOuvert();
 
-                ListeFluxCollecteEtConfigConrante.getInstance().modifierFlux(flux);
+                DAOFactory.getInstance().getDAOFlux().modifierFlux(flux);
+                
+//                ListeFluxCollecteEtConfigConrante.getInstance().modifierFlux(flux);
                 System.out.println("Tache RECUP : NBR item Collecté après dédoublonage : " + flux.getItem().size());
 
-            } //            catch (MalformedURLException ex) { // Serveur injoignable
-            //                System.out.println("TACHE RECUP : Capture d'une MalformedURLException");
-            //                ServiceGestionIncident.getInstance().gererIncident(ex, this.flux);
-            ////                Logger.getLogger(TacheRecup.class.getName()).log(Level.SEVERE, null, ex);
-            //            } catch (IOException ex) {
-            //                ServiceGestionIncident.getInstance().gererIncident(ex, this.flux);
-            //                Logger.getLogger(TacheRecup.class.getName()).log(Level.SEVERE, null, ex);
-            //            } 
-            //            catch ( HTTPException ex){ // Erreur si code http != 200
-            //                System.out.println("TACHE RECUP : Capture d'une HTTPException");
-            //                ServiceGestionIncident.getInstance().gererIncident(ex, this.flux);
-            //            }
-            //            catch(FeedException ex){ // Les erreur de parsinf
-            //                System.out.println("TACHE RECUP : Capture d'une FeedException");
-            //                ServiceGestionIncident.getInstance().gererIncident(ex, this.flux);
-            //            }
+            }
             catch (Exception ex) { // On capture toute erreur pour l'envoyer au gestionnaire de d'incident
                 this.incident = ServiceGestionIncident.getInstance().gererIncident(ex, this.flux);
                 System.out.println("TACHE RECUP : Capture d'une Exception");
                 Logger.getLogger(TacheRecup.class.getName()).log(Level.SEVERE, null, ex);
-
             }
         }
     }

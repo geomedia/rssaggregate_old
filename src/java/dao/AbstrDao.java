@@ -7,6 +7,7 @@ package dao;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Observable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
@@ -16,10 +17,10 @@ import javax.persistence.Persistence;
 import javax.persistence.Query;
 
 /**
- *
+ *      Les DAO étende observable car certaine (flux, conf), sont enregistrée auprès du service de collecte des flux par le patterne observateur
  * @author clem
  */
-public abstract class AbstrDao {
+public abstract class AbstrDao extends Observable{
 
     protected EntityManager em;
     protected EntityManagerFactory emf;
@@ -28,24 +29,22 @@ public abstract class AbstrDao {
 //    protected static String REQ_FIND_ALL = "SELECT zazaza";
     protected Class classAssocie;
 
-    public void creer(Object obj) {
+    
+    
+    
+    public void creer(Object obj) throws Exception{
         //Il faut initialiser le em
         em = dAOFactory.getEntityManager();
         em.getTransaction().begin();
-      
         em.persist(obj);
-        
-      
         em.getTransaction().commit();
-
 
 //        em.close();
     }
 
-    public void modifier(Object obj) {
+    public void modifier(Object obj) throws Exception{
         
-
-        try {
+       
             // Test si le flux possède bien un id
 
             // On récupère l'id
@@ -53,37 +52,17 @@ public abstract class AbstrDao {
             Object retour = getter.invoke(obj);
  
             if (retour != null && retour instanceof Long && (Long) retour >= 0) {
-                     
                 em = dAOFactory.getEntityManager();
                 em.getTransaction().begin();
-                
                 em.merge(obj);
                 em.getTransaction().commit();
                 System.out.println("FIN DE SAUVEGARDE FLUX");
             }
 
-            //        if (obj.getID() != null && obj.getID() >= 0) {
-            //        } 
-            //        }
-          
-        } catch (NoSuchMethodException ex) {
-            Logger.getLogger(AbstrDao.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SecurityException ex) {
-            Logger.getLogger(AbstrDao.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(AbstrDao.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalArgumentException ex) {
-            Logger.getLogger(AbstrDao.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvocationTargetException ex) {
-            Logger.getLogger(AbstrDao.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            if (em != null) {
-//                  em.close();
-                System.out.println("FINALYYYY");
-//                em.close();
-            }
+         
+
         }
-    }
+    
 
     /**
      * *
@@ -101,6 +80,7 @@ public abstract class AbstrDao {
 
         try {
         Object resu = em.find(laclass, id);  
+        
         return resu;
         } catch (Exception e) {
         }
@@ -118,7 +98,7 @@ public abstract class AbstrDao {
      *
      * @param obj
      */
-    public void remove(Object obj) {
+    public void remove(Object obj) throws Exception{
         em = dAOFactory.getEntityManager();
         em.getTransaction().begin();
 //        em.remove(obj);

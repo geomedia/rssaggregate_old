@@ -12,13 +12,15 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.tomcat.jni.Local;
 import rssagregator.beans.Journal;
 import rssagregator.beans.form.JournalForm;
 import utils.CodePays;
@@ -50,18 +52,18 @@ public class JournauxSrvl extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
         request.setCharacterEncoding("UTF-8");
+        Map<String, String> redirmap = null;
 
-        
         request.setAttribute("listLocal", CodePays.getLanMap().entrySet().iterator());
         request.setAttribute("listCountry", CodePays.getCountryMap().entrySet().iterator());
-        
-        String[] timeZonetab= TimeZone.getAvailableIDs();
+
+        String[] timeZonetab = TimeZone.getAvailableIDs();
         Arrays.sort(timeZonetab);
-        
+
         request.setAttribute("fuseau", timeZonetab);
 //        
-        
-        
+
+
         // Un simple attribut pour que le menu brille sur la navigation courante
         request.setAttribute("navmenu", "journaux");
 
@@ -81,26 +83,37 @@ public class JournauxSrvl extends HttpServlet {
         if (idString != null && !idString.equals("")) {
             Long id = new Long(idString);
             request.setAttribute("id", id);
+
             journal = (Journal) daoJournal.find(id);
+            DAOFactory.getInstance().getEntityManager().refresh(journal); // Si on ne refresh pas le journal la liste des flux n'est pas chargée
+            System.out.println("NOMBRE DE FLUX AVANT BIND : " + journal.getFluxLie().size());
         }
-       
-        
+
+
         // Si il y a du post on récupère les données saisies par l'utilisateur pour éviter la resaisie de l'information
         if (request.getMethod().equals("POST")) {
             journal = (Journal) journalForm.bind(request, journal, Journal.class);
+            System.out.println("NOMBRE DE FLUX APRES BIND : " + journal.getFluxLie().size());
         }
 
         if (action.equals("list")) {
             List<Object> listJournaux = daoJournal.findall();
             request.setAttribute(ATT_LIST_JOURNAUX, listJournaux);
         }
-        
-        
-        if(action.equals("rem")){
-            
-            daoJournal.remove(journal);
+
+
+        if (action.equals("rem")) {
+            try {
+                daoJournal.remove(journal);
+//                DAOFactory.getInstance().getDAOFlux().forceChange();
+//                DAOFactory.getInstance().getDAOFlux().notifyObservers();
+
+            } catch (Exception ex) {
+                Logger.getLogger(JournauxSrvl.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
         }
-        
+
 
         request.setAttribute(ATT_FORM, journalForm);
         request.setAttribute(ATT_JOURNAL, journal);
@@ -108,9 +121,21 @@ public class JournauxSrvl extends HttpServlet {
         // SAUVEGARDE SI INFOS 
         if (journalForm.getValide()) {
             if (action.equals("add")) {
-                daoJournal.creer(journal);
+                try {
+                    daoJournal.creer(journal);
+                } catch (Exception ex) {
+                    Logger.getLogger(JournauxSrvl.class.getName()).log(Level.SEVERE, null, ex);
+                }
             } else if (action.equals("mod")) {
-                daoJournal.modifier(journal);
+                try {
+                    daoJournal.modifier(journal);
+                } catch (Exception ex) {
+                    redirmap.put("url", "flux?action=add");
+                    redirmap.put("msg", "ERREUR LORS DE L'AJOUT DU FLUX. : " + ex.toString());
+                    request.setAttribute("redirmap", redirmap);
+                    request.setAttribute("err", "true");
+                    Logger.getLogger(JournauxSrvl.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
 

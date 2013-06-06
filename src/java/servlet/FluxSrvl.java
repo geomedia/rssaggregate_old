@@ -11,6 +11,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.persistence.Entity;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -21,7 +24,6 @@ import rssagregator.beans.Flux;
 import rssagregator.beans.FluxType;
 import rssagregator.beans.Journal;
 import rssagregator.beans.form.DAOGenerique;
-import rssagregator.services.ListeFluxCollecteEtConfigConrante;
 import rssagregator.services.ServiceCollecteur;
 
 /**
@@ -54,10 +56,20 @@ public class FluxSrvl extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
         request.setCharacterEncoding("UTF-8");
 
+        //Liste des clause servant à criteria
+        Journal journalLie = null;
+        String order_by = null;
+        Boolean order_desc = null;
+        Integer firstResult = null;
+        Integer itPrPage = null;
+
+
+
         Map<String, String> redirmap = null;
 
 
         DaoJournal daoJournal = DAOFactory.getInstance().getDaoJournal();
+        DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
         List<Object> journals = daoJournal.findall();
         request.setAttribute("listjournaux", journals);
 
@@ -82,7 +94,7 @@ public class FluxSrvl extends HttpServlet {
         if (idString != null && !idString.equals("")) {
             Long id = new Long(request.getParameter("id"));
             request.setAttribute("id", id);
-            flux = ListeFluxCollecteEtConfigConrante.getInstance().getflux(id);
+            flux = daoFlux.getflux(id); // ListeFluxCollecteEtConfigConrante.getInstance().getflux(id);
         }
 //        
 
@@ -115,11 +127,23 @@ public class FluxSrvl extends HttpServlet {
 
             if (fluxForm.getValide()) {
                 flux = (Flux) fluxForm.bind(request, flux, Flux.class);
-                ListeFluxCollecteEtConfigConrante.getInstance().addFlux(flux);
-                redirmap = new HashMap<String, String>();
-                redirmap.put("url", "flux?action=mod&id=" + flux.getID());
-                redirmap.put("msg", "Ajout du Flux effectué.");
-                request.setAttribute("redirmap", redirmap);
+                try {
+                    daoFlux.addFlux(flux);
+                    redirmap = new HashMap<String, String>();
+                    redirmap.put("url", "flux?action=mod&id=" + flux.getID());
+                    redirmap.put("msg", "Ajout du Flux effectué.");
+                    request.setAttribute("redirmap", redirmap);
+
+                } catch (Exception ex) {
+                    // Si erreur avec la base de donnée lors de l'ajout
+                    redirmap = new HashMap<String, String>();
+                    redirmap.put("url", "flux?action=add");
+                    redirmap.put("msg", "ERREUR LORS DE L'AJOUT DU FLUX. : " + ex.toString());
+                    request.setAttribute("redirmap", redirmap);
+                    request.setAttribute("err", "true");
+                    Logger.getLogger(FluxSrvl.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
             }
         } else if (action.equals("mod")) {
             if (fluxForm.getValide()) {
@@ -133,14 +157,37 @@ public class FluxSrvl extends HttpServlet {
                 DaoFlux dao = DAOFactory.getInstance().getDAOFlux();
 
                 flux = (Flux) fluxForm.bind(request, flux, Flux.class);
-                dao.modifier(flux);
+                try {
+                    dao.modifier(flux);
+                } catch (Exception ex) {
+                    redirmap = new HashMap<String, String>();
+                    redirmap.put("url", "flux?action=add");
+                    redirmap.put("msg", "ERREUR LORS DE La modif DU FLUX. : " + ex.toString());
+                    request.setAttribute("redirmap", redirmap);
+                    request.setAttribute("err", "true");
+
+                    Logger.getLogger(FluxSrvl.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 //La liste des flux doit notifier ses observeur (le collecteur) D'un changement
-                ListeFluxCollecteEtConfigConrante.getInstance().forceChange();
-                ListeFluxCollecteEtConfigConrante.getInstance().notifyObservers();
+                daoFlux.forceChange();
+                daoFlux.notifyObservers();
+//                ListeFluxCollecteEtConfigConrante.getInstance().forceChange();
+//                ListeFluxCollecteEtConfigConrante.getInstance().notifyObservers();
             }
         } else if (action.equals("maj")) {
+            try {
+                ServiceCollecteur.getInstance().majManuelle(flux);
+//                  DAOFactory.getInstance().getEntityManager().refresh(flux);
+            } catch (Exception ex) {
+                redirmap = new HashMap<String, String>();
+                redirmap.put("url", "flux?action=add");
+                redirmap.put("msg", "ERREUR LORS DE La modif DU FLUX. : " + ex.toString());
+                request.setAttribute("redirmap", redirmap);
+                request.setAttribute("err", "true");
+                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><err");
+            }
 
-            ServiceCollecteur.getInstance().majManuelle(flux);
+
         } // Si l'action est liste, on récupère la liste des flux
         else if (action.equals("list")) {
 
@@ -149,38 +196,60 @@ public class FluxSrvl extends HttpServlet {
 
             // Restriction en fonction du journal
             try {
-                System.out.println("ID du journal : " + request.getParameter("journal-id"));
-
                 Long idJournal = new Long(request.getParameter("journal-id"));
-
                 request.setAttribute("journalid", idJournal);
-                Journal journalSelection = (Journal) daoJournal.find(idJournal);
-                list = ListeFluxCollecteEtConfigConrante.getInstance().findFluxParJournaux(journalSelection);
+                journalLie = (Journal) daoJournal.find(idJournal);
 
 
             } catch (Exception e) {
             }
+            //On récupère le nombre max d'item
+            Integer nbItem = daoFlux.findNbMax(journalLie);
+            request.setAttribute("nbitem", nbItem);
+            System.out.println("nbitem" + nbItem);
 
 
-            // Si la liste est null, on renvoie tous les flux
-            if (list == null) {
-                list = ListeFluxCollecteEtConfigConrante.getInstance().getListFlux();
+            // On récupère le nombre d'item par page
+            try {
+                itPrPage = new Integer(request.getParameter("itPrPage"));
+            } catch (Exception e) {
+                itPrPage = 30;
             }
+            request.setAttribute("itPrPage", itPrPage);
+
+
+            //On restreint les items à trouver dans la recherche
+
+            try {
+                firstResult = new Integer(request.getParameter("firstResult"));
+            } catch (Exception e) {
+                firstResult = 0;
+                System.out.println("YYY" + request.getParameter("firstResult"));
+                System.out.println("" + e);
+            }
+
+
+
+            list = daoFlux.findCretaria(journalLie, order_by, order_desc, firstResult, itPrPage);
 
 
             request.setAttribute(ATT_LISTOBJ, list);
         } else if (action.equals("rem")) {
             // On tente de supprimer. Si une exeption est levée pendant la suppression. On redirige l'utilisateur différement
             try {
-                ListeFluxCollecteEtConfigConrante.getInstance().removeFlux(flux);
+                daoFlux.remove(flux);
+                daoFlux.forceChange();
+                daoFlux.notifyObservers();
+
+//                ListeFluxCollecteEtConfigConrante.getInstance().removeFlux(flux);
                 //On rediige vers la page de listing des flux.
                 redirmap = new HashMap<String, String>();
                 redirmap.put("url", "flux");
                 redirmap.put("msg", "Suppression du flux effecué.");
                 request.setAttribute("redirmap", redirmap);
-            } catch (Exception e) { 
+            } catch (Exception e) {
                 redirmap = new HashMap<String, String>();
-                redirmap.put("url", "flux?action=mod&id="+flux.getID());
+                redirmap.put("url", "flux?action=mod&id=" + flux.getID());
                 redirmap.put("msg", "ERREUR LORS DE LA SUPPRESSION DU FLUX. : " + e.toString());
                 request.setAttribute("redirmap", redirmap);
             }

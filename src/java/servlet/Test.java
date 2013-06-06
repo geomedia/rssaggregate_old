@@ -16,7 +16,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import rssagregator.beans.Flux;
-import rssagregator.services.ListeFluxCollecteEtConfigConrante;
 
 /**
  *
@@ -42,7 +41,8 @@ public class Test extends HttpServlet {
         
         
         // Récupération de la liste des flux par l'objet liste des flux
-        List<Flux> listeFluxMémoire = ListeFluxCollecteEtConfigConrante.getInstance().listFlux;
+//        List<Flux> listeFluxMémoire = ListeFluxCollecteEtConfigConrante.getInstance().listFlux;
+        List<Flux> listeFluxMémoire = DAOFactory.getInstance().getDAOFlux().getListFlux();
         
         
         // Récupération des flux par la dao

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -25,7 +26,7 @@ public class Journal extends Bean implements Serializable {
     /**
      * Le nom du journal : Le monde par exemple
      */
-    @Column(name = "nom")
+    @Column(name = "nom", unique = true)
     private String nom;
     /**
      * Le fuseaeu horraire. Cette information est importante pour effectuer des
@@ -50,13 +51,13 @@ public class Journal extends Bean implements Serializable {
     /**
      * Un journal possède plusieurs flux.
      */
-    @OneToMany(mappedBy = "journalLie", cascade = {CascadeType.ALL})
+    @OneToMany(mappedBy = "journalLie", fetch = FetchType.LAZY)
     private List<Flux> fluxLie;
 
     public Journal() {
         this.fluxLie = new ArrayList<Flux>();
     }
-
+ 
     public Long getID() {
         return ID;
     }

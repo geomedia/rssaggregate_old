@@ -30,67 +30,89 @@
         </p>
 
         <c:choose>
-            <c:when test="${action=='list'}">
-                <ul>
-                    <c:forEach items="${listjournaux}" var="it">
-                        <li><a href="journaux?action=mod&id=${it.ID}"><c:out value="${it.nom}"></c:out></a></li>
+            <c:when test="${not empty redirmap}">
+                <p>${form.resultat}
+                </p>
+                <p>${redirmap['msg']}. Vous serez redirigé dans 3seconde à l'adresse <a href="${redirmap['url']}">${redirmap['url']}</a></p>
+                <script type="text/JavaScript">
+                    <!--
+                    setTimeout("location.href = '${redirmap['url']}';",3000);
+                    -->
+                </script>
 
-                    </c:forEach>
-                </ul>
-            </c:when> 
-
-            <c:when test="${action=='mod' or action=='add'}">
-                <h2>Administration du journal : ${journal.nom}</h2>
-                <a href="journaux?action=rem&id=${journal.ID}">Supprimer journal</a>
-                ${form.resultat}
-                <form method="post" action="journaux?action=<c:out value="${action}"></c:out>">
-                        <fieldset>
-                            <legend>journal</legend>
-                            <label for="url">Nom du journal<span class="requis">*</span></label>
-                            <input type="text" id="nom" name="nom" value="<c:out value="${journal.nom}" />" size="20" maxlength="60" />
-                        <span class="erreur"> ${form.erreurs['nom']}</span>
+            </c:when>
+            <c:when test="${empty redirmap}">
 
 
-                        <br>
-                        <label for="langue">Langue : </label>
-                        <select name="langue" id="langue">
-                            <c:forEach items="${listLocal}" var="loc">
-
-                                <option value="${loc.key}" <c:if test="${loc.key==journal.langue}"> selected="true"</c:if>>${loc.value}</option>>
+                <c:choose>
+                    <c:when test="${action=='list'}">
+                        <ul>
+                            <c:forEach items="${listjournaux}" var="it">
+                                <li><a href="journaux?action=mod&id=${it.ID}"><c:out value="${it.nom}"></c:out></a></li>
 
                             </c:forEach>
-                        </select>
+                        </ul>
+                    </c:when> 
+
+                    <c:when test="${action=='mod' or action=='add'}">
+                        <h2>Administration du journal : ${journal.nom}</h2>
+                        <a href="journaux?action=rem&id=${journal.ID}">Supprimer journal</a>
+                        ${form.resultat}
+                        <form method="post" action="journaux?action=<c:out value="${action}"></c:out>">
+                                <fieldset>
+                                    <legend>journal</legend>
+                                    <label for="url">Nom du journal<span class="requis">*</span></label>
+                                    <input type="text" id="nom" name="nom" value="<c:out value="${journal.nom}" />" size="20" maxlength="60" />
+                                <span class="erreur"> ${form.erreurs['nom']}</span>
 
 
-                        <br />
-                        <label for="pays">Pays :</label>
-                        <select name="pays" id="pays">
-                            <c:forEach items="${listCountry}" var="country">
-                                <option value="${country.key}" <c:if test="${country.key==journal.pays}"> selected="true"</c:if>>${country.value}</option>
-                            </c:forEach>
+                                <br>
+                                <label for="langue">Langue : </label>
+                                <select name="langue" id="langue">
+                                    <c:forEach items="${listLocal}" var="loc">
 
-                        </select>
+                                        <option value="${loc.key}" <c:if test="${loc.key==journal.langue}"> selected="true"</c:if>>${loc.value}</option>>
 
-                        <br />
+                                    </c:forEach>
+                                </select>
 
-                        <label for="">Fuseau Horaire : </label>
-                        <select name="fuseauHorraire">
-                            <c:forEach items="${fuseau}" var="fus">
-                                <option value="${fus}" <c:if test="${fus==journal.fuseauHorraire}"> selected="true"</c:if> >${fus}</option>
 
-                            </c:forEach>
-                        </select>
+                                <br />
+                                <label for="pays">Pays :</label>
+                                <select name="pays" id="pays">
+                                    <c:forEach items="${listCountry}" var="country">
+                                        <option value="${country.key}" <c:if test="${country.key==journal.pays}"> selected="true"</c:if>>${country.value}</option>
+                                    </c:forEach>
 
-                     
-                        <br />
-                        <input type="hidden" name="id" value="${journal.ID}">
+                                </select>
 
-                        <input type="submit" value="Inscription" class="sansLabel" />
-                        <br />
-                    </fieldset>
-                </form>
+                                <br />
+
+                                <label for="">Fuseau Horaire : </label>
+                                <select name="fuseauHorraire">
+                                    <c:forEach items="${fuseau}" var="fus">
+                                        <option value="${fus}" <c:if test="${fus==journal.fuseauHorraire}"> selected="true"</c:if> >${fus}</option>
+
+                                    </c:forEach>
+                                </select>
+
+
+                                <br />
+                                <input type="hidden" name="id" value="${journal.ID}">
+
+                                <input type="submit" value="Inscription" class="sansLabel" />
+                                <br />
+                            </fieldset>
+                        </form>
+                    </c:when>
+                </c:choose>
+
             </c:when>
         </c:choose>
+
+
+
+
 
     </div>
 </div>

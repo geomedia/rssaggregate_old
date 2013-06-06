@@ -38,7 +38,7 @@ public class Item implements Serializable {
      * stocke ici le contenu RSS de l'élément description. Pour les flux ATOM,
      * on a une déparation entre description et contenu
      */
-    @Column(name = "description",length = 8000)
+    @Column(name = "description", length = 20)
     private String description;
     /**
      * *

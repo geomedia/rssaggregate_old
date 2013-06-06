@@ -28,6 +28,16 @@
         <c:choose >
             <c:when test="${not empty redirmap}">
 
+                               <p>${form.resultat}
+                </p>
+                <p>${redirmap['msg']}. Vous serez redirigé dans 3seconde à l'adresse <a href="${redirmap['url']}">${redirmap['url']}</a></p>
+                <script type="text/JavaScript">
+                    <!--
+                    setTimeout("location.href = '${redirmap['url']}';",3000);
+                    -->
+                </script>
+                
+                
             </c:when>
             <c:when test="${empty redirmap}">
 
@@ -40,7 +50,16 @@
                         </ul>
                     </c:when>
                     
-                    <c:when test="${action=='mod'}">
+                    <c:when test="${action=='mod' or action=='add'}">
+                        <div>
+                            <ul>
+                                <li><a href="TypeFluxSrvl?action=rem&id=${obj.ID}">Supprimer ce type</a></li>
+                                
+                            </ul>
+                            
+                            
+                        </div>
+                        
                 <form method="post" action="TypeFluxSrvl?action=${action}&id=${obj.ID}">
                     
                     <label for="denomination">Dénomination : </label>

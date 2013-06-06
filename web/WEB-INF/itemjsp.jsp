@@ -132,13 +132,13 @@
 
 
 
-<!--                <div class="pagination">
-                    <a href="#" class="first" data-action="first">&laquo;</a>
-                    <a href="#" class="previous" data-action="previous">&lsaquo;</a>
-                    <input type="text" readonly="readonly" data-max-page="3" />
-                    <a href="http://sss" class="next" data-action="next">&rsaquo;</a>
-                    <a href="#" class="last" data-action="last">&raquo;</a>
-                </div>-->
+                <!--                <div class="pagination">
+                                    <a href="#" class="first" data-action="first">&laquo;</a>
+                                    <a href="#" class="previous" data-action="previous">&lsaquo;</a>
+                                    <input type="text" readonly="readonly" data-max-page="3" />
+                                    <a href="http://sss" class="next" data-action="next">&rsaquo;</a>
+                                    <a href="#" class="last" data-action="last">&raquo;</a>
+                                </div>-->
 
 
             </div>
@@ -153,10 +153,10 @@
 
 
 
-<!--
-
-    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
-    <script src="jqPagination/js/jquery.jqpagination.js"></script>-->
+    <!--
+    
+        <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+        <script src="jqPagination/js/jquery.jqpagination.js"></script>-->
 
 
 

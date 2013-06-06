@@ -16,7 +16,6 @@ import javax.servlet.http.HttpServletResponse;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.beans.form.ItemForm;
-import rssagregator.services.ListeFluxCollecteEtConfigConrante;
 
 /**
  *
@@ -101,11 +100,16 @@ public class ItemSrvl extends HttpServlet {
             daoItem.setFistResult(firsResult);
 
             // On récupère la liste des flux
-            request.setAttribute("listflux", ListeFluxCollecteEtConfigConrante.getInstance().listFlux);
+//            request.setAttribute("listflux", ListeFluxCollecteEtConfigConrante.getInstance().listFlux);
+            request.setAttribute("listflux", DAOFactory.getInstance().getDAOFlux().getListFlux());
 
+            
+            
             // SI on doit restreindre la sélection à un flux 
             try {
-                Flux f = ListeFluxCollecteEtConfigConrante.getInstance().getflux(new Long(request.getParameter("id-flux")));
+//                Flux f = ListeFluxCollecteEtConfigConrante.getInstance().getflux(new Long(request.getParameter("id-flux")));
+                Flux f = DAOFactory.getInstance().getDAOFlux().getflux(new Long(request.getParameter("id-flux")));
+//                        ListeFluxCollecteEtConfigConrante.getInstance().getflux(new Long(request.getParameter("id-flux")));
                 daoItem.setWhere_clause_flux(f);
 
                 request.setAttribute("idflux", f.getID().toString());

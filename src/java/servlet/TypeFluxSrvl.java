@@ -6,21 +6,19 @@ package servlet;
 
 import dao.DAOFactory;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import rssagregator.beans.FluxType;
-import rssagregator.beans.Journal;
 import rssagregator.beans.form.DAOGenerique;
 import rssagregator.beans.form.FluxTypeForm;
-import static servlet.ConfigSrvl.VUE;
-import static servlet.JournauxSrvl.ATT_FORM;
-import static servlet.JournauxSrvl.ATT_JOURNAL;
-import static servlet.JournauxSrvl.ATT_LIST_JOURNAUX;
 
 /**
  *
@@ -52,6 +50,8 @@ public class TypeFluxSrvl extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
 
         request.setAttribute("navmenu", "config");
+        Map<String, String> redirmap = null;
+
 
 
         // récupération de l'action
@@ -87,20 +87,53 @@ public class TypeFluxSrvl extends HttpServlet {
         }
 
         if (action.equals("rem")) {
-            dao.remove(fluxType);
+                  redirmap = new HashMap<String, String>();
+                redirmap.put("url", "TypeFluxSrvl?action=list");
+                redirmap.put("msg", "Le type de Flux a été supprimé. Vous allez être redigigé vers la liste des TypeFlux");
+                request.setAttribute("redirmap", redirmap);
+            try {
+                dao.remove(fluxType);
+            } catch (Exception ex) {
+                Logger.getLogger(TypeFluxSrvl.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
-        
-                request.setAttribute(ATT_FORM, form);
+
+        request.setAttribute(ATT_FORM, form);
         request.setAttribute(ATT_BEAN, fluxType);
-        
-        
-                // SAUVEGARDE SI INFOS 
+
+
+        // SAUVEGARDE SI INFOS 
         if (form.getValide()) {
             if (action.equals("add")) {
-                dao.creer(fluxType);
+                try {
+                    dao.creer(fluxType);
+                } catch (Exception ex) {
+                    Logger.getLogger(TypeFluxSrvl.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                 
+                redirmap = new HashMap<String, String>();
+                redirmap.put("url", "TypeFluxSrvl?action=mod&id=" + fluxType.getID());
+                redirmap.put("msg", "Le type de Flux a été ajouté.");
+                request.setAttribute("redirmap", redirmap);
+      
+
+               
             } else if (action.equals("mod")) {
-                System.out.println("");
-                dao.modifier(fluxType);
+                try {
+                    redirmap = new HashMap<String, String>();
+                    redirmap.put("url", "TypeFluxSrvl?action=mod&id=" + fluxType.getID());
+                    redirmap.put("msg", "Modification effectée");
+                    request.setAttribute("redirmap", redirmap);
+
+                    dao.modifier(fluxType);
+                } catch (Exception ex) {
+                      redirmap.put("url", "flux?action=add");
+                redirmap.put("msg", "ERREUR LORS DE L'AJOUT DU FLUX. : " + ex.toString());
+                request.setAttribute("redirmap", redirmap);
+                          request.setAttribute("err", "true");
+                          
+                    Logger.getLogger(TypeFluxSrvl.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
 

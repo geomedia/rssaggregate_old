@@ -90,24 +90,14 @@ public class DaoItem extends AbstrDao {
 
         // application de la limite
 
-
-
-
         TypedQuery<Item> tq = em.createQuery(cq);
 
         if (fistResult != null && maxResult != null) {
             tq.setMaxResults(maxResult);
             tq.setFirstResult(fistResult);
             System.out.println("OUI >>");
-        } else {
-            System.out.println("NONNN");
-        }
-
-
-
+        } 
         return tq.getResultList();
-
-
     }
 
     /**
@@ -140,7 +130,6 @@ public class DaoItem extends AbstrDao {
 
 
 
-        System.out.println("RESU COUNT : " + resu.get(0));
 
         try {
             Integer retour = new Integer(resu.get(0).toString());

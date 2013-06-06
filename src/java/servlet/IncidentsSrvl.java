@@ -7,7 +7,11 @@ package servlet;
 import dao.DAOFactory;
 import dao.DAOIncident;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -42,6 +46,7 @@ public class IncidentsSrvl extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
 
         response.setContentType("text/html;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
@@ -49,6 +54,7 @@ public class IncidentsSrvl extends HttpServlet {
 
         // Un simple attribut pour que le menu brille sur la navigation courante
         request.setAttribute("navmenu", "incident");
+           Map<String, String> redirmap = null;
 
         // récupération de l'action
         String action = request.getParameter("action");
@@ -87,7 +93,16 @@ public class IncidentsSrvl extends HttpServlet {
         }
         else if (action.equals("mod")) {
              if (form.getValide()) {
-                 dao.modifier(incident);
+                 try {
+                     dao.modifier(incident);
+                 } catch (Exception ex) {
+                                     redirmap = new HashMap<String, String>();
+                redirmap.put("url", "flux?action=add");
+                redirmap.put("msg", "ERREUR LORS DE L'AJOUT DU FLUX. : " + ex.toString());
+                request.setAttribute("redirmap", redirmap);
+                          request.setAttribute("err", "true");
+                     Logger.getLogger(IncidentsSrvl.class.getName()).log(Level.SEVERE, null, ex);
+                 }
                  
              }
         }

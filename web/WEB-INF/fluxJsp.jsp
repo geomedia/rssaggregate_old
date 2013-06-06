@@ -42,12 +42,16 @@
             <c:when test="${not empty redirmap}">
                 <p>${form.resultat}
                 </p>
-                <p>${redirmap['msg']}. Vous serez redirigé dans 3seconde à l'adresse <a href="${redirmap['url']}">${redirmap['url']}</a></p>
-                <script type="text/JavaScript">
+                <p>${redirmap['msg']}. </p>
+                <c:if test="${err!='true'}">
+                Vous serez redirigé dans 3 secondes à l'adresse : <a href="${redirmap['url']}">${redirmap['url']}</a>
+                  <script type="text/JavaScript">
                     <!--
                     setTimeout("location.href = '${redirmap['url']}';",3000);
                     -->
                 </script>
+                </c:if>
+              
 
             </c:when>
             <c:when test="${empty redirmap}">
@@ -57,7 +61,25 @@
 
 
 
+
                         <form method="POST">
+
+                            <fieldset>
+                                <legend>Pages : </legend>
+                                <c:forEach var="i" begin="1" end="${nbitem}" step="${itPrPage}" varStatus="varstat">
+                                    <button type="submit" name="firstResult" value="${i-1}">${i} - ${i+varstat.step-1}</button>
+                                </c:forEach>
+
+                                <label>Item par page</label>
+
+                                <select name="itPrPage" onChange="this.form.submit();"> 
+                                    <c:forEach var="i" begin="10" end="100" step="20">
+                                        <option value="${i}" <c:if test="${itPrPage==i}"> selected="true"</c:if>>${i}</option>
+                                    </c:forEach>
+                                </select> 
+
+                            </fieldset>
+
                             <fieldset>
                                 <legend>Affiner la recherche</legend>
                                 <label>Appartenant au journal : </label>
@@ -124,9 +146,12 @@
                                     </c:forEach>
                                 </select>
                                 <br />
-
+                                
+                                <label for="infoCollecte">Information :</label><br />
+                                <textarea id="infoCollecte" name="infoCollecte" rows="20" cols="80">${flux.infoCollecte}</textarea>
+                                
                                 <input type="hidden" name="id" value="${flux.ID}">
-
+                                <br />
                                 <input type="submit" value="Enregitrer" class="sansLabel" />
                                 <br />
                             </fieldset>
@@ -170,18 +195,18 @@
                                 </li>
                                 <c:set var="rien" value=""></c:set>
                             </c:forEach>
-                                ${rien}
+                            ${rien}
                         </ul>
-                       
-                        
+
+
                         <c:if test="${flux.tacheRechup.incident!=null}">
-                            
+
                             <p>Erreur lors de la collecte du FLUX</p>
                             ${flux.tacheRechup.incident.messageEreur}
                             <a href="incidents?action=mod&id=${flux.tacheRechup.incident.ID}">Voir le détail de l'incident</a>
-                            
+
                         </c:if>
-                        
+
                     </c:when>
                 </c:choose>
             </c:when>

@@ -4,6 +4,9 @@
  */
 package servlet;
 
+import dao.DAOConf;
+import dao.DAOFactory;
+import dao.DaoFlux;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.util.Enumeration;
@@ -11,7 +14,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-import rssagregator.services.ListeFluxCollecteEtConfigConrante;
 import rssagregator.services.ServiceCollecteur;
 
 /**
@@ -21,7 +23,7 @@ import rssagregator.services.ServiceCollecteur;
 public class StartServlet implements ServletContextListener {
 
     private static final String ATT_LIST_FLUX = "listflux";
-    private ListeFluxCollecteEtConfigConrante listflux;
+//    private ListeFluxCollecteEtConfigConrante listflux;
     private static final String ATT_SERVICE_COLLECTE = "collecte";
     private ServiceCollecteur collecte;
 
@@ -37,22 +39,32 @@ public class StartServlet implements ServletContextListener {
         try {
             Class.forName("com.mysql.jdbc.Driver");
 
+            
+            DaoFlux daoflux = DAOFactory.getInstance().getDAOFlux();
+            DAOConf daoconf = DAOFactory.getInstance().getDAOConf();
+            
+            
 
             // Initialisation de la liste des flux.
-            listflux = ListeFluxCollecteEtConfigConrante.getInstance();
+//            listflux = ListeFluxCollecteEtConfigConrante.getInstance();
 
             // Initialisation du  collecteur
             collecte = ServiceCollecteur.getInstance();
 
             // On enregistre les service comme observer et la liste des flux comme observable
-            listflux.addObserver(collecte);
+//            listflux.addObserver(collecte);
+            daoflux.addObserver(collecte);
+            daoconf.addObserver(collecte);
 
             // On charge la liste des flux depuis la base de donnée
-            listflux.chargerDepuisBd();
+            daoflux.chargerDepuisBd();
+            daoconf.chargerDepuisBd();
 
-            listflux.forceChange();
+            daoflux.forceChange();
+            daoconf.forceChange();
             //        listflux.chargerDepuisBd();
-            listflux.notifyObservers();
+            daoflux.notifyObservers();
+            daoconf.notifyObservers();
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
         }

@@ -16,7 +16,6 @@ import javax.persistence.Transient;
 import javax.xml.ws.http.HTTPException;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
-import rssagregator.services.ListeFluxCollecteEtConfigConrante;
 
 /**
  * Cette classe gère les relations entre un ou plusieurs flux et les differents
@@ -124,8 +123,6 @@ public class MediatorCollecteAction implements Serializable {
         // On dédoublonne
         //TODO : Il faut dédoublonner dans le médiator collecte action. La liste retounée corespond aux items devant être lié au flux. Il peut s'agir d'item nouvelles ou d'item déjà enregistrée mais pas encore lié au flux traité
         listItem = this.dedoubloneur.dedoublonne(listItem, flux);
-
-
         
         this.requesteur.disconnect();
         return listItem;

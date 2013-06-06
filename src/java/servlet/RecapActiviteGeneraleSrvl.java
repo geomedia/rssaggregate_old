@@ -6,6 +6,7 @@ package servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -18,7 +19,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 @WebServlet(name = "RecapActiviteGenerale", urlPatterns = {"/recapActiviteGenerale"})
 public class RecapActiviteGeneraleSrvl extends HttpServlet {
-
+    public static final String VUE = "/WEB-INF/recapactivitegeneralejsp.jsp";
     /**
      * Processes requests for both HTTP
      * <code>GET</code> and
@@ -32,20 +33,29 @@ public class RecapActiviteGeneraleSrvl extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        PrintWriter out = response.getWriter();
-        try {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet RecapActiviteGenerale</title>");            
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet RecapActiviteGenerale at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        } finally {            
-            out.close();
+        response.setContentType("text/html;charset=UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        request.setCharacterEncoding("UTF-8");
+
+        request.setAttribute("navmenu", "recap");
+        Map<String, String> redirmap = null;
+        
+                // récupération de l'action
+        String action = request.getParameter("action");
+        if (action == null) {
+            action = "list";
         }
+        request.setAttribute("action", action);
+        if(action.equals("test")){
+            this.getServletContext().getRequestDispatcher("/WEB-INF/jsonrecapjsp.jsp").forward(request, response);
+        }
+        else{
+             this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
+        } 
+        
+        System.out.println("action : " + action);
+        
+           
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

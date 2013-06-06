@@ -10,6 +10,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import org.eclipse.persistence.annotations.CascadeOnDelete;
 
 /**
  * Les types de flux sont associé aux flux. Un type de flux corresponds aux
@@ -33,8 +34,8 @@ public class FluxType implements Serializable {
 //    @OneToMany(mappedBy = "typeFlux", cascade = {CascadeType.MERGE})
 //    @Transient
 
-   
-//    @OneToMany(mappedBy = "typeFlux", cascade = CascadeType.DETACH)
+   @CascadeOnDelete
+    @OneToMany(mappedBy = "typeFlux", cascade = {CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
     private List<Flux> fluxLie;
 
     public Long getID() {

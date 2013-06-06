@@ -9,6 +9,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 
 @Entity
 public class Conf implements Serializable {
@@ -26,10 +27,12 @@ public class Conf implements Serializable {
      * base de données. Si 0 pas de durée. Ce paramettre est utilisée pouir ne
      * pas encombrer les serveurs de secours de données innutiles.
      */ 
+    @Transient
     private Time purgeDuration;
     /**
      * Statut du serveur. Peut prendre deux valeurs, maitre ou esclave
      */
+    @Transient
     private String statutServeur;
     /**
      * Les serveur slaves doivent connaitre l'ip du serveur maitre (seul lui est
@@ -39,6 +42,7 @@ public class Conf implements Serializable {
      * de la configuration du serveru en maitre (attribution du paramètre
      * statutServer)
      */
+    @Transient
     private String hostMaster;
     /**
      * *

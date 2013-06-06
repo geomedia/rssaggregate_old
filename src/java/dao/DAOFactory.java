@@ -22,6 +22,7 @@ public class DAOFactory {
     EntityManager em;
     
     private DaoFlux daoflux = new DaoFlux(this);
+    private DAOConf daoConf = new DAOConf(this);
     
     
     
@@ -43,6 +44,10 @@ EntityManagerFactory emf;
         // La daoflux est une instance unique
         return daoflux;
 //        return daoFlux;
+    }
+    
+    public DAOConf getDAOConf(){
+        return daoConf;
     }
 
     public DaoJournal getDaoJournal() {
