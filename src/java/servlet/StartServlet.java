@@ -60,11 +60,11 @@ public class StartServlet implements ServletContextListener {
             daoflux.chargerDepuisBd();
             daoconf.chargerDepuisBd();
 
-            daoflux.forceChange();
-            daoconf.forceChange();
+            daoflux.forceNotifyObserver();
+            daoconf.forceNotifyObservers();
             //        listflux.chargerDepuisBd();
-            daoflux.notifyObservers();
-            daoconf.notifyObservers();
+//            daoflux.notifyObservers();
+//            daoconf.notifyObservers();
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
         }

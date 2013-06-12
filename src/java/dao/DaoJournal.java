@@ -93,8 +93,8 @@ public class DaoJournal extends AbstrDao {
             System.out.println("SUPPRESSION D'UN FLUX A PAETIR DU JOURNAL");
             
         }
-        DAOFactory.getInstance().getDAOFlux().forceChange();
-        DAOFactory.getInstance().getDAOFlux().notifyObservers();
+        DAOFactory.getInstance().getDAOFlux().forceNotifyObserver();
+//        DAOFactory.getInstance().getDAOFlux().notifyObservers();
         
         journal.setFluxLie(new ArrayList<Flux>());
         em = DAOFactory.getInstance().getEntityManager();

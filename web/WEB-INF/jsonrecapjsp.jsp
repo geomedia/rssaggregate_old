@@ -1,10 +1,4 @@
-<script>
-
-
-
-
-
-var chart = new Highcharts.Chart({
+{
       chart: {
          renderTo: 'container'
       },
@@ -13,6 +7,4 @@ var chart = new Highcharts.Chart({
          pointStart: 0,
          pointInterval: 20
       }]
-});
-
-</script>
+}

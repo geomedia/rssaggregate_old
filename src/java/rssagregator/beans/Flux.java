@@ -72,7 +72,7 @@ public class Flux extends Bean implements Observer, Serializable {
      * récupération. Il n'est pas persisté
      */
     @Transient
-    private TacheRecup tacheRechup;
+    private TacheRecupCallable tacheRechup;
     /**
      * Lors du lancement d'une collecte par la tache de récupération, cette
      * liste est mise à jour lorsque à la fin de la collecte, la tache notifie
@@ -205,14 +205,24 @@ public class Flux extends Bean implements Observer, Serializable {
         this.lastEmpruntes = lastEmpruntes;
     }
 
-    public TacheRecup getTacheRechup() {
+    //    public TacheRecup getTacheRechup() {
+    //        return tacheRechup;
+    //    }
+    //
+    //    public void setTacheRechup(TacheRecup tacheRechup) {
+    //        this.tacheRechup = tacheRechup;
+    //    }
+    public TacheRecupCallable getTacheRechup() {
         return tacheRechup;
     }
 
-    public void setTacheRechup(TacheRecup tacheRechup) {
+    public void setTacheRechup(TacheRecupCallable tacheRechup) {
         this.tacheRechup = tacheRechup;
     }
 
+    
+    
+    
     public List<Item> getListDernierItemCollecte() {
         return listDernierItemCollecte;
     }
@@ -283,7 +293,7 @@ public class Flux extends Bean implements Observer, Serializable {
      * Créer une nouvelle tache de récupération pour le Flux
      */
     public void createTask() {
-        this.tacheRechup = new TacheRecup(this);
+        this.tacheRechup = new TacheRecupCallable(this);
     }
 
     public Boolean getErreurDerniereLevee() {

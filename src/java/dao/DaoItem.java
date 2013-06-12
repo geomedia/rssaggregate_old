@@ -4,13 +4,22 @@
  */
 package dao;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import org.eclipse.persistence.internal.jpa.querydef.CompoundExpressionImpl;
+import org.eclipse.persistence.internal.jpa.querydef.PredicateImpl;
+import org.eclipse.persistence.internal.oxm.schema.model.Restriction;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 
@@ -28,6 +37,8 @@ public class DaoItem extends AbstrDao {
     Boolean order_desc;
     Integer fistResult;
     Integer maxResult;
+    Date date1;
+    Date date2;
 
     protected DaoItem(DAOFactory daof) {
         this.dAOFactory = daof;
@@ -61,10 +72,10 @@ public class DaoItem extends AbstrDao {
 
     public List<Item> findCretaria() {
 
-
         em = dAOFactory.getEntityManager();
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
+        List<Predicate> listWhere = new ArrayList<Predicate>();
 
         CriteriaQuery<Item> cq = cb.createQuery(Item.class);
         Root<Item> root = cq.from(Item.class);
@@ -72,9 +83,21 @@ public class DaoItem extends AbstrDao {
         //La jointure avec whereclause
         if (where_clause_flux != null) {
             Join joinFlux = root.join("listFlux");
-            cq.where(cb.equal(joinFlux.get("ID"), where_clause_flux.getID()));
 
+            listWhere.add(cb.equal(joinFlux.get("ID"), where_clause_flux.getID()));
+//            cq.where(cb.equal(joinFlux.get("ID"), where_clause_flux.getID()));
         }
+
+        if (date1 != null && date2 != null) {
+
+//            cq.where(cb.between(root.<Date>get("dateRecup"), date1, date2));
+//            cq.where(cb.and(cb.between(root.<Date>get("dateRecup"), date1, date2)));
+            listWhere.add(cb.and(cb.between(root.<Date>get("dateRecup"), date1, date2)));
+
+
+//            cq.where(cb.and(restrictions))
+        }
+
 
 //        
         // Le ORDER BY
@@ -86,23 +109,63 @@ public class DaoItem extends AbstrDao {
                 System.out.println("ASC");
                 cq.orderBy(cb.asc(root.get(order_by)));
             }
-        }
+        } 
 
+        
+        // On applique les wheres
+          int i;
+            if (listWhere.size() == 1) {
+                cq.where(listWhere.get(0));
+            } else if(listWhere.size()>1) {
+                Predicate pr= cb.and(listWhere.get(0));
+                for (i = 1; i < listWhere.size(); i++) {
+                    pr=cb.and(pr, listWhere.get(i));
+                }
+                cq.where(pr);
+            }
+        
+
+        
         // application de la limite
-
         TypedQuery<Item> tq = em.createQuery(cq);
 
         if (fistResult != null && maxResult != null) {
             tq.setMaxResults(maxResult);
             tq.setFirstResult(fistResult);
             System.out.println("OUI >>");
-        } 
+        }
         return tq.getResultList();
+    }
+
+    public static void main(String[] args) {
+
+        System.out.println("dd");
+
+        DaoItem dao = DAOFactory.getInstance().getDaoItem();
+
+
+
+        DateTimeFormatter fmt = DateTimeFormat.forPattern("dd/MM/yyyy");
+        DateTime dateTime = fmt.parseDateTime("01/01/2014");
+        Date date1 = dateTime.toDate();
+
+
+        dateTime = fmt.parseDateTime("01/01/2015");
+        Date date2 = dateTime.toDate();
+
+
+        dao.setDate1(date1);
+        dao.setDate2(date2);
+
+        List<Item> resu = dao.findCretaria();
+        System.out.println("nbr : " + resu.size());
     }
 
     /**
      * *
-     * Retourne le nombre total d'item dans la base de données. Si une jointure est demandé (voir les where clause criteria de cette dao), le count sera restreint aux items joins au flux
+     * Retourne le nombre total d'item dans la base de données. Si une jointure
+     * est demandé (voir les where clause criteria de cette dao), le count sera
+     * restreint aux items joins au flux
      *
      * @return
      */
@@ -123,7 +186,7 @@ public class DaoItem extends AbstrDao {
 
 
         cq.select(cb.count(root));
-        
+
         Query query = em.createQuery(cq);
         List resu = query.getResultList();
 
@@ -170,12 +233,6 @@ public class DaoItem extends AbstrDao {
         List<Item> listResult = query.getResultList();
 //        em.close();
         return listResult;
-    }
-
-    public static void main(String[] args) {
-        DaoItem daoItem = new DaoItem(DAOFactory.getInstance());
-        Item r = daoItem.findByHash("zz");
-        System.out.println("result : " + r.getTitre());
     }
 
     /**
@@ -279,5 +336,21 @@ public class DaoItem extends AbstrDao {
 
     public void setMaxResult(Integer maxResult) {
         this.maxResult = maxResult;
+    }
+
+    public Date getDate1() {
+        return date1;
+    }
+
+    public void setDate1(Date date1) {
+        this.date1 = date1;
+    }
+
+    public Date getDate2() {
+        return date2;
+    }
+
+    public void setDate2(Date date2) {
+        this.date2 = date2;
     }
 }

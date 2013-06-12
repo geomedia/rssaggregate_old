@@ -4,22 +4,20 @@
  */
 package rssagregator.services;
 
+import dao.DAOConf;
 import dao.DAOFactory;
 import dao.DaoFlux;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import rssagregator.beans.Flux;
-import rssagregator.beans.TacheRecup;
+import rssagregator.beans.Item;
+import rssagregator.beans.TacheRecupCallable;
 
 /**
  *
@@ -67,44 +65,42 @@ public class ServiceCollecteur implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
-
+        System.out.println("JE M'UPDATE");
         // On récupère la liste des flux
 //        ListeFluxCollecteEtConfigConrante fluxCollecte = (ListeFluxCollecteEtConfigConrante) o;
 
-        // Si l'observable notifiant est la DAO FLUX
-        if (o instanceof DaoFlux) {
+        // Si l'observable notifiant est la DAO FLUX. Il faut recréer le pool avec la liste des nouveau flux à suivre
+        if (o instanceof DaoFlux || o instanceof DAOConf) {
+            System.out.println("IF 1");
             if (DAOFactory.getInstance().getDAOConf().getConfCourante().getActive()) {
-                
-                            // On supprime de scheduler pour le rechrer avec la liste de nouvelles tâches
+                System.out.println("IF 2 ");
+                // On supprime de scheduler pour le rechrer avec la liste de nouvelles tâches
                 Integer nbThread = DAOFactory.getInstance().getDAOConf().getConfCourante().getNbThreadRecup();
-//                this.poolSchedule.shutdown();
-
-                this.poolSchedule.shutdownNow();
-                this.poolSchedule.shutdown();
-
+                
+                // On tue les tache en cours
+                 List<Runnable> listFutur= this.poolSchedule.shutdownNow();
 
                 this.poolSchedule = Executors.newScheduledThreadPool(nbThread);
 
-//                List<Flux> tmpList = fluxCollecte.getListFlux();
-                List<Flux> tmpList = DAOFactory.getInstance().getDAOFlux().getListFlux();
+                List<Flux> listFlux = DAOFactory.getInstance().getDAOFlux().getListFlux();
 
-
-                // On inscrit les taches actives au pool
+                // On inscrit les taches actives au pool schedule
                 int i;
-                for (i = 0; i < tmpList.size(); i++) {
-                    //Si le flux est actif, on l'ajoute au scheduler
-                    if (tmpList.get(i).getActive()) {
+                for (i = 0; i < listFlux.size(); i++) {
+                    if (listFlux.get(i).getActive()) {
                         // On schedule
-                        tmpList.get(i).createTask();
-                        TacheRecup tmpTache = tmpList.get(i).getTacheRechup();
+                        listFlux.get(i).createTask();
+                        
+                        TacheRecupCallable tmpTache =   new TacheRecupCallable(listFlux.get(i));
+                        tmpTache.setTacheSchedule(true);
+                         
                         //TODO : Scheduler en fonction du temps restant. il faut modifier de deuxieme paramettre de la commande. 
-                        this.poolSchedule.scheduleAtFixedRate(tmpTache, 0, tmpList.get(i).getPeriodiciteCollecte(), TimeUnit.SECONDS);
+                        this.poolSchedule.schedule(tmpTache, listFlux.get(i).getPeriodiciteCollecte(), TimeUnit.SECONDS);
                     }
                 }
-                
             }
             else {
-                stopCollecte();
+                poolSchedule.shutdown();
             }
         }
 
@@ -153,8 +149,6 @@ public class ServiceCollecteur implements Observer {
     public void startScheduledCollecte() {
         //On se contente de reloader
         update(null, null);
-
-
     }
 
     public void stopCollecte() {
@@ -164,17 +158,26 @@ public class ServiceCollecteur implements Observer {
     }
 
     public void majManuelle(Flux flux) throws Exception{
-        
 
-            flux.createTask();
-            Future<TacheRecup> t = (Future<TacheRecup>) this.poolPrioritaire.submit(flux.getTacheRechup());
-
-            t.get(30, TimeUnit.SECONDS);
+             TacheRecupCallable task = new TacheRecupCallable(flux);
             
+            Future<List<Item>> t =  this.poolPrioritaire.submit(task);
+            
+            t.get(30, TimeUnit.SECONDS);
 
+           
+            
             // A la fin de la tache, il faut rafraichir le context objet et la base de donnée.
 //            DAOFactory.getInstance().getEntityManager().refresh(flux);
- 
-       
     }
+    
+    
+    /***
+     * Permet d'ajouter un callable au pool schedulé. La méthode scheduleAtFixedRate ne permet pas d'ajouter des Callable, seulement des runnable. Pour cette raison, les renable doivent se réajouter en fin de tache pour avoir un effet scheduleAtFixedRate
+     * @param t 
+     */
+    public void addScheduledCallable(TacheRecupCallable t ){
+        this.poolSchedule.schedule(t, t.getFlux().getPeriodiciteCollecte(), TimeUnit.SECONDS);
+    }
+    
 }

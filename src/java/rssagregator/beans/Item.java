@@ -21,7 +21,7 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(name = "item")
-public class Item implements Serializable {
+public class Item implements Serializable, Comparable<Item> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -38,7 +38,7 @@ public class Item implements Serializable {
      * stocke ici le contenu RSS de l'élément description. Pour les flux ATOM,
      * on a une déparation entre description et contenu
      */
-    @Column(name = "description", length = 20)
+    @Column(name = "description", columnDefinition = "text")
     private String description;
     /**
      * *
@@ -270,6 +270,23 @@ public class Item implements Serializable {
 
     public void setID(Long ID) {
         this.ID = ID;
+    }
+
+    @Override
+    /***
+     * la comparaison est basée sur les date de publication
+     */
+    public int compareTo(Item o) {
+        if(this.getDateRecup().before(o.getDateRecup())){
+            return 1;
+        }
+        else if(this.getDateRecup().equals(o.getDateRecup())){
+            return 0;
+        }
+        else{
+            return -1;
+        }
+       
     }
     
     

@@ -36,8 +36,9 @@ public class DAOConf extends AbstrDao {
      * *
      * Modifi le statut Change de L'observable.
      */
-    public void forceChange() {
+    public void forceNotifyObservers() {
         this.setChanged();
+        notifyObservers();
     }
     
         /**
@@ -81,9 +82,9 @@ public class DAOConf extends AbstrDao {
                 em.getTransaction().begin();
                 em.merge(conf);
                 em.getTransaction().commit();
-        forceChange();
+        forceNotifyObservers();
 
-        notifyObservers();
+//        notifyObservers();
     }
     
 }

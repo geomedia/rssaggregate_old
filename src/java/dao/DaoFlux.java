@@ -18,6 +18,7 @@ import javax.persistence.criteria.Root;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.beans.Journal;
+import rssagregator.services.ServiceGestionIncident;
 
 /**
  *
@@ -99,7 +100,7 @@ public class DaoFlux extends AbstrDao {
         em.remove(em.merge(flux));
         em.getTransaction().commit();
         listFlux.remove(flux);
-//        forceChange(); // La notification est effectué par la servlet
+//        forceNotifyObserver(); // La notification est effectué par la servlet
 //        notifyObservers();
     }
     
@@ -111,7 +112,7 @@ public class DaoFlux extends AbstrDao {
 //
 //            dao.remove(flux);
 //            listFlux.remove(flux);
-//            forceChange();
+//            forceNotifyObserver();
 //            notifyObservers();
 //
 //        } catch (Exception e) {
@@ -224,8 +225,8 @@ public class DaoFlux extends AbstrDao {
 
 //        System.out.println("Nombre d'observateur : " + this.countObservers());
         listFlux.add(f);
-        forceChange();
-        notifyObservers();
+        forceNotifyObserver();
+//        notifyObservers();
     }
 
     /**
@@ -277,30 +278,46 @@ public class DaoFlux extends AbstrDao {
         DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
         
         
- 
-            if (flux.getID() != null && flux.getID() >= 0) {
+        try {
+             if (flux.getID() != null && flux.getID() >= 0) {
                 em = dAOFactory.getEntityManager();
                 em.getTransaction().begin();
+                
+                
                 em.merge(flux);
+                
                 em.getTransaction().commit();
+                
                
-        
+       
                 System.out.println("FIN DE SAUVEGARDE FLUX");
             }
+            
+        } catch (RollbackException e) {
+            ServiceGestionIncident.getInstance().gererIncident(e, flux);
+            System.out.println("EXEPTION BDD");
+            throw e;
+        }
+           
         
 //        daoFlux.modifier(flux);
 
-        forceChange();
 
-        notifyObservers();
     }
+    
+    
+    
+    
+    
 
     /**
      * *
-     * Modifi le statut Change de L'observable.
+     * Modifi le statut Change de L'observable et notifi les observer.
      */
-    public void forceChange() {
+    public void forceNotifyObserver() {
         this.setChanged();
+        this.notifyObservers();
+        
     }
 
     /**

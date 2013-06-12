@@ -6,6 +6,8 @@ package servlet;
 
 import dao.DAOFactory;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -73,14 +75,18 @@ public class ConfigSrvl extends HttpServlet {
 
         // SAUVEGARDE SI INFOS 
         if (form.getValide()) {
-            
-//            dao.modifier(confGenerale);
-//            ListeFluxCollecteEtConfigConrante.getInstance().setConfCourante(confGenerale);
-//            ListeFluxCollecteEtConfigConrante.getInstance().notifyObservers();
-            //            ListeFluxCollecteEtConfigConrante.getInstance().modifierConf(confGenerale);
-            DAOFactory.getInstance().getDAOConf().modifierConf(confGenerale);
+            try {
+                //            dao.modifier(confGenerale);
+                //            ListeFluxCollecteEtConfigConrante.getInstance().setConfCourante(confGenerale);
+                //            ListeFluxCollecteEtConfigConrante.getInstance().notifyObservers();
+                            //            ListeFluxCollecteEtConfigConrante.getInstance().modifierConf(confGenerale);
+                            
+                            DAOFactory.getInstance().getDAOConf().modifierConf(confGenerale);
 
-            // Il faut notifier le changement 
+                            // Il faut notifier le changement 
+            } catch (Exception ex) {
+                Logger.getLogger(ConfigSrvl.class.getName()).log(Level.SEVERE, null, ex);
+            }
             
         }
 

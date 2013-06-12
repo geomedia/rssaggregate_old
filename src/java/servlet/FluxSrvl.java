@@ -24,7 +24,9 @@ import rssagregator.beans.Flux;
 import rssagregator.beans.FluxType;
 import rssagregator.beans.Journal;
 import rssagregator.beans.form.DAOGenerique;
+import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.services.ServiceCollecteur;
+import rssagregator.services.ServiceGestionIncident;
 
 /**
  *
@@ -63,16 +65,12 @@ public class FluxSrvl extends HttpServlet {
         Integer firstResult = null;
         Integer itPrPage = null;
 
-
-
         Map<String, String> redirmap = null;
-
 
         DaoJournal daoJournal = DAOFactory.getInstance().getDaoJournal();
         DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
         List<Object> journals = daoJournal.findall();
         request.setAttribute("listjournaux", journals);
-
 
 
         // Un simple attribut pour que le menu brille sur la navigation courante
@@ -129,6 +127,7 @@ public class FluxSrvl extends HttpServlet {
                 flux = (Flux) fluxForm.bind(request, flux, Flux.class);
                 try {
                     daoFlux.addFlux(flux);
+                    
                     redirmap = new HashMap<String, String>();
                     redirmap.put("url", "flux?action=mod&id=" + flux.getID());
                     redirmap.put("msg", "Ajout du Flux effectué.");
@@ -169,9 +168,9 @@ public class FluxSrvl extends HttpServlet {
                     Logger.getLogger(FluxSrvl.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 //La liste des flux doit notifier ses observeur (le collecteur) D'un changement
-                daoFlux.forceChange();
+                daoFlux.forceNotifyObserver();
                 daoFlux.notifyObservers();
-//                ListeFluxCollecteEtConfigConrante.getInstance().forceChange();
+//                ListeFluxCollecteEtConfigConrante.getInstance().forceNotifyObserver();
 //                ListeFluxCollecteEtConfigConrante.getInstance().notifyObservers();
             }
         } else if (action.equals("maj")) {
@@ -180,6 +179,9 @@ public class FluxSrvl extends HttpServlet {
 //                  DAOFactory.getInstance().getEntityManager().refresh(flux);
             } catch (Exception ex) {
                 redirmap = new HashMap<String, String>();
+                System.out.println("");
+                AbstrIncident incid = ServiceGestionIncident.getInstance().gererIncident(ex, flux);
+                
                 redirmap.put("url", "flux?action=add");
                 redirmap.put("msg", "ERREUR LORS DE La modif DU FLUX. : " + ex.toString());
                 request.setAttribute("redirmap", redirmap);
@@ -238,8 +240,8 @@ public class FluxSrvl extends HttpServlet {
             // On tente de supprimer. Si une exeption est levée pendant la suppression. On redirige l'utilisateur différement
             try {
                 daoFlux.remove(flux);
-                daoFlux.forceChange();
-                daoFlux.notifyObservers();
+                daoFlux.forceNotifyObserver();
+//                daoFlux.notifyObservers();
 
 //                ListeFluxCollecteEtConfigConrante.getInstance().removeFlux(flux);
                 //On rediige vers la page de listing des flux.

@@ -46,7 +46,8 @@ public class AbstrIncident implements Serializable {
     protected String messageEreur;
     @Column(name = "noteIndicent", length = 3000)
     protected String noteIndicent;
-    @Column(name = "logErreur")
+    
+    @Column(name = "logErreur", columnDefinition = "text")
     protected String logErreur;
     @Column(name = "bloquant")
     protected Boolean bloquant;
