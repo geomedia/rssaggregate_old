@@ -96,7 +96,7 @@
 
                         <ul>
                             <c:forEach items="${listflux}" var="flux">
-                                <li><a href="flux?action=mod&id=${flux.ID}"><c:out value="${flux.url}"></c:out></a></li>
+                                <li><a href="flux?action=mod&id=${flux.ID}"><c:out value="${flux}"></c:out></a></li>
                                 </c:forEach>
                         </ul>
                     </c:when>
@@ -175,8 +175,9 @@
                     <c:when test="${action=='read-incident'}">
                         <h2>Liste des incidets du flux</h2>
                         <c:forEach items="${flux.incidentsLie}" var="incid">
+                            
                             <li class="item">
-                                <h3>indid</h3>
+                                <h3><a href="incidents?action=mod&id=${incid.ID}">${incid}</a></h3>
                                 <p>Début : ${incid.dateDebut} fin : ${incid.dateFin}</p>
                                 <p>${incid.messageEreur}</p>
 

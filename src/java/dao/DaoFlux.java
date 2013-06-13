@@ -160,6 +160,10 @@ public class DaoFlux extends AbstrDao {
     public void setListFlux(List<Flux> listFlux) {
         this.listFlux = listFlux;
     }
+    
+    
+
+   
 
     /**
      * *
@@ -186,18 +190,27 @@ public class DaoFlux extends AbstrDao {
 
         DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
         List<Object> listflux = daoFlux.findall();
+        
+        System.out.println("");
+        System.out.println("");
         int i;
 
         for (i = 0; i < listflux.size(); i++) {
             Flux fl = (Flux) listflux.get(i);
-            fl.setPeriodiciteCollecte(60);
-            this.listFlux.add(fl);
+//            fl.setPeriodiciteCollecte(60);
+            
 
             // Pour chaque flux, on va charger les 100 dernier hash 
             DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
             List<String> dernierHash = daoItem.findLastHash(fl, 100);
             fl.setLastEmpruntes(dernierHash);
+            fl.occupationMinimaleMemoire();
+            
+            this.listFlux.add(fl);
         }
+        
+        System.out.println("");
+        System.out.println("");
     }
 
     /**

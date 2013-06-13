@@ -42,6 +42,7 @@ public class StartServlet implements ServletContextListener {
             
             DaoFlux daoflux = DAOFactory.getInstance().getDAOFlux();
             DAOConf daoconf = DAOFactory.getInstance().getDAOConf();
+            System.out.println("");
             
             
 
@@ -56,6 +57,9 @@ public class StartServlet implements ServletContextListener {
             daoflux.addObserver(collecte);
             daoconf.addObserver(collecte);
 
+            System.out.println("");
+            System.out.println("");
+            
             // On charge la liste des flux depuis la base de donnée
             daoflux.chargerDepuisBd();
             daoconf.chargerDepuisBd();
@@ -65,6 +69,8 @@ public class StartServlet implements ServletContextListener {
             //        listflux.chargerDepuisBd();
 //            daoflux.notifyObservers();
 //            daoconf.notifyObservers();
+            
+            System.out.println("");
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
         }

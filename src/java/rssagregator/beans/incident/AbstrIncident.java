@@ -10,6 +10,9 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.Temporal;
+import javax.persistence.Transient;
+import org.joda.time.DateTime;
+import org.joda.time.Duration;
 
 /**
  * *
@@ -21,7 +24,7 @@ import javax.persistence.Temporal;
 public class AbstrIncident implements Serializable {
 
     @Id
-      @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long ID;
 
     public void AbstrIncident() {
@@ -46,7 +49,6 @@ public class AbstrIncident implements Serializable {
     protected String messageEreur;
     @Column(name = "noteIndicent", length = 3000)
     protected String noteIndicent;
-    
     @Column(name = "logErreur", columnDefinition = "text")
     protected String logErreur;
     @Column(name = "bloquant")
@@ -59,8 +61,9 @@ public class AbstrIncident implements Serializable {
     protected Date dateDebut;
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     protected Date dateFin;
-    
-        /**
+//    @Transient
+//    protected String duree;
+    /**
      * nombre de 1 à 5 . 0 = normal : On ne notifie l'erreur qu'une fois par
      * jour. ( test currenttime > lastnotification + 24h) 1 = grave. On notifie
      * toute les 12h 2 = très grave. Le notifieur doit envoyer un mail à chaque
@@ -69,7 +72,6 @@ public class AbstrIncident implements Serializable {
      * parte instantanément.
      */
     private Integer gravite;
-    
 
     public String getMessageEreur() {
         return messageEreur;
@@ -142,5 +144,38 @@ public class AbstrIncident implements Serializable {
     public void setGravite(Integer gravite) {
         this.gravite = gravite;
     }
+
     
+    /***
+     * Une méthode qui renvoir la durée sous forme d'une chaine de caractère. la chaine de caractère comprend l'unité
+     * @return "6 minute" , "3 heures" ou encore "4 jours"
+     */
+    public String getDuree() {
+        
+        Date datefin = dateFin;
+        if(datefin==null);
+        datefin = new Date();
+
+        if (dateDebut != null && datefin != null) {
+
+            DateTime start = new DateTime(this.dateDebut);
+            DateTime end = new DateTime(this.dateFin);
+
+            Duration dur = new Duration(start, end);
+            if (dur.getStandardDays() > 0) {
+                return dur.getStandardDays() + " jours";
+            }
+            if (dur.getStandardHours() > 0) {
+                return dur.getStandardHours() + " heures";
+            }
+
+            if (dur.getStandardMinutes() > 0) {
+                return dur.getStandardMinutes() + " minutes";
+            }
+            if (dur.getStandardSeconds()> 0) {
+                return dur.getStandardSeconds()+ " secondes";
+            }
+        }
+        return null;
+    }
 }

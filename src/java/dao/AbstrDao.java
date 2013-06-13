@@ -15,6 +15,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
+import rssagregator.beans.Flux;
 
 /**
  *      Les DAO étende observable car certaine (flux, conf), sont enregistrée auprès du service de collecte des flux par le patterne observateur
@@ -116,15 +117,13 @@ public abstract class AbstrDao extends Observable{
         try {
             em = dAOFactory.getEntityManager();
 //            em.getTransaction().begin();
-            
 
             Class classasso = this.getClassAssocie();
 
             String req = "SELECT f FROM " + classasso.getSimpleName() + " f";
             Query query = em.createQuery(req);
-            List<Object> result = query.getResultList();
-        
             
+            List<Object> result = query.getResultList();
             
             return result;
         } catch (SecurityException ex) {

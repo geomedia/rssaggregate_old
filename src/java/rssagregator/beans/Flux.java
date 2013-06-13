@@ -87,7 +87,7 @@ public class Flux extends Bean implements Observer, Serializable {
      * Liste des Item du flux. Permet de matérialiser la relation entre flux et
      * Item
      */
-    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, fetch = FetchType.LAZY)
+    @ManyToMany( fetch = FetchType.LAZY, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private List<Item> item;
     /**
      * Un objet flux peut posséder différents incidents. Un incident ne possède
@@ -97,7 +97,7 @@ public class Flux extends Bean implements Observer, Serializable {
      */
 //    @OneToMany(mappedBy = "flux", cascade = CascadeType.ALL)
 //    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true,fetch = FetchType.LAZY)
-    @OneToMany(mappedBy = "fluxLie", cascade = {CascadeType.ALL}, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "fluxLie", cascade = {CascadeType.ALL}, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<FluxIncident> incidentsLie;
     /**
      *
@@ -125,7 +125,7 @@ public class Flux extends Bean implements Observer, Serializable {
      * flux
      */
 // On veut que le flux ne puisse pas créer de journaux mais simplment se lier. Ce n'est pas à la dao du flux de de créer des journaux.
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     private Journal journalLie;
     /** 
      * Le mediator flux permet d'assigner un flux un comportement de collecte.
@@ -141,6 +141,11 @@ public class Flux extends Bean implements Observer, Serializable {
     @Transient
     private Boolean erreurDerniereLevee;
 
+    
+    @Transient
+    private String duree;
+    
+    
     /**
      * Retourne une la liste des rss autodécouvert. Commence par l'adresse
      * urlRubrique. Si pas de réponse, on remonte vers la racine du site. On
@@ -397,4 +402,16 @@ public class Flux extends Bean implements Observer, Serializable {
         return nomRetour;
 
     }
+
+    /***
+     * supprimer toute les item et indident dans la mémoire (mais ne persiste pas), il faut éviter l'accumulation.
+     */
+    public void occupationMinimaleMemoire(){
+        this.item = new ArrayList<Item>();
+        this.incidentsLie = new ArrayList<FluxIncident>();
+        
+    }
+
+    
+    
 }

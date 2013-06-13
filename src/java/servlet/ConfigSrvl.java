@@ -5,6 +5,7 @@
 package servlet;
 
 import dao.DAOFactory;
+import dao.DaoFlux;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -15,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import rssagregator.beans.Conf;
 import rssagregator.beans.form.ConfForm;
+import rssagregator.services.ServiceCollecteur;
 
 /**
  *
@@ -44,6 +46,16 @@ public class ConfigSrvl extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
         request.setCharacterEncoding("UTF-8");
 
+        
+        //pour les test à supprimer par la suite
+        // TODO : supprimer cela
+        
+        DaoFlux daof = DAOFactory.getInstance().getDAOFlux();
+        ServiceCollecteur collecteur = ServiceCollecteur.getInstance();
+        System.out.println("");
+        
+        
+        
 
         // Un simple attribut pour que le menu brille sur la navigation courante
         request.setAttribute("navmenu", "config");

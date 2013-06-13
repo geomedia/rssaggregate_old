@@ -32,7 +32,9 @@
 
                         <li><a href="incidents?action=mod&id=${incid.ID}">${incid.fluxLie} : ${incid.messageEreur}</a>
                             <p>   Date début : <fmt:formatDate value="${incid.dateDebut}" pattern="dd/MM/yyyy hh:mm:ss"/>
-                                Date fin : <c:if test="${empty incid.dateFin}">Incident non clos</c:if><fmt:formatDate value="${incid.dateFin}" pattern="dd/MM/yyyy hh:mm:ss"/></p>
+                                Date fin : <c:if test="${empty incid.dateFin}"><strong>Incident non clos</strong></c:if><fmt:formatDate value="${incid.dateFin}" pattern="dd/MM/yyyy hh:mm:ss"/>
+                            Durée : ${incid.duree}
+                            </p>
                    
                         </li>
                     </c:forEach>

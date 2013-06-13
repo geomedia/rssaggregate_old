@@ -116,11 +116,9 @@
                         {
                             name: '${fl}',
                             data: [],
-                         
 //                            pointStart: Date.UTC(2010, 1, 1),
 
-                            pointStart: Date.UTC(<fmt:formatDate value="${recapActivite.date1}" pattern="yyyy"/>, <fmt:formatDate value="${recapActivite.date1}" pattern="MM"/> -1, <fmt:formatDate value="${recapActivite.date1}" pattern="dd"/>),
-                           
+                            pointStart: Date.UTC(<fmt:formatDate value="${recapActivite.date1}" pattern="yyyy"/>, <fmt:formatDate value="${recapActivite.date1}" pattern="MM"/> - 1, <fmt:formatDate value="${recapActivite.date1}" pattern="dd"/>),
                 <c:if test="${param.temporalite=='jour'}">pointInterval: 24 * 3600 * 1000 // one day</c:if>
 //                            pointInterval: 24 * 3600 * 1000 // one day
                                 },</c:forEach>
@@ -139,24 +137,13 @@
 
                                 // add the point
 //            chart.series[0].addPoint([110100,30], true, shift);
+
+
+
                                 for (var iter = 0; iter < point.length; iter++) {
                                     chart.series[iter].setData(point[iter]);
                                 }
 
-//                            chart.series[0].setData(point);
-//            chart.series[0].deleteContents();
-//            chart.series[0].addpoints([10,20,30,40], true);
-//            alert(point);
-//            chart.series[0].update(true, true);
-
-//            chart.series[0].setVisible(true, true);
-
-//            chart.series[0].
-//            chart.addSeries(point, true, shift);
-//            chart.series[series.size-1].select(true);
-
-                                // call it again after one second
-//            setTimeout(requestData, 100000);    
 
                             },
                             // error : clem(), 
