@@ -4,8 +4,8 @@
  */
 package rssagregator.beans.form;
 
-import dao.DAOFactory;
-import dao.DaoItem;
+import rssagregator.dao.DAOFactory;
+import rssagregator.dao.DaoItem;
 import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -64,9 +64,7 @@ public class RecapActiviteForm extends AbstrForm {
         int i ;
         if (tabflux != null) {
             for (i = 0; i < tabflux.length; i++) {
-                
-                
-                Flux fl = DAOFactory.getInstance().getDAOFlux().getflux(new Long(tabflux[i]));
+                Flux fl = (Flux) DAOFactory.getInstance().getDAOFlux().find(new Long(tabflux[i]));
                 recap.getListFlux().add(fl);
 //                fl.setID(new Long(tabflux[i]));
 

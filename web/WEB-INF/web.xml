@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
-
-
-    
     <servlet>
         <servlet-name>Index</servlet-name>
-        <servlet-class>servlet.Index</servlet-class>
+        <servlet-class>rssagregator.servlet.Index</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>Index</servlet-name>
@@ -17,6 +14,6 @@
         </session-timeout>
     </session-config>
     <listener>
-        <listener-class>servlet.StartServlet</listener-class>
+        <listener-class>rssagregator.servlet.StartServlet</listener-class>
     </listener>
 </web-app>

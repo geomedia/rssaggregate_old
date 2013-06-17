@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package dao;
+package rssagregator.dao;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,17 +16,20 @@ import rssagregator.beans.form.DAOGenerique;
  * @author clem
  */
 public class DAOFactory {
+
     protected String PERSISTENCE_UNIT_NAME = "RSSAgregatePU2";
     private static DAOFactory instance = new DAOFactory();
     public List<EntityManager> listEm = new ArrayList<EntityManager>();
     EntityManager em;
     
-    private DaoFlux daoflux = new DaoFlux(this);
-    private DAOConf daoConf = new DAOConf(this);
+//    private DaoFlux daoflux = new DaoFlux(this);
+//    private DAOConf daoConf = new DAOConf(this);
     
+        private DaoFlux daoflux;
+    private DAOConf daoConf;
     
-    
-EntityManagerFactory emf;
+    EntityManagerFactory emf;
+
     public static DAOFactory getInstance() {
         if (instance == null) {
             instance = new DAOFactory();
@@ -36,17 +39,25 @@ EntityManagerFactory emf;
 
     private DAOFactory() {
         emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
-        em=emf.createEntityManager();
+        em = emf.createEntityManager();
     }
 
     public DaoFlux getDAOFlux() {
 //        DaoFlux daoFlux = new DaoFlux(this);
         // La daoflux est une instance unique
+        if(daoflux==null){
+            daoflux = new DaoFlux(this);
+        }
+        
         return daoflux;
 //        return daoFlux;
     }
-    
-    public DAOConf getDAOConf(){
+
+    public DAOConf getDAOConf() {
+        if(daoConf==null){
+            daoConf = new DAOConf(this);
+        }
+        
         return daoConf;
     }
 
@@ -60,17 +71,17 @@ EntityManagerFactory emf;
         return daoItem;
     }
 
-    public DAOGenerique getDAOGenerique(){
+    public DAOGenerique getDAOGenerique() {
         return new DAOGenerique(this);
     }
-    
-    public DAOIncident getDAOIncident(){
+
+    public DAOIncident getDAOIncident() {
         return new DAOIncident(this);
     }
-    
+
     public EntityManager getEntityManager() {
         //TODO : faire le point la créaion du EntityManager, il n'est peut être pas nécessaire de le créer à chaque fois. 
-        
+
 //        int i = 0;
 //
 //        
@@ -80,18 +91,21 @@ EntityManagerFactory emf;
 //        for(i=0; i<listEm.size(); i++){
 //            System.out.println("OPEN : "+listEm.get(i).isOpen());;
 //        }
-       
+
 //        em = emf.createEntityManager();
 //        listEm.add(em);
-        if(this.em==null || !this.em.isOpen()){
-            System.out.println("INSTANCIATION DE l EM");
-            em=emf.createEntityManager();
-        }
-
+//        if(this.em==null || !this.em.isOpen()){
+//            System.out.println("INSTANCIATION DE l EM");
+//    
+//            em=emf.createEntityManager();
+//          
+//        }
+        // Maintenant on instancie pour chaque DAO un EntityManager. C'est le cache du persist unit qui doit permettre le stockage générale des objet comme flux en mémoire pas l'entity manager
+        em = emf.createEntityManager();
         return this.em;
     }
-    
-    public void closeem(){
-    this.em.close();
-}
+
+    public void closeem() {
+        this.em.close();
+    }
 }

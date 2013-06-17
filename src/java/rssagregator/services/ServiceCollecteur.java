@@ -4,9 +4,9 @@
  */
 package rssagregator.services;
 
-import dao.DAOConf;
-import dao.DAOFactory;
-import dao.DaoFlux;
+import rssagregator.dao.DAOConf;
+import rssagregator.dao.DAOFactory;
+import rssagregator.dao.DaoFlux;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -82,7 +82,7 @@ public class ServiceCollecteur implements Observer {
 
                 this.poolSchedule = Executors.newScheduledThreadPool(nbThread);
 
-                List<Flux> listFlux = DAOFactory.getInstance().getDAOFlux().getListFlux();
+                List<Flux> listFlux = DAOFactory.getInstance().getDAOFlux().findAllFlux(false);
 
                 // On inscrit les taches actives au pool schedule
                 int i;
@@ -123,8 +123,8 @@ public class ServiceCollecteur implements Observer {
 //
 //                this.poolSchedule = Executors.newScheduledThreadPool(nbThread);
 //
-////                List<Flux> tmpList = fluxCollecte.getListFlux();
-//                List<Flux> tmpList = DAOFactory.getInstance().getDAOFlux().getListFlux();
+////                List<Flux> tmpList = fluxCollecte.findAllFlux();
+//                List<Flux> tmpList = DAOFactory.getInstance().getDAOFlux().findAllFlux();
 //
 //
 //                // On inscrit les taches actives au pool
@@ -158,7 +158,7 @@ public class ServiceCollecteur implements Observer {
     }
 
     public void majManuelle(Flux flux) throws Exception{
-
+        System.out.println("");
              TacheRecupCallable task = new TacheRecupCallable(flux);
             
             Future<List<Item>> t =  this.poolPrioritaire.submit(task);

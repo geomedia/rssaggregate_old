@@ -2,11 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package servlet;
+package rssagregator.servlet;
 
-import dao.DAOFactory;
-import dao.DaoFlux;
-import dao.DaoJournal;
+import rssagregator.dao.DAOFactory;
+import rssagregator.dao.DaoFlux;
+import rssagregator.dao.DaoJournal;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -92,7 +92,7 @@ public class FluxSrvl extends HttpServlet {
         if (idString != null && !idString.equals("")) {
             Long id = new Long(request.getParameter("id"));
             request.setAttribute("id", id);
-            flux = daoFlux.getflux(id); // ListeFluxCollecteEtConfigConrante.getInstance().getflux(id);
+            flux = (Flux) daoFlux.find(id); // ListeFluxCollecteEtConfigConrante.getInstance().getflux(id);
         }
 //        
 
@@ -126,8 +126,7 @@ public class FluxSrvl extends HttpServlet {
             if (fluxForm.getValide()) {
                 flux = (Flux) fluxForm.bind(request, flux, Flux.class);
                 try {
-                    daoFlux.addFlux(flux);
-                    
+                    daoFlux.creer(flux);
                     redirmap = new HashMap<String, String>();
                     redirmap.put("url", "flux?action=mod&id=" + flux.getID());
                     redirmap.put("msg", "Ajout du Flux effectué.");
@@ -179,7 +178,6 @@ public class FluxSrvl extends HttpServlet {
 //                  DAOFactory.getInstance().getEntityManager().refresh(flux);
             } catch (Exception ex) {
                 redirmap = new HashMap<String, String>();
-                System.out.println("");
                 AbstrIncident incid = ServiceGestionIncident.getInstance().gererIncident(ex, flux);
                 
                 redirmap.put("url", "flux?action=add");
@@ -220,7 +218,7 @@ public class FluxSrvl extends HttpServlet {
             request.setAttribute("itPrPage", itPrPage);
 
 
-            //On restreint les items à trouver dans la recherche
+            //On restreint les items à trouver dans la recherche 
 
             try {
                 firstResult = new Integer(request.getParameter("firstResult"));

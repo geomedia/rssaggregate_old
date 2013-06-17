@@ -2,9 +2,8 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package dao;
+package rssagregator.dao;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.Query;
@@ -26,31 +25,22 @@ import rssagregator.services.ServiceGestionIncident;
  */
 public class DaoFlux extends AbstrDao {
 
-    public List<Flux> listFlux;
-
-//    private static String REQ_FIND_ALL="SELECT f FROM Flux f";
-//    private String REQ_FIND_ALL_LIMIT="SELECT f FROM Flux f";
-    protected DaoFlux(DAOFactory dAOFactory) {
-        this.classAssocie = Flux.class;
-        this.dAOFactory = dAOFactory;
-        this.listFlux = new ArrayList<Flux>();
-
-
-    }
+//    public List<Flux> listFlux;
+    private static String REQ_FIND_ALL = "SELECT f FROM Flux f";
 
     /**
-     * Enregistre le flux comme nouveau dans la base de donnée Cette méthode est
-     * maintenant dans la classe abstraite
+     * *
+     * Ce constructeur NE DOIT PAS ETRE UTILISE (d'ou le protected), il faut
+     * passer par la DAOFactory
      *
-     * @param flux
+     * @param dAOFactory
      */
-//    public void creer(Flux flux) {
-//        //Il faut initialiser le em
-//        initEntityManager();
-//        em.getTransaction().begin();
-//        em.persist(flux);
-//        em.getTransaction().commit();
-//    }
+    protected DaoFlux(DAOFactory dAOFactory) {
+        em = dAOFactory.getEntityManager();
+        this.classAssocie = Flux.class;
+        this.dAOFactory = dAOFactory;
+    }
+
 //    /**
 //     * *
 //     * Modifie le flux envoyé
@@ -68,13 +58,15 @@ public class DaoFlux extends AbstrDao {
 //    }
     /**
      * *
-     * Supprimer le flux et tous ses objets liées (item, incident,
-     * Infocollecte...)
+     * Supprimer le flux et tous ses objets liées (item, incident). Si une item
+     * est encore liée à un autre flux, la liaison est rompu mais l'item n'est
+     * pas supprimée Infocollecte...)
      *
      * @param flux
      */
     public void remove(Flux flux) throws IllegalArgumentException, TransactionRequiredException, Exception {
-        em = DAOFactory.getInstance().getEntityManager();
+//        em = DAOFactory.getInstance().getEntityManager();
+
 
         // On doit suppimer les items liées si il sont orphelin
         List<Item> items = flux.getItem(); //....
@@ -85,7 +77,6 @@ public class DaoFlux extends AbstrDao {
             //Supppression des items qui vont devenir orphelines
             if (items.get(i).getListFlux().size() < 2) {
                 daoItem.remove(items.get(i));
-                System.out.println("SUPRESSION D'une item");
             } else { // Sinon on détach le flux
 
                 items.get(i).getListFlux().remove(flux);
@@ -99,129 +90,57 @@ public class DaoFlux extends AbstrDao {
         em.getTransaction().begin();
         em.remove(em.merge(flux));
         em.getTransaction().commit();
-        listFlux.remove(flux);
-//        forceNotifyObserver(); // La notification est effectué par la servlet
-//        notifyObservers();
-    }
-    
-    
-//     public void removeFlux(Flux flux) throws IllegalArgumentException, TransactionRequiredException, Exception {
-//
-//        try {
-//            DaoFlux dao = DAOFactory.getInstance().getDAOFlux();
-//
-//            dao.remove(flux);
-//            listFlux.remove(flux);
-//            forceNotifyObserver();
-//            notifyObservers();
-//
-//        } catch (Exception e) {
-//            // On réenvoie l'exeption, c'est à la servlet d'informer et rediriger l'utilisateur
-//            throw e;
-//        }
-//    }
-     
 
-    //    /**
-    //     * *
-    //     * Retrouver un flux à patir de son id.
-    //     *
-    //     * @param id
-    //     * @return
-    //     */
-    //    public Flux find(Long id) {
-    //        initEntityManager();
-    //        em.getTransaction().begin();
-    //        Flux resuFlux = em.find(Flux.class, id);
-    //        em.getTransaction().commit();
-    //        return resuFlux;
-    //    }
-    //        public  List<Object> findall() {
-    //        initEntityManager();
-    //        em.getTransaction().begin();
-    //
-    //        System.out.println("JE suis : "+this.getClass().getCanonicalName());
-    //        Query query = em.createQuery(REQ_FIND_ALL);
-    //        List<Object> result = query.getResultList();
-    //        return result;
-    //    }
-    //    public List<Flux> findall() {
-    //        initEntityManager();
-    //        em.getTransaction().begin();
-    //        Query query = em.createQuery(REQ_FIND_ALL);
-    //        List<Flux> result = query.getResultList();
-    //        return result;
-    //    }
-    //    }
-    public List<Flux> getListFlux() {
-        return listFlux;
     }
-
-    public void setListFlux(List<Flux> listFlux) {
-        this.listFlux = listFlux;
-    }
-    
-    
-
-   
 
     /**
      * *
-     * Charger données (list flux et config) depuis la base de données.
+     * Permet de récupérer la liste complete des flux. Pour éviter d'éffectuer
+     * milles fois la même requête, il est possible de limiter la recherche au
+     * cache de l'ORM.
+     *
+     * @param sql true= parcourir la base, false : juste le cache
+     * @return
+     */
+    public List<Flux> findAllFlux(Boolean sql) {
+//        em = dAOFactory.getEntityManager();
+        Query query = em.createQuery(REQ_FIND_ALL);
+//        Query query = em.createQuery("SELECT f FROM Flux f");
+        if (!sql) {
+//            query.setHint("eclipselink.cache-usage", "CheckCacheOnly");
+//            query.setHint(QueryHints.FETCH, HintValues.FALSE);
+            query.setHint("eclipselink.cache-usage", "CheckCacheOnly");
+//              query.setHint("eclipselink.join-fetch", "f.zaddress");
+
+        }
+//        System.out.println("QUERY : " + query.toString());
+
+        List<Flux> result = query.getResultList();
+        return result;
+    }
+
+    /**
+     * *
+     * Charger données (list flux et config) depuis la base de données. Les
+     * dernier hash des items sont aussi chargé
      */
     public void chargerDepuisBd() {
 
-//        //Chargement de la config depuis la base de donnée
-//        DAOGenerique dao = DAOFactory.getInstance().getDAOGenerique();
-//        dao.setClassAssocie(Conf.class);
-//        List<Object> confs = dao.findall();
-//        if (confs != null && confs.size() > 0) {
-//            Conf conf = (Conf) confs.get(0);
-//            this.confCourante = conf;
-//        } else {
-//            Conf defaultconf = new Conf();
-//            defaultconf.setActive(Boolean.TRUE);
-//            defaultconf.setNbThreadRecup(5);
-//            this.confCourante = defaultconf;
-//            dao.creer(confCourante);
-//        }
-
         //Chargement de la liste des flux depuis la BDD
-
         DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
-        List<Object> listflux = daoFlux.findall();
-        
-        System.out.println("");
-        System.out.println("");
+        List<Flux> listflux = daoFlux.findAllFlux(Boolean.TRUE);
+
         int i;
 
         for (i = 0; i < listflux.size(); i++) {
             Flux fl = (Flux) listflux.get(i);
-//            fl.setPeriodiciteCollecte(60);
-            
 
             // Pour chaque flux, on va charger les 100 dernier hash 
             DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
             List<String> dernierHash = daoItem.findLastHash(fl, 100);
             fl.setLastEmpruntes(dernierHash);
-            fl.occupationMinimaleMemoire();
-            
-            this.listFlux.add(fl);
         }
-        
-        System.out.println("");
-        System.out.println("");
     }
-
-    /**
-     * *
-     * Supprime le flux de la liste des flux collecté en mémoire, et persiste
-     * dans la base de données, la modification est notifié aux observeur (le
-     * Collecteur)
-     *
-     * @param flux
-     */
-   
 
     /**
      * *
@@ -229,34 +148,12 @@ public class DaoFlux extends AbstrDao {
      * donées. La modification est ensuite notifiée aux observeur (le service de
      * collecte collecteurs)
      *
-     * @param f
+     * @param obj Le flux a créer
      */
-    public void addFlux(Flux f) throws Exception{
-        DaoFlux dao = DAOFactory.getInstance().getDAOFlux();
-                
-        dao.creer(f);
-
-//        System.out.println("Nombre d'observateur : " + this.countObservers());
-        listFlux.add(f);
+    @Override
+    public void creer(Object obj) throws Exception {
+        super.creer(obj); //To change body of generated methods, choose Tools | Templates.
         forceNotifyObserver();
-//        notifyObservers();
-    }
-
-    /**
-     * *
-     * Parcours les flux en mémoire et retourne le flux
-     *
-     * @return Le flux demandé ou null si il n'a pas été trouvé
-     */
-    public Flux getflux(Long id) {
-        int i = 0;
-        while (i < listFlux.size()) {
-            if (listFlux.get(i).getID().equals(id)) {
-                return listFlux.get(i);
-            }
-            i++;
-        }
-        return null;
     }
 
     /**
@@ -267,7 +164,7 @@ public class DaoFlux extends AbstrDao {
      * @return Une liste de flux résultat de la recherche
      */
     public List<Flux> findFluxParJournaux(Journal j) {
-
+        List<Flux> listFlux = findAllFlux(Boolean.FALSE);
         int i;
         List<Flux> retourList = new ArrayList<Flux>();
         for (i = 0; i < listFlux.size(); i++) {
@@ -276,52 +173,31 @@ public class DaoFlux extends AbstrDao {
                 retourList.add(listFlux.get(i));
             }
         }
-
         return retourList;
     }
 
     /**
      * *
-     * Enregistre les modification du flux dans la base de donnée. Notifi l'observer
+     * Enregistre les modifications du flux dans la base de donnée. Notifi
+     * l'observer
      *
      * @param flux
      */
-    public void modifierFlux(Flux flux)  throws IllegalStateException , RollbackException, Exception{
-        System.out.println("");
-        DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
-        
-        
+    public void modifierFlux(Flux flux) throws IllegalStateException, RollbackException, Exception {
         try {
-             if (flux.getID() != null && flux.getID() >= 0) {
-                em = dAOFactory.getEntityManager();
+            if (flux.getID() != null && flux.getID() >= 0) {
+//                em = dAOFactory.getEntityManager();
                 em.getTransaction().begin();
-                
-                
                 em.merge(flux);
-                
                 em.getTransaction().commit();
-                
-               
-       
-                System.out.println("FIN DE SAUVEGARDE FLUX");
             }
-            
+
         } catch (RollbackException e) {
             ServiceGestionIncident.getInstance().gererIncident(e, flux);
             System.out.println("EXEPTION BDD");
             throw e;
         }
-           
-        
-//        daoFlux.modifier(flux);
-
-
     }
-    
-    
-    
-    
-    
 
     /**
      * *
@@ -330,7 +206,6 @@ public class DaoFlux extends AbstrDao {
     public void forceNotifyObserver() {
         this.setChanged();
         this.notifyObservers();
-        
     }
 
     /**
@@ -343,7 +218,7 @@ public class DaoFlux extends AbstrDao {
      */
     public Integer findNbMax(Journal j) {
 
-        em = DAOFactory.getInstance().getEntityManager();
+//        em = DAOFactory.getInstance().getEntityManager();
         CriteriaBuilder cb = em.getCriteriaBuilder();
 
         CriteriaQuery cq = cb.createQuery(Flux.class);
@@ -368,8 +243,20 @@ public class DaoFlux extends AbstrDao {
         }
     }
 
+    /**
+     * *
+     * Rechercher une liste de flux par criteria (qui peuvent être null pour
+     * absence de critères)
+     *
+     * @param jLie : le flux doit être lié au journal
+     * @param order_by : le champs sur lequel doit porter le trie
+     * @param order_desc : true pour obtenir un ordre descendant
+     * @param fistResult : pour les limit
+     * @param maxResult pour les limit
+     * @return : une liste de flux
+     */
     public List<Flux> findCretaria(Journal jLie, String order_by, Boolean order_desc, Integer fistResult, Integer maxResult) {
-        em = dAOFactory.getEntityManager();
+//        em = dAOFactory.getEntityManager();
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
 
@@ -399,7 +286,6 @@ public class DaoFlux extends AbstrDao {
         if (fistResult != null && maxResult != null) {
             tq.setMaxResults(maxResult);
             tq.setFirstResult(fistResult);
-            System.out.println("LALA");
         }
         System.out.println("fistResult : " + fistResult);
         System.out.println("maxResult : " + maxResult);

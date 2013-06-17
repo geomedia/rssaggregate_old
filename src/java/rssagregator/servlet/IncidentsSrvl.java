@@ -2,10 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package servlet;
+package rssagregator.servlet;
 
-import dao.DAOFactory;
-import dao.DAOIncident;
+import rssagregator.dao.DAOFactory;
+import rssagregator.dao.DAOIncident;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;

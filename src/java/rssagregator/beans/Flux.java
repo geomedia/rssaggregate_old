@@ -7,6 +7,7 @@ import rssagregator.beans.traitement.MediatorCollecteAction;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import rssagregator.beans.incident.FluxIncident;
@@ -21,7 +22,11 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import org.eclipse.persistence.annotations.Cache;
+import org.eclipse.persistence.annotations.CacheCoordinationType;
+import org.eclipse.persistence.annotations.CacheType;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
+import org.eclipse.persistence.config.CacheIsolationType;
 
 /**
  * Une des entités les plus importantes... Il s'agit d'un flux de syndication
@@ -30,6 +35,10 @@ import org.eclipse.persistence.annotations.CascadeOnDelete;
  */
 @Entity
 @Table(name = "flux")
+
+        
+@Cacheable(value = true)
+@Cache(type = CacheType.FULL, coordinationType = CacheCoordinationType.SEND_NEW_OBJECTS_WITH_CHANGES, isolation = CacheIsolationType.SHARED)
 public class Flux extends Bean implements Observer, Serializable {
 
 //    @PersistenceContext(type= PersistenceContextType.EXTENDED)
@@ -98,6 +107,7 @@ public class Flux extends Bean implements Observer, Serializable {
 //    @OneToMany(mappedBy = "flux", cascade = CascadeType.ALL)
 //    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true,fetch = FetchType.LAZY)
     @OneToMany(mappedBy = "fluxLie", cascade = {CascadeType.ALL}, orphanRemoval = true, fetch = FetchType.LAZY)
+
     private List<FluxIncident> incidentsLie;
     /**
      *
@@ -403,14 +413,11 @@ public class Flux extends Bean implements Observer, Serializable {
 
     }
 
-    /***
-     * supprimer toute les item et indident dans la mémoire (mais ne persiste pas), il faut éviter l'accumulation.
-     */
-    public void occupationMinimaleMemoire(){
-        this.item = new ArrayList<Item>();
-        this.incidentsLie = new ArrayList<FluxIncident>();
-        
+    void addItem(Item nouvellesItems) {
+        this.item.add(nouvellesItems);
     }
+
+
 
     
     

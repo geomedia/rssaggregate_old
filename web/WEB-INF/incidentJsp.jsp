@@ -4,7 +4,7 @@
     Author     : clem
 --%>
 
-<%@page import="servlet.IncidentsSrvl"%>
+<%@page import="rssagregator.servlet.IncidentsSrvl"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>  <!--Il faut bien utiliser la vesion 1.1 d ela jstl l'autre ne permet pas d'utiliser les EL-->

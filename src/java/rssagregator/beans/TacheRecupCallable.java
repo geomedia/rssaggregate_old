@@ -4,7 +4,8 @@
  */
 package rssagregator.beans;
 
-import dao.DAOFactory;
+import rssagregator.dao.DAOFactory;
+import rssagregator.dao.DaoItem;
 import java.util.Date;
 import java.util.List;
 import java.util.Observable;
@@ -56,7 +57,7 @@ public class TacheRecupCallable extends Observable implements Callable<List<Item
         // On block le flux pour eviter que la tache automanique et la tache manuelle agissent en même temps
         synchronized (this.flux) {
  
-            // TODO : synchroniser la tache. Blocage du flux
+           
             flux.setTacheRechup(this);
 
             nouvellesItems = this.flux.getMediatorFlux().executeActions(this.flux);
@@ -65,12 +66,20 @@ public class TacheRecupCallable extends Observable implements Callable<List<Item
             System.out.println("###############################################################");
             System.out.println("Lancement de la tache : " + flux.getUrl());
             System.out.println("Nombre d'item rapporté pa le médiatoAction (nouvelles ou a lier) : " + nouvellesItems.size());
-            System.out.println("###############################################################");
+            System.out.println("###############################################################"); 
             // On enregistre ces nouvelles items
+            
+            DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
 
             int i;
             for (i = 0; i < nouvellesItems.size(); i++) {
-                this.flux.getItem().add(nouvellesItems.get(i));
+                // 
+                nouvellesItems.get(i).getListFlux().add(flux);
+//                daoItem.creer(nouvellesItems.get(i));
+                this.flux.addItem(nouvellesItems.get(i));
+//                DAOFactory.getInstance().getEntityManager().refresh(flux);
+                
+//                this.flux.getItem().add(nouvellesItems.get(i));
                 this.flux.getLastEmpruntes().add(nouvellesItems.get(i).getHashContenu());
             }
 
@@ -101,6 +110,13 @@ public class TacheRecupCallable extends Observable implements Callable<List<Item
             if (tacheSchedule) {
                 ServiceCollecteur.getInstance().addScheduledCallable(this);
             }
+            
+            // On supprimer les items capturée du cache de l'ORM pour éviter l'encombrement
+            
+            for(i=0;i<nouvellesItems.size();i++){
+                DAOFactory.getInstance().getEntityManager().detach(nouvellesItems.get(i));
+            }
+            
 
             return nouvellesItems;
         }

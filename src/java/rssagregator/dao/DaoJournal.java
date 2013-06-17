@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package dao;
+package rssagregator.dao;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,9 +45,10 @@ public class DaoJournal extends AbstrDao {
     }
 
     protected DaoJournal(DAOFactory daof) {
-        super();
+//        super();
         this.dAOFactory = daof;
         this.classAssocie = Journal.class;
+        em = daof.getEntityManager();
     }
 
     //    public void modifier(Journal journal) {

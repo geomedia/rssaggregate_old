@@ -4,7 +4,7 @@
  */
 package rssagregator.beans.form;
 
-import dao.AbstrDao;
+import rssagregator.dao.AbstrDao;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

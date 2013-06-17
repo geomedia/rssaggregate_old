@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package utils;
+package rssagregator.utils;
 
 import com.mysql.jdbc.util.TimezoneDump;
 import java.util.Calendar;

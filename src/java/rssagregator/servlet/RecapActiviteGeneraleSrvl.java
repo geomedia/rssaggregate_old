@@ -2,17 +2,12 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package servlet;
+package rssagregator.servlet;
 
-import dao.DAOConf;
-import dao.DAOFactory;
-import dao.DaoFlux;
-import dao.DaoItem;
+import rssagregator.dao.DAOFactory;
+import rssagregator.dao.DaoFlux;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -24,14 +19,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import org.joda.time.DateTime;
-import org.joda.time.Days;
-import org.joda.time.Interval;
-import org.joda.time.Period;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import rssagregator.beans.Flux;
-import rssagregator.beans.Item;
 import rssagregator.beans.RecapActivite;
 import rssagregator.beans.form.RecapActiviteForm;
 
@@ -92,7 +80,7 @@ public class RecapActiviteGeneraleSrvl extends HttpServlet {
             //Capture de la liste des flux pour créer le menu
 
             DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
-            List<Flux> list = daoFlux.getListFlux();
+            List<Flux> list = daoFlux.findAllFlux(false);
             request.setAttribute("listFlux", list);
 
             RecapActivite recapActivite = new RecapActivite();

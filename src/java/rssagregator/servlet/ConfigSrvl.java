@@ -2,11 +2,12 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package servlet;
+package rssagregator.servlet;
 
-import dao.DAOFactory;
-import dao.DaoFlux;
+import rssagregator.dao.DAOFactory;
+import rssagregator.dao.DaoFlux;
 import java.io.IOException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
@@ -15,6 +16,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import rssagregator.beans.Conf;
+import rssagregator.beans.Flux;
+import rssagregator.beans.Item;
 import rssagregator.beans.form.ConfForm;
 import rssagregator.services.ServiceCollecteur;
 
@@ -47,12 +50,26 @@ public class ConfigSrvl extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
 
         
-        //pour les test à supprimer par la suite
-        // TODO : supprimer cela
-        
-        DaoFlux daof = DAOFactory.getInstance().getDAOFlux();
-        ServiceCollecteur collecteur = ServiceCollecteur.getInstance();
-        System.out.println("");
+//        //pour les test à supprimer par la suite
+//        // TODO : supprimer cela
+//        
+//        DaoFlux daof = DAOFactory.getInstance().getDAOFlux();
+//        ServiceCollecteur collecteur = ServiceCollecteur.getInstance();
+//        DAOFactory.getInstance().getEntityManager().getEntityManagerFactory().getCache().evictAll();
+//        System.out.println("LILI");
+//        int i;
+//        List<Flux> lf = DAOFactory.getInstance().getDAOFlux().findAllFlux(true);
+//        for(i=0;i<lf.size(); i++){
+//            List<Item> li = lf.get(i).getItem();
+//            System.out.println("LALA");
+//            int j;
+//            for(j=0;j<li.size();j++){
+//                DAOFactory.getInstance().getEntityManager().detach(li.get(j));
+//                System.out.println("OUI");
+//            }
+//        }
+//        
+//        System.out.println("");
         
         
         

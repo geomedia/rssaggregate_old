@@ -2,10 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package utils;
+package rssagregator.utils;
 
-import dao.DAOFactory;
-import dao.DaoFlux;
+import rssagregator.dao.DAOFactory;
+import rssagregator.dao.DaoFlux;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import rssagregator.beans.Flux;
@@ -36,17 +36,17 @@ public class SetDonnee {
  
         DaoFlux dao = DAOFactory.getInstance().getDAOFlux();
         try {
-            dao.addFlux(fl1);
+            dao.creer(fl1);
         } catch (Exception ex) {
             Logger.getLogger(SetDonnee.class.getName()).log(Level.SEVERE, null, ex);
         }
         try {
-            dao.addFlux(fl2);
+            dao.creer(fl2);
         } catch (Exception ex) {
             Logger.getLogger(SetDonnee.class.getName()).log(Level.SEVERE, null, ex);
         }
         try {
-            dao.addFlux(fl3);
+            dao.creer(fl3);
             
     //        ListeFluxCollecteEtConfigConrante.getInstance().addFlux(fl1);
     //        ListeFluxCollecteEtConfigConrante.getInstance().addFlux(fl2);

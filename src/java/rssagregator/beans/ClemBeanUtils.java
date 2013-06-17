@@ -4,7 +4,7 @@
  */
 package rssagregator.beans;
 
-import dao.DAOFactory;
+import rssagregator.dao.DAOFactory;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;

@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package dao;
+package rssagregator.dao;
 
 import java.util.List;
 import javax.persistence.Query;
@@ -21,6 +21,7 @@ public class DAOIncident extends AbstrDao {
     protected DAOIncident(DAOFactory dAOFactory) {
         this.classAssocie = FluxIncident.class;
         this.dAOFactory = dAOFactory;
+        em = dAOFactory.getEntityManager();
     }
 
     public List<FluxIncident> findAllLimit(Long premier, Long nombre) {

@@ -4,8 +4,8 @@
  */
 package rssagregator.beans.form;
 
-import dao.AbstrDao;
-import dao.DAOFactory;
+import rssagregator.dao.AbstrDao;
+import rssagregator.dao.DAOFactory;
 
 /**
  * *
@@ -17,6 +17,7 @@ import dao.DAOFactory;
 public class DAOGenerique extends AbstrDao {
 
     public DAOGenerique(DAOFactory daof) {
+        em = daof.getEntityManager();
         this.dAOFactory = daof;
     }
 }

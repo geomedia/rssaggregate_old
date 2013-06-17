@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package dao;
+package rssagregator.dao;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -41,6 +41,8 @@ public class DaoItem extends AbstrDao {
     Date date2;
 
     protected DaoItem(DAOFactory daof) {
+
+        em = daof.getEntityManager();
         this.dAOFactory = daof;
         this.classAssocie = Item.class;
 
@@ -61,7 +63,7 @@ public class DaoItem extends AbstrDao {
      * @param hash
      */
     public Item findByHash(String hash) {
-        em = dAOFactory.getEntityManager();
+//        em = dAOFactory.getEntityManager();
 //        em.getTransaction().begin();
         Query query = em.createQuery(REQ_FIND_BY_HASH);
         query.setParameter("hash", hash);
@@ -72,7 +74,7 @@ public class DaoItem extends AbstrDao {
 
     public List<Item> findCretaria() {
 
-        em = dAOFactory.getEntityManager();
+//        em = dAOFactory.getEntityManager();
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
         List<Predicate> listWhere = new ArrayList<Predicate>();
@@ -109,23 +111,23 @@ public class DaoItem extends AbstrDao {
                 System.out.println("ASC");
                 cq.orderBy(cb.asc(root.get(order_by)));
             }
-        } 
+        }
 
-        
+
         // On applique les wheres
-          int i;
-            if (listWhere.size() == 1) {
-                cq.where(listWhere.get(0));
-            } else if(listWhere.size()>1) {
-                Predicate pr= cb.and(listWhere.get(0));
-                for (i = 1; i < listWhere.size(); i++) {
-                    pr=cb.and(pr, listWhere.get(i));
-                }
-                cq.where(pr);
+        int i;
+        if (listWhere.size() == 1) {
+            cq.where(listWhere.get(0));
+        } else if (listWhere.size() > 1) {
+            Predicate pr = cb.and(listWhere.get(0));
+            for (i = 1; i < listWhere.size(); i++) {
+                pr = cb.and(pr, listWhere.get(i));
             }
-        
+            cq.where(pr);
+        }
 
-        
+
+
         // application de la limite
         TypedQuery<Item> tq = em.createQuery(cq);
 
@@ -171,7 +173,7 @@ public class DaoItem extends AbstrDao {
      */
     public Integer findNbMax() {
 
-        em = DAOFactory.getInstance().getEntityManager();
+//        em = DAOFactory.getInstance().getEntityManager();
         CriteriaBuilder cb = em.getCriteriaBuilder();
 
         CriteriaQuery cq = cb.createQuery(Item.class);
@@ -219,7 +221,7 @@ public class DaoItem extends AbstrDao {
 
     public List<Item> findAllLimit(Long premier, Long nombre) {
 
-        em = dAOFactory.getEntityManager();
+//        em = dAOFactory.getEntityManager();
 //        em.getTransaction().begin();
 
         Query query = em.createQuery(REQ_FIND_ALL_AC_LIMIT);
@@ -247,7 +249,7 @@ public class DaoItem extends AbstrDao {
      * sélectioné.
      */
     public List<Item> findHashFlux(List<Item> hashContenu, Flux flux) {
-        em = dAOFactory.getEntityManager();
+//        em = dAOFactory.getEntityManager();
 //        em.getTransaction().begin();
 
         // Constuction de la liste des hash
@@ -279,7 +281,7 @@ public class DaoItem extends AbstrDao {
      */
     public List<String> findLastHash(Flux fl, int i) {
 
-        em = dAOFactory.getEntityManager();
+//        em = dAOFactory.getEntityManager();
         Query query = em.createQuery(REQ_FIND_HASH);
         query.setParameter("idfl", fl.getID());
 //        query.setParameter("lim", i);

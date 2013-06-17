@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.TimeZone;
 import java.io.Serializable;
 import java.util.ArrayList;
+import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,6 +19,7 @@ import javax.persistence.OneToMany;
  * objet. Un journal peut contenir plusieurs flux
  */
 @Entity
+@Cacheable(value = true)
 public class Journal extends Bean implements Serializable {
 
     @Id

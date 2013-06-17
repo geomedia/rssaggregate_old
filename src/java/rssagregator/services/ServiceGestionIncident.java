@@ -5,8 +5,8 @@
 package rssagregator.services;
 
 import com.sun.syndication.io.FeedException;
-import dao.DAOFactory;
-import dao.DAOIncident;
+import rssagregator.dao.DAOFactory;
+import rssagregator.dao.DAOIncident;
 import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.List;

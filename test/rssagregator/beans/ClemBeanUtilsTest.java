@@ -9,8 +9,8 @@ import com.meterware.httpunit.WebRequest;
 import com.meterware.servletunit.InvocationContext;
 import com.meterware.servletunit.ServletRunner;
 import com.meterware.servletunit.ServletUnitClient;
-import dao.DAOFactory;
-import dao.DaoJournal;
+import rssagregator.dao.DAOFactory;
+import rssagregator.dao.DaoJournal;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -22,7 +22,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import rssagregator.beans.form.AbstrForm;
 import rssagregator.beans.form.JournalForm;
-import servlet.JournauxSrvl;
+import rssagregator.servlet.JournauxSrvl;
 
 /**
  *

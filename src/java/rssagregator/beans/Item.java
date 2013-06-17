@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 
 
@@ -17,10 +18,13 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
+import org.eclipse.persistence.annotations.Cache;
+import org.eclipse.persistence.annotations.CacheType;
 
 @Entity
 @Table(name = "item")
+@Cacheable(value = true)
+@Cache(size = 10000, type = CacheType.CACHE, shared = true)
 public class Item implements Serializable, Comparable<Item> {
 
     @Id
@@ -28,7 +32,7 @@ public class Item implements Serializable, Comparable<Item> {
     private Long ID;
     /**
      * *
-     * Titre de l'item. Element persisté dans la base de données
+     * Titre de l'item. Element persisté dans la base de données 
      */
     @Column(name = "titre")
     private String titre;

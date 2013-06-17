@@ -5,7 +5,7 @@
     Author     : clem
 --%>
 <%@page import="javax.el.ValueExpression"%>
-<%@page import="servlet.FluxSrvl"%>
+<%@page import="rssagregator.servlet.FluxSrvl"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 

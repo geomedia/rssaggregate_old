@@ -4,7 +4,7 @@
  */
 package rssagregator.beans.form;
 
-import dao.AbstrDao;
+import rssagregator.dao.AbstrDao;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;

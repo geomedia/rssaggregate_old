@@ -2,10 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package servlet;
+package rssagregator.servlet;
 
-import dao.DAOFactory;
-import dao.DaoItem;
+import rssagregator.dao.DAOFactory;
+import rssagregator.dao.DaoItem;
 import java.io.IOException;
 import java.util.List;
 import javax.servlet.ServletException;
@@ -13,6 +13,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.eclipse.persistence.jpa.JpaEntityManager;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.beans.form.ItemForm;
@@ -68,6 +69,7 @@ public class ItemSrvl extends HttpServlet {
             Long id = new Long(request.getParameter("id"));
             request.setAttribute("id", id);
             item = (Item) daoItem.find(id);
+           
         }
 
 
@@ -100,15 +102,16 @@ public class ItemSrvl extends HttpServlet {
             daoItem.setFistResult(firsResult);
 
             // On récupère la liste des flux
-//            request.setAttribute("listflux", ListeFluxCollecteEtConfigConrante.getInstance().listFlux);
-            request.setAttribute("listflux", DAOFactory.getInstance().getDAOFlux().getListFlux());
+//            request.setAttribute("listflux", ListeFluxCollecteEtConfigConrante.getInstance().listFlux); 
+//            DAOFactory.getInstance().getDAOFlux().chargerDepuisBd();
+            request.setAttribute("listflux", DAOFactory.getInstance().getDAOFlux().findAllFlux(false));
 
             
             
             // SI on doit restreindre la sélection à un flux 
             try {
 //                Flux f = ListeFluxCollecteEtConfigConrante.getInstance().getflux(new Long(request.getParameter("id-flux")));
-                Flux f = DAOFactory.getInstance().getDAOFlux().getflux(new Long(request.getParameter("id-flux")));
+                Flux f = (Flux) DAOFactory.getInstance().getDAOFlux().find(new Long(request.getParameter("id-flux")));
 //                        ListeFluxCollecteEtConfigConrante.getInstance().getflux(new Long(request.getParameter("id-flux")));
                 daoItem.setWhere_clause_flux(f);
 
@@ -143,6 +146,13 @@ public class ItemSrvl extends HttpServlet {
             listItem = daoItem.findCretaria();
             request.setAttribute("listItem", listItem);
             System.out.println("NBIT : " + listItem.size());
+            
+            
+            int i;
+            for(i=0;i<listItem.size();i++){
+//                DAOFactory.getInstance().getEntityManager().detach(listItem.get(i));
+            }
+            
         }
         request.setAttribute(ATT_ITEM, item);
 

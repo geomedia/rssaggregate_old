@@ -4,9 +4,9 @@
  */
 package rssagregator.beans.traitement;
 
-import dao.DAOFactory;
-import dao.DaoFlux;
-import dao.DaoItem;
+import rssagregator.dao.DAOFactory;
+import rssagregator.dao.DaoFlux;
+import rssagregator.dao.DaoItem;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;

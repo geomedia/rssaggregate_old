@@ -2,6 +2,7 @@ package rssagregator.beans.incident;
 
 import java.io.Serializable;
 import java.util.Date;
+import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -9,8 +10,15 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.QueryHint;
 import javax.persistence.Temporal;
-import javax.persistence.Transient;
+import javax.persistence.Transient; 
+import org.eclipse.persistence.annotations.Cache;
+import org.eclipse.persistence.annotations.CacheCoordinationType;
+import org.eclipse.persistence.annotations.CacheType;
+import org.eclipse.persistence.annotations.QueryRedirectors;
+import org.eclipse.persistence.config.CacheIsolationType;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 
@@ -19,7 +27,11 @@ import org.joda.time.Duration;
  *
  * @author clem
  */
-@Entity(name = "incident")
+@Cacheable(value = true)
+//@Cache(shared = true)
+//@Entity(name = "incident")
+@MappedSuperclass()
+@Cache(size = 100, type = CacheType.CACHE, isolation = CacheIsolationType.SHARED, coordinationType = CacheCoordinationType.SEND_NEW_OBJECTS_WITH_CHANGES)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE) // Peu de champs supplémentaires dans les autres entités, on va conserver la stratégie la plus simple
 public class AbstrIncident implements Serializable {
 

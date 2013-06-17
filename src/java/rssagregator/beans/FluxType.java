@@ -3,6 +3,7 @@ package rssagregator.beans;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,6 +19,7 @@ import org.eclipse.persistence.annotations.CascadeOnDelete;
  * environnement...
  */
 @Entity
+@Cacheable(value = true)
 public class FluxType implements Serializable {
 
     @Id

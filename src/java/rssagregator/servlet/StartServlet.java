@@ -2,11 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package servlet;
+package rssagregator.servlet;
 
-import dao.DAOConf;
-import dao.DAOFactory;
-import dao.DaoFlux;
+import rssagregator.dao.DAOConf;
+import rssagregator.dao.DAOFactory;
+import rssagregator.dao.DaoFlux;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.util.Enumeration;
@@ -36,16 +36,18 @@ public class StartServlet implements ServletContextListener {
      */
     @Override
     public void contextInitialized(ServletContextEvent sce) {
+        
         try {
+            System.out.println("fkldsjfkljdslkqjflkdsqjdlfkjqsdlkfjlksdqjflkdjqsf sdfqqsdf");
             Class.forName("com.mysql.jdbc.Driver");
-
+            System.out.println("DEBUTT");
+            
+            DAOFactory.getInstance();
             
             DaoFlux daoflux = DAOFactory.getInstance().getDAOFlux();
             DAOConf daoconf = DAOFactory.getInstance().getDAOConf();
             System.out.println("");
             
-            
-
             // Initialisation de la liste des flux.
 //            listflux = ListeFluxCollecteEtConfigConrante.getInstance();
 
@@ -57,12 +59,23 @@ public class StartServlet implements ServletContextListener {
             daoflux.addObserver(collecte);
             daoconf.addObserver(collecte);
 
-            System.out.println("");
-            System.out.println("");
+
             
             // On charge la liste des flux depuis la base de donnée
             daoflux.chargerDepuisBd();
+            
+            
             daoconf.chargerDepuisBd();
+            
+//            Object fl = daoflux.find(new Long(451));
+//            DAOFactory.getInstance().getEntityManager().refresh(fl);
+//            DAOFactory.getInstance().getEntityManager().;
+            
+            
+            
+            
+            System.out.println("");
+            System.out.println("");
 
             daoflux.forceNotifyObserver();
             daoconf.forceNotifyObservers();

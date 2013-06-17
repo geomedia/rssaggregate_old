@@ -2,11 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package servlet;
+package rssagregator.servlet;
 
 import com.mysql.jdbc.util.TimezoneDump;
-import dao.DAOFactory;
-import dao.DaoJournal;
+import rssagregator.dao.DAOFactory;
+import rssagregator.dao.DaoJournal;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.Arrays;
@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import rssagregator.beans.Journal;
 import rssagregator.beans.form.JournalForm;
-import utils.CodePays;
+import rssagregator.utils.CodePays;
 
 /**
  *

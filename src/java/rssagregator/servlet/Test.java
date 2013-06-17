@@ -2,10 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package servlet;
+package rssagregator.servlet;
 
-import dao.DAOFactory;
-import dao.DaoFlux;
+import rssagregator.dao.DAOFactory;
+import rssagregator.dao.DaoFlux;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
@@ -42,7 +42,7 @@ public class Test extends HttpServlet {
         
         // Récupération de la liste des flux par l'objet liste des flux
 //        List<Flux> listeFluxMémoire = ListeFluxCollecteEtConfigConrante.getInstance().listFlux;
-        List<Flux> listeFluxMémoire = DAOFactory.getInstance().getDAOFlux().getListFlux();
+        List<Flux> listeFluxMémoire = DAOFactory.getInstance().getDAOFlux().findAllFlux(false);
         
         
         // Récupération des flux par la dao
