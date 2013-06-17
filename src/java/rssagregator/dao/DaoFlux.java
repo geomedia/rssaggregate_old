@@ -96,7 +96,7 @@ public class DaoFlux extends AbstrDao {
     /**
      * *
      * Permet de récupérer la liste complete des flux. Pour éviter d'éffectuer
-     * milles fois la même requête, il est possible de limiter la recherche au
+     * milles fois la même requête, il est possible de limiter la recherche au 
      * cache de l'ORM.
      *
      * @param sql true= parcourir la base, false : juste le cache
