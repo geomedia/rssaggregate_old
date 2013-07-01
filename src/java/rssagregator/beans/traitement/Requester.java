@@ -23,6 +23,8 @@ import rssagregator.beans.Item;
 /*
  */
 public class Requester extends AbstrRequesteur {
+    
+    org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(Requester.class);
 
     private static String description = "Requester par défault";
     /**
@@ -86,10 +88,10 @@ public class Requester extends AbstrRequesteur {
         
         
         this.httpStatut = conn.getResponseCode();
-        System.out.println("CODE : " + httpStatut);
+//        System.out.println("CODE : " + httpStatut);
         if(httpStatut!=200){
+            logger.info("Erreur HTTP : " + httpStatut+". " + urlArg);
             throw new HTTPException(httpStatut);
-            
         }
 
 
@@ -176,7 +178,6 @@ public class Requester extends AbstrRequesteur {
     public void disconnect(){
     conn.disconnect();
     
-        System.out.println(">>>>>>>>>>>>>>> DECONNECTION ");
 }
 
     @Override

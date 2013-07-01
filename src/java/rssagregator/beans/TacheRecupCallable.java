@@ -21,6 +21,7 @@ import rssagregator.services.ServiceCollecteur;
  */
 public class TacheRecupCallable extends Observable implements Callable<List<Item>> {
 
+    org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheRecupCallable.class);
     /**
      * *
      * Les items capturées par la tache
@@ -56,19 +57,22 @@ public class TacheRecupCallable extends Observable implements Callable<List<Item
     public List<Item> call() throws Exception {
         // On block le flux pour eviter que la tache automanique et la tache manuelle agissent en même temps
         synchronized (this.flux) {
- 
-           
+
+            logger.debug("Recup du flux : " + this.flux.getID() + ". " + flux);
+
+
             flux.setTacheRechup(this);
 
             nouvellesItems = this.flux.getMediatorFlux().executeActions(this.flux);
+//                   logger.info("Recup du flux : " + this.flux.getID()+". "+flux+" Nombre de nouvelles item : " + nouvellesItems.size());
 
 
-            System.out.println("###############################################################");
-            System.out.println("Lancement de la tache : " + flux.getUrl());
-            System.out.println("Nombre d'item rapporté pa le médiatoAction (nouvelles ou a lier) : " + nouvellesItems.size());
-            System.out.println("###############################################################"); 
+//            System.out.println("###############################################################");
+//            System.out.println("Lancement de la tache : " + flux.getUrl());
+//            System.out.println("Nombre d'item rapporté pa le médiatoAction (nouvelles ou a lier) : " + nouvellesItems.size());
+//            System.out.println("###############################################################");
             // On enregistre ces nouvelles items
-            
+
             DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
 
             int i;
@@ -78,7 +82,7 @@ public class TacheRecupCallable extends Observable implements Callable<List<Item
 //                daoItem.creer(nouvellesItems.get(i));
                 this.flux.addItem(nouvellesItems.get(i));
 //                DAOFactory.getInstance().getEntityManager().refresh(flux);
-                
+
 //                this.flux.getItem().add(nouvellesItems.get(i));
                 this.flux.getLastEmpruntes().add(nouvellesItems.get(i).getHashContenu());
             }
@@ -88,36 +92,49 @@ public class TacheRecupCallable extends Observable implements Callable<List<Item
             Integer nbr = flux.getMediatorFlux().getNbrItemCollecte() + 19;
             if (nbr > 0 && nbr < flux.getLastEmpruntes().size()) {
                 for (i = nbr; i < flux.getLastEmpruntes().size(); i++) {
-
                     flux.getLastEmpruntes().remove(i);
-                    System.out.println("TACHE RECUP : SUPPRESSION D'UN HASH");
+
+//                    System.out.println("TACHE RECUP : SUPPRESSION D'UN HASH");
                 }
             }
 
             flux.fermerLesIncidentOuvert();
 
+            DebugRecapLeveeFlux debug = new DebugRecapLeveeFlux();
+            debug.setDate(new Date());
+            debug.setNbrRecup(nouvellesItems.size());
+            flux.getDebug().add(debug);
 
-            // TODO : On peut utiliser le pattern observer pour notifier au flux des nouveautés. 
+
+
+            // TODO : On peut utiliser le pattern observer pour notifier au flux des nouveautés. Il faut en effet enregistrer les incidents
             if (persit) {
-                DAOFactory.getInstance().getDAOFlux().modifierFlux(flux);
+                try {
+                    DAOFactory.getInstance().getDAOFlux().modifierFlux(flux);
+                } catch (Exception e) {
+                }
+
             }
 
 //                ListeFluxCollecteEtConfigConrante.getInstance().modifierFlux(flux);
-            System.out.println("Tache RECUP : NBR item Collecté après dédoublonage : " + flux.getItem().size());
+//            logger.info("Tache RECUP : NBR item Collecté après dédoublonage : ");
+//            System.out.println("Tache RECUP : NBR item Collecté après dédoublonage : " + flux.getItem().size());
 
 
             // Si il s'agit d'une tache schedule, il faut la réajouter au scheduler
             if (tacheSchedule) {
                 ServiceCollecteur.getInstance().addScheduledCallable(this);
             }
-            
+
             // On supprimer les items capturée du cache de l'ORM pour éviter l'encombrement
-            
-            for(i=0;i<nouvellesItems.size();i++){
+
+            for (i = 0; i < nouvellesItems.size(); i++) {
                 DAOFactory.getInstance().getEntityManager().detach(nouvellesItems.get(i));
             }
-            
 
+
+
+            logger.info("Flux : " + this.flux.getID() + ". (" + flux + "). Nbr item recup : " + nouvellesItems.size());
             return nouvellesItems;
         }
 

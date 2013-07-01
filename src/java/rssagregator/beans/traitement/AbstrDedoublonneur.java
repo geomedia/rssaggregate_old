@@ -5,12 +5,10 @@
 package rssagregator.beans.traitement;
 
 import rssagregator.dao.DAOFactory;
-import rssagregator.dao.DaoFlux;
 import rssagregator.dao.DaoItem;
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.EntityManager;
+import org.apache.log4j.Logger;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 
@@ -20,6 +18,7 @@ import rssagregator.beans.Item;
  */
 public abstract class AbstrDedoublonneur {
 
+    private Logger logger = Logger.getLogger(AbstrDedoublonneur.class); 
     /**
      * *
      * Test si l'on a déjà enregitré l'item.
@@ -73,21 +72,27 @@ public abstract class AbstrDedoublonneur {
 
 
         // dédoublonnage basé sur les hash en mémoire.
+         int nbrdedoub =0; // sert juste à l'affichage dans les logs
         for (i = 0; i < flux.getLastEmpruntes().size(); i++) {
             String umprunteItemDsFlux = flux.getLastEmpruntes().get(i);
+           
             for (j = 0; j < listItemCapture.size(); j++) {
                 Item item = listItemCapture.get(j);
                 if (item.getHashContenu().equals(umprunteItemDsFlux)) {
                     listRetour.remove(item);
-                    System.out.println("DEDOUBLONNEUR : SUPPRESSION d'un Flux après calcul HASH");
-
+                    nbrdedoub++;
+//                    System.out.println("DEDOUBLONNEUR : SUPPRESSION d'un Flux après calcul HASH");
                 }
             }
         }
+        logger.debug("Flux "+flux.getID()+". Suppression de " + nbrdedoub+" par DedoubMemoire");
+//        System.out.println("DEBOUBLONNEUR : Suppression de " + nbrdedoub+" par DedoubMemoire" );
 
         // Si il reste encore des items, on pocède à une vérification à partir de la BASE DE DONNEE
         if (listRetour.size() > 0) {
-            System.out.println("DEDOUBLONNEUR : dédoublonage BDD du flux ID : " + flux.getID()+ ". Il y a : " + listRetour.size()+" item à vérifier");
+            
+            logger.debug("Flux : "+flux.getID()+". Dédoublonage BDD pour " + listRetour.size()+" item à vérifier");
+//            System.out.println("DEDOUBLONNEUR : dédoublonage BDD du flux ID : " + flux.getID()+ ". Il y a : " + listRetour.size()+" item à vérifier");
             //Supression de toutes les items déjà lié au flux
             DaoItem dao = DAOFactory.getInstance().getDaoItem();
             List<Item> ListitemDejaPresenteBDD = dao.findHashFlux(listRetour, flux);
@@ -108,7 +113,8 @@ public abstract class AbstrDedoublonneur {
 
                             // SI l'item courante possède la même id que dans la base de donnée, on supprime de la liste courante
                             if (listfluxItemBDD.get(k).getID().equals(flux.getID())) {
-                                System.out.println("DEDOUB : Suppression d'une Item car elle déjà lié au flux");
+                                logger.debug("Flux : "+flux.getID()+". Suppression d'une Item car elle déjà lié au flux");
+//                                System.out.println("DEDOUB : Suppression d'une Item car elle déjà lié au flux");
                                 listRetour.remove(itemRetour);
                                 trouve = true;
                             }
@@ -117,13 +123,15 @@ public abstract class AbstrDedoublonneur {
                         if (!trouve) {
                             listRetour.add(j, ItemBdd);
                             listRetour.remove(itemRetour);
-                            System.out.println("DEDOUB : Lien réalisé entre une item déjà enregistrée et le flux observé");
+                            logger.debug("Flux : "+flux.getID()+". Lien réalisé entre une item déjà enregistrée et le flux observé");
+//                            System.out.println("DEDOUB : Lien réalisé entre une item déjà enregistrée et le flux observé");
 
                         }
                     }
                 }
             }
         }
+        logger.debug("Nombre d'item après dédoub : " + listRetour.size());
         return listRetour;
     }
 }

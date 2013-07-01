@@ -79,9 +79,16 @@ public class RecapActiviteGeneraleSrvl extends HttpServlet {
         } else {
             //Capture de la liste des flux pour créer le menu
 
-            DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
-            List<Flux> list = daoFlux.findAllFlux(false);
-            request.setAttribute("listFlux", list);
+//            DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
+//            List<Flux> list = daoFlux.findAllFlux(false);
+//            request.setAttribute("listFlux", list);
+                   request.setAttribute("listFlux", DAOFactory.getInstance().getDAOFlux().findAllFlux(false));
+            
+            // Liste des journaux
+                    request.setAttribute("listJournaux", DAOFactory.getInstance().getDaoJournal().findall());
+            
+            
+            
 
             RecapActivite recapActivite = new RecapActivite();
             RecapActiviteForm form = new RecapActiviteForm();

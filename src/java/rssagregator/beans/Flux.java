@@ -1,6 +1,16 @@
 package rssagregator.beans;
 
+import com.sun.syndication.feed.module.DCModuleImpl;
+import com.sun.syndication.feed.module.Module;
+import com.sun.syndication.feed.module.ModuleImpl;
+import com.sun.syndication.feed.module.SyModuleImpl;
+import com.sun.syndication.feed.opml.Attribute;
+
+import com.sun.syndication.feed.opml.Opml;
+import com.sun.syndication.feed.opml.Outline;
 import java.io.Serializable;
+import java.net.URL;
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Date;
 import rssagregator.beans.traitement.MediatorCollecteAction;
@@ -21,12 +31,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
 import javax.persistence.Transient;
 import org.eclipse.persistence.annotations.Cache;
 import org.eclipse.persistence.annotations.CacheCoordinationType;
 import org.eclipse.persistence.annotations.CacheType;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.config.CacheIsolationType;
+import rssagregator.dao.DAOFactory;
+import rssagregator.dao.DaoFlux;
 
 /**
  * Une des entités les plus importantes... Il s'agit d'un flux de syndication
@@ -35,8 +48,6 @@ import org.eclipse.persistence.config.CacheIsolationType;
  */
 @Entity
 @Table(name = "flux")
-
-        
 @Cacheable(value = true)
 @Cache(type = CacheType.FULL, coordinationType = CacheCoordinationType.SEND_NEW_OBJECTS_WITH_CHANGES, isolation = CacheIsolationType.SHARED)
 public class Flux extends Bean implements Observer, Serializable {
@@ -66,8 +77,8 @@ public class Flux extends Bean implements Observer, Serializable {
      * L'url de la rubrique du flux, il s'agit de la page HTML d'entrée de la
      * rubrique. Cette adresse peut être utilisé pour faire de l'auto discovery.
      */
-    @Transient
-    private String urlRubrique;
+    @Column(name = "htmlUrl", length = 2000, nullable = true)
+    private String htmlUrl;
     /**
      * Les dernières empruntes md5 des items du flux. On les garde en mémoire
      * pour faire du dédoublonage sans effectuer de requetes dans la base de
@@ -96,7 +107,7 @@ public class Flux extends Bean implements Observer, Serializable {
      * Liste des Item du flux. Permet de matérialiser la relation entre flux et
      * Item
      */
-    @ManyToMany( fetch = FetchType.LAZY, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private List<Item> item;
     /**
      * Un objet flux peut posséder différents incidents. Un incident ne possède
@@ -107,7 +118,6 @@ public class Flux extends Bean implements Observer, Serializable {
 //    @OneToMany(mappedBy = "flux", cascade = CascadeType.ALL)
 //    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true,fetch = FetchType.LAZY)
     @OneToMany(mappedBy = "fluxLie", cascade = {CascadeType.ALL}, orphanRemoval = true, fetch = FetchType.LAZY)
-
     private List<FluxIncident> incidentsLie;
     /**
      *
@@ -120,8 +130,6 @@ public class Flux extends Bean implements Observer, Serializable {
 //    private List<InfoCollecte> infoCollecteFlux;
     @Column(name = "infoCollecte", columnDefinition = "text")
     private String infoCollecte;
-    
-    
     /**
      * Le type du flux (international, a la une etc...). Les types de flux sont
      * des beans. ils sont persisté dans la base de données
@@ -137,9 +145,9 @@ public class Flux extends Bean implements Observer, Serializable {
 // On veut que le flux ne puisse pas créer de journaux mais simplment se lier. Ce n'est pas à la dao du flux de de créer des journaux.
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     private Journal journalLie;
-    /** 
+    /**
      * Le mediator flux permet d'assigner un flux un comportement de collecte.
-     * Un médiator est une configuration de parseur Raffineur etc. 
+     * Un médiator est une configuration de parseur Raffineur etc.
      */
     //TODO : pas encore géré
 //    @OneToOne(cascade = CascadeType.MERGE) 
@@ -150,17 +158,48 @@ public class Flux extends Bean implements Observer, Serializable {
      */
     @Transient
     private Boolean erreurDerniereLevee;
-
-    
-    @Transient
-    private String duree;
-    
-    
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    Date created;
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    Date modified;
+    /**
+     * *
+     * Un flux peut être le sous flux d'un autre, exemple Europe est un sous
+     * flux de international. Si null, il s'agit d'un flux racine
+     */
+    @OneToOne
+    Flux parentFlux;
+    /**
+     * *
+     * Un nom pour le flux. Ce champ est utilisé par la méthode toString. Si ce
+     * champ est vide tostring va chercher le journal et le type de flux. Sinon
+     * il va montrer l'url
+     */
+    @Column(name = "nom")
+    private String nom;
     /**
      * Retourne une la liste des rss autodécouvert. Commence par l'adresse
      * urlRubrique. Si pas de réponse, on remonte vers la racine du site. On
      * enlève une sous répertoire par tentative.
      */
+    // TODO : supprimer ceci à la fin
+    /**
+     * *
+     * Utilise pour le debug. A chaque levée on ajoute la date, permet de bien
+     * vérifier que les flux sont levee en permanence
+     */
+    @Transient
+    List<DebugRecapLeveeFlux> debug;
+
+    public List<DebugRecapLeveeFlux> getDebug() {
+        return debug;
+    }
+
+    public void setDebug(List<DebugRecapLeveeFlux> debug) {
+        this.debug = debug;
+    }
+
+    @Deprecated
     public void autodiscovery() {
     }
 
@@ -205,11 +244,11 @@ public class Flux extends Bean implements Observer, Serializable {
     }
 
     public String getUrlRubrique() {
-        return urlRubrique;
+        return htmlUrl;
     }
 
     public void setUrlRubrique(String urlRubrique) {
-        this.urlRubrique = urlRubrique;
+        this.htmlUrl = urlRubrique;
     }
 
     public List<String> getLastEmpruntes() {
@@ -235,9 +274,6 @@ public class Flux extends Bean implements Observer, Serializable {
         this.tacheRechup = tacheRechup;
     }
 
-    
-    
-    
     public List<Item> getListDernierItemCollecte() {
         return listDernierItemCollecte;
     }
@@ -261,10 +297,6 @@ public class Flux extends Bean implements Observer, Serializable {
     public void setInfoCollecte(String infoCollecte) {
         this.infoCollecte = infoCollecte;
     }
-
-  
-
-
 
     public FluxType getTypeFlux() {
         return typeFlux;
@@ -290,12 +322,44 @@ public class Flux extends Bean implements Observer, Serializable {
         this.MediatorFlux = MediatorFlux;
     }
 
+    public Flux getParentFlux() {
+        return parentFlux;
+    }
+
+    public void setParentFlux(Flux parentFlux) {
+        this.parentFlux = parentFlux;
+    }
+
+    public String getNom() {
+        return nom;
+    }
+
+    public void setNom(String nom) {
+        this.nom = nom;
+    }
+
     public Flux() {
+
+        this.debug = new ArrayList<DebugRecapLeveeFlux>();
         this.item = new ArrayList<Item>();
         this.lastEmpruntes = new ArrayList<String>();
 
         this.MediatorFlux = MediatorCollecteAction.getDefaultCollectAction();
         this.incidentsLie = new ArrayList<FluxIncident>();
+    }
+
+    public Flux(String url) {
+        this.debug = new ArrayList<DebugRecapLeveeFlux>();
+        this.item = new ArrayList<Item>();
+        this.lastEmpruntes = new ArrayList<String>();
+
+        this.MediatorFlux = MediatorCollecteAction.getDefaultCollectAction();
+        this.incidentsLie = new ArrayList<FluxIncident>();
+        this.url = url;
+
+        this.periodiciteCollecte = 3600;
+        this.active = Boolean.TRUE;
+
     }
 
     @Override
@@ -333,6 +397,30 @@ public class Flux extends Bean implements Observer, Serializable {
 
     public void setIncidentsLie(List<FluxIncident> incidentsLie) {
         this.incidentsLie = incidentsLie;
+    }
+
+    public String getHtmlUrl() {
+        return htmlUrl;
+    }
+
+    public void setHtmlUrl(String htmlUrl) {
+        this.htmlUrl = htmlUrl;
+    }
+
+    public Date getCreated() {
+        return created;
+    }
+
+    public void setCreated(Date created) {
+        this.created = created;
+    }
+
+    public Date getModified() {
+        return modified;
+    }
+
+    public void setModified(Date modified) {
+        this.modified = modified;
     }
 
     /**
@@ -397,19 +485,33 @@ public class Flux extends Bean implements Observer, Serializable {
     }
 
     @Override
-    /***
-     * Retourne le nom du journal ainsi que le type du flux. Si ces variables ne sont pas définient, on retourne l'url.
+    /**
+     * *
+     * Retourne le nom du journal ainsi que le type du flux. Si ces variables ne
+     * sont pas définient, on retourne l'url.
      */
     public String toString() {
-//        return "zouzou";
-        String nomRetour = "";
-        if (this.getJournalLie() != null && this.getTypeFlux() != null) {
-            
-            nomRetour += this.getJournalLie().getNom() + " - " + this.getTypeFlux().getDenomination();
+
+        // Si on a un nom on le retourne en priorité
+        if (nom != null && !nom.trim().isEmpty()) {
+            return nom.trim();
+        } else if (this.getJournalLie() != null && this.getTypeFlux() != null) {
+            return this.getJournalLie().getNom() + " - " + this.getTypeFlux().getDenomination();
+        } else if (this.url != null && !this.url.isEmpty()) {
+            return this.url;
+        } else if (this.ID != null) {
+            return "Flux n°" + this.ID;
         } else {
-            nomRetour = this.getUrl();
+            return "FLUX ";
         }
-        return nomRetour;
+
+//        String nomRetour = "";
+//        if (this.getJournalLie() != null && this.getTypeFlux() != null) {
+//            nomRetour += this.getJournalLie().getNom() + " - " + this.getTypeFlux().getDenomination();
+//        } else {
+//            nomRetour = this.getUrl();
+//        }
+//        return nomRetour;
 
     }
 
@@ -417,8 +519,73 @@ public class Flux extends Bean implements Observer, Serializable {
         this.item.add(nouvellesItems);
     }
 
+    /**
+     * *
+     * Retourne un Opml du flux contenant ses sous flux
+     *
+     * @return
+     */
+    public Opml getOpml() {
+        // On doit commencer par rechercher la liste des flux enfant
+        DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
+        Opml opml = new Opml();
+        opml.setTitle(this.toString());
+
+        Outline outline = this.getOpmlOutline();
+
+        List<Outline> listoutline = new ArrayList<Outline>();
+        listoutline.add(outline);
+
+        opml.setOutlines(listoutline);
+
+//        List<Flux> fluxs = daoFlux.findChildren(this.ID);
+//
+//        int i;
+//        for (i = 0; i < fluxs.size(); i++) {
+//            Outline suboutline = fluxs.get(i).getOpmlOutline();
+//            
+//        }
+        return opml;
+    }
+
+    public Outline getOpmlOutline() {
 
 
-    
-    
+        URL xmlUrl = null;
+        try {
+            xmlUrl = new URL(this.url);
+        } catch (Exception e) {
+        }
+
+        URL outlinehtmlUrl = null;
+        try {
+            outlinehtmlUrl = new URL(this.htmlUrl);
+        } catch (Exception e) {
+        }
+
+
+        Outline outline = new Outline(this.toString(), xmlUrl, outlinehtmlUrl);
+
+        // On chercher les flux enfant;
+        DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
+        int i;
+        List<Flux> fluxs = daoFlux.findChildren(this);
+        for (i = 0; i < fluxs.size(); i++) {
+            Outline subOutline = fluxs.get(i).getOpmlOutline();
+
+            outline.getChildren().add(subOutline);
+        }
+        
+        if (this.getTypeFlux() != null) {
+            // On ajoute un attribut non conventionnelle pour préciser le type de flux 
+            Attribute att = new Attribute("typeFlux", this.getTypeFlux().getDenomination());
+   
+            List<Attribute> listAtt = new ArrayList<Attribute>();
+            listAtt.add(att);
+            outline.getAttributes().add(att);
+            
+            }
+        return outline;
+
+    }
 }

@@ -4,6 +4,7 @@
  */
 package rssagregator.services;
 
+import java.util.ArrayList;
 import rssagregator.dao.DAOConf;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoFlux;
@@ -15,15 +16,22 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.beans.TacheRecupCallable;
+import rssagregator.servlet.Test;
 
 /**
  *
  * @author clem
  */
 public class ServiceCollecteur implements Observer {
+    
+    org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(ServiceCollecteur.class);
 
 //    ListeFluxCollecte fluxCollecte; On le récupère maintenant directement depuis le singleton de collecte
     private static ServiceCollecteur instance = new ServiceCollecteur();
@@ -65,15 +73,17 @@ public class ServiceCollecteur implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
-        System.out.println("JE M'UPDATE");
+       
+        logger.info("Rechargement du Service de Collecte");
         // On récupère la liste des flux
 //        ListeFluxCollecteEtConfigConrante fluxCollecte = (ListeFluxCollecteEtConfigConrante) o;
 
         // Si l'observable notifiant est la DAO FLUX. Il faut recréer le pool avec la liste des nouveau flux à suivre
         if (o instanceof DaoFlux || o instanceof DAOConf) {
-            System.out.println("IF 1");
+            
+
+            
             if (DAOFactory.getInstance().getDAOConf().getConfCourante().getActive()) {
-                System.out.println("IF 2 ");
                 // On supprime de scheduler pour le rechrer avec la liste de nouvelles tâches
                 Integer nbThread = DAOFactory.getInstance().getDAOConf().getConfCourante().getNbThreadRecup();
                 
@@ -172,6 +182,31 @@ public class ServiceCollecteur implements Observer {
     }
     
     
+    public void majManuellAll(List<Flux> listFlux)throws Exception{
+           int i;
+           
+           List<TacheRecupCallable> listTache = new ArrayList<TacheRecupCallable>();
+           
+                for(i=0;i<listFlux.size(); i++){
+                    
+                     TacheRecupCallable task = new TacheRecupCallable(listFlux.get(i));
+                    listTache.add(task);
+//                    this.poolPrioritaire.submit(task);
+                }
+                
+                
+                DateTime dtDebut = new DateTime();
+                this.poolPrioritaire.invokeAll(listTache);
+
+                
+         
+                
+//                 this.poolPrioritaire.awaitTermination(30, TimeUnit.SECONDS);
+        
+                 
+    }
+    
+    
     /***
      * Permet d'ajouter un callable au pool schedulé. La méthode scheduleAtFixedRate ne permet pas d'ajouter des Callable, seulement des runnable. Pour cette raison, les renable doivent se réajouter en fin de tache pour avoir un effet scheduleAtFixedRate
      * @param t 
@@ -179,5 +214,28 @@ public class ServiceCollecteur implements Observer {
     public void addScheduledCallable(TacheRecupCallable t ){
         this.poolSchedule.schedule(t, t.getFlux().getPeriodiciteCollecte(), TimeUnit.SECONDS);
     }
+
+    public ScheduledExecutorService getPoolSchedule() {
+        return poolSchedule;
+    }
+
+    public void setPoolSchedule(ScheduledExecutorService poolSchedule) {
+        this.poolSchedule = poolSchedule;
+    }
+
+    public ExecutorService getPoolPrioritaire() {
+        return poolPrioritaire;
+    }
+
+    public void setPoolPrioritaire(ExecutorService poolPrioritaire) {
+        this.poolPrioritaire = poolPrioritaire;
+    }
+    
+    
+    public void infoCollecteur(){
+        
+    }
+    
+    
     
 }

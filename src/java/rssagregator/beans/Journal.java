@@ -1,7 +1,6 @@
 package rssagregator.beans;
 
 import java.util.List;
-import java.util.TimeZone;
 import java.io.Serializable;
 import java.util.ArrayList;
 import javax.persistence.Cacheable;
@@ -53,7 +52,7 @@ public class Journal extends Bean implements Serializable {
     /**
      * Un journal possède plusieurs flux.
      */
-    @OneToMany(mappedBy = "journalLie", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "journalLie", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Flux> fluxLie;
 
     public Journal() {

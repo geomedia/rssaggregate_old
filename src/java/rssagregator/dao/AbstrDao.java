@@ -113,7 +113,7 @@ public abstract class AbstrDao extends Observable {
 
             String req = "SELECT f FROM " + classasso.getSimpleName() + " f";
             Query query = em.createQuery(req);
-            query.setHint("eclipselink.cache-usage", "CheckCacheOnly");
+//            query.setHint("eclipselink.cache-usage", "CheckCacheOnly");
 
 
 

@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.persistence.Entity;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -39,7 +38,7 @@ public class FluxSrvl extends HttpServlet {
     public static final String ATT_OBJ = "flux";
     public static final String ATT_ACTION = "action";
     public static final String ATT_LISTOBJ = "listflux";
-    public static final String VUE = "/WEB-INF/fluxJsp.jsp";
+    public String VUE = "/WEB-INF/fluxJsp.jsp";
 
     /**
      * Processes requests for both HTTP
@@ -54,9 +53,6 @@ public class FluxSrvl extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        response.setContentType("text/html;charset=UTF-8");
-        response.setCharacterEncoding("UTF-8");
-        request.setCharacterEncoding("UTF-8");
 
         //Liste des clause servant à criteria
         Journal journalLie = null;
@@ -84,6 +80,15 @@ public class FluxSrvl extends HttpServlet {
             action = "list";
         }
         request.setAttribute("action", action);
+
+
+        // On récupère la sortie (html Json. Cette variable sert à configurer la vue
+        // récupération de l'action
+        String vue = request.getParameter("vue");
+        if (vue == null) {
+            vue = "html";
+        }
+        request.setAttribute("vue", vue);
 
 
 //        // On récupère le flux dans la base de donnée si l'id est précisé et qu'on n'a pas de parametre en post
@@ -119,7 +124,6 @@ public class FluxSrvl extends HttpServlet {
                 fluxForm.bind(request, fluxTmp, Flux.class);
             }
         }
-
         // Si l'utilisateur à demander la mise à jour manuelle du flux  
         if (action.equals("add")) {
 
@@ -127,6 +131,7 @@ public class FluxSrvl extends HttpServlet {
                 flux = (Flux) fluxForm.bind(request, flux, Flux.class);
                 try {
                     daoFlux.creer(flux);
+                    daoFlux.forceNotifyObserver();
                     redirmap = new HashMap<String, String>();
                     redirmap.put("url", "flux?action=mod&id=" + flux.getID());
                     redirmap.put("msg", "Ajout du Flux effectué.");
@@ -179,7 +184,7 @@ public class FluxSrvl extends HttpServlet {
             } catch (Exception ex) {
                 redirmap = new HashMap<String, String>();
                 AbstrIncident incid = ServiceGestionIncident.getInstance().gererIncident(ex, flux);
-                
+
                 redirmap.put("url", "flux?action=add");
                 redirmap.put("msg", "ERREUR LORS DE La modif DU FLUX. : " + ex.toString());
                 request.setAttribute("redirmap", redirmap);
@@ -257,6 +262,25 @@ public class FluxSrvl extends HttpServlet {
         }
 
         request.setAttribute(ATT_OBJ, flux);
+
+        if (vue.equals("json")) {
+//            response.setContentType("text/json;charset=UTF-8");
+
+            response.setContentType("application/json;charset=UTF-8");
+            response.setCharacterEncoding("UTF-8");
+            response.setHeader("Content-Disposition", "inline");
+            VUE = "/WEB-INF/fluxJSON.jsp";
+        } else if (vue.equals("opml")) {
+
+            response.setContentType("application/xml;charset=UTF-8");
+            response.setCharacterEncoding("UTF-8");
+            VUE = "/WEB-INF/fluxOPML.jsp";
+        } else {
+            response.setContentType("text/html;charset=UTF-8");
+            response.setCharacterEncoding("UTF-8");
+            VUE = "/WEB-INF/fluxHTML.jsp";
+        }
+
 
         this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
 

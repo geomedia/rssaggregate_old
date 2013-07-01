@@ -4,14 +4,12 @@
  */
 package rssagregator.servlet;
 
-import com.mysql.jdbc.util.TimezoneDump;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoJournal;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.logging.Level;
@@ -85,7 +83,7 @@ public class JournauxSrvl extends HttpServlet {
             request.setAttribute("id", id);
 
             journal = (Journal) daoJournal.find(id);
-            DAOFactory.getInstance().getEntityManager().refresh(journal); // Si on ne refresh pas le journal la liste des flux n'est pas chargée
+//            DAOFactory.getInstance().getEntityManager().refresh(journal); // Si on ne refresh pas le journal la liste des flux n'est pas chargée
             System.out.println("NOMBRE DE FLUX AVANT BIND : " + journal.getFluxLie().size());
         }
 
@@ -104,6 +102,10 @@ public class JournauxSrvl extends HttpServlet {
 
         if (action.equals("rem")) {
             try {
+                redirmap = new HashMap<String, String>();
+                redirmap.put("url", "journaux?action=list");
+                redirmap.put("msg", "Suppression effectuée");
+                request.setAttribute("redirmap", redirmap);
                 daoJournal.remove(journal);
 //                DAOFactory.getInstance().getDAOFlux().forceChange();
 //                DAOFactory.getInstance().getDAOFlux().notifyObservers();
@@ -122,16 +124,26 @@ public class JournauxSrvl extends HttpServlet {
         if (journalForm.getValide()) {
             if (action.equals("add")) {
                 try {
+                    redirmap = new HashMap<String, String>();
+                    redirmap.put("url", "journaux?action=list");
+                    redirmap.put("msg", "Ajout effectuée ");
+                    request.setAttribute("redirmap", redirmap);
+                    daoJournal.modifier(journal);
                     daoJournal.creer(journal);
                 } catch (Exception ex) {
                     Logger.getLogger(JournauxSrvl.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } else if (action.equals("mod")) {
                 try {
+                    redirmap = new HashMap<String, String>();
+                    redirmap.put("url", "journaux?action=list");
+                    redirmap.put("msg", "Modifification effectuée ");
+                    request.setAttribute("redirmap", redirmap);
                     daoJournal.modifier(journal);
                 } catch (Exception ex) {
-                    redirmap.put("url", "flux?action=add");
-                    redirmap.put("msg", "ERREUR LORS DE L'AJOUT DU FLUX. : " + ex.toString());
+                    redirmap = new HashMap<String, String>();
+                    redirmap.put("url", "journaux?action=add");
+                    redirmap.put("msg", "ERREUR LORS DE L'AJOUT DU JOURNAL. : " + ex.toString());
                     request.setAttribute("redirmap", redirmap);
                     request.setAttribute("err", "true");
                     Logger.getLogger(JournauxSrvl.class.getName()).log(Level.SEVERE, null, ex);
@@ -141,11 +153,11 @@ public class JournauxSrvl extends HttpServlet {
 
 
 // redirection de l'utilisateur
-        if (action.equals("add") && journalForm.getValide()) {
-            response.sendRedirect("journaux?action=mod&id=" + journal.getID());
-        } else {
-            this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
-        }
+//        if (action.equals("add") && journalForm.getValide()) {
+//            response.sendRedirect("journaux?action=mod&id=" + journal.getID());
+//        } else {
+        this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
+//        }
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

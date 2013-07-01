@@ -23,12 +23,6 @@
 
 <div id="content">
 
-
-
-
-
-
-
     <c:choose>
         <c:when test="${action=='read'}">
             <div class="post">
@@ -57,18 +51,28 @@
 
 
         <c:when test="${action=='list'}">
+
+            <link rel="stylesheet" href="jquery-ui.css" />
+            <script src="jquery-ui.js"></script>
+
+            <script>
+                $(function() {
+                    $(".datepicker").datepicker();
+                });</script>
+
+
             <div class="post">
                 <h1>Liste des items</h1>
                 <div>
 
-                    <form method="GET">
+                    <form method="GET" id="form">
                         <fieldset>
                             <legend title="truc"  >Pages : </legend> <c:forEach var="i" begin="1" end="${nbitem}" step="${itPrPage}" varStatus="varstat">
                                 <button type="submit" name="firstResult" value="${i-1}">${i} - ${i+varstat.step-1}</button>
                             </c:forEach>
 
 
-                            <label>Item par page</label>
+                            <label for="itPrPage">Item par page : </label>
                             <select name="itPrPage" onChange="this.form.submit();"> 
 
                                 <c:forEach var="i" begin="20" end="500" step="20">
@@ -80,6 +84,7 @@
                             <noscript>
                             <input type="submit" value="Changer"  />
                             </noscript>
+                            <span>nombre de résultats : ${nbitem}</span>
 
                         </fieldset>
 
@@ -88,14 +93,27 @@
                         <fieldset>
                             <legend>Affiner la recherche</legend>
                             <label for="flux">Lie au flux : </label>
+                            
+                            <select id="journalSelection">
+                                <option value="null">Journal : </option>
+                                <option id="tous">tous</option>
+                                <c:forEach items="${listJournaux}" var="j">
+                                    <option value="${j.ID}">${j.nom}</option>
+                                </c:forEach>
+                                
+                            </select>
 
 
-                            <select id="id-flux" name="id-flux">
+                            <select id="fluxSelection" name="id-flux">
                                 <option value="all">Tous</option>
                                 <c:forEach items="${listflux}" var="fl">
                                     <option value="${fl.ID}" <c:if test="${idflux==fl.ID}"> selected="true"</c:if>>${fl}</option>                                
                                 </c:forEach>
                             </select>
+                            
+                            <script src="dynListJournauxFLux.js"></script>
+                            
+                            
                             <label>Ordonner par : </label>
                             <select name="order">
                                 <option value=""></option>
@@ -104,17 +122,30 @@
                                 </select>
                                 <label for="desc">Décroissant</label>
                                 <input type="checkbox" name="desc" value="true" <c:if test="${param.desc=='true'}"> checked="true"</c:if>/>
+
+
+                                <label for="date1">Date début : </label>
+                                <input type="text" name="date1" class="datepicker"/>
+                                <label for="date2">Date fin : </label>
+                                <input type="text" name="date2" class="datepicker"/>
+
                                 <input type="submit" value="Affiner la sélection">
 
+                                <select name="vue" id="vue" onchange="subExport();">
+                                    <option value="html">Export</option>
+                                    <option value="csv">csv</option>
+                                </select>
+<!--                                <button type="submit"  formaction="Export" formtarget="_blank">Exporter</button>-->
+                                <script>
+                                    function subExport(){
+                                        if($('#vue').val()=='csv'){
+                                            $('#form').submit();
+                                        }
+                                    }
+                                </script>
+
                             </fieldset>
-
-
-
-
-
                         </form>
-
-
                     </div>
 
                     <ul>

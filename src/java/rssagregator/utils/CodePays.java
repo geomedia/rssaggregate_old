@@ -4,12 +4,8 @@
  */
 package rssagregator.utils;
 
-import com.mysql.jdbc.util.TimezoneDump;
-import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -18,18 +14,7 @@ import java.util.List;
 import java.util.Locale;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.TimeZone;
-import java.util.TreeMap;
-import java.util.spi.LocaleServiceProvider;
-import javax.persistence.Tuple;
-import javax.security.auth.callback.LanguageCallback;
-import org.apache.naming.java.javaURLContextFactory;
-import org.apache.tomcat.jni.Local;
-import org.eclipse.persistence.internal.jpa.querydef.TupleImpl;
-import org.eclipse.persistence.internal.queries.SortedCollectionContainerPolicy;
-import org.eclipse.persistence.jpa.internal.jpql.parser.OrderByItem;
-import sun.util.locale.LanguageTag;
 
 /**
  *

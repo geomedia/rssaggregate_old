@@ -9,13 +9,24 @@ import rssagregator.dao.DaoFlux;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+
 import javax.persistence.EntityManager;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import rssagregator.beans.Flux;
+import rssagregator.beans.Journal;
+import rssagregator.dao.DAOConf;
+import rssagregator.dao.DaoJournal;
+import rssagregator.services.ServiceCollecteur;
+import rssagregator.utils.SetDonnee;
 
 /**
  *
@@ -23,6 +34,8 @@ import rssagregator.beans.Flux;
  */
 @WebServlet(name = "Test", urlPatterns = {"/Test"})
 public class Test extends HttpServlet {
+private static Logger logger = Logger.getLogger(Test.class);
+    
 
     /**
      * Processes requests for both HTTP
@@ -38,48 +51,126 @@ public class Test extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
+
+        String action = request.getParameter("action");
         
-        
-        // Récupération de la liste des flux par l'objet liste des flux
-//        List<Flux> listeFluxMémoire = ListeFluxCollecteEtConfigConrante.getInstance().listFlux;
-        List<Flux> listeFluxMémoire = DAOFactory.getInstance().getDAOFlux().findAllFlux(false);
-        
-        
-        // Récupération des flux par la dao
-        DaoFlux dao = DAOFactory.getInstance().getDAOFlux();
-        List<Object> listeFluxDAO = dao.findall();
-        
-        
+        logger.debug("Je suis un debug");
+
+
         try {
-            EntityManager em = DAOFactory.getInstance().getEntityManager();
-            
-            
-            
-            
             /* TODO output your page here. You may use following sample code. */
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet Test</title>");            
+            out.println("<title>Servlet Test</title>");
             out.println("</head>");
             out.println("<body>");
-            int i;
-            for(i=0; i<listeFluxMémoire.size(); i++){
-                out.println("<p>FLUX Memoire : " + listeFluxMémoire.get(i).hashCode()+"</p>");
-                out.println("FLUX DAO   : "+ listeFluxDAO.get(i).hashCode());
+
+
+            if (action.equals("setdonnee")) {
+
+                Journal j_libre = new Journal();
+                j_libre.setNom("Liberation");
+                j_libre.getFluxLie().add(new Flux("http://rss.liberation.fr/rss/9/"));
+                j_libre.getFluxLie().add(new Flux("http://rss.liberation.fr/rss/58/"));
+                j_libre.getFluxLie().add(new Flux("http://rss.liberation.fr/rss/13/"));
+                j_libre.getFluxLie().add(new Flux("http://rss.liberation.fr/rss/53/"));
+                j_libre.getFluxLie().add(new Flux("http://rss.liberation.fr/rss/100160/"));
+                j_libre.getFluxLie().add(new Flux("http://rss.liberation.fr/rss/17/"));
+                j_libre.getFluxLie().add(new Flux("http://rss.liberation.fr/rss/100206/"));
+                j_libre.getFluxLie().add(new Flux("http://rss.liberation.fr/rss/44/"));
+                j_libre.getFluxLie().add(new Flux("http://rss.liberation.fr/rss/10/"));
+                j_libre.getFluxLie().add(new Flux("http://rss.liberation.fr/rss/100226/"));
+                j_libre.getFluxLie().add(new Flux("http://rss.liberation.fr/rss/11/"));
+                j_libre.getFluxLie().add(new Flux("http://rss.liberation.fr/rss/18/"));
+                j_libre.getFluxLie().add(new Flux("http://rss.liberation.fr/rss/12/"));
+                j_libre.getFluxLie().add(new Flux("http://rss.liberation.fr/rss/14/"));
+                j_libre.getFluxLie().add(new Flux("http://rss.liberation.fr/rss/100197/"));
                 
-                System.out.println("flux memoire managed : " + em.contains(listeFluxMémoire.get(i)) );
-                System.out.println("flux BAO managed : " + em.contains(listeFluxDAO.get(i)) );
-                if(listeFluxMémoire.get(i).equals(listeFluxDAO.get(i))){
-                    System.out.println("EGAL");
+                
+                Journal  j_monde = new Journal();
+                j_monde.getFluxLie().add(new Flux("http://www.lemonde.fr/rss/une.xml"));
+                j_monde.getFluxLie().add(new Flux("http://www.lemonde.fr/rss/tag/videos.xml"));
+                j_monde.getFluxLie().add(new Flux("http://www.lemonde.fr/rss/tag/afrique.xml"));
+                j_monde.getFluxLie().add(new Flux("http://www.lemonde.fr/rss/tag/services-aux-internautes.xml"));
+                j_monde.getFluxLie().add(new Flux("http://www.lemonde.fr/rss/tag/ameriques.xml"));
+                j_monde.getFluxLie().add(new Flux("http://www.lemonde.fr/rss/tag/argent.xml"));
+                j_monde.getFluxLie().add(new Flux("http://www.lemonde.fr/rss/tag/asie-pacifique.xml"));
+                j_monde.getFluxLie().add(new Flux("http://www.lemonde.fr/rss/tag/crise-financiere.xml"));
+                j_monde.getFluxLie().add(new Flux("http://www.lemonde.fr/rss/tag/culture.xml"));
+                j_monde.getFluxLie().add(new Flux("http://www.lemonde.fr/rss/tag/disparitions.xml"));
+                j_monde.getFluxLie().add(new Flux("http://www.lemonde.fr/rss/tag/documents-wikileaks.xml"));
+                j_monde.getFluxLie().add(new Flux("http://www.lemonde.fr/rss/tag/elections-regionales.xml"));
+                j_monde.getFluxLie().add(new Flux("http://www.lemonde.fr/rss/tag/elections-italiennes.xml"));
+                j_monde.getFluxLie().add(new Flux("http://www.lemonde.fr/rss/tag/emploi.xml"));
+                j_monde.getFluxLie().add(new Flux("http://www.lemonde.fr/rss/tag/enseignement-superieur.xml"));
+                j_monde.getFluxLie().add(new Flux("http://www.lemonde.fr/rss/tag/economie.xml"));
+               
+                
+                
+
+
+
+//                ServiceCollecteur collecteur = ServiceCollecteur.getInstance();
+                DaoJournal daoJournal = DAOFactory.getInstance().getDaoJournal();
+//                DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
+//                DAOConf dAOConf = DAOFactory.getInstance().getDAOConf();
+//
+//                dAOConf.chargerDepuisBd();
+//
+//                daoFlux.addObserver(collecteur);
+//                dAOConf.addObserver(collecteur);
+//
+//
+//
+                try {
+                    daoJournal.creer(j_libre);
+                    daoJournal.creer(j_monde);
+                } catch (Exception ex) {
+//                    Logger.getLogger(SetDonnee.class.getName()).log(Level.SEVERE, null, ex);
                 }
+                ServiceCollecteur.getInstance().update(DAOFactory.getInstance().getDAOFlux(), null);
+
             }
             
-            System.out.println("");
+            
+            if(action.equals("simpleadd")){
+      
+                
+                
+                
+            }
+            
+            
+
+
+            if (action.equals("updateall")) {
+                ServiceCollecteur collecte = ServiceCollecteur.getInstance();
+
+//                collecte.getPoolSchedule().shutdownNow();
+
+
+                List<Flux> listFlux = DAOFactory.getInstance().getDAOFlux().findAllFlux(Boolean.TRUE);
+
+
+                DateTime dtDebut = new DateTime();
+                try {
+                    collecte.majManuellAll(listFlux);
+                } catch (Exception ex) {
+//                    Logger.getLogger(Test.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+                             DateTime dtFIN = new DateTime();
+                Interval interval = new Interval(dtDebut, dtFIN);
+                out.println("Temps d'exe : " + interval.toDuration().getStandardSeconds());
+
+            }
+
+
 
             out.println("</body>");
             out.println("</html>");
-        } finally {            
+        } finally {
             out.close();
         }
     }

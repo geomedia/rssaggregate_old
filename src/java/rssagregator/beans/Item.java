@@ -24,7 +24,7 @@ import org.eclipse.persistence.annotations.CacheType;
 @Entity
 @Table(name = "item")
 @Cacheable(value = true)
-@Cache(size = 10000, type = CacheType.CACHE, shared = true)
+@Cache(size = 5000, type = CacheType.CACHE, shared = true)
 public class Item implements Serializable, Comparable<Item> {
 
     @Id
@@ -34,7 +34,7 @@ public class Item implements Serializable, Comparable<Item> {
      * *
      * Titre de l'item. Element persisté dans la base de données 
      */
-    @Column(name = "titre")
+    @Column(name = "titre", length = 500)
     private String titre;
     /**
      * *
@@ -49,7 +49,7 @@ public class Item implements Serializable, Comparable<Item> {
      * Correspond à l'élément contenu d'un flux ATOM. N'est pas présent dans les
      * flux RSS
      */
-    @Column(name = "contenu",length = 5000)
+    @Column(name = "contenu",columnDefinition = "text")
     private String contenu;
     /**
      * *
@@ -88,7 +88,7 @@ public class Item implements Serializable, Comparable<Item> {
      * *
      * Correspond à l'élément link d'un flux RSS.
      */
-    @Column(name = "link")
+    @Column(name = "link",length = 2000)
     private String link;
     /**
      * 0 = nouveau pas encore de sync 1 = synch effectué 2 = item sur le maitre

@@ -20,7 +20,7 @@
 <div id="content">
     <div class="post">
 
-        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+
 
         <!--<script src="http://code.highcharts.com/modules/exporting.js"></script>-->
 
@@ -38,7 +38,7 @@
 
         <script>
             $(function() {
-                $(".datepicker").datepicker();
+            $(".datepicker").datepicker();
             });</script>
 
 
@@ -50,12 +50,29 @@
             <label for="date2">Date fin : </label>
             <input type="text" name="date2" class="datepicker"/>
             <br />
-            <select multiple="true" name="flux">
+
+            
+            <label>Flux : </label>
+                
+            <select id="journalSelection">
+                <option value="null">Journal : </option>
+                <option id="tous">tous</option>
+                <c:forEach items="${listJournaux}" var="j">
+                    <option value="${j.ID}">${j.nom}</option>
+                </c:forEach>
+
+            </select>
+
+            <select multiple="true" name="flux" id="fluxSelection">
                 <option value="">NULL</option>
                 <c:forEach items="${listFlux}" var="fl">
                     <option value="${fl.ID}">${fl}</option>
                 </c:forEach>
             </select>
+          <script src="dynListJournauxFLux.js"></script>
+
+
+
             <br />
             <label for="temporalite">Temporalité : </label>
             <select name="temporalite">
@@ -74,83 +91,83 @@
 
             var chart; // global
             /**
-             * Request data from the server, add it to the graph and set a timeout to request again
-             */
+            * Request data from the server, add it to the graph and set a timeout to request again
+            */
 
 
 
 
             $(document).ready(function() {
-                chart = new Highcharts.Chart({
-                    chart: {
-                        renderTo: 'container',
-                        zoomType: 'x',
-//             type: 'line',
-//            defaultSeriesType: 'spline',
-                        events: {
-                            load: requestData
+            chart = new Highcharts.Chart({
+            chart: {
+            renderTo: 'container',
+            zoomType: 'x',
+            //             type: 'line',
+            //            defaultSeriesType: 'spline',
+            events: {
+            load: requestData
 
-                        }
-                    },
-                    title: {
-                        text: 'Récapitulatif de l\'activité des flux'
-                    },
-                    xAxis: {
-//                            categories: ['Jan', 'Feb']
-                        type: 'datetime',
-                        maxZoom: 48 * 3600 * 1000
+            }
+            },
+            title: {
+            text: 'Récapitulatif de l\'activité des flux'
+            },
+            xAxis: {
+            //                            categories: ['Jan', 'Feb']
+            type: 'datetime',
+            maxZoom: 48 * 3600 * 1000
 
-//            maxZoom: 20 * 1000
-                    },
-                    yAxis: {
-                        minPadding: 0.2,
-                        maxPadding: 0.2,
-                        title: {
-                            text: 'Nombre d\'items',
-                            margin: 80
-                        }
-                    }
-                    ,
-                    series: [
+            //            maxZoom: 20 * 1000
+            },
+            yAxis: {
+            minPadding: 0.2,
+            maxPadding: 0.2,
+            title: {
+            text: 'Nombre d\'items',
+            margin: 80
+            }
+            }
+            ,
+            series: [
             <c:forEach items="${recapActivite.listFlux}" var="fl">
-                        {
-                            name: '${fl}',
-                            data: [],
-//                            pointStart: Date.UTC(2010, 1, 1),
+                {
+                name: '${fl}',
+                data: [],
+                //                            pointStart: Date.UTC(2010, 1, 1),
 
-                            pointStart: Date.UTC(<fmt:formatDate value="${recapActivite.date1}" pattern="yyyy"/>, <fmt:formatDate value="${recapActivite.date1}" pattern="MM"/> - 1, <fmt:formatDate value="${recapActivite.date1}" pattern="dd"/>),
+                pointStart: Date.UTC(<fmt:formatDate value="${recapActivite.date1}" pattern="yyyy"/>, <fmt:formatDate value="${recapActivite.date1}" pattern="MM"/> - 1, <fmt:formatDate value="${recapActivite.date1}" pattern="dd"/>),
                 <c:if test="${param.temporalite=='jour'}">pointInterval: 24 * 3600 * 1000 // one day</c:if>
-//                            pointInterval: 24 * 3600 * 1000 // one day
-                                },</c:forEach>
-                            ]
-                        });
-                    });
-                    function requestData() {
-                        $.ajax({
-                            url: 'http://localhost:8084/RSSAgregate/recapActiviteGenerale?action=json',
-//        success: alert("oui"),
+                    //                            pointInterval: 24 * 3600 * 1000 // one day
+                    },</c:forEach>
+                ]
+                });
+                });
+                function requestData() {
+                $.ajax({
+                url: 'recapActiviteGenerale?action=json',
+                //        success: alert("oui"),
 
-                            success: function(point) {
-                                var series = chart.series[0],
-                                        shift = series.data.length > 20; // shift if the series is longer than 20
-
-
-                                // add the point
-//            chart.series[0].addPoint([110100,30], true, shift);
+                success: function(point) {
+                var series = chart.series[0],
+                shift = series.data.length > 20; // shift if the series is longer than 20
 
 
-
-                                for (var iter = 0; iter < point.length; iter++) {
-                                    chart.series[iter].setData(point[iter]);
-                                }
+                // add the point
+                //            chart.series[0].addPoint([110100,30], true, shift);
 
 
-                            },
-                            // error : clem(), 
 
-                            cache: false
-                        });
-                    }
+                for (var iter = 0; iter < point.length; iter++) {
+                chart.series[iter].setData(point[iter]);
+                }
+
+
+                },
+                // error : clem(), 
+
+                cache: false
+                });
+                }
 
 
 

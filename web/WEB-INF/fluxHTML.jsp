@@ -44,36 +44,29 @@
                 </p>
                 <p>${redirmap['msg']}. </p>
                 <c:if test="${err!='true'}">
-                Vous serez redirigé dans 3 secondes à l'adresse : <a href="${redirmap['url']}">${redirmap['url']}</a>
-                  <script type="text/JavaScript">
-                    <!--
-                    setTimeout("location.href = '${redirmap['url']}';",3000);
-                    -->
-                </script>
+                    Vous serez redirigé dans 3 secondes à l'adresse : <a href="${redirmap['url']}">${redirmap['url']}</a>
+                    <script type="text/JavaScript">
+                        <!--
+                        setTimeout("location.href = '${redirmap['url']}';",3000);
+                        -->
+                    </script>
                 </c:if>
-              
+
 
             </c:when>
             <c:when test="${empty redirmap}">
                 <c:choose>
 
                     <c:when test="${action=='list'}">
-
-
-
-
-                        <form method="POST">
-
+                        <form method="POST" id="form">
                             <fieldset>
                                 <legend>Pages : </legend>
                                 <c:forEach var="i" begin="1" end="${nbitem}" step="${itPrPage}" varStatus="varstat">
                                     <button type="submit" name="firstResult" value="${i-1}">${i} - ${i+varstat.step-1}</button>
                                 </c:forEach>
-
-                                <label>Item par page</label>
-
+                                <label>Flux par page</label>
                                 <select name="itPrPage" onChange="this.form.submit();"> 
-                                    <c:forEach var="i" begin="10" end="100" step="20">
+                                    <c:forEach var="i" begin="10" end="150" step="20">
                                         <option value="${i}" <c:if test="${itPrPage==i}"> selected="true"</c:if>>${i}</option>
                                     </c:forEach>
                                 </select> 
@@ -89,7 +82,25 @@
                                         <option value="${j.ID}" <c:if test="${j.ID==journalid}"> selected="true"</c:if>>${j.nom}</option>    
                                     </c:forEach>
                                 </select>
-                                <input type="submit" value="Affiner">
+                                <input type="submit" value="Affiner" onclick="$('#vue').val('')"id="sub" />
+
+                                <select name="vue" id="vue" onchange="subExport()()">
+                                    <option value="html">Exporter</option>
+                                    <option value="opml">opml</option>
+                                </select>
+                                <script>
+
+                                    function subExport(){
+                                    if($('#vue').val()=='opml'){
+
+                                    $('#form').attr('target', '_blank');
+                                    $('#form').submit();
+                                    $('#form').attr('target', '');
+
+                                    }
+                                    }
+                                </script>
+                                <button type="submit"  formaction="flux" formtarget="_blank" value="vue">Exporter</button>
                             </fieldset>
                         </form>
 
@@ -112,26 +123,34 @@
                     </c:when>
                 </c:choose>
 
-                <c:choose>
+                <c:choose> 
                     <c:when test="${action=='add' or action=='mod'}">
                         ${form.resultat}
                         <form method="post" action="flux?action=<c:out value="${action}"></c:out>">
                                 <fieldset>
                                     <legend>Paramètres :</legend>
-                                    <label for="url">URL du flux<span class="requis">*</span></label>
-                                    <input type="text" id="url" name="url" value="<c:out value="${form.erreurs['url'][0]}" default="${flux.url}" />" size="20" maxlength="60" />
-                                <span class="erreur"> ${form.erreurs['url'][1]}</span>
 
-                                <label for="active">Actif<span class="requis"></span></label>
-                                <input type="checkbox" id="active" name="active" <c:if test="${flux.active=='true'}">checked="true"</c:if>/>
+                                    <label for="active" title="L'agrégateur doit t'il collecter ce flux ?">Actif : <span class="requis"></span></label>
+                                    <input type="checkbox" id="active" name="active" <c:if test="${flux.active=='true'}">checked="true"</c:if>/>
 
                                     <br />
-                                    <label for="periodiciteCollecte">Périodicié de la collecte en seconde</label>
-                                    <input type="text" id="periodiciteCollecte" name="periodiciteCollecte" value="<c:out value="${flux.periodiciteCollecte}" default="900"/>">
+                                    <label for="url" title="Adresse a laquelle on trouve le XML du flux">URL du flux<span class="requis">*</span></label>
+                                    <input type="text" id="url" name="url" value="<c:out value="${form.erreurs['url'][0]}" default="${flux.url}" />" size="20" maxlength="60" />
+                                <span class="erreur"> ${form.erreurs['url'][1]}</span><br />
+
+                                <label title="Indiquez la page html de la rubrique capturée">Page html</label>
+                                <input name="htmlUrl" type="text" value="<c:out value="${form.erreurs['htmlUrl'][0]}" default="${flux.htmlUrl}" />"/>
+                                <span class="erreur"> ${form.erreurs['htmlUrl'][1]}</span>
                                 <br />
 
-                                <label for="journalLie">Journal :</label>
-                                <select name="journalLie">
+
+                                <label for="periodiciteCollecte" title="L'agrégéteur déclanche la collecte tout les x secondes">Périodicié de la collecte en seconde</label>
+                                <input type="text" id="periodiciteCollecte" name="periodiciteCollecte" value="<c:out value="${flux.periodiciteCollecte}" default="900"/>">
+                                <br />
+
+                                <label for="journalLie" title="Un journal comprends plusieurs flux... Si vous ne trouvez pas le journal concerné, allez dans Journal-> ajouter">Journal :</label>
+                                <select name="journalLie" id="journalLie">
+                                    <option value="null">Aucun</option>
                                     <c:forEach items="${listjournaux}" var="journal">
                                         <option<c:if test="${journal.nom==flux.journalLie.nom}"> selected="true"</c:if> value="${journal.ID}">${journal.nom}</option>
                                     </c:forEach>
@@ -139,23 +158,58 @@
 
 
                                 <br />
-                                <label>Type de flux</label>
+                                <label title="La rubrique du journal concernée : international, A la Une ... Pour ajouter des types de flux allez dans la configuration générale">Type de flux</label>
                                 <select name="typeFlux">
                                     <c:forEach items="${listtypeflux}" var="typeflux">
                                         <option<c:if test="${flux.typeFlux.denomination==typeflux.denomination}"> selected="true" </c:if> value="${typeflux.ID}">${typeflux.denomination}</option>
                                     </c:forEach>
                                 </select>
                                 <br />
-                                
+
+                                <label for="nom" title="Paramettre facultatif : Par défaut le flux sera nommé en fonction du journal et du type de flux sélectionné. Ce paramettre permet de forcer un nom">Nom du flux : </label>
+                                <input type="text" name="nom" value="${flux.nom}" />
+
+                                <br />
+
+
+                                <label for="parentFlux" title="Certain flux sont des sous classement d'autres. Exemple le flux Europe est un sous flux de International">Sous flux de : </label>
+                                <select name="parentFlux" id="parentFlux">
+                                    <option>NULL</option>
+                                    <c:forEach items="${flux.journalLie.fluxLie}" var="fluxJournal">
+                                        <option <c:if test="${fluxJournal.ID==flux.parentFlux.ID}"> selected="true"</c:if>>${fluxJournal}</option>
+                                    </c:forEach>
+                                </select>
+
+
+                                <br />
                                 <label for="infoCollecte">Information :</label><br />
+
+                                <p>Flux créé le : <fmt:formatDate value="${flux.created}" pattern="dd/MM/yyyy hh:mm"/> </p>
                                 <textarea id="infoCollecte" name="infoCollecte" rows="20" cols="80">${flux.infoCollecte}</textarea>
-                                
+
                                 <input type="hidden" name="id" value="${flux.ID}">
                                 <br />
                                 <input type="submit" value="Enregitrer" class="sansLabel" />
                                 <br />
                             </fieldset>
                         </form>
+
+
+                        <p>Debug : Recap des levée</p>
+                        <ul>
+                            <c:forEach items="${flux.debug}" var="deb">
+                                <li>${deb.date}    Nombre item : ${deb.nbrRecup} </li>
+
+                            </c:forEach>
+                        </ul>
+
+                        <script src="test.js">
+
+
+
+                        </script>
+
+
                     </c:when>
                     <c:when test="${action=='read-item'}">
 
@@ -175,7 +229,7 @@
                     <c:when test="${action=='read-incident'}">
                         <h2>Liste des incidets du flux</h2>
                         <c:forEach items="${flux.incidentsLie}" var="incid">
-                            
+
                             <li class="item">
                                 <h3><a href="incidents?action=mod&id=${incid.ID}">${incid}</a></h3>
                                 <p>Début : ${incid.dateDebut} fin : ${incid.dateFin}</p>

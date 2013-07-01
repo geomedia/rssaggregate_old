@@ -14,7 +14,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import rssagregator.beans.incident.FluxIncident;
-import rssagregator.beans.incident.HTTPIndident;
+
 
 /**
  *
@@ -120,19 +120,20 @@ public class FluxTest {
         System.out.println("getIncidentEnCours");
         Flux instance = new Flux();
         
-        FluxIncident incid1 = new HTTPIndident();
-        FluxIncident incid2 = new HTTPIndident();
+        FluxIncident incid1 = new FluxIncident();
+        FluxIncident incid2 = new FluxIncident();
         
         incid1.setDateFin(new Date(new Long(6000)));
         
-        instance.getIncident().add(incid1);
-        instance.getIncident().add(incid2);
+
+        instance.getIncidentsLie().add(incid1);
+        instance.getIncidentsLie().add(incid2);
         
         List<FluxIncident> incidentEncours = instance.getIncidentEnCours();
         
         
         if(incidentEncours.size()!=1){
-            fail("Il ne devrait y avoir qu'un incident dans la liste, on en a trouvé : " + instance.getIncident().size());
+            fail("Il ne devrait y avoir qu'un incident dans la liste, on en a trouvé : " + instance.getIncidentsLie().size());
         }
         
         if(!incidentEncours.get(0).equals(incid2)){
@@ -146,8 +147,15 @@ public class FluxTest {
                 fail("On a trouvé une date de fin dans un incident en cours. Cette valeur devait être null");
             }
         }
+    }
+    
+        /**
+     * Test of getIncidentEnCours method, of class Flux.
+     */
+    @Test
+    public void testGetOpml() {
         
-     
         
     }
+    
 }

@@ -5,6 +5,7 @@
 package rssagregator.dao;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.persistence.Query;
 import javax.persistence.RollbackException;
@@ -96,7 +97,7 @@ public class DaoFlux extends AbstrDao {
     /**
      * *
      * Permet de récupérer la liste complete des flux. Pour éviter d'éffectuer
-     * milles fois la même requête, il est possible de limiter la recherche au 
+     * milles fois la même requête, il est possible de limiter la recherche au
      * cache de l'ORM.
      *
      * @param sql true= parcourir la base, false : juste le cache
@@ -152,8 +153,16 @@ public class DaoFlux extends AbstrDao {
      */
     @Override
     public void creer(Object obj) throws Exception {
-        super.creer(obj); //To change body of generated methods, choose Tools | Templates.
-        forceNotifyObserver();
+
+        // On va remplir la date en force
+        Flux fl = (Flux)obj;
+        fl.setCreated(new Date());
+        
+        em.getTransaction().begin();
+        em.persist(fl);
+        em.getTransaction().commit();
+
+//        forceNotifyObserver();
     }
 
     /**
@@ -273,10 +282,8 @@ public class DaoFlux extends AbstrDao {
         // Le ORDER BY
         if (order_by != null) {
             if (order_desc) {
-                System.out.println("DESC");
                 cq.orderBy(cb.desc(root.get(order_by)));
             } else {
-                System.out.println("ASC");
                 cq.orderBy(cb.asc(root.get(order_by)));
             }
         }
@@ -287,9 +294,20 @@ public class DaoFlux extends AbstrDao {
             tq.setMaxResults(maxResult);
             tq.setFirstResult(fistResult);
         }
-        System.out.println("fistResult : " + fistResult);
-        System.out.println("maxResult : " + maxResult);
-
         return tq.getResultList();
+    }
+
+    public List<Flux> findChildren(Flux flu) {
+        String req = "SELECT f FROM Flux f WHERE f.parentFlux=:fl";
+        Query query = em.createQuery(req);
+
+
+
+        query.setParameter("fl", flu);
+        List<Flux> listResult = query.getResultList();
+
+        return listResult;
+
+
     }
 }

@@ -91,13 +91,7 @@ public class DaoItem extends AbstrDao {
         }
 
         if (date1 != null && date2 != null) {
-
-//            cq.where(cb.between(root.<Date>get("dateRecup"), date1, date2));
-//            cq.where(cb.and(cb.between(root.<Date>get("dateRecup"), date1, date2)));
             listWhere.add(cb.and(cb.between(root.<Date>get("dateRecup"), date1, date2)));
-
-
-//            cq.where(cb.and(restrictions))
         }
 
 
@@ -134,7 +128,6 @@ public class DaoItem extends AbstrDao {
         if (fistResult != null && maxResult != null) {
             tq.setMaxResults(maxResult);
             tq.setFirstResult(fistResult);
-            System.out.println("OUI >>");
         }
         return tq.getResultList();
     }
@@ -175,33 +168,90 @@ public class DaoItem extends AbstrDao {
 
 //        em = DAOFactory.getInstance().getEntityManager();
         CriteriaBuilder cb = em.getCriteriaBuilder();
+        List<Predicate> listWhere = new ArrayList<Predicate>();
 
         CriteriaQuery cq = cb.createQuery(Item.class);
         Root root = cq.from(Item.class);
 
+
         //La jointure avec whereclause
         if (where_clause_flux != null) {
             Join joinFlux = root.join("listFlux");
-            cq.where(cb.equal(joinFlux.get("ID"), where_clause_flux.getID()));
 
+            listWhere.add(cb.equal(joinFlux.get("ID"), where_clause_flux.getID()));
+//            cq.where(cb.equal(joinFlux.get("ID"), where_clause_flux.getID()));
+        }
+
+        if (date1 != null && date2 != null) {
+            listWhere.add(cb.and(cb.between(root.<Date>get("dateRecup"), date1, date2)));
+            System.out.println("DDDDDDDDDDDDDAATE");
         }
 
 
+        // On applique les wheres
+        int i;
+        if (listWhere.size() == 1) {
+            cq.where(listWhere.get(0));
+        } else if (listWhere.size() > 1) {
+            Predicate pr = cb.and(listWhere.get(0));
+            for (i = 1; i < listWhere.size(); i++) {
+                pr = cb.and(pr, listWhere.get(i));
+            }
+            cq.where(pr);
+        }
+
         cq.select(cb.count(root));
-
-        Query query = em.createQuery(cq);
-        List resu = query.getResultList();
+        TypedQuery<Item> tq = em.createQuery(cq);
 
 
 
-
+        List resu = tq.getResultList();
+        System.out.println("RESU size : " + resu.size());
+        System.out.println("RESU 0 : " + resu.get(0));
 
         try {
             Integer retour = new Integer(resu.get(0).toString());
             return retour;
         } catch (Exception e) {
+            System.out.println("ERRRRR");
             return null;
         }
+
+
+
+        //La jointure avec whereclause
+//        if (where_clause_flux != null) {
+//            Join joinFlux = root.join("listFlux");
+//            cq.where(cb.equal(joinFlux.get("ID"), where_clause_flux.getID()));
+//
+//        }
+//
+//        if (date1 != null && date2 != null) {
+//
+////            cq.where(cb.between(root.<Date>get("dateRecup"), date1, date2));
+////            cq.where(cb.and(cb.between(root.<Date>get("dateRecup"), date1, date2)));
+//            listWhere.add(cb.and(cb.between(root.<Date>get("dateRecup"), date1, date2)));
+//
+//
+////            cq.where(cb.and(restrictions))
+//        }
+//
+//
+//        cq.select(cb.count(root));
+//
+//        Query query = em.createQuery(cq);
+//        List resu = query.getResultList();
+//
+//
+//
+//
+//
+//        try {
+//            Integer retour = new Integer(resu.get(0).toString());
+//            return retour;
+//        } catch (Exception e) {
+//            return null;
+//        }
 
 
 // ANCIENNE VERSION AVANT CRITERIA

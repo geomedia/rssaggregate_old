@@ -11,6 +11,8 @@
         <link href="style.css" type="text/css" rel="stylesheet" media="all"/>
     </head>
     <body>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+
         <div id="banner">
             <a href ="/RSSAgregate/index">
                 <img src="ress/img/img01.jpg"/>

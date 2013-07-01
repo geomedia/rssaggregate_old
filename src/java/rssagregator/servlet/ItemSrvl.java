@@ -14,6 +14,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.eclipse.persistence.jpa.JpaEntityManager;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.beans.form.ItemForm;
@@ -25,7 +28,7 @@ import rssagregator.beans.form.ItemForm;
 @WebServlet(name = "Item", urlPatterns = {"/item"})
 public class ItemSrvl extends HttpServlet {
 
-    public static final String VUE = "/WEB-INF/itemjsp.jsp";
+    public String VUE = null;
     public static final String ATT_ITEM = "item";
 
     /**
@@ -51,12 +54,19 @@ public class ItemSrvl extends HttpServlet {
         }
         request.setAttribute("action", action);
 
+        //récupération de la vue
+        String vue = request.getParameter("vue");
+        if (vue == null) {
+            vue = "html";
+        }
+
+
+
         // On récupère le type de sélection.
         String type = request.getParameter("type");
 
 
         //DAO
-
         DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
         ItemForm form = new ItemForm();
 
@@ -69,52 +79,49 @@ public class ItemSrvl extends HttpServlet {
             Long id = new Long(request.getParameter("id"));
             request.setAttribute("id", id);
             item = (Item) daoItem.find(id);
-           
+
         }
 
 
         if (action.equals("list")) {
 
             /**
-             * *
-             * Entrée des parametres pour compléter la vue
+             * Entrée des parametres pour compléter les vues
              */
-            Integer nbrItemPrPage;
-            try {
-                nbrItemPrPage = new Integer(request.getParameter("itPrPage"));
-            } catch (Exception e) {
-                nbrItemPrPage = 20;
-            }
-            request.setAttribute("itPrPage", nbrItemPrPage);
-            daoItem.setMaxResult(nbrItemPrPage);
+            // On récupère le premier et dernier résult pour former des limites de requêtes. Ces limites ne doivent s'appliquer que si la vue est html
+            if (vue.equals("html")) {
+                Integer nbrItemPrPage;
+                try {
+                    nbrItemPrPage = new Integer(request.getParameter("itPrPage"));
+                } catch (Exception e) {
+                    nbrItemPrPage = 20;
+                }
+                request.setAttribute("itPrPage", nbrItemPrPage);
+                daoItem.setMaxResult(nbrItemPrPage);
 
+                //Récupération du firs result
+                Integer firsResult;
+                try {
+                    firsResult = new Integer(request.getParameter("firstResult"));
+                    daoItem.setFistResult(firsResult);
 
-            //Récupération du firs result
-            Integer firsResult;
-            try {
-                firsResult = new Integer(request.getParameter("firstResult"));
+                } catch (Exception e) {
+                    firsResult = 0;
+                }
+                request.setAttribute("firsResult", nbrItemPrPage);
                 daoItem.setFistResult(firsResult);
 
-            } catch (Exception e) {
-                firsResult = 0;
+                // On récupère la liste des flux utile à la génération du menu déroulant
+                request.setAttribute("listflux", DAOFactory.getInstance().getDAOFlux().findAllFlux(false));
+                
+                //List des journaux
+                request.setAttribute("listJournaux", DAOFactory.getInstance().getDaoJournal().findall());
             }
-            request.setAttribute("firsResult", nbrItemPrPage);
-            daoItem.setFistResult(firsResult);
 
-            // On récupère la liste des flux
-//            request.setAttribute("listflux", ListeFluxCollecteEtConfigConrante.getInstance().listFlux); 
-//            DAOFactory.getInstance().getDAOFlux().chargerDepuisBd();
-            request.setAttribute("listflux", DAOFactory.getInstance().getDAOFlux().findAllFlux(false));
-
-            
-            
             // SI on doit restreindre la sélection à un flux 
             try {
-//                Flux f = ListeFluxCollecteEtConfigConrante.getInstance().getflux(new Long(request.getParameter("id-flux")));
                 Flux f = (Flux) DAOFactory.getInstance().getDAOFlux().find(new Long(request.getParameter("id-flux")));
-//                        ListeFluxCollecteEtConfigConrante.getInstance().getflux(new Long(request.getParameter("id-flux")));
                 daoItem.setWhere_clause_flux(f);
-
                 request.setAttribute("idflux", f.getID().toString());
             } catch (Exception e) {
                 daoItem.setWhere_clause_flux(null);
@@ -135,10 +142,29 @@ public class ItemSrvl extends HttpServlet {
             } catch (Exception e) {
             }
 
+            // Récupération des date limites
+            try {
+                String d1 = request.getParameter("date1");
+                DateTimeFormatter fmt = DateTimeFormat.forPattern("dd/MM/yyyy");
+                DateTime dateTime = fmt.parseDateTime(d1);
+                daoItem.setDate1(dateTime.toDate());
+            } catch (Exception e) {
+            }
+
+
+            try {
+                String d2 = request.getParameter("date2");
+                DateTimeFormatter fmt2 = DateTimeFormat.forPattern("dd/MM/yyyy");
+                DateTime dateTime2 = fmt2.parseDateTime(d2);
+                daoItem.setDate2(dateTime2.toDate());
+            } catch (Exception e) {
+            }
+
 
             //On récupère le nombre max d'item
             Integer nbItem = daoItem.findNbMax();
             request.setAttribute("nbitem", nbItem);
+
 
 
             //En fonction de la sélection demander on formule la bonne recherche
@@ -146,17 +172,27 @@ public class ItemSrvl extends HttpServlet {
             listItem = daoItem.findCretaria();
             request.setAttribute("listItem", listItem);
             System.out.println("NBIT : " + listItem.size());
-            
-            
+
+
             int i;
-            for(i=0;i<listItem.size();i++){
+            for (i = 0; i < listItem.size(); i++) {
 //                DAOFactory.getInstance().getEntityManager().detach(listItem.get(i));
             }
-            
+
         }
         request.setAttribute(ATT_ITEM, item);
 
         request.setAttribute("navmenu", "item");
+
+
+        //utilisation de la vue en fonction des paramettres envoyé par l'utilisateur.
+        if (vue.equals("html")) {
+            VUE = "/WEB-INF/itemHTML.jsp";
+        }
+        if (vue.equals("csv")) {
+            response.setHeader ("Content-Disposition", "attachment; filename = items-export.csv");
+            VUE = "/WEB-INF/itemCSV.jsp";
+        }
         this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
     }
 

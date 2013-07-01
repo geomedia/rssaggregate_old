@@ -3,6 +3,7 @@ package rssagregator.beans;
 import java.io.Serializable;
 import java.sql.Time;
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -13,6 +14,12 @@ import javax.persistence.Transient;
 
 @Entity
 public class Conf implements Serializable {
+
+    public Conf() {
+    this.active = true;
+    }
+    
+    
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -48,7 +55,7 @@ public class Conf implements Serializable {
      * *
      * Liste des serveur esclaves utiles au serveur maitre
      */
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     private List<ServeurSlave> ServeurSlave;
     
     /***
