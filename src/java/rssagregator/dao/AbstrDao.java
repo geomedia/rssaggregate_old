@@ -44,9 +44,7 @@ public abstract class AbstrDao extends Observable {
 
     public void modifier(Object obj) throws Exception {
 
-
         // Test si le flux possède bien un id
-
         // On récupère l'id
         Method getter = obj.getClass().getMethod("getID");
         Object retour = getter.invoke(obj);
@@ -56,11 +54,7 @@ public abstract class AbstrDao extends Observable {
             em.getTransaction().begin();
             em.merge(obj);
             em.getTransaction().commit();
-            System.out.println("FIN DE SAUVEGARDE FLUX");
         }
-
-
-
     }
 
     /**
@@ -93,11 +87,8 @@ public abstract class AbstrDao extends Observable {
 //        em = dAOFactory.getEntityManager();
         em.getTransaction().begin();
 //        em.remove(obj);
-        System.out.println("Il y a bien une suppression");
 
         em.remove(em.merge(obj));
-
-
 
         em.getTransaction().commit();
 //        em.close();

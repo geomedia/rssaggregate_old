@@ -17,17 +17,17 @@ import rssagregator.beans.form.DAOGenerique;
  */
 public class DAOFactory {
 
+    
+    private static DaoItem daoItem ;
+    
     protected String PERSISTENCE_UNIT_NAME = "RSSAgregatePU2";
     private static DAOFactory instance = new DAOFactory();
     public List<EntityManager> listEm = new ArrayList<EntityManager>();
     EntityManager em;
-    
 //    private DaoFlux daoflux = new DaoFlux(this);
 //    private DAOConf daoConf = new DAOConf(this);
-    
-        private DaoFlux daoflux;
+    private DaoFlux daoflux;
     private DAOConf daoConf;
-    
     EntityManagerFactory emf;
 
     public static DAOFactory getInstance() {
@@ -40,24 +40,29 @@ public class DAOFactory {
     private DAOFactory() {
         emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
         em = emf.createEntityManager();
+        
+        // Attention aux singleton et au multi threading
+        daoItem = new DaoItem(this);
+        daoflux = new DaoFlux(this);
+        daoConf = new DAOConf(this);
     }
 
     public DaoFlux getDAOFlux() {
 //        DaoFlux daoFlux = new DaoFlux(this);
         // La daoflux est une instance unique
-        if(daoflux==null){
+        if (daoflux == null) {
             daoflux = new DaoFlux(this);
         }
-        
+
         return daoflux;
 //        return daoFlux;
     }
 
     public DAOConf getDAOConf() {
-        if(daoConf==null){
+        if (daoConf == null) {
             daoConf = new DAOConf(this);
         }
-        
+
         return daoConf;
     }
 
@@ -67,7 +72,11 @@ public class DAOFactory {
     }
 
     public DaoItem getDaoItem() {
-        DaoItem daoItem = new DaoItem(this);
+        
+        if(daoItem==null){
+            daoItem =  new DaoItem(this);
+        }
+//        DaoItem daoItem = new DaoItem(this);
         return daoItem;
     }
 
@@ -77,6 +86,10 @@ public class DAOFactory {
 
     public DAOIncident getDAOIncident() {
         return new DAOIncident(this);
+    }
+
+    public DAOComportementCollecte getDAOComportementCollecte() {
+        return new DAOComportementCollecte(this);
     }
 
     public EntityManager getEntityManager() {

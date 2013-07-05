@@ -12,10 +12,10 @@
 
 
 </div>
-<div id="sidebar">
+<!--<div id="sidebar">
     <p><a href="journaux?action=add">Blabla</a></p>
     <p><a href="journaux?action=list">Bla</a></p>
-</div>
+</div>-->
 
 <div id="content">
     <div class="post">
@@ -137,8 +137,9 @@
 
                 pointStart: Date.UTC(<fmt:formatDate value="${recapActivite.date1}" pattern="yyyy"/>, <fmt:formatDate value="${recapActivite.date1}" pattern="MM"/> - 1, <fmt:formatDate value="${recapActivite.date1}" pattern="dd"/>),
                 <c:if test="${param.temporalite=='jour'}">pointInterval: 24 * 3600 * 1000 // one day</c:if>
-                    //                            pointInterval: 24 * 3600 * 1000 // one day
-                    },</c:forEach>
+        
+                    },
+            </c:forEach>
                 ]
                 });
                 });

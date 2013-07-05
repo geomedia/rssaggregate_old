@@ -1,31 +1,23 @@
 package rssagregator.beans.traitement;
 
-import com.sun.syndication.io.FeedException;
-import com.sun.syndication.io.XmlReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.UnknownHostException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.naming.TimeLimitExceededException;
+import javax.persistence.Entity;
+import javax.persistence.Transient;
 import javax.xml.ws.http.HTTPException;
-import org.apache.commons.io.IOUtils;
-import org.eclipse.persistence.internal.oxm.record.XMLReader;
-import rssagregator.beans.Item;
 
 
 /*
  */
+@Entity
 public class Requester extends AbstrRequesteur {
     
+    @Transient
     org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(Requester.class);
-
+    
     private static String description = "Requester par défault";
     /**
      * *
@@ -33,25 +25,27 @@ public class Requester extends AbstrRequesteur {
      * Gecko/20100101 Firefox/16.0". Pour certain serveur, si l'on ne spécifie
      * pas la request property on peut subir une redirection
      */
-    private String[] requestProperty;
+//    private String[] requestProperty;
     /**
      * *
      * Le timeout de la connection
      */
-    public Integer timeOut;
+
     /**
      * *
      * Après avoir effectué la requête, le requester inscrit le code retour
      * server (200, 404...) dans cette variable
      */
-    private Integer httpStatut;
+
     /**
      * *
-     * Le contenu retourné par la requête (HTML, XML...). Maintenant on préfère manier un input stream. C'est au parseru de détercter l'encodage
+     * Le contenu retourné par la requête (HTML, XML...). Maintenant on préfère
+     * manier un input stream. C'est au parseru de détercter l'encodage
      */
-    @Deprecated
-    private String HttpResult;
+
+
 //    private InputStream httpInputStream;
+    @Transient
     private HttpURLConnection conn;
 
     /**
@@ -68,60 +62,41 @@ public class Requester extends AbstrRequesteur {
      * une exeption contenant l'erreur http
      */
     @Override
-    public void requete(String urlArg) throws MalformedURLException, HTTPException,IOException {
-
+    public void requete(String urlArg) throws MalformedURLException, HTTPException, IOException, TimeLimitExceededException, Exception {
         URL url = new URL(urlArg);
-
-        conn = (HttpURLConnection) url.openConnection();
-       
         
+        
+        conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
-
-        if (this.requestProperty != null && requestProperty.length == 2) {
-            conn.setRequestProperty(this.requestProperty[0], this.requestProperty[1]);
+        
+        
+        if (timeOut != null) {
+            conn.setConnectTimeout(timeOut * 1000);            
+        } else {
+            conn.setConnectTimeout(12000);
+        }
+        
+        int i;
+        
+        if (requestProperty != null) {
+            for (i = 0; i < requestProperty.length; i = i + 2) {
+                conn.setRequestProperty(this.requestProperty[i][0], this.requestProperty[i][1]);
+            }
         }
 
+//        if (this.requestProperty != null && requestProperty.length == 2) {
+//            conn.setRequestProperty(this.requestProperty[0], this.requestProperty[1]);
+//        }
         conn.setInstanceFollowRedirects(true);
-
         conn.connect();
-        
-        
         
         this.httpStatut = conn.getResponseCode();
 //        System.out.println("CODE : " + httpStatut);
-        if(httpStatut!=200){
-            logger.info("Erreur HTTP : " + httpStatut+". " + urlArg);
+        if (httpStatut != 200) {
+            logger.info("Erreur HTTP : " + httpStatut + ". " + urlArg);
             throw new HTTPException(httpStatut);
         }
-
-
-
         this.httpInputStream = conn.getInputStream();
-        
-
-
-
-
-    }
-    public static void main(String[] args) {
-        Requester r = new Requester();
-        try {
-            r.requete("http://www.google.free");
-            
-        } catch (MalformedURLException ex) {
-           
-            Logger.getLogger(Requester.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        catch(UnknownHostException e){
-            System.out.println("fin");
-        }
-        catch (IOException ex) {
-             
-            Logger.getLogger(Requester.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        
-        
     }
 
     /**
@@ -129,57 +104,23 @@ public class Requester extends AbstrRequesteur {
      * Retourne un connecteur générique
      */
     public static AbstrRequesteur getDefaulfInstance() {
-
+        
         Requester r = new Requester();
-        r.requestProperty = new String[]{"User-Agent", "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:16.0) Gecko/20100101 Firefox/16.0"};
-        r.timeOut = 10;
+        r.requestProperty = new String[1][2];
+        r.requestProperty[0][0] = "User-Agent";
+        r.requestProperty[0][1] = "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:16.0) Gecko/20100101 Firefox/16.0";
 
+//        {{"User-Agent", "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:16.0) Gecko/20100101 Firefox/16.0"}};
+        r.timeOut = 12;
+        
         return r;
     }
-
-    public String[] getRequestProperty() {
-        return requestProperty;
-    }
-
-    public void setRequestProperty(String[] requestProperty) {
-        this.requestProperty = requestProperty;
-    }
-
-    public Integer getTimeOut() {
-        return timeOut;
-    }
-
-    public void setTimeOut(Integer timeOut) {
-        this.timeOut = timeOut;
-    }
-
-    public Integer getHttpStatut() {
-        return httpStatut;
-    }
-
-    public void setHttpStatut(Integer httpStatut) {
-        this.httpStatut = httpStatut;
-    }
-
- 
-
-    public String getHttpResult() {
-        return HttpResult;
-    }
-
-    public void setHttpResult(String HttpResult) {
-        this.HttpResult = HttpResult;
-    }
-
-
-
-
-    @Override
-    public void disconnect(){
-    conn.disconnect();
     
-}
-
+    @Override
+    public void disconnect() {
+        conn.disconnect();
+    }
+    
     @Override
     protected void finalize() throws Throwable {
         try {
@@ -190,6 +131,4 @@ public class Requester extends AbstrRequesteur {
             super.finalize();
         }
     }
-
-  
 }

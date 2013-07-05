@@ -105,13 +105,44 @@
                         </form>
 
 
-                        <ul>
-                            <c:forEach items="${listflux}" var="flux">
-                                <li><a href="flux?action=mod&id=${flux.ID}"><c:out value="${flux}"></c:out></a></li>
+                        <form>
+                            <ul id="sall">
+                                <c:forEach items="${listflux}" var="flux">
+
+
+                                    <li><input name="id" type="checkbox" value="${flux.ID}"/><a href="flux?action=mod&id=${flux.ID}"><c:out value="${flux}"></c:out></a></li>
+
+
+
                                 </c:forEach>
-                        </ul>
+                            </ul>
+                            <button type="button" value="0" id="bts">Tout sélectionner</button>
+                            <select name="action">
+                                <option value="rem">Supprimer</option>
+                                <option value="maj">Mettre à jour</option>
+                            </select>
+
+                            <script>
+                                $('#bts').click(function() {
+
+                                if(this.value==='1'){
+                                this.textContent='Déselectionner tout';
+                                this.value='0';
+                                $("#sall").find(':checkbox').prop('checked', false);
+                                }
+                                else if(this.value==='0'){
+                                this.textContent='Tout sélectionner';
+                                this.value='1';
+                                $("#sall").find(':checkbox').prop('checked', true);
+                                }
+                                });
+                            </script>
+                            <input type="submit" value="OK"/>
+                        </form>
+
+
                     </c:when>
-                    <c:when test="${action=='read-item' or action=='mod' or action=='maj' or action=='read-incident'}">
+                    <c:when test="${action=='read-item' or action=='mod' or action=='read-incident'}">
                         <h1>Administration du flux : ${flux.url}</h1>
                         <ul>
                             <li><a href="item?id-flux=${flux.ID}">Parcourir les items du flux</a></li>
@@ -146,6 +177,16 @@
 
                                 <label for="periodiciteCollecte" title="L'agrégéteur déclanche la collecte tout les x secondes">Périodicié de la collecte en seconde</label>
                                 <input type="text" id="periodiciteCollecte" name="periodiciteCollecte" value="<c:out value="${flux.periodiciteCollecte}" default="900"/>">
+                                <br />
+
+                                <label>Comportement de collecte : </label>
+                                <select name="mediatorFlux">
+                                    <c:forEach items="${listcomportement}" var="compo">
+                                        <option value="${compo.ID}" <c:if test="${flux.mediatorFlux.ID==compo.ID}"> selected="true"</c:if> >${compo}</option>
+                                    </c:forEach>
+
+                                </select>
+
                                 <br />
 
                                 <label for="journalLie" title="Un journal comprends plusieurs flux... Si vous ne trouvez pas le journal concerné, allez dans Journal-> ajouter">Journal :</label>
@@ -241,27 +282,37 @@
                     </c:when>
 
                     <c:when test="${action=='maj'}">
-                        <h2>Nouvelles items capturés : </h2>
-                        <ul>
-                            <c:set var="rien" value="<li>Collecte terminée avec succès. Aucune Item n'a cependant été trouvé dans le flux.</li>"></c:set>
-                            <c:forEach items="${flux.tacheRechup.nouvellesItems}" var="it" varStatus="varstat">
-                                <li class="item"><h3>${it.titre}</h3>
-                                    <p>${it.description}</p>
-                                </li>
-                                <c:set var="rien" value=""></c:set>
+                        <table border="1">
+                            <tr>
+                                <th>Flux</th>
+                                <th>Item trouvée</th>
+                                <th>Dedoub mémoire</th>
+                                <th>Dedoub BDD</th>
+                                <th>Item liée</th>
+                                <th>Item nouvelle</th>
+                                <th>Statut</th>
+                            </tr>
+
+                            
+                                 * 1=nombre item trouvé ; 2 dedoub memoire; 3 BDD item lié ;4 BDD item déjà présente mais lien ajouté ;  5 item nouvelles
+                            
+                            <c:forEach items="${flux}" var="fl">
+                                <tr>
+                                    <td> ${fl}</td>
+                                    <td>${fl.mediatorFluxAction.dedoubloneur.compteCapture[0]}</td>
+                                    <td>${fl.mediatorFluxAction.dedoubloneur.compteCapture[1]}</td>
+                                    <td>${fl.mediatorFluxAction.dedoubloneur.compteCapture[2]}</td>
+                                    <td>${fl.mediatorFluxAction.dedoubloneur.compteCapture[3]}</td>
+                                    <td>${fl.mediatorFluxAction.dedoubloneur.compteCapture[4]}</td>
+                                    <td>
+                                        <c:forEach items="${fl.incidentEnCours}" var="inci" varStatus="last">
+                                            <c:set var="erreur" value="1"></c:set>
+                                            ${inci.messageEreur}
+                                        </c:forEach>
+                                        <c:if test="${erreur!=1}">OK</c:if>
+                                </tr>
                             </c:forEach>
-                            ${rien}
-                        </ul>
-
-
-                        <c:if test="${flux.tacheRechup.incident!=null}">
-
-                            <p>Erreur lors de la collecte du FLUX</p>
-                            ${flux.tacheRechup.incident.messageEreur}
-                            <a href="incidents?action=mod&id=${flux.tacheRechup.incident.ID}">Voir le détail de l'incident</a>
-
-                        </c:if>
-
+                        </table>
                     </c:when>
                 </c:choose>
             </c:when>

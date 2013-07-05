@@ -14,6 +14,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -28,7 +29,7 @@ import org.eclipse.persistence.annotations.CacheType;
 public class Item implements Serializable, Comparable<Item> {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long ID;
     /**
      * *
@@ -117,7 +118,7 @@ public class Item implements Serializable, Comparable<Item> {
 
 
 
-    @ManyToMany(mappedBy = "item", fetch = FetchType.LAZY, cascade = { CascadeType.REFRESH},targetEntity = Flux.class)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.REFRESH, CascadeType.MERGE},targetEntity = Flux.class)
     private List<Flux> listFlux;
     /**
      * *

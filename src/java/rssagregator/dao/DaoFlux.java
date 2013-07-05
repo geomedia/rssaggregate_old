@@ -7,6 +7,8 @@ package rssagregator.dao;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.persistence.Query;
 import javax.persistence.RollbackException;
 import javax.persistence.TransactionRequiredException;
@@ -70,13 +72,20 @@ public class DaoFlux extends AbstrDao {
 
 
         // On doit suppimer les items liées si il sont orphelin
-        List<Item> items = flux.getItem(); //....
-        DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
-
+              DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
+//        List<Item> items = flux.getItem(); //....
+      List<Item>  items = daoItem.findByFlux(flux.getID());
+        
+  
         int i;
         for (i = 0; i < items.size(); i++) {
             //Supppression des items qui vont devenir orphelines
             if (items.get(i).getListFlux().size() < 2) {
+
+                
+                // On supprimer la relation 
+                items.get(i).getListFlux().clear();
+                daoItem.modifier(items.get(i));
                 daoItem.remove(items.get(i));
             } else { // Sinon on détach le flux
 
@@ -192,13 +201,15 @@ public class DaoFlux extends AbstrDao {
      *
      * @param flux
      */
-    public void modifierFlux(Flux flux) throws IllegalStateException, RollbackException, Exception {
+    public synchronized void modifierFlux(Flux flux) throws IllegalStateException, RollbackException, Exception {
+        
         try {
             if (flux.getID() != null && flux.getID() >= 0) {
 //                em = dAOFactory.getEntityManager();
                 em.getTransaction().begin();
                 em.merge(flux);
                 em.getTransaction().commit();
+                
             }
 
         } catch (RollbackException e) {
@@ -309,5 +320,20 @@ public class DaoFlux extends AbstrDao {
         return listResult;
 
 
+    }
+
+    public void removeall(List<Flux> flux) {
+        int i;
+        for(i=0;i<flux.size();i++){
+            try {
+                remove(flux.get(i));
+            } catch (IllegalArgumentException ex) {
+                Logger.getLogger(DaoFlux.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (TransactionRequiredException ex) {
+                Logger.getLogger(DaoFlux.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (Exception ex) {
+                Logger.getLogger(DaoFlux.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
 }

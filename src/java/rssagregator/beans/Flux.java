@@ -1,18 +1,13 @@
 package rssagregator.beans;
 
-import com.sun.syndication.feed.module.DCModuleImpl;
-import com.sun.syndication.feed.module.Module;
-import com.sun.syndication.feed.module.ModuleImpl;
-import com.sun.syndication.feed.module.SyModuleImpl;
 import com.sun.syndication.feed.opml.Attribute;
-
 import com.sun.syndication.feed.opml.Opml;
 import com.sun.syndication.feed.opml.Outline;
 import java.io.Serializable;
 import java.net.URL;
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import rssagregator.beans.traitement.MediatorCollecteAction;
 import java.util.List;
 import java.util.Observable;
@@ -104,10 +99,10 @@ public class Flux extends Bean implements Observer, Serializable {
     private List<Item> listDernierItemCollecte;
     /**
      *
-     * Liste des Item du flux. Permet de matérialiser la relation entre flux et
+     * Liste des Item du flux. La relation est possédée par l'item !! Il faut passer par la DAO pour obtenir la liste des items. 
      * Item
      */
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, mappedBy = "listFlux")
     private List<Item> item;
     /**
      * Un objet flux peut posséder différents incidents. Un incident ne possède
@@ -151,8 +146,19 @@ public class Flux extends Bean implements Observer, Serializable {
      */
     //TODO : pas encore géré
 //    @OneToOne(cascade = CascadeType.MERGE) 
+    
+    @OneToOne(cascade = CascadeType.MERGE)
+    private MediatorCollecteAction mediatorFlux;
+    
+    
+    
+    /***
+     * C'est une copie du modèle.
+     */
     @Transient
-    private MediatorCollecteAction MediatorFlux;
+    private MediatorCollecteAction mediatorFluxAction;
+    
+    
     /**
      * On ne persiste pas ce champs
      */
@@ -190,6 +196,17 @@ public class Flux extends Bean implements Observer, Serializable {
      */
     @Transient
     List<DebugRecapLeveeFlux> debug;
+    
+
+    
+    
+    /***
+     * Les incident en cours sont gardée en mémoire mais pas persisté. Il faut les charger au démarrage.
+     */
+    @Transient
+    List<FluxIncident> incidentEnCours;
+    
+    
 
     public List<DebugRecapLeveeFlux> getDebug() {
         return debug;
@@ -218,7 +235,22 @@ public class Flux extends Bean implements Observer, Serializable {
         this.item = new ArrayList<Item>();
         this.listDernierItemCollecte = new ArrayList<Item>();
     }
+    
+    
+    
 
+    public MediatorCollecteAction getMediatorFluxAction() {
+        return mediatorFluxAction;
+    }
+
+    public void setMediatorFluxAction(MediatorCollecteAction mediatorFluxAction) {
+        this.mediatorFluxAction = mediatorFluxAction;
+    }
+
+    
+    
+    
+    
     public String getUrl() {
         return url;
     }
@@ -315,11 +347,11 @@ public class Flux extends Bean implements Observer, Serializable {
     }
 
     public MediatorCollecteAction getMediatorFlux() {
-        return MediatorFlux;
+        return mediatorFlux;
     }
 
     public void setMediatorFlux(MediatorCollecteAction MediatorFlux) {
-        this.MediatorFlux = MediatorFlux;
+        this.mediatorFlux = MediatorFlux;
     }
 
     public Flux getParentFlux() {
@@ -342,23 +374,29 @@ public class Flux extends Bean implements Observer, Serializable {
 
         this.debug = new ArrayList<DebugRecapLeveeFlux>();
         this.item = new ArrayList<Item>();
-        this.lastEmpruntes = new ArrayList<String>();
+//        this.lastEmpruntes = new ArrayList<String>();
+        this.lastEmpruntes = new LinkedList<String>();
 
-        this.MediatorFlux = MediatorCollecteAction.getDefaultCollectAction();
+        this.mediatorFlux = MediatorCollecteAction.getDefaultCollectAction();
         this.incidentsLie = new ArrayList<FluxIncident>();
+        
+        this.incidentEnCours = new ArrayList<FluxIncident>();
     }
 
     public Flux(String url) {
         this.debug = new ArrayList<DebugRecapLeveeFlux>();
         this.item = new ArrayList<Item>();
-        this.lastEmpruntes = new ArrayList<String>();
+//        this.lastEmpruntes = new ArrayList<String>();
+        this.lastEmpruntes = new LinkedList<String>();
 
-        this.MediatorFlux = MediatorCollecteAction.getDefaultCollectAction();
+        this.mediatorFlux = MediatorCollecteAction.getDefaultCollectAction();
         this.incidentsLie = new ArrayList<FluxIncident>();
         this.url = url;
 
         this.periodiciteCollecte = 3600;
         this.active = Boolean.TRUE;
+        
+        this.incidentEnCours = new ArrayList<FluxIncident>();
 
     }
 
@@ -423,6 +461,8 @@ public class Flux extends Bean implements Observer, Serializable {
         this.modified = modified;
     }
 
+    
+    
     /**
      * *
      * Parcours les incidents et retourne ceux qui ne sont pas clos, cad ceux
@@ -431,16 +471,19 @@ public class Flux extends Bean implements Observer, Serializable {
      * @return
      */
     public List<FluxIncident> getIncidentEnCours() {
-        List<FluxIncident> iRetour = new ArrayList<FluxIncident>();
-
-        int i;
-        for (i = 0; i < this.incidentsLie.size(); i++) {
-
-            if (this.incidentsLie.get(i).getDateFin() == null) {
-                iRetour.add(this.incidentsLie.get(i));
-            }
-        }
-        return iRetour;
+        return incidentEnCours;
+//        List<FluxIncident> iRetour = new ArrayList<FluxIncident>();
+//        
+//        List<FluxIncident> fluxIncidents;
+//        fluxIncidents = DAOFactory.getInstance().getDAOIncident().findByFlux(this.ID);
+//
+//        int i;
+//        for (i = 0; i < this.incidentsLie.size(); i++) {
+//            if (this.incidentsLie.get(i).getDateFin() == null) {
+//                iRetour.add(this.incidentsLie.get(i));
+//            }
+//        }
+//        return iRetour;
     }
 
     /**

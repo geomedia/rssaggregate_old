@@ -26,7 +26,7 @@ public class FluxIncident extends AbstrIncident implements Serializable  {
    *  Un objet flux peut posséder différents incidents. Un incident ne possède qu'un flux. 
    */
     
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private Flux fluxLie;
       
     

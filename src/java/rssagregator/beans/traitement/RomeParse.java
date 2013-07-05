@@ -18,13 +18,25 @@ import java.util.logging.Logger;
 import rssagregator.beans.Item;
 import com.sun.syndication.io.XmlReader;
 import java.util.Date;
+import java.util.concurrent.Callable;
+import javax.persistence.Entity;
+import javax.persistence.Transient;
+
 /**
  * test
  */
-public class RomeParse extends AbstrParseur implements IfsObjetDeTraitement, IfsParseur {
+@Entity
+public class RomeParse extends AbstrParseur implements IfsObjetDeTraitement, IfsParseur, Cloneable {
     /* {author=clem}*/
 
+    /***
+     * Le input stream provenant du requester
+     */
 
+    
+    
+    @Transient
+    org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(RomeParse.class);
     private final static String description = "Le parseur ROME est trop super...";
 
     /**
@@ -39,8 +51,16 @@ public class RomeParse extends AbstrParseur implements IfsObjetDeTraitement, Ifs
     @Override
     public List<Item> execute(InputStream xmlIS) throws IOException, IllegalArgumentException, FeedException {
         List<Item> listItems = new ArrayList<Item>();
-        XmlReader reader = new XmlReader(xmlIS);
 
+        try {
+            
+        } catch (Exception e) {
+        }
+        XmlReader reader = new XmlReader(xmlIS);
+        
+   
+
+        
         SyndFeedInput feedInput = new SyndFeedInput();
 
         feedInput.setPreserveWireFeed(true);
@@ -52,7 +72,7 @@ public class RomeParse extends AbstrParseur implements IfsObjetDeTraitement, Ifs
         for (Iterator i = feed.getEntries().iterator(); i.hasNext();) {
             // Création d'un nouveau beans Item
             Item new_item = new Item();
-            
+
             SyndEntry entry = (SyndEntry) i.next();
 
             if (entry.getTitle() != null) {
@@ -82,65 +102,63 @@ public class RomeParse extends AbstrParseur implements IfsObjetDeTraitement, Ifs
 
 // Si c'est un feed rss, captation du GUID
             if (entry.getWireEntry() instanceof com.sun.syndication.feed.rss.Item) {
-              
-                
+
+
                 if (entry.getWireEntry() instanceof com.sun.syndication.feed.rss.Item) {
 //                    import com.sun.syndication.feed.rss.Item;
                     com.sun.syndication.feed.rss.Item it;
                     it = (com.sun.syndication.feed.rss.Item) entry.getWireEntry();
-                   if(it.getGuid() != null){
+                    if (it.getGuid() != null) {
 //                    result += "GUID : " + s.getGuid().getValue();                      
-                       new_item.setGuid(it.getGuid().getValue());
-                   }
+                        new_item.setGuid(it.getGuid().getValue());
+                    }
                 }
-                
+
             }
-            
-            
+
+
             // Gesion de la date
-            if(entry.getPublishedDate() != null){
+            if (entry.getPublishedDate() != null) {
                 new_item.setDatePub(entry.getPublishedDate());
             }
-            
+
             //Concat de toutes les catégories
-            
-            if(entry.getCategories()!= null && entry.getCategories().size()>0){
+
+            if (entry.getCategories() != null && entry.getCategories().size() > 0) {
 
                 int j;
-                String concat ="";
-                for(j=0; j<entry.getCategories().size(); j++){
+                String concat = "";
+                for (j = 0; j < entry.getCategories().size(); j++) {
                     SyndCategoryImpl cat = (SyndCategoryImpl) entry.getCategories().get(j);
-                    concat+=cat.getName()+"; ";
+                    concat += cat.getName() + "; ";
                 }
-                concat = concat.substring(0, concat.length()-2);
+                concat = concat.substring(0, concat.length() - 2);
                 new_item.setCategorie(concat);
-                
+
             }
-            
+
             // On inscrit la date de récupération
             Date datecourante = new Date();
             new_item.setDateRecup(datecourante);
-            
+
 
             result += "\n------------------------------------------\n";
 //            System.out.println(result);
 
             listItems.add(new_item);
         }
-        
-        // Calcul des hash
-        int i;
-        for(i=0; i< listItems.size(); i++){
-            try {
-                calculHash(listItems);
-            } catch (NoSuchAlgorithmException ex) {
-                Logger.getLogger(RomeParse.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
+
+//        // Calcul des hash
+//        int i;
+//        for(i=0; i< listItems.size(); i++){
+//            try {
+//                calculHash(listItems);
+//            } catch (NoSuchAlgorithmException ex) {
+//                Logger.getLogger(RomeParse.class.getName()).log(Level.SEVERE, null, ex);
+//            }
+//        }
         return listItems;
     }
-    
-
 
     /**
      * *
@@ -161,6 +179,24 @@ public class RomeParse extends AbstrParseur implements IfsObjetDeTraitement, Ifs
 
     @Override
     public void testParse() {
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return super.clone(); //To change body of generated methods, choose Tools | Templates.
+    }
+
+
+    public void run() {
+  
+        
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public  List<Item> call() throws Exception {
+        return execute(xmlIS);
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

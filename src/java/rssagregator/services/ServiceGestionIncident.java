@@ -32,6 +32,39 @@ public class ServiceGestionIncident {
 
     /**
      * *
+     * Parcours les incidents du flux et clos si certain sont ouverts. Cette
+     * méthode est utilisée à la fin de la tache de récup. Si la récup s'est
+     * bien déroulé, alors il est nécessaire de clore
+     *
+     * @param flux
+     */
+    public static void fermerLesIncidentsDuFlux(Flux flux) {
+        int i;
+        List<FluxIncident> incidentOuvert = flux.getIncidentEnCours();
+
+
+        System.out.println("NBR INCIDENT : " + flux.getIncidentEnCours());
+
+        for (i = 0; i < incidentOuvert.size(); i++) {
+            // On vérifi quand même que la date de fin est bien null
+            if (incidentOuvert.get(i).getDateFin() == null) {
+                try {
+                    incidentOuvert.get(i).setDateFin(new Date());
+                    DAOFactory.getInstance().getDAOIncident().modifier(incidentOuvert.get(i));
+                    flux.getIncidentEnCours().remove(incidentOuvert.get(i));
+                } catch (Exception ex) {
+                    Logger.getLogger(ServiceGestionIncident.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+            }
+        }
+
+
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    /**
+     * *
      * Construceur prive, c'est un singleton...
      */
     private ServiceGestionIncident() {
@@ -61,21 +94,30 @@ public class ServiceGestionIncident {
 
             incident.setLogErreur(ex.getClass().getSimpleName() + " : " + ex.getLocalizedMessage());
 
-            flux.getIncidentsLie().add(incident);
+//            flux.getIncidentsLie().add(incident);
             incident.setFluxLie(flux);
 
+
+            try {
+
+                DAOFactory.getInstance().getDAOIncident().creer(incident);
+                flux.getIncidentEnCours().add(incident);
+
+            } catch (Exception ex1) {
+                Logger.getLogger(ServiceGestionIncident.class.getName()).log(Level.SEVERE, null, ex1);
+            }
         } else {
             int nbr = incident.getNombreTentativeEnEchec();
             nbr++;
             incident.setNombreTentativeEnEchec(nbr);
 
+            try {
+                DAOFactory.getInstance().getDAOIncident().modifier(incident);
+                DAOFactory.getInstance().getDAOIncident().creer(incident);
+            } catch (Exception ex1) {
+                Logger.getLogger(ServiceGestionIncident.class.getName()).log(Level.SEVERE, null, ex1);
+            }
         }
-        try {
-            DAOFactory.getInstance().getDAOFlux().modifierFlux(flux);
-        } catch (Exception ex1) {
-            Logger.getLogger(ServiceGestionIncident.class.getName()).log(Level.SEVERE, null, ex1);
-        }
-
         return incident;
     }
 
@@ -85,8 +127,8 @@ public class ServiceGestionIncident {
         incident.setEntiteErreur(objEnErreur.getClass());
         incident.setMessageEreur(msg);
 
-         incident.setLogErreur(e.getClass().getSimpleName() + " : " + e.toString());
-        
+        incident.setLogErreur(e.getClass().getSimpleName() + " : " + e.toString());
+
         Date dateDebut = new Date();
         incident.setDateDebut(dateDebut);
         incident.setNombreTentativeEnEchec(1);
@@ -151,7 +193,7 @@ public class ServiceGestionIncident {
             } else if (exception instanceof FeedException) { // Erreur de parsage du flux
                 return creeIncidentFLux("FeedException : Impossible de parser le flux XML : " + flux, flux, exception);
             } else if (exception instanceof RollbackException) {
-                creeIncidentBDD("Erreur RoolBock : ", objEnErreur, exception);
+                creeIncidentBDD("Erreur RollbackException : ", objEnErreur, exception);
             } else if (exception instanceof Exception) {
                 return creeIncidentFLux("ERREUR inconnue : " + flux, flux, exception);
 

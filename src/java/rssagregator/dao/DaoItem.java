@@ -7,7 +7,11 @@ package rssagregator.dao;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.persistence.EntityExistsException;
 import javax.persistence.Query;
+import javax.persistence.RollbackException;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -22,6 +26,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
+import rssagregator.beans.traitement.AbstrDedoublonneur;
 
 /**
  *
@@ -39,6 +44,7 @@ public class DaoItem extends AbstrDao {
     Integer maxResult;
     Date date1;
     Date date2;
+    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DaoItem.class);
 
     protected DaoItem(DAOFactory daof) {
 
@@ -323,6 +329,23 @@ public class DaoItem extends AbstrDao {
 
     /**
      * *
+     * retourne l'item possédant le hash
+     *
+     * @param hash
+     * @return
+     */
+    public Item findItemByHash(String hash) {
+
+        Item item;
+
+        Query query = em.createQuery("SELECT i FROM Item i WHERE i.hashContenu=:hash");
+        query.setParameter("hash", hash);
+        item = (Item) query.getSingleResult();
+        return item;
+    }
+
+    /**
+     * *
      * Cette méthode est utilisée au démarrage de l'application pour précharger
      * les derniers hash des flux.
      *
@@ -404,5 +427,59 @@ public class DaoItem extends AbstrDao {
 
     public void setDate2(Date date2) {
         this.date2 = date2;
+    }
+
+    public synchronized void enregistrement(Item item, Flux flux) {
+        // On tente de créer l'item.
+
+        Boolean err = false;
+        try {
+            em.getTransaction().begin();
+            em.persist(item);
+            em.getTransaction().commit();
+
+
+        } catch (EntityExistsException existexeption) { // En cas d'erreur, on se rend compte qu'une item possédant le hash existe déjà
+            err = true;
+        } catch (RollbackException e) {
+            err = true;
+        } catch (Exception e) {
+            System.out.println("ERR");
+        }
+
+
+        // Si on n'a pas réussi à créer l'item car il existe déjà une item possédant le hash
+        if (err) {
+            logger.debug("Item déjà existente lors de l'enregistrement");
+            Item it = findByHash(item.getHashContenu());
+            int i;
+            it.getListFlux().add(flux);
+            try {
+                modifier(it);
+            } catch (Exception ex) {
+                Logger.getLogger(DaoItem.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        //On ajoute le hash à la liste des hash capturée
+        flux.getLastEmpruntes().add(0, item.getHashContenu());
+    }
+
+    /**
+     * *
+     * Retrouve la liste des items appartenant au flux
+     *
+     * @param idflux : id du flux
+     * @return liste d'item
+     */
+    List<Item> findByFlux(Long idflux) {
+        String REQ = "SELECT item FROM Item item JOIN item.listFlux flux where flux.ID=:fluxid";
+        List<Item> item;
+        Query query = em.createQuery(REQ);
+        query.setParameter("fluxid", idflux);
+        item = (List<Item>) query.getResultList();
+        System.out.println("LISTTTT : " + item.size());
+        return item;
+
     }
 }

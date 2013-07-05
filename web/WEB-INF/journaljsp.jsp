@@ -56,7 +56,13 @@
 
                     <c:when test="${action=='mod' or action=='add'}">
                         <h2>Administration du journal : ${journal.nom}</h2>
-                        <a href="journaux?action=rem&id=${journal.ID}">Supprimer journal</a>
+                        <ul>
+                            <li>  <a href="journaux?action=rem&id=${journal.ID}">Supprimer journal</a></li>
+                            <li>  <a href="flux?action=list&journal-id=${journal.ID}">Parcourir les flux du journal</a></li>
+                            
+                        </ul>
+                      
+                      
                         ${form.resultat}
                         <form method="post" action="journaux?action=<c:out value="${action}"></c:out>">
                                 <fieldset>
@@ -65,8 +71,15 @@
                                     <input type="text" id="nom" name="nom" value="<c:out value="${journal.nom}" />" size="20" maxlength="60" />
                                 <span class="erreur"> ${form.erreurs['nom']}</span>
 
+                                <br />
+                                
+                                
+                                <label>urlHtmlRecapFlux : </label>
+                                <input type="text" name="urlHtmlRecapFlux" value="<c:out value="${journal.urlHtmlRecapFlux}"></c:out>"/>
 
-                                <br>
+                                
+                                
+                                <br />
                                 <label for="langue">Langue : </label>
                                 <select name="langue" id="langue">
                                     <c:forEach items="${listLocal}" var="loc">

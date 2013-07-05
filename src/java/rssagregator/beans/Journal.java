@@ -12,6 +12,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 
 /**
  * Un journal : Le monde, le Figaro... Chaque journal est instancier dans un
@@ -44,21 +45,25 @@ public class Journal extends Bean implements Serializable {
      */
     @Column(name = "langue", length = 4)
     private String langue;
-    
-    
     @Column(name = "pays", length = 60)
     private String pays;
-    
     /**
      * Un journal possède plusieurs flux.
      */
     @OneToMany(mappedBy = "journalLie", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Flux> fluxLie;
+    
+    
+    /***
+     * Il s'agit de la page html permettant de trouver tous les flux RSS. Pour de nombreux journaux, on a une page de ce type. 
+     */
+    @Column(name = "urlHtmlRecapFlux", length = 2000)
+    private String urlHtmlRecapFlux;
 
     public Journal() {
         this.fluxLie = new ArrayList<Flux>();
     }
- 
+
     public Long getID() {
         return ID;
     }
@@ -76,7 +81,7 @@ public class Journal extends Bean implements Serializable {
     }
 
     public String getFuseauHorraire() {
-        
+
         return fuseauHorraire;
     }
 
@@ -108,9 +113,17 @@ public class Journal extends Bean implements Serializable {
         this.pays = pays;
     }
 
+    public String getUrlHtmlRecapFlux() {
+        return urlHtmlRecapFlux;
+    }
+
+    public void setUrlHtmlRecapFlux(String urlHtmlRecapFlux) {
+        this.urlHtmlRecapFlux = urlHtmlRecapFlux;
+    }
     
     
     
+
     //    @Override
     //    public boolean equals(Object obj) {
     //        return false;
@@ -137,9 +150,6 @@ public class Journal extends Bean implements Serializable {
     ////
     ////        return true;
     //    }
-
-   
-
     public static void main(String[] args) {
         Journal j1 = new Journal();
         j1.setNom("j1");

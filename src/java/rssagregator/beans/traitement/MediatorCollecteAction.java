@@ -6,6 +6,15 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -31,8 +40,12 @@ import rssagregator.beans.Item;
  */
 @Entity
 @Table(name = "tr_mediatocollecteaction")
-public class MediatorCollecteAction implements Serializable {
+public class MediatorCollecteAction implements Serializable, Cloneable {
 
+    @Transient
+    org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(MediatorCollecteAction.class);
+    
+    
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long ID;
@@ -41,23 +54,33 @@ public class MediatorCollecteAction implements Serializable {
      * les réutiliszzer par la suite. Exemple : "captation des flux devant être
      * parser par X" ou "flux contenant des renvoie génant"
      */
+    @Column(name = "nom")
     private String nom;
     /**
      * On laisse la possibilité de décrire plus longuement le comportement de
      * capture
      */
+    @Column(name = "description", columnDefinition = "text")
     private String description;
+    /**
+     * *
+     * Parmis toute les entités, une est considérée comme le comportement de
+     * collecte par defaut, ce boolean permet de déterminer ce comportement par
+     * défaut.
+     */
+    @Column(name = "defaut")
+    protected Boolean defaut;
     /**
      * *
      * Le parseur propre au médiateur.
      */
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private AbstrParseur parseur;
     /**
      * Le requesteur propre au médiateur. C'est l'objet qui permet de formuler
      * des requêtes http
      */
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private AbstrRequesteur requesteur;
     /**
      * Le mediator flux permet d'assigner un flux un comportement de collecte.
@@ -75,8 +98,8 @@ public class MediatorCollecteAction implements Serializable {
      * raffineurs vont être très souvent réutilisé d'ou l'emploi d'un médiateur
      * pour les manier
      */
-    @Transient
-    private List<MediatorTraitementRafinage> rafineurHTML;
+//    @Transient    LE RAFFINAGE NEST PLUS CONSIDÉRÉ COMME UN TRAITEMENT DE COLECTE; IL N'EST DESTINEE QUA FAIRE DES EXPORT EN CSV
+//    private List<MediatorTraitementRafinage> rafineurHTML;
     /**
      * *
      * Nettoyeur, une classe pas encore certaine.
@@ -87,9 +110,8 @@ public class MediatorCollecteAction implements Serializable {
      * *
      * Dédoublonneur du médiateur.
      */
-    @Transient
+    @OneToOne(cascade = CascadeType.ALL)
     private AbstrDedoublonneur dedoubloneur;
-    
     @Transient
     private Integer nbrItemCollecte;
 
@@ -105,25 +127,62 @@ public class MediatorCollecteAction implements Serializable {
     public List<Item> executeActions(Flux flux) throws MalformedURLException, IOException, HTTPException, FeedException, HTTPException, Exception {
 // On vérifie si le collecteur est actif. Pour lancer la collecte
         // On commence par récupérer le flux
-        
-        
-        this.requesteur.requete(flux.getUrl());
-      
 
-//        String retourHTTP = this.requesteur.getHttpResult();
-        
+
+       
+
+
+//-----------------------
+// REQUESTEUR
+//-----------------------
+
+        if(requesteur.timeOut==null){
+            requesteur.timeOut=15;
+            System.out.println("");
+        }
+         this.requesteur.requete(flux.getUrl());
         InputStream retourInputStream = this.requesteur.getHttpInputStream();
         
-      
+
+
         
-        // On parse le retour du serveur 
-        List<Item> listItem = parseur.execute(retourInputStream);
+        //-----------------------------
+        //  Parseur
+        //-----------------------------
+
+        
+        // On parse le retour du serveur. Le parseur doit se comporter comme une thread car il faut limiter le temps d'execution. Très facile avec un runnable.
+        parseur.setXmlIS(retourInputStream);
+
+        ExecutorService executor = Executors.newFixedThreadPool(1);
+        Future<List<Item>> futurs = executor.submit(parseur);
+        List<Item> listItem = futurs.get(requesteur.getTimeOut(), TimeUnit.SECONDS);
+
+
+
+        logger.debug("fin de parse");
         this.nbrItemCollecte = listItem.size();
 
         // On dédoublonne
-        //TODO : Il faut dédoublonner dans le médiator collecte action. La liste retounée corespond aux items devant être lié au flux. Il peut s'agir d'item nouvelles ou d'item déjà enregistrée mais pas encore lié au flux traité
+
+        // calcul des Md5
+        this.dedoubloneur.calculHash(listItem);
+
+
         listItem = this.dedoubloneur.dedoublonne(listItem, flux);
         
+        
+        
+        //----------------------------------------------
+        //   Enregistrement des résultats
+        //----------------------------------------------
+        
+        
+        
+        
+        
+        
+
         this.requesteur.disconnect();
         return listItem;
     }
@@ -143,9 +202,19 @@ public class MediatorCollecteAction implements Serializable {
     public static MediatorCollecteAction getDefaultCollectAction() {
         MediatorCollecteAction collecteAction = new MediatorCollecteAction();
 
+        collecteAction.setDefaut(false);
+
         collecteAction.requesteur = Requester.getDefaulfInstance();
         collecteAction.parseur = RomeParse.getDefaultInstance();
+
+
         collecteAction.dedoubloneur = new Dedoubloneur();
+        collecteAction.dedoubloneur.setDeboubTitle(Boolean.TRUE);
+        collecteAction.dedoubloneur.setDeboudDesc(Boolean.TRUE);
+        collecteAction.dedoubloneur.setDedouGUID(Boolean.TRUE);
+        collecteAction.dedoubloneur.setDedoubCategory(Boolean.FALSE);
+        collecteAction.dedoubloneur.setDedoubDatePub(Boolean.FALSE);
+        collecteAction.dedoubloneur.setDedoubLink(Boolean.TRUE);
         return collecteAction;
     }
 
@@ -208,14 +277,6 @@ public class MediatorCollecteAction implements Serializable {
         this.parseur = parseur;
     }
 
-    public List<MediatorTraitementRafinage> getRafineurHTML() {
-        return rafineurHTML;
-    }
-
-    public void setRafineurHTML(List<MediatorTraitementRafinage> rafineurHTML) {
-        this.rafineurHTML = rafineurHTML;
-    }
-
     public Nettoyeur getMyNettoyeur() {
         return myNettoyeur;
     }
@@ -239,7 +300,66 @@ public class MediatorCollecteAction implements Serializable {
     public void setNbrItemCollecte(Integer nbrItemCollecte) {
         this.nbrItemCollecte = nbrItemCollecte;
     }
-    
-    
-    
+
+    public Boolean getDefaut() {
+        return defaut;
+    }
+
+    public void setDefaut(Boolean defaut) {
+        this.defaut = defaut;
+    }
+
+    @Override
+    public String toString() {
+
+        if (this.nom != null && !this.nom.isEmpty()) {
+            return this.nom;
+        } else {
+
+            return "unamed";
+        }
+    }
+
+    @Override
+    protected MediatorCollecteAction clone() throws CloneNotSupportedException {
+        MediatorCollecteAction clone = null;
+
+        clone = (MediatorCollecteAction) super.clone();
+
+        clone.parseur = (AbstrParseur) this.parseur.clone();
+        clone.dedoubloneur = (AbstrDedoublonneur) this.dedoubloneur.clone();
+//        clone.dedoubloneur.getCompteCapture()[0]=0;
+//        clone.dedoubloneur.getCompteCapture()[1]=1;
+//        clone.dedoubloneur.getCompteCapture()[2]=0;
+//        clone.dedoubloneur.getCompteCapture()[3]=0;
+//        clone.dedoubloneur.setDedoubDatePub(true);
+
+
+
+        System.out.println("");
+
+        clone.requesteur = (AbstrRequesteur) this.requesteur.clone();
+        return clone;
+//        return super.clone(); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public MediatorCollecteAction genererClone() throws CloneNotSupportedException {
+        return this.clone();
+    }
+
+    public static void main(String[] args) {
+        try {
+            MediatorCollecteAction mca = MediatorCollecteAction.getDefaultCollectAction();
+                        System.out.println("time out 1 : " + mca.getRequesteur().getTimeOut());
+            MediatorCollecteAction mca2 = (MediatorCollecteAction) mca.clone();
+            
+            
+            System.out.println("time out 1 : " + mca.getRequesteur().getTimeOut());
+            System.out.println("time out 1 : " + mca2.getRequesteur().getTimeOut());
+
+
+        } catch (CloneNotSupportedException ex) {
+            Logger.getLogger(MediatorCollecteAction.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 }

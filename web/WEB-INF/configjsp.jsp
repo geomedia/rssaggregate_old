@@ -18,7 +18,7 @@
 </div>
 <div id="sidebar">
     <p><a href="config">générale</a></p>
-    <p><a href="comportementcollecte">Gérer les compotement </a></p>
+    <p><a href="ComportementCollecte">Gérer les compotement </a></p>
     <p><a href="TypeFluxSrvl">Gérer les types de flux </a></p>
     <p><a href="slave">Gérer les serveurs esclave</a></p>
 </div>

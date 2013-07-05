@@ -4,8 +4,8 @@
  */
 package rssagregator.beans;
 
+import java.util.ArrayList;
 import rssagregator.dao.DAOFactory;
-import rssagregator.dao.DaoItem;
 import java.util.Date;
 import java.util.List;
 import java.util.Observable;
@@ -13,7 +13,9 @@ import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import rssagregator.beans.incident.AbstrIncident;
+import rssagregator.dao.DaoItem;
 import rssagregator.services.ServiceCollecteur;
+import rssagregator.services.ServiceGestionIncident;
 
 /**
  *
@@ -57,87 +59,65 @@ public class TacheRecupCallable extends Observable implements Callable<List<Item
     public List<Item> call() throws Exception {
         // On block le flux pour eviter que la tache automanique et la tache manuelle agissent en même temps
         synchronized (this.flux) {
-
-            logger.debug("Recup du flux : " + this.flux.getID() + ". " + flux);
-
-
+            nouvellesItems = new ArrayList<Item>();
             flux.setTacheRechup(this);
+            //On crée une copie du mediator devant être employé. C'est notre façon d'être thread safe
+            this.flux.setMediatorFluxAction(this.flux.getMediatorFlux().genererClone());
 
-            nouvellesItems = this.flux.getMediatorFlux().executeActions(this.flux);
-//                   logger.info("Recup du flux : " + this.flux.getID()+". "+flux+" Nombre de nouvelles item : " + nouvellesItems.size());
-
-
-//            System.out.println("###############################################################");
-//            System.out.println("Lancement de la tache : " + flux.getUrl());
-//            System.out.println("Nombre d'item rapporté pa le médiatoAction (nouvelles ou a lier) : " + nouvellesItems.size());
-//            System.out.println("###############################################################");
-            // On enregistre ces nouvelles items
-
-            DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
-
-            int i;
-            for (i = 0; i < nouvellesItems.size(); i++) {
-                // 
-                nouvellesItems.get(i).getListFlux().add(flux);
-//                daoItem.creer(nouvellesItems.get(i));
-                this.flux.addItem(nouvellesItems.get(i));
-//                DAOFactory.getInstance().getEntityManager().refresh(flux);
-
-//                this.flux.getItem().add(nouvellesItems.get(i));
-                this.flux.getLastEmpruntes().add(nouvellesItems.get(i).getHashContenu());
+            //On lance la capture en utilisant le mediator qui vient d'être crée. Les erreurs sont générée ici
+            try {
+                nouvellesItems = this.flux.getMediatorFluxAction().executeActions(this.flux);
+            } catch (Exception e) {
+                //si erreur on leve l'exeption et on lance l'enregistremnet de celle ci. on stoppe la tache
+                this.incident = ServiceGestionIncident.getInstance().gererIncident(e, flux);
+                logger.error(e);
+                throw e;
             }
 
-            // On supprime des hash pour éviter l'accumulation. On en laisse 20 en plus du nombre d'item contenues dans le flux.
-
-            Integer nbr = flux.getMediatorFlux().getNbrItemCollecte() + 19;
-            if (nbr > 0 && nbr < flux.getLastEmpruntes().size()) {
-                for (i = nbr; i < flux.getLastEmpruntes().size(); i++) {
-                    flux.getLastEmpruntes().remove(i);
-
-//                    System.out.println("TACHE RECUP : SUPPRESSION D'UN HASH");
+            // On enregistre ces nouvelles items
+            int i;
+            DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
+            for (i = 0; i < nouvellesItems.size(); i++) {
+                //On précise à la nouvelle item qu'elle appartient au flux collecté
+                nouvellesItems.get(i).getListFlux().add(flux);
+                if (persit) {
+                    daoItem.enregistrement(nouvellesItems.get(i), flux);
+//                    this.flux.getLastEmpruntes().add(0, nouvellesItems.get(i).getHashContenu());
                 }
             }
 
-            flux.fermerLesIncidentOuvert();
+            // On supprime des hash pour éviter l'accumulation. On en laisse 10 en plus du nombre d'item contenues dans le flux.
+            Integer nbr = flux.getMediatorFluxAction().getDedoubloneur().getCompteCapture()[0] + 10;
+            if (nbr > 0 && nbr < flux.getLastEmpruntes().size()) {
+                for (i = nbr; i < flux.getLastEmpruntes().size(); i++) {
+                    flux.getLastEmpruntes().remove(i);
+                }
+            }
 
+
+            ServiceGestionIncident.fermerLesIncidentsDuFlux(flux);
+//            flux.fermerLesIncidentOuvert();
+
+            //Devra être supprimé à la fin
             DebugRecapLeveeFlux debug = new DebugRecapLeveeFlux();
             debug.setDate(new Date());
             debug.setNbrRecup(nouvellesItems.size());
             flux.getDebug().add(debug);
 
 
-
-            // TODO : On peut utiliser le pattern observer pour notifier au flux des nouveautés. Il faut en effet enregistrer les incidents
-            if (persit) {
-                try {
-                    DAOFactory.getInstance().getDAOFlux().modifierFlux(flux);
-                } catch (Exception e) {
-                }
-
-            }
-
-//                ListeFluxCollecteEtConfigConrante.getInstance().modifierFlux(flux);
-//            logger.info("Tache RECUP : NBR item Collecté après dédoublonage : ");
-//            System.out.println("Tache RECUP : NBR item Collecté après dédoublonage : " + flux.getItem().size());
-
-
+            // TODO le fait de réajouté la tache doit aussi être géré par le service de gestion des incidents
             // Si il s'agit d'une tache schedule, il faut la réajouter au scheduler
             if (tacheSchedule) {
                 ServiceCollecteur.getInstance().addScheduledCallable(this);
             }
 
             // On supprimer les items capturée du cache de l'ORM pour éviter l'encombrement
-
             for (i = 0; i < nouvellesItems.size(); i++) {
                 DAOFactory.getInstance().getEntityManager().detach(nouvellesItems.get(i));
             }
 
-
-
-            logger.info("Flux : " + this.flux.getID() + ". (" + flux + "). Nbr item recup : " + nouvellesItems.size());
             return nouvellesItems;
         }
-
     }
 
     public List<Item> getNouvellesItems() {

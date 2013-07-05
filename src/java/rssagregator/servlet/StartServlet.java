@@ -38,7 +38,6 @@ public class StartServlet implements ServletContextListener {
     public void contextInitialized(ServletContextEvent sce) {
         
         try {
-            System.out.println("fkldsjfkljdslkqjflkdsqjdlfkjqsdlkfjlksdqjflkdjqsf sdfqqsdf");
             Class.forName("com.mysql.jdbc.Driver");
             System.out.println("DEBUTT");
             
