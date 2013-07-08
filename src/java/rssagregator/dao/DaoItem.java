@@ -64,18 +64,30 @@ public class DaoItem extends AbstrDao {
 
     /**
      * *
-     * Permet de trouver un item à partir de son hash
+     *
      *
      * @param hash
      */
-    public Item findByHash(String hash) {
+    /**
+     * *
+     * Permet de trouver un item à partir de son hash
+     *
+     * @param hash
+     * @return L'item ou null si pas de réponse
+     */
+    public synchronized Item findByHash(String hash) {
 //        em = dAOFactory.getEntityManager();
 //        em.getTransaction().begin();
         Query query = em.createQuery(REQ_FIND_BY_HASH);
         query.setParameter("hash", hash);
-        Item result = (Item) query.getSingleResult();
-//        em.close();
-        return result;
+        try {
+
+            Item result = (Item) query.getSingleResult();
+            return result;
+        } catch (Exception e) {
+            return null;
+        }
+
     }
 
     public List<Item> findCretaria() {
@@ -304,7 +316,7 @@ public class DaoItem extends AbstrDao {
      * @return List de flux possédant un hash dans la liste et étant lié au flux
      * sélectioné.
      */
-    public List<Item> findHashFlux(List<Item> hashContenu, Flux flux) {
+    public synchronized List<Item> findHashFlux(List<Item> hashContenu, Flux flux) {
 //        em = dAOFactory.getEntityManager();
 //        em.getTransaction().begin();
 
@@ -430,39 +442,45 @@ public class DaoItem extends AbstrDao {
     }
 
     public synchronized void enregistrement(Item item, Flux flux) {
-        // On tente de créer l'item.
 
         Boolean err = false;
-        try {
-            em.getTransaction().begin();
-            em.persist(item);
-            em.getTransaction().commit();
 
-
-        } catch (EntityExistsException existexeption) { // En cas d'erreur, on se rend compte qu'une item possédant le hash existe déjà
+        if (item.getID() != null) {
             err = true;
-        } catch (RollbackException e) {
-            err = true;
-        } catch (Exception e) {
-            System.out.println("ERR");
         }
 
-
-        // Si on n'a pas réussi à créer l'item car il existe déjà une item possédant le hash
-        if (err) {
-            logger.debug("Item déjà existente lors de l'enregistrement");
-            Item it = findByHash(item.getHashContenu());
-            int i;
-            it.getListFlux().add(flux);
+        // Si l'item est nouvelle (elle n'a pas d'id)
+        if (!err) {
             try {
-                modifier(it);
-            } catch (Exception ex) {
-                Logger.getLogger(DaoItem.class.getName()).log(Level.SEVERE, null, ex);
+                em.getTransaction().begin();
+                em.persist(item);
+                em.getTransaction().commit();
+                flux.getLastEmpruntes().add(0, item.getHashContenu());
+            } catch (EntityExistsException existexeption) { // En cas d'erreur, on se rend compte qu'une item possédant le hash existe déjà
+                err = true;
+            } catch (RollbackException e) {
+                err = true;
+            } catch (Exception e) {
+                System.out.println("ERR");
             }
         }
 
-        //On ajoute le hash à la liste des hash capturée
-        flux.getLastEmpruntes().add(0, item.getHashContenu());
+        if (err) 
+        {
+            Item it = findByHash(item.getHashContenu());
+            it.getListFlux().add(flux);
+            logger.debug("Item déjà existente lors de l'enregistrement");
+            try {
+                em.getTransaction().begin();
+                em.merge(it);
+                em.getTransaction().commit();
+                flux.getLastEmpruntes().add(0, item.getHashContenu());
+            } catch (Exception e) {
+                logger.debug("ERREURR");
+            }
+        }
+
+        
     }
 
     /**

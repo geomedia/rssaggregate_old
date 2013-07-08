@@ -5,11 +5,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,8 +24,11 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.xml.ws.http.HTTPException;
+import rssagregator.beans.DebugRecapLeveeFlux;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
+import rssagregator.dao.DAOFactory;
+import rssagregator.dao.DaoItem;
 
 /**
  * Cette classe gère les relations entre un ou plusieurs flux et les differents
@@ -40,15 +44,15 @@ import rssagregator.beans.Item;
  */
 @Entity
 @Table(name = "tr_mediatocollecteaction")
-public class MediatorCollecteAction implements Serializable, Cloneable {
+public class MediatorCollecteAction implements Serializable, Cloneable, Callable<List<Item>> {
 
     @Transient
     org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(MediatorCollecteAction.class);
-    
-    
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long ID;
+    @Transient
+    Boolean persister;
     /**
      * Le nom du comportement. Il est préférable de nommer les médiators afin de
      * les réutiliszzer par la suite. Exemple : "captation des flux devant être
@@ -128,29 +132,20 @@ public class MediatorCollecteAction implements Serializable, Cloneable {
 // On vérifie si le collecteur est actif. Pour lancer la collecte
         // On commence par récupérer le flux
 
+        //-----------------------
+        // REQUESTEUR
+        //-----------------------
 
-       
-
-
-//-----------------------
-// REQUESTEUR
-//-----------------------
-
-        if(requesteur.timeOut==null){
-            requesteur.timeOut=15;
+        if (requesteur.timeOut == null) {
+            requesteur.timeOut = 15;
             System.out.println("");
         }
-         this.requesteur.requete(flux.getUrl());
+        this.requesteur.requete(flux.getUrl());
         InputStream retourInputStream = this.requesteur.getHttpInputStream();
-        
 
-
-        
         //-----------------------------
         //  Parseur
         //-----------------------------
-
-        
         // On parse le retour du serveur. Le parseur doit se comporter comme une thread car il faut limiter le temps d'execution. Très facile avec un runnable.
         parseur.setXmlIS(retourInputStream);
 
@@ -158,28 +153,65 @@ public class MediatorCollecteAction implements Serializable, Cloneable {
         Future<List<Item>> futurs = executor.submit(parseur);
         List<Item> listItem = futurs.get(requesteur.getTimeOut(), TimeUnit.SECONDS);
 
-
-
-        logger.debug("fin de parse");
         this.nbrItemCollecte = listItem.size();
 
-        // On dédoublonne
+        //-----------------------------
+        //  Dedoublonneur
+        //-----------------------------
 
         // calcul des Md5
         this.dedoubloneur.calculHash(listItem);
-
-
         listItem = this.dedoubloneur.dedoublonne(listItem, flux);
-        
-        
-        
+
+
         //----------------------------------------------
         //   Enregistrement des résultats
         //----------------------------------------------
-        
-        
-        
-        
+
+        // On enregistre ces nouvelles items
+        int i;
+        DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
+        for (i = 0; i < listItem.size(); i++) {
+            //On précise à la nouvelle item qu'elle appartient au flux collecté
+            listItem.get(i).getListFlux().add(flux);
+//                if (persit) {
+            try {
+                daoItem.enregistrement(listItem.get(i), flux);
+            } catch (Exception e) {
+                logger.error("Catch d'une errreur dans l'enregistrement d'un item");
+            }
+
+//                    this.flux.getLastEmpruntes().add(0, nouvellesItems.get(i).getHashContenu());
+//                }
+        }
+
+
+        // On supprime des hash pour éviter l'accumulation. On en laisse 10 en plus du nombre d'item contenues dans le flux.
+        Integer nbr = flux.getMediatorFluxAction().getDedoubloneur().getCompteCapture()[0] + 10;
+        if (nbr > 0 && nbr < flux.getLastEmpruntes().size()) {
+            for (i = nbr; i < flux.getLastEmpruntes().size(); i++) {
+                flux.getLastEmpruntes().remove(i);
+            }
+        }
+
+        //Devra être supprimé à la fin
+        DebugRecapLeveeFlux debug = new DebugRecapLeveeFlux();
+        debug.setDate(new Date());
+        debug.setNbrRecup(listItem.size());
+        flux.getDebug().add(debug);
+
+
+//        // TODO le fait de réajouté la tache doit aussi être géré par le service de gestion des incidents
+//        // Si il s'agit d'une tache schedule, il faut la réajouter au scheduler
+//        if (flux.getActive()) {
+//            ServiceCollecteur.getInstance().addScheduledCallable(this);
+//            ServiceCollecteur.getInstance().addScheduledCallable(null);
+//        }
+
+        // On supprimer les items capturée du cache de l'ORM pour éviter l'encombrement
+        for (i = 0; i < listItem.size(); i++) {
+            DAOFactory.getInstance().getEntityManager().detach(listItem.get(i));
+        }
         
         
 
@@ -350,10 +382,10 @@ public class MediatorCollecteAction implements Serializable, Cloneable {
     public static void main(String[] args) {
         try {
             MediatorCollecteAction mca = MediatorCollecteAction.getDefaultCollectAction();
-                        System.out.println("time out 1 : " + mca.getRequesteur().getTimeOut());
+            System.out.println("time out 1 : " + mca.getRequesteur().getTimeOut());
             MediatorCollecteAction mca2 = (MediatorCollecteAction) mca.clone();
-            
-            
+
+
             System.out.println("time out 1 : " + mca.getRequesteur().getTimeOut());
             System.out.println("time out 1 : " + mca2.getRequesteur().getTimeOut());
 
@@ -361,5 +393,10 @@ public class MediatorCollecteAction implements Serializable, Cloneable {
         } catch (CloneNotSupportedException ex) {
             Logger.getLogger(MediatorCollecteAction.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    @Override
+    public List<Item> call() throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

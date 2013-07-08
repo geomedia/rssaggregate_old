@@ -39,7 +39,8 @@ public class ServiceCollecteur implements Observer {
         poolSchedule = Executors.newScheduledThreadPool(10);
 
         ThreadFactoryPrioitaire factoryPrioitaire = new ThreadFactoryPrioitaire();
-        poolPrioritaire = Executors.newFixedThreadPool(30, factoryPrioitaire);
+//        poolPrioritaire = Executors.newFixedThreadPool(30, factoryPrioitaire);
+        poolPrioritaire = Executors.newFixedThreadPool(30);
     }
 
     /**
@@ -76,9 +77,10 @@ public class ServiceCollecteur implements Observer {
         // Si l'observable notifiant est la DAO FLUX. Il faut recréer le pool avec la liste des nouveau flux à suivre
         if (o instanceof DaoFlux || o instanceof DAOConf) {
 
-
+    
 
             if (DAOFactory.getInstance().getDAOConf().getConfCourante().getActive()) {
+              
                 // On supprime de scheduler pour le rechrer avec la liste de nouvelles tâches
                 Integer nbThread = DAOFactory.getInstance().getDAOConf().getConfCourante().getNbThreadRecup();
 
@@ -87,18 +89,23 @@ public class ServiceCollecteur implements Observer {
 
                 this.poolSchedule = Executors.newScheduledThreadPool(nbThread);
 
-                List<Flux> listFlux = DAOFactory.getInstance().getDAOFlux().findAllFlux(false);
+                List<Flux> listFlux = DAOFactory.getInstance().getDAOFlux().findAllFlux(true);
+                System.out.println("NBR DE FLUX : " + listFlux.size());
 
                 // On inscrit les taches actives au pool schedule
                 int i;
                 for (i = 0; i < listFlux.size(); i++) {
+                         logger.debug("AJOUT");
                     if (listFlux.get(i).getActive()) {
                         // On schedule
-                        listFlux.get(i).createTask();
+//                        listFlux.get(i).createTask();
 
                         TacheRecupCallable tmpTache = new TacheRecupCallable(listFlux.get(i));
                         tmpTache.setTacheSchedule(true);
 
+                        
+                 
+                        
                         //TODO : Scheduler en fonction du temps restant. il faut modifier de deuxieme paramettre de la commande. 
                         this.poolSchedule.schedule(tmpTache, listFlux.get(i).getPeriodiciteCollecte(), TimeUnit.SECONDS);
                     }
@@ -165,7 +172,7 @@ public class ServiceCollecteur implements Observer {
         System.out.println("");
         TacheRecupCallable task = new TacheRecupCallable(flux);
 
-        Future<List<Item>> t = this.poolPrioritaire.submit(task);
+        Future<Boolean> t = this.poolPrioritaire.submit(task);
 
         t.get(30, TimeUnit.SECONDS);
 
@@ -187,7 +194,7 @@ public class ServiceCollecteur implements Observer {
         DateTime dtDebut = new DateTime();
 
         
-        List<Future<List<Item>>> listFutur = this.poolPrioritaire.invokeAll(listTache);
+        List<Future<Boolean>> listFutur = this.poolPrioritaire.invokeAll(listTache);
 
         for (i = 0; i < listFutur.size(); i++) {
 //              listFutur.get(i).get();

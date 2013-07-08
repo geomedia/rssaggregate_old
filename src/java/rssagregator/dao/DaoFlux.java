@@ -68,36 +68,31 @@ public class DaoFlux extends AbstrDao {
      * @param flux
      */
     public void remove(Flux flux) throws IllegalArgumentException, TransactionRequiredException, Exception {
-//        em = DAOFactory.getInstance().getEntityManager();
-
 
         // On doit suppimer les items liées si il sont orphelin
-              DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
+        DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
 //        List<Item> items = flux.getItem(); //....
-      List<Item>  items = daoItem.findByFlux(flux.getID());
-        
-  
+        List<Item> items = daoItem.findByFlux(flux.getID());
+
+
         int i;
         for (i = 0; i < items.size(); i++) {
             //Supppression des items qui vont devenir orphelines
             if (items.get(i).getListFlux().size() < 2) {
 
-                
                 // On supprimer la relation 
                 items.get(i).getListFlux().clear();
                 daoItem.modifier(items.get(i));
                 daoItem.remove(items.get(i));
             } else { // Sinon on détach le flux
-
                 items.get(i).getListFlux().remove(flux);
                 daoItem.modifier(items.get(i));
-
             }
         }
 
         // On supprime la liste de flux du flux
         flux.setItem(new ArrayList<Item>());
-        em.getTransaction().begin();
+        em.getTransaction().begin(); 
         em.remove(em.merge(flux));
         em.getTransaction().commit();
 
@@ -113,18 +108,11 @@ public class DaoFlux extends AbstrDao {
      * @return
      */
     public List<Flux> findAllFlux(Boolean sql) {
-//        em = dAOFactory.getEntityManager();
         Query query = em.createQuery(REQ_FIND_ALL);
-//        Query query = em.createQuery("SELECT f FROM Flux f");
         if (!sql) {
-//            query.setHint("eclipselink.cache-usage", "CheckCacheOnly");
-//            query.setHint(QueryHints.FETCH, HintValues.FALSE);
             query.setHint("eclipselink.cache-usage", "CheckCacheOnly");
-//              query.setHint("eclipselink.join-fetch", "f.zaddress");
 
         }
-//        System.out.println("QUERY : " + query.toString());
-
         List<Flux> result = query.getResultList();
         return result;
     }
@@ -149,6 +137,9 @@ public class DaoFlux extends AbstrDao {
             DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
             List<String> dernierHash = daoItem.findLastHash(fl, 100);
             fl.setLastEmpruntes(dernierHash);
+
+            DAOIncident dAOIncident = DAOFactory.getInstance().getDAOIncident();
+            fl.setIncidentEnCours(dAOIncident.findIncidentOuvert(fl.getID()));
         }
     }
 
@@ -164,9 +155,9 @@ public class DaoFlux extends AbstrDao {
     public void creer(Object obj) throws Exception {
 
         // On va remplir la date en force
-        Flux fl = (Flux)obj;
+        Flux fl = (Flux) obj;
         fl.setCreated(new Date());
-        
+
         em.getTransaction().begin();
         em.persist(fl);
         em.getTransaction().commit();
@@ -202,14 +193,14 @@ public class DaoFlux extends AbstrDao {
      * @param flux
      */
     public synchronized void modifierFlux(Flux flux) throws IllegalStateException, RollbackException, Exception {
-        
+
         try {
             if (flux.getID() != null && flux.getID() >= 0) {
 //                em = dAOFactory.getEntityManager();
                 em.getTransaction().begin();
                 em.merge(flux);
                 em.getTransaction().commit();
-                
+
             }
 
         } catch (RollbackException e) {
@@ -324,7 +315,7 @@ public class DaoFlux extends AbstrDao {
 
     public void removeall(List<Flux> flux) {
         int i;
-        for(i=0;i<flux.size();i++){
+        for (i = 0; i < flux.size(); i++) {
             try {
                 remove(flux.get(i));
             } catch (IllegalArgumentException ex) {

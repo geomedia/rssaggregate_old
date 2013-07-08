@@ -47,6 +47,8 @@ public class ItemSrvl extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
         request.setCharacterEncoding("UTF-8");
+        
+        System.out.println("NBR FLUX DS CACHE : " + DAOFactory.getInstance().getDAOFlux().findAllFlux(false).size());
 
         String action = request.getParameter("action");
         if (action == null) {

@@ -52,15 +52,9 @@ public class RomeParse extends AbstrParseur implements IfsObjetDeTraitement, Ifs
     public List<Item> execute(InputStream xmlIS) throws IOException, IllegalArgumentException, FeedException {
         List<Item> listItems = new ArrayList<Item>();
 
-        try {
-            
-        } catch (Exception e) {
-        }
-        XmlReader reader = new XmlReader(xmlIS);
-        
-   
 
-        
+        XmlReader reader = new XmlReader(xmlIS);
+                
         SyndFeedInput feedInput = new SyndFeedInput();
 
         feedInput.setPreserveWireFeed(true);
@@ -88,7 +82,6 @@ public class RomeParse extends AbstrParseur implements IfsObjetDeTraitement, Ifs
             if (entry.getDescription() != null) {
                 result += "Dexcription : " + entry.getDescription().getValue() + "\n";
                 new_item.setDescription(entry.getDescription().getValue());
-
             }
 
             if (entry.getContents() != null) {
@@ -102,8 +95,6 @@ public class RomeParse extends AbstrParseur implements IfsObjetDeTraitement, Ifs
 
 // Si c'est un feed rss, captation du GUID
             if (entry.getWireEntry() instanceof com.sun.syndication.feed.rss.Item) {
-
-
                 if (entry.getWireEntry() instanceof com.sun.syndication.feed.rss.Item) {
 //                    import com.sun.syndication.feed.rss.Item;
                     com.sun.syndication.feed.rss.Item it;
@@ -113,9 +104,7 @@ public class RomeParse extends AbstrParseur implements IfsObjetDeTraitement, Ifs
                         new_item.setGuid(it.getGuid().getValue());
                     }
                 }
-
             }
-
 
             // Gesion de la date
             if (entry.getPublishedDate() != null) {
@@ -125,7 +114,6 @@ public class RomeParse extends AbstrParseur implements IfsObjetDeTraitement, Ifs
             //Concat de toutes les catégories
 
             if (entry.getCategories() != null && entry.getCategories().size() > 0) {
-
                 int j;
                 String concat = "";
                 for (j = 0; j < entry.getCategories().size(); j++) {
@@ -134,13 +122,11 @@ public class RomeParse extends AbstrParseur implements IfsObjetDeTraitement, Ifs
                 }
                 concat = concat.substring(0, concat.length() - 2);
                 new_item.setCategorie(concat);
-
             }
 
             // On inscrit la date de récupération
             Date datecourante = new Date();
             new_item.setDateRecup(datecourante);
-
 
             result += "\n------------------------------------------\n";
 //            System.out.println(result);
@@ -148,15 +134,6 @@ public class RomeParse extends AbstrParseur implements IfsObjetDeTraitement, Ifs
             listItems.add(new_item);
         }
 
-//        // Calcul des hash
-//        int i;
-//        for(i=0; i< listItems.size(); i++){
-//            try {
-//                calculHash(listItems);
-//            } catch (NoSuchAlgorithmException ex) {
-//                Logger.getLogger(RomeParse.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//        }
         return listItems;
     }
 

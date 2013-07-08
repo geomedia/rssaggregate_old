@@ -55,6 +55,13 @@ public class Dedoubloneur extends AbstrDedoublonneur implements IfsObjetDeTraite
 
         // Si il reste encore des items, on pocède à une vérification à partir de la BASE DE DONNEE
         if (listRetour.size() > 0) {
+            
+//            // On initialise les valeur is new
+//            for(i=0; i< listRetour.size(); i++){
+//                listItemCapture.get(i).setIsNew(Boolean.TRUE);
+//            }
+            
+            
 
 //            System.out.println("DEDOUBLONNEUR : dédoublonage BDD du flux ID : " + flux.getID()+ ". Il y a : " + listRetour.size()+" item à vérifier");
             //Supression de toutes les items déjà lié au flux
@@ -86,8 +93,10 @@ public class Dedoubloneur extends AbstrDedoublonneur implements IfsObjetDeTraite
                         // L'item analysé existe dans la base de donnée mais n'est pas encore lié à notre flux. Il faut remplacer par l'item trouvé dans la base de donnée (concevation de  l'id et des paticulaité de l'item existant)
                         if (!trouve) {
                             listRetour.add(j, ItemBdd);
+//                            ItemBdd.setIsNew(false);
                             listRetour.remove(itemRetour);
                             compteCapture[3]++;
+                            
                         }
                     }
                 }

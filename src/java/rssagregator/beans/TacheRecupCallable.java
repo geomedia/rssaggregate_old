@@ -5,7 +5,6 @@
 package rssagregator.beans;
 
 import java.util.ArrayList;
-import rssagregator.dao.DAOFactory;
 import java.util.Date;
 import java.util.List;
 import java.util.Observable;
@@ -13,7 +12,6 @@ import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import rssagregator.beans.incident.AbstrIncident;
-import rssagregator.dao.DaoItem;
 import rssagregator.services.ServiceCollecteur;
 import rssagregator.services.ServiceGestionIncident;
 
@@ -21,7 +19,7 @@ import rssagregator.services.ServiceGestionIncident;
  *
  * @author clem
  */
-public class TacheRecupCallable extends Observable implements Callable<List<Item>> {
+public class TacheRecupCallable extends Observable implements Callable<Boolean> {
 
     org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheRecupCallable.class);
     /**
@@ -55,14 +53,28 @@ public class TacheRecupCallable extends Observable implements Callable<List<Item
         persit = true;
     }
 
+    /**
+     * *
+     *
+     * @return un booleen true si ok false si exeption capturé et géré. mais pas
+     * vraiment utilisé dans le reste du programme
+     * @throws Exception
+     */
     @Override
-    public List<Item> call() throws Exception {
+    public Boolean call() throws Exception {
         // On block le flux pour eviter que la tache automanique et la tache manuelle agissent en même temps
         synchronized (this.flux) {
-            nouvellesItems = new ArrayList<Item>();
+
+
+
             flux.setTacheRechup(this);
             //On crée une copie du mediator devant être employé. C'est notre façon d'être thread safe
-            this.flux.setMediatorFluxAction(this.flux.getMediatorFlux().genererClone());
+            try {
+                this.flux.setMediatorFluxAction(this.flux.getMediatorFlux().genererClone());
+
+            } catch (Exception e) {
+                logger.error("Erreur lors de la génération du clone");
+            }
 
             //On lance la capture en utilisant le mediator qui vient d'être crée. Les erreurs sont générée ici
             try {
@@ -70,53 +82,28 @@ public class TacheRecupCallable extends Observable implements Callable<List<Item
             } catch (Exception e) {
                 //si erreur on leve l'exeption et on lance l'enregistremnet de celle ci. on stoppe la tache
                 this.incident = ServiceGestionIncident.getInstance().gererIncident(e, flux);
-                logger.error(e);
-                throw e;
-            }
 
-            // On enregistre ces nouvelles items
-            int i;
-            DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
-            for (i = 0; i < nouvellesItems.size(); i++) {
-                //On précise à la nouvelle item qu'elle appartient au flux collecté
-                nouvellesItems.get(i).getListFlux().add(flux);
-                if (persit) {
-                    daoItem.enregistrement(nouvellesItems.get(i), flux);
-//                    this.flux.getLastEmpruntes().add(0, nouvellesItems.get(i).getHashContenu());
+                // On réajoute la tache c'est le flux est schedulé
+                if (flux.getActive() && this.tacheSchedule) {
+                    ServiceCollecteur.getInstance().addScheduledCallable(this);
                 }
-            }
 
-            // On supprime des hash pour éviter l'accumulation. On en laisse 10 en plus du nombre d'item contenues dans le flux.
-            Integer nbr = flux.getMediatorFluxAction().getDedoubloneur().getCompteCapture()[0] + 10;
-            if (nbr > 0 && nbr < flux.getLastEmpruntes().size()) {
-                for (i = nbr; i < flux.getLastEmpruntes().size(); i++) {
-                    flux.getLastEmpruntes().remove(i);
-                }
+
+                logger.error("capture de l'erreur du mediateur : " + e); //Logger.getLogger(TacheRecupCallable.class.getName()).log(Level.SEVERE, null, e);
+                return false;
             }
 
 
+            // Tout s'est bien déroulé on va donc fermer les incidents du flux et renvoyé true
             ServiceGestionIncident.fermerLesIncidentsDuFlux(flux);
-//            flux.fermerLesIncidentOuvert();
 
-            //Devra être supprimé à la fin
-            DebugRecapLeveeFlux debug = new DebugRecapLeveeFlux();
-            debug.setDate(new Date());
-            debug.setNbrRecup(nouvellesItems.size());
-            flux.getDebug().add(debug);
-
-
-            // TODO le fait de réajouté la tache doit aussi être géré par le service de gestion des incidents
-            // Si il s'agit d'une tache schedule, il faut la réajouter au scheduler
-            if (tacheSchedule) {
+            // On réajoute la tache c'est le flux est schedulé
+            if (flux.getActive() && this.tacheSchedule) {
                 ServiceCollecteur.getInstance().addScheduledCallable(this);
             }
 
-            // On supprimer les items capturée du cache de l'ORM pour éviter l'encombrement
-            for (i = 0; i < nouvellesItems.size(); i++) {
-                DAOFactory.getInstance().getEntityManager().detach(nouvellesItems.get(i));
-            }
-
-            return nouvellesItems;
+            // On returne true si tout est ok. 
+            return true; // cette variable n'est pas vraiment utilisé
         }
     }
 

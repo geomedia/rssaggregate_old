@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 import javax.persistence.RollbackException;
 import javax.xml.ws.http.HTTPException;
 import rssagregator.beans.Flux;
+import rssagregator.beans.TacheRecupCallable;
 import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.BDDIncident;
 import rssagregator.beans.incident.FluxIncident;
@@ -34,16 +35,13 @@ public class ServiceGestionIncident {
      * *
      * Parcours les incidents du flux et clos si certain sont ouverts. Cette
      * méthode est utilisée à la fin de la tache de récup. Si la récup s'est
-     * bien déroulé, alors il est nécessaire de clore
+     * bien déroulé, alors il est nécessaire de clore. La liste des incident en cours est ensuite vidée.
      *
      * @param flux
      */
     public static void fermerLesIncidentsDuFlux(Flux flux) {
         int i;
         List<FluxIncident> incidentOuvert = flux.getIncidentEnCours();
-
-
-        System.out.println("NBR INCIDENT : " + flux.getIncidentEnCours());
 
         for (i = 0; i < incidentOuvert.size(); i++) {
             // On vérifi quand même que la date de fin est bien null
@@ -55,12 +53,10 @@ public class ServiceGestionIncident {
                 } catch (Exception ex) {
                     Logger.getLogger(ServiceGestionIncident.class.getName()).log(Level.SEVERE, null, ex);
                 }
-
             }
         }
-
-
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
+        flux.getIncidentEnCours().clear();
     }
 
     /**
@@ -84,7 +80,7 @@ public class ServiceGestionIncident {
 
         // Si on a déjà un incident ouvert de même type
         FluxIncident incident = flux.getIncidentOuverType(FluxIncident.class);
-        if (incident == null) {
+        if (incident == null) { // Si on n'a pas d'incident ouvert du même type
             incident = new FluxIncident();
             incident.setMessageEreur(msg);
 
@@ -99,25 +95,34 @@ public class ServiceGestionIncident {
 
 
             try {
-
                 DAOFactory.getInstance().getDAOIncident().creer(incident);
                 flux.getIncidentEnCours().add(incident);
-
             } catch (Exception ex1) {
                 Logger.getLogger(ServiceGestionIncident.class.getName()).log(Level.SEVERE, null, ex1);
             }
         } else {
-            int nbr = incident.getNombreTentativeEnEchec();
+            Integer nbr = incident.getNombreTentativeEnEchec();
+            if(nbr == null){
+                nbr=0;
+            }
             nbr++;
             incident.setNombreTentativeEnEchec(nbr);
 
             try {
                 DAOFactory.getInstance().getDAOIncident().modifier(incident);
-                DAOFactory.getInstance().getDAOIncident().creer(incident);
+//                DAOFactory.getInstance().getDAOIncident().creer(incident);
             } catch (Exception ex1) {
                 Logger.getLogger(ServiceGestionIncident.class.getName()).log(Level.SEVERE, null, ex1);
             }
         }
+        
+//       // On gère la réinscription du flux dans le Service de collecte. Pou rl'instant, on fait très simple.
+//        TacheRecupCallable tache = new TacheRecupCallable(flux);
+//        ServiceCollecteur.getInstance().addScheduledCallable(tache);
+        
+        
+    
+        
         return incident;
     }
 
@@ -196,7 +201,6 @@ public class ServiceGestionIncident {
                 creeIncidentBDD("Erreur RollbackException : ", objEnErreur, exception);
             } else if (exception instanceof Exception) {
                 return creeIncidentFLux("ERREUR inconnue : " + flux, flux, exception);
-
             }
         }
         return null;

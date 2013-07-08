@@ -30,24 +30,25 @@ public class DAOIncident extends AbstrDao {
         Query query = em.createQuery(REQ_FIND_ALL_AC_LIMIT);
         query.setFirstResult(premier.intValue());
         query.setMaxResults(nombre.intValue());
-        
-
         List<FluxIncident> listResult = query.getResultList();
-        System.out.println("Premier : " + premier+ ". nombre : " + nombre);
-        System.out.println("NOMBRE INCIDENT  : " + listResult.size());
-
-        System.out.println("ICI");
-        int i;
-        for (i = 0; i < listResult.size(); i++) {
-            System.out.println("Incid id : " + listResult.get(i).getID());
-            System.out.println("Incid message : " + listResult.get(i).getMessageEreur());
-        }
-        System.out.println("FIN");
-//        em.close();
 
         return listResult;
 
     }
+    
+    /***
+     * Trouve les incident ouvert pour le flux envoyé en argument 
+     * @param fluxId : l'id du flux
+     * @return 
+     */
+    public List<FluxIncident> findIncidentOuvert(Long fluxId){
+        String req = "SELECT i FROM incidentflux i JOIN i.fluxLie flux WHERE i.ID=:idflux";
+        
+        Query query = em.createQuery(req);
+        query.setParameter("idflux", fluxId);
+        return query.getResultList();
+    }
+    
 //        @Override
 //    public FluxIncident find(Long id) {
 //            

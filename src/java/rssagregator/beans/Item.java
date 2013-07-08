@@ -3,6 +3,7 @@ package rssagregator.beans;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
@@ -33,7 +34,7 @@ public class Item implements Serializable, Comparable<Item> {
     private Long ID;
     /**
      * *
-     * Titre de l'item. Element persisté dans la base de données 
+     * Titre de l'item. Element persisté dans la base de données
      */
     @Column(name = "titre", length = 500)
     private String titre;
@@ -50,7 +51,7 @@ public class Item implements Serializable, Comparable<Item> {
      * Correspond à l'élément contenu d'un flux ATOM. N'est pas présent dans les
      * flux RSS
      */
-    @Column(name = "contenu",columnDefinition = "text")
+    @Column(name = "contenu", columnDefinition = "text")
     private String contenu;
     /**
      * *
@@ -89,7 +90,7 @@ public class Item implements Serializable, Comparable<Item> {
      * *
      * Correspond à l'élément link d'un flux RSS.
      */
-    @Column(name = "link",length = 2000)
+    @Column(name = "link", length = 2000)
     private String link;
     /**
      * 0 = nouveau pas encore de sync 1 = synch effectué 2 = item sur le maitre
@@ -110,15 +111,13 @@ public class Item implements Serializable, Comparable<Item> {
      * Il faut lui présenter d'une couleur différente les flux capté et les flux
      * déjà présent dans la base. C'est à cela que sert ce boollen
      */
+    @Deprecated
     private Boolean isNew;
     /**
      * *
      * Les flux auxquelles appartiennent l'item.
      */
-
-
-
-    @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.REFRESH, CascadeType.MERGE},targetEntity = Flux.class)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.REFRESH, CascadeType.MERGE}, targetEntity = Flux.class)
     private List<Flux> listFlux;
     /**
      * *
@@ -127,7 +126,6 @@ public class Item implements Serializable, Comparable<Item> {
     //TODO : relation pas géré pour les ItemRafinée 
     @Transient
     private ItemRafine myItemRafine;
-    
     @Transient
     private Boolean nonPresentDansBDD;
 
@@ -138,15 +136,13 @@ public class Item implements Serializable, Comparable<Item> {
     public void setNonPresentDansBDD(Boolean nonPresentDansBDD) {
         this.nonPresentDansBDD = nonPresentDansBDD;
     }
-    
-    
 
     /**
      * *
      * Constructeur vide
      */
     public Item() {
-        this.listFlux = new ArrayList<Flux>();
+        this.listFlux = new LinkedList<Flux>();
     }
 
     /**
@@ -229,10 +225,25 @@ public class Item implements Serializable, Comparable<Item> {
         this.erreurDerniereLevee = erreurDerniereLevee;
     }
 
+    /**
+     * *
+     * Pour tester si c'est nouveau on va utiliser l'ID
+     *
+     * @return
+     * @deprecated
+     */
+    @Deprecated
     public Boolean getIsNew() {
         return isNew;
     }
 
+    /**
+     * *
+     *     * Pour tester si c'est nouveau on va utiliser l'ID
+     *
+     * @param isNew
+     */
+    @Deprecated
     public void setIsNew(Boolean isNew) {
         this.isNew = isNew;
     }
@@ -278,22 +289,18 @@ public class Item implements Serializable, Comparable<Item> {
     }
 
     @Override
-    /***
+    /**
+     * *
      * la comparaison est basée sur les date de publication
      */
     public int compareTo(Item o) {
-        if(this.getDateRecup().before(o.getDateRecup())){
+        if (this.getDateRecup().before(o.getDateRecup())) {
             return 1;
-        }
-        else if(this.getDateRecup().equals(o.getDateRecup())){
+        } else if (this.getDateRecup().equals(o.getDateRecup())) {
             return 0;
-        }
-        else{
+        } else {
             return -1;
         }
-       
+
     }
-    
-    
-    
 }

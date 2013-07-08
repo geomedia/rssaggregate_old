@@ -385,7 +385,7 @@ public class Flux extends Bean implements Observer, Serializable {
 
     public Flux(String url) {
         this.debug = new ArrayList<DebugRecapLeveeFlux>();
-        this.item = new ArrayList<Item>();
+        this.item = new LinkedList<Item>();
 //        this.lastEmpruntes = new ArrayList<String>();
         this.lastEmpruntes = new LinkedList<String>();
 
@@ -405,13 +405,13 @@ public class Flux extends Bean implements Observer, Serializable {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    /**
-     * *
-     * Créer une nouvelle tache de récupération pour le Flux
-     */
-    public void createTask() {
-        this.tacheRechup = new TacheRecupCallable(this);
-    }
+//    /**
+//     * *
+//     * Créer une nouvelle tache de récupération pour le Flux
+//     */
+//    public void createTask() {
+//        this.tacheRechup = new TacheRecupCallable(this);
+//    }
 
     public Boolean getErreurDerniereLevee() {
         return erreurDerniereLevee;
@@ -459,6 +459,10 @@ public class Flux extends Bean implements Observer, Serializable {
 
     public void setModified(Date modified) {
         this.modified = modified;
+    }
+
+    public void setIncidentEnCours(List<FluxIncident> incidentEnCours) {
+        this.incidentEnCours = incidentEnCours;
     }
 
     
