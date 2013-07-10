@@ -11,12 +11,14 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Temporal;
+import javax.persistence.Transient;
 import org.eclipse.persistence.annotations.Cache;
 import org.eclipse.persistence.annotations.CacheCoordinationType;
 import org.eclipse.persistence.annotations.CacheType;
 import org.eclipse.persistence.config.CacheIsolationType;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
+import rssagregator.dao.DaoItem;
 
 /**
  * *
@@ -31,6 +33,9 @@ import org.joda.time.Duration;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE) // Peu de champs supplémentaires dans les autres entités, on va conserver la stratégie la plus simple
 public class AbstrIncident implements Serializable {
 
+    @Transient
+    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(AbstrIncident.class);
+    
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long ID;
@@ -115,6 +120,7 @@ public class AbstrIncident implements Serializable {
 
     public Integer getNombreTentativeEnEchec() {
         return nombreTentativeEnEchec;
+
     }
 
     public void setNombreTentativeEnEchec(Integer nombreTentativeEnEchec) {
@@ -153,15 +159,17 @@ public class AbstrIncident implements Serializable {
         this.gravite = gravite;
     }
 
-    
-    /***
-     * Une méthode qui renvoir la durée sous forme d'une chaine de caractère. la chaine de caractère comprend l'unité
+    /**
+     * *
+     * Une méthode qui renvoir la durée sous forme d'une chaine de caractère. la
+     * chaine de caractère comprend l'unité
+     *
      * @return "6 minute" , "3 heures" ou encore "4 jours"
      */
     public String getDuree() {
-        
+
         Date datefin = dateFin;
-        if(datefin==null);
+        if (datefin == null);
         datefin = new Date();
 
         if (dateDebut != null && datefin != null) {
@@ -180,8 +188,8 @@ public class AbstrIncident implements Serializable {
             if (dur.getStandardMinutes() > 0) {
                 return dur.getStandardMinutes() + " minutes";
             }
-            if (dur.getStandardSeconds()> 0) {
-                return dur.getStandardSeconds()+ " secondes";
+            if (dur.getStandardSeconds() > 0) {
+                return dur.getStandardSeconds() + " secondes";
             }
         }
         return null;

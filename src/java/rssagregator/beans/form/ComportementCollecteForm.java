@@ -5,6 +5,7 @@
 package rssagregator.beans.form;
 
 import javax.servlet.http.HttpServletRequest;
+import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.traitement.Dedoubloneur;
 import rssagregator.beans.traitement.MediatorCollecteAction;
 import rssagregator.beans.traitement.Requester;
@@ -15,6 +16,8 @@ import rssagregator.beans.traitement.RomeParse;
  * @author clem
  */
 public class ComportementCollecteForm extends AbstrForm {
+    
+        protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(ComportementCollecteForm.class);
 
     @Override
     public Object bind(HttpServletRequest request, Object objEntre, Class type) {
@@ -43,9 +46,8 @@ public class ComportementCollecteForm extends AbstrForm {
 //            collecte.getRequesteur().setTimeOut(PARAM_timeout);
             Integer intval = new Integer(s);
             collecte.getRequesteur().setTimeOut(intval);
-            System.out.println("TIME OUT  : " + intval);
         } catch (Exception e) {
-            System.out.println("EXEPTION");
+            logger.error("Erreur lors du bind du paramettre Time Out");
         }
 
 

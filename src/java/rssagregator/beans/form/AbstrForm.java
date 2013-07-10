@@ -36,7 +36,6 @@ public class AbstrForm {
     public Object bind(HttpServletRequest request, Object objEntre, Class type) {
         // SI flux est null (cas d'un ajout, on crée un nouveau flux
         
-        System.out.println("req ds bind : " + request.getParameter("noteIndicent"));
         if (objEntre == null) {
 
             try {

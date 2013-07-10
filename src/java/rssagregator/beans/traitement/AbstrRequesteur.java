@@ -94,19 +94,6 @@ public class AbstrRequesteur implements Serializable, Cloneable {
         this.requestProperty = newTab;
     }
 
-    public static void main(String[] args) {
-        Requester requester = new Requester();
-        requester.addRequestProperty("zozo1", "zaza1");
-        requester.addRequestProperty("zozo2", "zaza2");
-        requester.addRequestProperty("zozo3", "zaza3");
-        
-        int i;
-        for(i=0;i<requester.requestProperty.length;i++){
-            System.out.println("cle : " + requester.requestProperty[i][0]+" val : " + requester.requestProperty[i][1]);
-        }
-        
-    }
-
     public Integer getTimeOut() {
         return timeOut;
     }
@@ -149,6 +136,4 @@ public class AbstrRequesteur implements Serializable, Cloneable {
     protected Object clone() throws CloneNotSupportedException {
         return super.clone(); //To change body of generated methods, choose Tools | Templates.
     }
-    
-    
 }

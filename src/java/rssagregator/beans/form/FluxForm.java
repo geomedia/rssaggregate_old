@@ -51,7 +51,6 @@ public class FluxForm extends AbstrForm {
         Pattern p = Pattern.compile("[hH][tT]{2}[pP][:][//].*");
         Matcher m = p.matcher(url);
         if (!m.find()) {
-            System.out.println("\"Doit commencer par http://\"");
             throw new Exception("Doit commencer par http://");
         }
     }
@@ -65,7 +64,6 @@ public class FluxForm extends AbstrForm {
             Pattern p = Pattern.compile("[hH][tT]{2}[pP][:][//].*");
             Matcher m = p.matcher(url);
             if (!m.find()) {
-                System.out.println("\"Doit commencer par http://\"");
                 throw new Exception("Doit commencer par http://");
             }
         }

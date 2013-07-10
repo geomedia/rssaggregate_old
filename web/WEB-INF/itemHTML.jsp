@@ -67,9 +67,48 @@
 
                     <form method="GET" id="form">
                         <fieldset>
-                            <legend title="truc"  >Pages : </legend> <c:forEach var="i" begin="1" end="${nbitem}" step="${itPrPage}" varStatus="varstat">
-                                <button type="submit" name="firstResult" value="${i-1}">${i} - ${i+varstat.step-1}</button>
+                            <legend title="truc"  >Pages : </legend> 
+
+                            <!--    On calcul des début et fin-->
+                            <c:choose>
+                                <c:when test="${firstResult - itPrPage<0}">
+                                    <c:set var="end2" value="0"></c:set>
+                                    <c:set var="begin2" value="10"></c:set>
+                                </c:when>
+                                <c:when test="${firstResult - (itPrPage)*5<=0}">
+                                    <c:set var="end2" value="${firstResult- itPrPage}"></c:set>
+                                    <c:set var="begin2" value="0"></c:set>
+                                </c:when>
+
+                                <c:when test="${firstResult - (itPrPage)*5>=0}">
+                                    <c:set var="end2" value="${firstResult - itPrPage}"></c:set>
+                                    <c:set var="begin2" value="${firstResult - (itPrPage)*5}"></c:set>
+                                </c:when>
+                            </c:choose>
+
+                            <c:forEach var="j" begin="${begin2}" end="${end2}" step="${itPrPage}" varStatus="varstat2">
+                                <button type="submit" name="firstResult" value="${j}">${j} - ${j+varstat2.step}</button>
                             </c:forEach>
+
+
+
+                            <c:choose>
+                                <c:when test="${firstResult + (itPrPage)*10<nbitem}">
+                                    <c:set var="begin" value="${firstResult}"></c:set>
+                                    <c:set var="end" value="${firstResult + (itPrPage)*10}"></c:set>
+                                </c:when>
+                                <c:when test="${firstResult + (itPrPage)*10>nbitem}">
+                                    <c:set var="begin" value="${firstResult}"></c:set>
+                                    <c:set var="end" value="${nbitem}"></c:set>
+
+                                </c:when>
+
+                            </c:choose>
+
+                            <c:forEach var="i" begin="${begin}" end="${end}" step="${itPrPage}"  varStatus="varstat">
+                                <button type="submit" name="firstResult" value="${i}" <c:if test="${i==firstResult}">style="color: red"</c:if>>${i} - ${i+varstat.step}<c:if test="${varstat.last}">...</c:if></button>
+                            </c:forEach>
+                      
 
 
                             <label for="itPrPage">Item par page : </label>
@@ -93,14 +132,14 @@
                         <fieldset>
                             <legend>Affiner la recherche</legend>
                             <label for="flux">Lie au flux : </label>
-                            
+
                             <select id="journalSelection">
                                 <option value="null">Journal : </option>
                                 <option id="tous">tous</option>
                                 <c:forEach items="${listJournaux}" var="j">
                                     <option value="${j.ID}">${j.nom}</option>
                                 </c:forEach>
-                                
+
                             </select>
 
 
@@ -110,15 +149,16 @@
                                     <option value="${fl.ID}" <c:if test="${idflux==fl.ID}"> selected="true"</c:if>>${fl}</option>                                
                                 </c:forEach>
                             </select>
-                            
+
                             <script src="dynListJournauxFLux.js"></script>
-                            
-                            
+
+
                             <label>Ordonner par : </label>
-                            <select name="order">
+                            <select id="order" name="order">
                                 <option value=""></option>
                                 <option value="dateRecup" <c:if test="${param.order=='dateRecup'}">selected="true"</c:if>>Date de récupération</option>
                                 <option value="datePub" <c:if test="${param.order=='datePub'}"> selected="true"</c:if>>Date de publication</option>
+                                <option value="listFlux" <c:if test="${param.order=='listFlux'}"> selected="true"</c:if>>Flux</option>
                                 </select>
                                 <label for="desc">Décroissant</label>
                                 <input type="checkbox" name="desc" value="true" <c:if test="${param.desc=='true'}"> checked="true"</c:if>/>
@@ -133,15 +173,20 @@
 
                                 <select name="vue" id="vue" onchange="subExport();">
                                     <option value="html">Export</option>
-                                    <option value="csv">csv</option>
+                                    <option value="csv">CSV</option>
+                                    <option value="csvexpert">CSV Expert</option>
+                                    <option value="xls">XLS</option>
                                 </select>
-<!--                                <button type="submit"  formaction="Export" formtarget="_blank">Exporter</button>-->
+                                <!--                                <button type="submit"  formaction="Export" formtarget="_blank">Exporter</button>-->
                                 <script>
-                                    function subExport(){
-                                        if($('#vue').val()=='csv'){
-                                            $('#form').submit();
-                                        }
-                                    }
+                function subExport() {
+                    if ($('#vue').val() == 'csv' || $('#vue').val() == 'csvexpert' || $('#vue').val() == 'xls') {
+                        var old = $('#order').val();
+                        $('#order').val('listFlux');
+                        $('#form').submit();
+                        $('#order').val(old);
+                    }
+                }
                                 </script>
 
                             </fieldset>
@@ -160,16 +205,6 @@
                         </li>
                     </c:forEach>
                 </ul>
-
-
-
-                <!--                <div class="pagination">
-                                    <a href="#" class="first" data-action="first">&laquo;</a>
-                                    <a href="#" class="previous" data-action="previous">&lsaquo;</a>
-                                    <input type="text" readonly="readonly" data-max-page="3" />
-                                    <a href="http://sss" class="next" data-action="next">&rsaquo;</a>
-                                    <a href="#" class="last" data-action="last">&raquo;</a>
-                                </div>-->
 
 
             </div>

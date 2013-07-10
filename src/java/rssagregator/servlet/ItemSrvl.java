@@ -47,7 +47,7 @@ public class ItemSrvl extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
         request.setCharacterEncoding("UTF-8");
-        
+
         System.out.println("NBR FLUX DS CACHE : " + DAOFactory.getInstance().getDAOFlux().findAllFlux(false).size());
 
         String action = request.getParameter("action");
@@ -62,7 +62,7 @@ public class ItemSrvl extends HttpServlet {
             vue = "html";
         }
 
-
+        System.out.println("la vue est : " + vue );
 
         // On récupère le type de sélection.
         String type = request.getParameter("type");
@@ -70,6 +70,7 @@ public class ItemSrvl extends HttpServlet {
 
         //DAO
         DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
+        daoItem.initcriteria();
         ItemForm form = new ItemForm();
 
 
@@ -81,7 +82,6 @@ public class ItemSrvl extends HttpServlet {
             Long id = new Long(request.getParameter("id"));
             request.setAttribute("id", id);
             item = (Item) daoItem.find(id);
-
         }
 
 
@@ -106,6 +106,7 @@ public class ItemSrvl extends HttpServlet {
                 try {
                     firsResult = new Integer(request.getParameter("firstResult"));
                     daoItem.setFistResult(firsResult);
+                    request.setAttribute("firstResult", firsResult);
 
                 } catch (Exception e) {
                     firsResult = 0;
@@ -115,7 +116,7 @@ public class ItemSrvl extends HttpServlet {
 
                 // On récupère la liste des flux utile à la génération du menu déroulant
                 request.setAttribute("listflux", DAOFactory.getInstance().getDAOFlux().findAllFlux(false));
-                
+
                 //List des journaux
                 request.setAttribute("listJournaux", DAOFactory.getInstance().getDaoJournal().findall());
             }
@@ -134,7 +135,7 @@ public class ItemSrvl extends HttpServlet {
                 String s = request.getParameter("order");
                 String desc = request.getParameter("desc");
                 if (!s.equals("")) {
-                    if (s.equals("dateRecup") || s.equals("datePub")) {
+                    if (s.equals("dateRecup") || s.equals("datePub") || s.equals("listFlux")) {
                         daoItem.setOrder_by(s);
                         if (desc.equals("true")) {
                             daoItem.setOrder_desc(Boolean.TRUE);
@@ -166,24 +167,15 @@ public class ItemSrvl extends HttpServlet {
             //On récupère le nombre max d'item
             Integer nbItem = daoItem.findNbMax();
             request.setAttribute("nbitem", nbItem);
-
-
+            
 
             //En fonction de la sélection demander on formule la bonne recherche
             List<Item> listItem;
             listItem = daoItem.findCretaria();
             request.setAttribute("listItem", listItem);
-            System.out.println("NBIT : " + listItem.size());
-
-
-            int i;
-            for (i = 0; i < listItem.size(); i++) {
-//                DAOFactory.getInstance().getEntityManager().detach(listItem.get(i));
-            }
 
         }
         request.setAttribute(ATT_ITEM, item);
-
         request.setAttribute("navmenu", "item");
 
 
@@ -192,9 +184,17 @@ public class ItemSrvl extends HttpServlet {
             VUE = "/WEB-INF/itemHTML.jsp";
         }
         if (vue.equals("csv")) {
-            response.setHeader ("Content-Disposition", "attachment; filename = items-export.csv");
+            response.setHeader("Content-Disposition", "attachment; filename = items-export.csv");
             VUE = "/WEB-INF/itemCSV.jsp";
+        } else if (vue.equals("csvexpert")) {
+            response.setHeader("Content-Disposition", "attachment; filename = items-export.csv");
+            VUE = "/WEB-INF/itemexpertCSV.jsp";
         }
+        else if (vue.equals("xls")) {
+            response.setHeader("Content-Disposition", "attachment; filename = itemss-export.xls");
+            VUE = "/WEB-INF/itemXLS.jsp";
+        }
+        
         this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
     }
 

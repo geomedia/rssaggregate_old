@@ -102,79 +102,7 @@ public abstract class AbstrDedoublonneur implements Serializable,Cloneable {
     }
 
     abstract List<Item> dedoublonne(List<Item> listItemCapture, Flux flux);
-//    {
-//
-//        // C'est la liste retour qui sera retouné. On commence par copier toutes les références présente dans la listItemCapture
-//        int i = 0;
-//        int j = 0;
-//        List<Item> listRetour = new ArrayList<Item>();
-//        listRetour.addAll(listItemCapture);
-//
-//
-//
-//        // dédoublonnage basé sur les hash en mémoire.
-//         int nbrdedoub =0; // sert juste à l'affichage dans les logs
-//        for (i = 0; i < flux.getLastEmpruntes().size(); i++) {
-//            String umprunteItemDsFlux = flux.getLastEmpruntes().get(i);
-//           
-//            for (j = 0; j < listItemCapture.size(); j++) {
-//                Item item = listItemCapture.get(j);
-//                if (item.getHashContenu().equals(umprunteItemDsFlux)) {
-//                    listRetour.remove(item);
-//                    nbrdedoub++;
-////                    System.out.println("DEDOUBLONNEUR : SUPPRESSION d'un Flux après calcul HASH");
-//                }
-//            }
-//        }
-//        logger.debug("Flux "+flux.getID()+". Suppression de " + nbrdedoub+" par DedoubMemoire");
-////        System.out.println("DEBOUBLONNEUR : Suppression de " + nbrdedoub+" par DedoubMemoire" );
-//
-//        // Si il reste encore des items, on pocède à une vérification à partir de la BASE DE DONNEE
-//        if (listRetour.size() > 0) {
-//            
-//            logger.debug("Flux : "+flux.getID()+". Dédoublonage BDD pour " + listRetour.size()+" item à vérifier");
-////            System.out.println("DEDOUBLONNEUR : dédoublonage BDD du flux ID : " + flux.getID()+ ". Il y a : " + listRetour.size()+" item à vérifier");
-//            //Supression de toutes les items déjà lié au flux
-//            DaoItem dao = DAOFactory.getInstance().getDaoItem();
-//            List<Item> ListitemDejaPresenteBDD = dao.findHashFlux(listRetour, flux);
-//            for (i = 0; i < ListitemDejaPresenteBDD.size(); i++) {
-//                Item ItemBdd = ListitemDejaPresenteBDD.get(i);
-//                for (j = 0; j < listRetour.size(); j++) {
-//                    Item itemRetour = listRetour.get(j);
-//
-//                    //Si les hash sont similaires
-//                    if (ItemBdd.getHashContenu().equals(itemRetour.getHashContenu())) {
-//
-//                        //Il est nécéssaire de supprimer l'item du retour si il est déjà lié au flux analysé.
-//                        // On récupère les id des flux des items présente dans la BDD
-//                        List<Flux> listfluxItemBDD = ItemBdd.getListFlux();
-//                        int k;
-//                        boolean trouve = false;
-//                        for (k = 0; k < listfluxItemBDD.size(); k++) {
-//
-//                            // SI l'item courante possède la même id que dans la base de donnée, on supprime de la liste courante
-//                            if (listfluxItemBDD.get(k).getID().equals(flux.getID())) {
-//                                logger.debug("Flux : "+flux.getID()+". Suppression d'une Item car elle déjà lié au flux");
-////                                System.out.println("DEDOUB : Suppression d'une Item car elle déjà lié au flux");
-//                                listRetour.remove(itemRetour);
-//                                trouve = true;
-//                            }
-//                        }
-//                        // L'item analysé existe dans la base de donnée mais n'est pas encore lié à notre flux. Il faut remplacer par l'item trouvé dans la base de donnée (concevation de  l'id et des paticulaité de l'item existant)
-//                        if (!trouve) {
-//                            listRetour.add(j, ItemBdd);
-//                            listRetour.remove(itemRetour);
-//                            logger.debug("Flux : "+flux.getID()+". Lien réalisé entre une item déjà enregistrée et le flux observé");
-////                            System.out.println("DEDOUB : Lien réalisé entre une item déjà enregistrée et le flux observé");
-//
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//        logger.debug("Nombre d'item après dédoub : " + listRetour.size());
-//        return listRetour;
-//    }
+
 
     public Boolean getDeboubTitle() {
         return deboubTitle;
@@ -301,6 +229,4 @@ public abstract class AbstrDedoublonneur implements Serializable,Cloneable {
         
         return clone; //To change body of generated methods, choose Tools | Templates.
     }
-    
-    
 }

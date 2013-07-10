@@ -20,10 +20,6 @@ public class ConfForm extends AbstrForm {
         try {
                     Integer i = Integer.parseInt(entre);
         } 
-//        catch (NumberFormatException e) {
-//            System.out.println("");
-//            throw new Exception("Ceci n'est pas un nombre entier");
-//        }
         catch(Exception e){
             throw new Exception("Ceci n'est pas un nombre entier");
         }

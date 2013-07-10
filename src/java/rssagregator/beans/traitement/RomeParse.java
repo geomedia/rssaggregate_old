@@ -26,7 +26,7 @@ import javax.persistence.Transient;
  * test
  */
 @Entity
-public class RomeParse extends AbstrParseur implements IfsObjetDeTraitement, IfsParseur, Cloneable {
+public class RomeParse extends AbstrParseur implements IfsParseur, Cloneable {
     /* {author=clem}*/
 
     /***
@@ -149,7 +149,7 @@ public class RomeParse extends AbstrParseur implements IfsObjetDeTraitement, Ifs
         return parse;
     }
 
-    @Override
+
     public String getDescription() {
         return description;
     }

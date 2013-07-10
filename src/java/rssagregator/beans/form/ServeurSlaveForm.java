@@ -19,9 +19,7 @@ public class ServeurSlaveForm extends AbstrForm{
     @Override
     public Object bind(HttpServletRequest request, Object objEntre, Class type) {
         
-        
         ServeurSlave serveurSlave = (ServeurSlave) objEntre;
-        
         
         if(serveurSlave==null){
             serveurSlave = new ServeurSlave();
@@ -34,8 +32,6 @@ public class ServeurSlaveForm extends AbstrForm{
         serveurSlave.setPass(request.getParameter("pass"));
         serveurSlave.setLogin("login");
         
-        
-        
         //         On lance les vérifaication
         try {
        
@@ -45,9 +41,6 @@ public class ServeurSlaveForm extends AbstrForm{
         } catch (NoSuchMethodException ex) {
             Logger.getLogger(FluxForm.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        
-        
         
         if (erreurs.isEmpty()) {
             resultat = "Traitement effectué";
@@ -60,12 +53,4 @@ public class ServeurSlaveForm extends AbstrForm{
         
         return serveurSlave;
     }
-    
-    
-    
-    
-    
-    
-    
-    
 }

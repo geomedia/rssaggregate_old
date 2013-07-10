@@ -12,7 +12,7 @@ import rssagregator.dao.DaoItem;
 
 @Entity(name = "Dedoubloneur")
 
-public class Dedoubloneur extends AbstrDedoublonneur implements IfsObjetDeTraitement {
+public class Dedoubloneur extends AbstrDedoublonneur {
 
     private static String description = "le dédoublonneur permet .....";
 
@@ -21,7 +21,7 @@ public class Dedoubloneur extends AbstrDedoublonneur implements IfsObjetDeTraite
         logger = Logger.getLogger(Dedoubloneur.class);
     }
 
-    @Override
+
     public String getDescription() {
         return description;
     }
@@ -36,9 +36,6 @@ public class Dedoubloneur extends AbstrDedoublonneur implements IfsObjetDeTraite
         List<Item> listRetour = new ArrayList<Item>();
         listRetour.addAll(listItemCapture);
         compteCapture[0]= listItemCapture.size();
-        
-
-
 
         // dédoublonnage basé sur les hash en mémoire.
         for (i = 0; i < flux.getLastEmpruntes().size(); i++) {
@@ -55,12 +52,6 @@ public class Dedoubloneur extends AbstrDedoublonneur implements IfsObjetDeTraite
 
         // Si il reste encore des items, on pocède à une vérification à partir de la BASE DE DONNEE
         if (listRetour.size() > 0) {
-            
-//            // On initialise les valeur is new
-//            for(i=0; i< listRetour.size(); i++){
-//                listItemCapture.get(i).setIsNew(Boolean.TRUE);
-//            }
-            
             
 
 //            System.out.println("DEDOUBLONNEUR : dédoublonage BDD du flux ID : " + flux.getID()+ ". Il y a : " + listRetour.size()+" item à vérifier");

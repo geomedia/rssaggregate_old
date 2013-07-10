@@ -49,6 +49,8 @@
                 <p>Flux Impacté : <a href="flux?action=mod&id=${incident.fluxLie.ID}">${incident.fluxLie}</a></p>
                 <p>Date début : <fmt:formatDate value="${incident.dateDebut}" pattern="dd/MM/yyyy hh:mm:ss"/></p>
                 <p>Date fin : <fmt:formatDate value="${incident.dateFin}" pattern="dd/MM/yyyy hh:mm:ss"/></p>
+                <p>Nombre de répétition dans la période : ${incident.nombreTentativeEnEchec}</p>
+                
 
 
                 <p>Message d'erreur : ${incident.messageEreur}</p>
@@ -62,7 +64,6 @@
 
 
             </c:when>
-
 
 
         </c:choose>

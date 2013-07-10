@@ -6,9 +6,6 @@ package rssagregator.beans.incident;
 
 import java.io.Serializable;
 import javax.persistence.Entity;
-import javax.persistence.OneToOne;
-import rssagregator.beans.Flux;
-import rssagregator.beans.Journal;
 
 /**
  *
@@ -20,7 +17,6 @@ public class BDDIncident extends AbstrIncident implements Serializable{
     
     public BDDIncident() {
     }
-    
     
     private Class entiteErreur;
 
@@ -45,9 +41,4 @@ public class BDDIncident extends AbstrIncident implements Serializable{
     public void setEntiteErreur(Class entiteErreur) {
         this.entiteErreur = entiteErreur;
     }
-    
-    
-    
-    
-    
 }

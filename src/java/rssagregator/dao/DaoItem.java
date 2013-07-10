@@ -7,8 +7,6 @@ package rssagregator.dao;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.persistence.EntityExistsException;
 import javax.persistence.Query;
 import javax.persistence.RollbackException;
@@ -18,15 +16,11 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import org.eclipse.persistence.internal.jpa.querydef.CompoundExpressionImpl;
-import org.eclipse.persistence.internal.jpa.querydef.PredicateImpl;
-import org.eclipse.persistence.internal.oxm.schema.model.Restriction;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
-import rssagregator.beans.traitement.AbstrDedoublonneur;
 
 /**
  *
@@ -116,7 +110,7 @@ public class DaoItem extends AbstrDao {
 //        
         // Le ORDER BY
         if (order_by != null) {
-            if (order_desc) {
+            if (order_desc!= null && order_desc) {
                 System.out.println("DESC");
                 cq.orderBy(cb.desc(root.get(order_by)));
             } else {
@@ -146,7 +140,12 @@ public class DaoItem extends AbstrDao {
         if (fistResult != null && maxResult != null) {
             tq.setMaxResults(maxResult);
             tq.setFirstResult(fistResult);
+            System.out.println("Y A DE LA LIMITE");
+        } else {
+            System.out.println("PAS DE LIMITE");
         }
+
+
         return tq.getResultList();
     }
 
@@ -465,8 +464,7 @@ public class DaoItem extends AbstrDao {
             }
         }
 
-        if (err) 
-        {
+        if (err) {
             Item it = findByHash(item.getHashContenu());
             it.getListFlux().add(flux);
             logger.debug("Item déjà existente lors de l'enregistrement");
@@ -480,7 +478,7 @@ public class DaoItem extends AbstrDao {
             }
         }
 
-        
+
     }
 
     /**
@@ -499,5 +497,20 @@ public class DaoItem extends AbstrDao {
         System.out.println("LISTTTT : " + item.size());
         return item;
 
+    }
+
+    /**
+     * *
+     * Met les paramettre de critère à null, utile car la daoItem est singleton,
+     * cette commande permet donc de réinitialiser les paramettres de recherche.
+     */
+    public void initcriteria() {
+        where_clause_flux = null;
+        order_by = null;
+        order_desc=null;
+        fistResult=null;
+        maxResult=null;
+        date1=null;
+        date2=null;
     }
 }

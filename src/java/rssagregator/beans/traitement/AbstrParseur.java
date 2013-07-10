@@ -10,13 +10,6 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.RunnableFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -44,27 +37,7 @@ public class AbstrParseur implements IfsParseur, Serializable, Cloneable,  Calla
         @Transient
     InputStream xmlIS;
 
-//    /**
-//     * *
-//     * Calcul les hash pour la list des items envoyés en paramètre
-//     *
-//     * @param listItem
-//     */
-//    protected static void calculHash(List<Item> listItem) throws NoSuchAlgorithmException {
-//        int i;
-//        String concat;
-//        for (i = 0; i < listItem.size(); i++) {
-//                Item item = listItem.get(i);
-//                concat = item.getTitre() + item.getDescription();
-//                MessageDigest digest = MessageDigest.getInstance("MD5");
-//
-//                digest.reset();
-//                
-//                byte[] hash = digest.digest(concat.getBytes());
-//                String hashString = new String(HexUtils.toHexString(hash));
-//                item.setHashContenu(hashString);
-//        }
-//    }
+
 
     @Override
     public void testParse() {
@@ -104,12 +77,6 @@ public class AbstrParseur implements IfsParseur, Serializable, Cloneable,  Calla
        return execute(xmlIS);
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
-  
-  
-
-
-   
-    
+ 
     
 }

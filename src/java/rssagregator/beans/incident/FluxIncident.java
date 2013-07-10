@@ -13,15 +13,6 @@ import rssagregator.beans.Flux;
 @Entity(name = "incidentflux")
 public class FluxIncident extends AbstrIncident implements Serializable  {
 
-    
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.AUTO)
-//    private Long ID;
-//
-//    public FluxIncident() {
-//    }
-    
-    
   /** 
    *  Un objet flux peut posséder différents incidents. Un incident ne possède qu'un flux. 
    */
@@ -29,8 +20,6 @@ public class FluxIncident extends AbstrIncident implements Serializable  {
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private Flux fluxLie;
       
-    
-    
  
 //  private Flux flux;
 
@@ -41,13 +30,5 @@ public class FluxIncident extends AbstrIncident implements Serializable  {
     public void setFluxLie(Flux fluxLie) {
         this.fluxLie = fluxLie;
     }
-
-//    public Long getID() {
-//        return ID;
-//    }
-//
-//    public void setID(Long ID) {
-//        this.ID = ID;
-//    }
 
 }
