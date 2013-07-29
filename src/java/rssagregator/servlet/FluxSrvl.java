@@ -25,6 +25,7 @@ import rssagregator.beans.FluxType;
 import rssagregator.beans.Journal;
 import rssagregator.beans.form.DAOGenerique;
 import rssagregator.beans.incident.AbstrIncident;
+import rssagregator.dao.DaoItem;
 import rssagregator.services.ServiceCollecteur;
 import rssagregator.services.ServiceGestionIncident;
 
@@ -40,7 +41,8 @@ public class FluxSrvl extends HttpServlet {
     public static final String ATT_ACTION = "action";
     public static final String ATT_LISTOBJ = "listflux";
     public String VUE = "/WEB-INF/fluxJsp.jsp";
-    Map redirmap = new HashMap<String, String>();
+    Map redirmap = new HashMap<String, String>(); // La redirmap est envoyée à la jsp, il s'agit d'une hash map pouvant contenir les couple clé valeur (url : l'adresse de redirection) ( msg : le message a faire parvenir à l'utilisateur)
+    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(FluxSrvl.class);
 
     /**
      * Processes requests for both HTTP
@@ -55,7 +57,7 @@ public class FluxSrvl extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        //Liste des clause servant à criteria
+        //Liste des clause servant à criteria, ces variables seront envoyé dans la dao par la suite
         Journal journalLie = null;
         String order_by = null;
         Boolean order_desc = null;
@@ -66,25 +68,25 @@ public class FluxSrvl extends HttpServlet {
 
         DaoJournal daoJournal = DAOFactory.getInstance().getDaoJournal();
         DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
-        List<Object> journals = daoJournal.findall();
+
+        List<Object> journals = daoJournal.findall(); // On a besoin de la liste des journaux dans les pages html pour les menus déroulant. Il faut donc un attribut list journaux
         request.setAttribute("listjournaux", journals);
 
         // Un simple attribut pour que le menu brille sur la navigation courante
         request.setAttribute("navmenu", ATT_OBJ);
+
+        //Il s'agit de la liste des flux à faire parvenir aux JSP. Cette liste sera remplie par la JSP
         List<Flux> flux = new ArrayList<Flux>();
-//        Flux flux = null;
         FluxForm fluxForm = null;
 
-        // récupération de l'action
+        // récupération de l'action (list, mod del ...). Si aucune action n'est précisée, alors on list.
         String action = request.getParameter("action");
         if (action == null) {
-            action = "list";
+            action = "recherche";
         }
         request.setAttribute("action", action);
 
-
         // On récupère la sortie (html Json. Cette variable sert à configurer la vue
-        // récupération de l'action
         String vue = request.getParameter("vue");
         if (vue == null) {
             vue = "html";
@@ -92,8 +94,7 @@ public class FluxSrvl extends HttpServlet {
         request.setAttribute("vue", vue);
 
 
-//        // On récupère le flux dans la base de donnée si l'id est précisé et qu'on n'a pas de parametre en post
-//        if (!request.getMethod().equals("POST")) {
+//        // On récupère les flux dont l'id est précisé dans les paramettres de requête (paramettre id)
         String idString = request.getParameter("id");
         String[] tabId = request.getParameterValues("id");
 
@@ -113,23 +114,16 @@ public class FluxSrvl extends HttpServlet {
         if (action.equals("mod") || action.equals("add")) {
 
             fluxForm = new FluxForm();
-//            fluxForm.setErreurs(new HashMap<String, String[]>());
             request.setAttribute(ATT_FORM, fluxForm);
 
-
-            // On a besoin de la liste des types de flux 
+            // On a besoin de la liste des types de flux et de la liste des comportement
             DAOGenerique dAOGenerique = DAOFactory.getInstance().getDAOGenerique();
             dAOGenerique.setClassAssocie(FluxType.class);
-            List<Object> listTypeFlux = dAOGenerique.findall();
-            request.setAttribute("listtypeflux", listTypeFlux);
-
-
+            request.setAttribute("listtypeflux", dAOGenerique.findall());
             request.setAttribute("listcomportement", DAOFactory.getInstance().getDAOComportementCollecte().findall());
 
 //            // Si il y a du post on récupère les données saisies par l'utilisateur pour éviter la resaisie de l'information
             if (request.getMethod().equals("POST")) {
-
-//                flux = (Flux) fluxForm.bind(request, flux, Flux.class);
                 // On tente de binder un flux avec les données du formulaire. Ceci a pour but d'étudier les erreur du formulaire
                 Flux fluxTmp = new Flux();
                 fluxForm.bind(request, fluxTmp, Flux.class);
@@ -137,9 +131,7 @@ public class FluxSrvl extends HttpServlet {
         }
         // Si l'utilisateur à demander la mise à jour manuelle du flux  
         if (action.equals("add")) {
-
             if (fluxForm.getValide()) {
-
                 Flux fluxnouv = (Flux) fluxForm.bind(request, null, Flux.class);
                 try {
                     daoFlux.creer(fluxnouv);
@@ -154,6 +146,7 @@ public class FluxSrvl extends HttpServlet {
         } else if (action.equals("mod")) {
             if (fluxForm.getValide()) {
                 DaoFlux dao = DAOFactory.getInstance().getDAOFlux();
+                // On bind dans le flux envoyé en paramettre il s'agit forcement du premier flux de la liste des flux envoyé en id
                 Flux fluxmod = (Flux) fluxForm.bind(request, flux.get(0), Flux.class);
                 redir(request, "flux?action=mod&id=" + fluxmod.getID(), "Modification du flux effecué.", false);
                 try {
@@ -165,35 +158,27 @@ public class FluxSrvl extends HttpServlet {
                 }
                 //La liste des flux doit notifier ses observeur (le collecteur) D'un changement
                 daoFlux.forceNotifyObserver();
-                daoFlux.notifyObservers();
-//                ListeFluxCollecteEtConfigConrante.getInstance().forceNotifyObserver();
-//                ListeFluxCollecteEtConfigConrante.getInstance().notifyObservers();
             }
         } else if (action.equals("maj")) {
             try {
-//                ServiceCollecteur.getInstance().majManuelle(flux); A REMETTRE EN PLACE
                 ServiceCollecteur.getInstance().majManuellAll(flux);
-//                  DAOFactory.getInstance().getEntityManager().refresh(flux);
             } catch (Exception ex) {
                 AbstrIncident incid = ServiceGestionIncident.getInstance().gererIncident(ex, flux);
                 redir(request, "flux?action=add", "ERREUR LORS DE La modif DU FLUX. : " + ex.toString(), true);
-                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><err");
             }
-
 
         } // Si l'action est liste, on récupère la liste des flux
         else if (action.equals("list")) {
-
             // On restreint la liste des flux affiché
             List<Flux> list = null;
 
             // Restriction en fonction du journal
             try {
-                Long idJournal = new Long(request.getParameter("journal-id"));
+                Long idJournal = new Long(request.getParameter("journalid"));
                 request.setAttribute("journalid", idJournal);
                 journalLie = (Journal) daoJournal.find(idJournal);
-
             } catch (Exception e) {
+                logger.debug(e);
             }
             //On récupère le nombre max d'item
             Integer nbItem = daoFlux.findNbMax(journalLie);
@@ -209,9 +194,10 @@ public class FluxSrvl extends HttpServlet {
             }
             request.setAttribute("itPrPage", itPrPage);
 
-            //On restreint les items à trouver dans la recherche 
+            //On restreint les items à trouver dans la recherche
             try {
                 firstResult = new Integer(request.getParameter("firstResult"));
+                request.setAttribute("firstResult", firstResult);
             } catch (Exception e) {
                 firstResult = 0;
                 System.out.println("YYY" + request.getParameter("firstResult"));
@@ -244,6 +230,10 @@ public class FluxSrvl extends HttpServlet {
             }
         }
 
+        //------------------------------------------------------------------------
+        //              Gestion de la VUE et de la redirection 
+        //------------------------------------------------------------------------
+        
         if (vue.equals("json")) {
             response.setContentType("application/json;charset=UTF-8");
             response.setCharacterEncoding("UTF-8");
@@ -253,22 +243,28 @@ public class FluxSrvl extends HttpServlet {
             response.setContentType("application/xml;charset=UTF-8");
             response.setCharacterEncoding("UTF-8");
             VUE = "/WEB-INF/fluxOPML.jsp";
+        } else if (vue.equals("jsondesc")) {
+            VUE = "/WEB-INF/fluxJSONDesc.jsp";
         } else {
             response.setContentType("text/html;charset=UTF-8");
             response.setCharacterEncoding("UTF-8");
             VUE = "/WEB-INF/fluxHTML.jsp";
         }
-
         this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
-
     }
 
+    /***
+     * Une méthode pour gérer la redirmap
+     * @param request
+     * @param url adresse de redirection
+     * @param msg message a afficher à l'utilisateur
+     * @param err true si il s'agit d'une erreur. false si c'est une redirection de routine, l'utilisateur est alors redirigé par javascript  secondes après.
+     */
     private void redir(HttpServletRequest request, String url, String msg, Boolean err) {
         redirmap = new HashMap<String, String>();
         redirmap.put("url", url);
         redirmap.put("msg", msg);
         request.setAttribute("redirmap", redirmap);
-
         if (err) {
             request.setAttribute("err", "true");
         }

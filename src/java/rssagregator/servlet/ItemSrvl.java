@@ -7,13 +7,13 @@ package rssagregator.servlet;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoItem;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.eclipse.persistence.jpa.JpaEntityManager;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -48,11 +48,12 @@ public class ItemSrvl extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
         request.setCharacterEncoding("UTF-8");
 
-        System.out.println("NBR FLUX DS CACHE : " + DAOFactory.getInstance().getDAOFlux().findAllFlux(false).size());
 
+        System.out.println("coucou");
+        
         String action = request.getParameter("action");
         if (action == null) {
-            action = "list";
+            action = "recherche";
         }
         request.setAttribute("action", action);
 
@@ -62,7 +63,6 @@ public class ItemSrvl extends HttpServlet {
             vue = "html";
         }
 
-        System.out.println("la vue est : " + vue );
 
         // On récupère le type de sélection.
         String type = request.getParameter("type");
@@ -85,13 +85,13 @@ public class ItemSrvl extends HttpServlet {
         }
 
 
+        //Action liste demander en ajax pour retour JSON
         if (action.equals("list")) {
 
             /**
              * Entrée des parametres pour compléter les vues
              */
-            // On récupère le premier et dernier résult pour former des limites de requêtes. Ces limites ne doivent s'appliquer que si la vue est html
-            if (vue.equals("html")) {
+            // On récupère le premier et dernier résult pour former des limites de requêtes.
                 Integer nbrItemPrPage;
                 try {
                     nbrItemPrPage = new Integer(request.getParameter("itPrPage"));
@@ -107,27 +107,32 @@ public class ItemSrvl extends HttpServlet {
                     firsResult = new Integer(request.getParameter("firstResult"));
                     daoItem.setFistResult(firsResult);
                     request.setAttribute("firstResult", firsResult);
+                    System.out.println("FIRST result  : " + firsResult);
 
                 } catch (Exception e) {
                     firsResult = 0;
+                    System.out.println("ERR first");
                 }
-                request.setAttribute("firsResult", nbrItemPrPage);
+                request.setAttribute("firsResult", firsResult);
                 daoItem.setFistResult(firsResult);
 
-                // On récupère la liste des flux utile à la génération du menu déroulant
-                request.setAttribute("listflux", DAOFactory.getInstance().getDAOFlux().findAllFlux(false));
-
-                //List des journaux
-                request.setAttribute("listJournaux", DAOFactory.getInstance().getDaoJournal().findall());
-            }
+           
 
             // SI on doit restreindre la sélection à un flux 
             try {
-                Flux f = (Flux) DAOFactory.getInstance().getDAOFlux().find(new Long(request.getParameter("id-flux")));
-                daoItem.setWhere_clause_flux(f);
-                request.setAttribute("idflux", f.getID().toString());
+                String[] tabIdFluxString = request.getParameterValues("fluxSelection2");
+                List<Flux> listFluxEntites = new ArrayList<Flux>();
+                
+                int i;
+                for(i=0;i<tabIdFluxString.length;i++){
+                    Flux f = (Flux) DAOFactory.getInstance().getDAOFlux().find(new Long(tabIdFluxString[i]));
+                    listFluxEntites.add(f);
+                }
+                daoItem.setWhere_clause_Flux(listFluxEntites);
+                
             } catch (Exception e) {
-                daoItem.setWhere_clause_flux(null);
+                System.out.println("ERRRRRRRR" + e);
+                daoItem.setWhere_clause_Flux(null);
             }
 
             //Selection de l'ordre
@@ -171,10 +176,26 @@ public class ItemSrvl extends HttpServlet {
 
             //En fonction de la sélection demander on formule la bonne recherche
             List<Item> listItem;
+            
+            // si la vue est csv il faut enlever les limites
+            if(!vue.equals("html") ^ vue.equals("jsondesc")){ // en java le ^ est un XOR
+                daoItem.setFistResult(null);
+                daoItem.setMaxResult(null);
+            }
+            
             listItem = daoItem.findCretaria();
             request.setAttribute("listItem", listItem);
-
         }
+        
+        // Action recherche, correspond à la demande de la page permettant de lister les flux. Il est nécessaire de fournir les paramettres permettant de construire les menus déroulant dans la JSP
+        if(action.equals("recherche")){
+                 // On récupère la liste des flux utile à la génération du menu déroulant
+                request.setAttribute("listflux", DAOFactory.getInstance().getDAOFlux().findAllFlux(false));
+
+                //List des journaux
+                request.setAttribute("listJournaux", DAOFactory.getInstance().getDaoJournal().findall());
+        }
+        
         request.setAttribute(ATT_ITEM, item);
         request.setAttribute("navmenu", "item");
 
@@ -189,6 +210,10 @@ public class ItemSrvl extends HttpServlet {
         } else if (vue.equals("csvexpert")) {
             response.setHeader("Content-Disposition", "attachment; filename = items-export.csv");
             VUE = "/WEB-INF/itemexpertCSV.jsp";
+        }
+        else if(vue.equals("jsondesc")){
+            System.out.println("ZOUZou");
+            VUE = "/WEB-INF/itemJSONDesc.jsp";
         }
         else if (vue.equals("xls")) {
             response.setHeader("Content-Disposition", "attachment; filename = itemss-export.xls");

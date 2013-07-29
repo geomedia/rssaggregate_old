@@ -27,7 +27,7 @@ import rssagregator.beans.Item;
 @Entity
 @Table(name = "tr_parseur")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-public class AbstrParseur implements IfsParseur, Serializable, Cloneable,  Callable<List<Item>> {
+public class AbstrParseur implements Serializable, Cloneable,  Callable<List<Item>> {
 
     protected String forceEncoding;
     @Id
@@ -39,7 +39,6 @@ public class AbstrParseur implements IfsParseur, Serializable, Cloneable,  Calla
 
 
 
-    @Override
     public void testParse() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

@@ -111,6 +111,9 @@
 
 
                                 <br />
+                                
+                                <textarea name="information">${journal.information}</textarea>
+                                
                                 <input type="hidden" name="id" value="${journal.ID}">
 
                                 <input type="submit" value="Inscription" class="sansLabel" />

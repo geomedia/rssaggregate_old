@@ -50,6 +50,16 @@ public class ComportementCollecteForm extends AbstrForm {
             logger.error("Erreur lors du bind du paramettre Time Out");
         }
 
+        
+        // Récup de la périodicité de collecte
+        try {
+            
+            s = request.getParameter("periodiciteCollecte");
+            Integer val = new Integer(s);
+            collecte.setPeriodiciteCollecte(val);
+        } catch (Exception e) {
+        }
+        
 
         String[] cle = request.getParameterValues("requestPropertyCle");
         String[] valeur = request.getParameterValues("requestPropertyValue");

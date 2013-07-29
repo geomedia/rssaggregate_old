@@ -26,7 +26,7 @@ public class ServeurSlaveForm extends AbstrForm{
         }
         
         // Bind manuel des paramettres
-        serveurSlave.setServHost(request.getParameter("servHost"));
+        serveurSlave.setHost(request.getParameter("servHost"));
         
         
         serveurSlave.setPass(request.getParameter("pass"));

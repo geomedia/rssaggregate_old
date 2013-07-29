@@ -2,7 +2,7 @@ package rssagregator.beans.traitement;
 
 import java.util.Vector;
 
-public class RafineurHTML implements IfsRaffinage {
+public class RafineurHTML {
 
   private Boolean removeHtmlEntities;
 
@@ -10,7 +10,7 @@ public class RafineurHTML implements IfsRaffinage {
 
     public Vector  myMediatorCollecteAction;
 
-    @Override
+    
     public String execution(String string) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

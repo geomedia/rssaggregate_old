@@ -29,7 +29,7 @@
         <script src="exporting.js"></script>
 
 
-
+ 
 
         <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
 
@@ -51,27 +51,43 @@
             <input type="text" name="date2" class="datepicker"/>
             <br />
 
-            
+
             <label>Flux : </label>
-                
-            <select id="journalSelection">
-                <option value="null">Journal : </option>
-                <option id="tous">tous</option>
-                <c:forEach items="${listJournaux}" var="j">
-                    <option value="${j.ID}">${j.nom}</option>
-                </c:forEach>
 
-            </select>
+            <table>
+                <tr>
+                    <td>
+                        <select id="journalSelection">
+                            <option value="null">Journal : </option>
+                            <option id="tous">tous</option>
+                            <c:forEach items="${listJournaux}" var="j">
+                                <option value="${j.ID}">${j.nom}</option>
+                            </c:forEach>
 
-            <select multiple="true" name="flux" id="fluxSelection">
-                <option value="">NULL</option>
-                <c:forEach items="${listFlux}" var="fl">
-                    <option value="${fl.ID}">${fl}</option>
-                </c:forEach>
-            </select>
-          <script src="dynListJournauxFLux.js"></script>
+                        </select>
+                    </td>
 
+                    <td>
 
+                        <select multiple="multiple" name="flux" id="fluxSelection" style="width: 300px">
+                            <option value="">NULL</option>
+                            <c:forEach items="${listFlux}" var="fl">
+                                <option value="${fl.ID}">${fl}</option>
+                            </c:forEach>
+                        </select>
+                    </td>
+                    <td>
+                        <button type="button" onclick="selectflux();">--></button><p />
+
+                        <button type="button" onclick="supp();"><--</button>
+                    </td>
+                    <td>
+                        <select id="fluxSelection2" name="fluxSelection2" multiple="multiple" style="width: 300px"></select>
+                    </td>
+                </tr>
+            </table>
+
+            <script src="dynListJournauxFLux.js"></script>
 
             <br />
             <label for="temporalite">Temporalité : </label>
@@ -84,8 +100,6 @@
         <!--<p>Date: <input type="text" id="datepicker" /></p>-->
 
         <div id="container" style="min-width: 400px; height: 400px; margin: 0 auto"></div>
-
-
 
         <script>
 
@@ -137,45 +151,45 @@
 
                 pointStart: Date.UTC(<fmt:formatDate value="${recapActivite.date1}" pattern="yyyy"/>, <fmt:formatDate value="${recapActivite.date1}" pattern="MM"/> - 1, <fmt:formatDate value="${recapActivite.date1}" pattern="dd"/>),
                 <c:if test="${param.temporalite=='jour'}">pointInterval: 24 * 3600 * 1000 // one day</c:if>
-        
+
                     },
             </c:forEach>
-                ]
-                });
-                });
-                function requestData() {
-                $.ajax({
-                url: 'recapActiviteGenerale?action=json',
-                //        success: alert("oui"),
+            ]
+            });
+            });
+            function requestData() {
+            $.ajax({
+            url: 'recapActiviteGenerale?action=json',
+            //        success: alert("oui"),
 
-                success: function(point) {
-                var series = chart.series[0],
-                shift = series.data.length > 20; // shift if the series is longer than 20
-
-
-                // add the point
-                //            chart.series[0].addPoint([110100,30], true, shift);
+            success: function(point) {
+            var series = chart.series[0],
+            shift = series.data.length > 20; // shift if the series is longer than 20
 
 
-
-                for (var iter = 0; iter < point.length; iter++) {
-                chart.series[iter].setData(point[iter]);
-                }
-
-
-                },
-                // error : clem(), 
-
-                cache: false
-                });
-                }
+            // add the point
+            //            chart.series[0].addPoint([110100,30], true, shift);
 
 
 
-            </script>
+            for (var iter = 0; iter < point.length; iter++) {
+            chart.series[iter].setData(point[iter]);
+            }
 
 
-        </div>
+            },
+            // error : clem(), 
+
+            cache: false
+            });
+            }
+
+
+
+        </script>
+
+
     </div>
+</div>
 
 <c:import url="/WEB-INF/footerjsp.jsp" />

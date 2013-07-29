@@ -58,11 +58,8 @@ public class Flux extends Bean implements Observer, Serializable {
      */
     @Column(name = "url", length = 2000, nullable = false, unique = true)
     private String url;
-    /**
-     * Nombre de secondes séparant deux moissonage du flux
-     */
-    @Column(name = "periodiciteCollecte")
-    private Integer periodiciteCollecte;
+
+    
     /**
      * Permet de déterminer si le flux doit être collecté ou non
      */
@@ -140,13 +137,11 @@ public class Flux extends Bean implements Observer, Serializable {
 // On veut que le flux ne puisse pas créer de journaux mais simplment se lier. Ce n'est pas à la dao du flux de de créer des journaux.
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     private Journal journalLie;
+
     /**
      * Le mediator flux permet d'assigner un flux un comportement de collecte.
      * Un médiator est une configuration de parseur Raffineur etc.
-     */
-    //TODO : pas encore géré
-//    @OneToOne(cascade = CascadeType.MERGE) 
-    
+     */  
     @OneToOne(cascade = CascadeType.MERGE)
     private MediatorCollecteAction mediatorFlux;
     
@@ -188,6 +183,8 @@ public class Flux extends Bean implements Observer, Serializable {
      * urlRubrique. Si pas de réponse, on remonte vers la racine du site. On
      * enlève une sous répertoire par tentative.
      */
+    
+    
     // TODO : supprimer ceci à la fin
     /**
      * *
@@ -248,9 +245,6 @@ public class Flux extends Bean implements Observer, Serializable {
     }
 
     
-    
-    
-    
     public String getUrl() {
         return url;
     }
@@ -259,13 +253,13 @@ public class Flux extends Bean implements Observer, Serializable {
         this.url = url;
     }
 
-    public Integer getPeriodiciteCollecte() {
-        return periodiciteCollecte;
-    }
-
-    public void setPeriodiciteCollecte(Integer periodiciteCollecte) {
-        this.periodiciteCollecte = periodiciteCollecte;
-    }
+//    public Integer getPeriodiciteCollecte() {
+//        return periodiciteCollecte;
+//    }
+//
+//    public void setPeriodiciteCollecte(Integer periodiciteCollecte) {
+//        this.periodiciteCollecte = periodiciteCollecte;
+//    }
 
     public Boolean getActive() {
         return active;
@@ -393,7 +387,7 @@ public class Flux extends Bean implements Observer, Serializable {
         this.incidentsLie = new ArrayList<FluxIncident>();
         this.url = url;
 
-        this.periodiciteCollecte = 3600;
+//        this.periodiciteCollecte = 3600;
         this.active = Boolean.TRUE;
         
         this.incidentEnCours = new ArrayList<FluxIncident>();

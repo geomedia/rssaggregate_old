@@ -4,6 +4,7 @@
  */
 package rssagregator.servlet;
 
+import java.io.IOException;
 import rssagregator.dao.DAOConf;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoFlux;
@@ -61,20 +62,27 @@ public class StartServlet implements ServletContextListener {
 
             
             // On charge la liste des flux depuis la base de donnée
-            daoflux.chargerDepuisBd();
+//            daoflux.chargerDepuisBd();
             
             
-            daoconf.chargerDepuisBd();
+//            daoconf.chargerDepuisBd();
             
-//            Object fl = daoflux.find(new Long(451));
-//            DAOFactory.getInstance().getEntityManager().refresh(fl);
-//            DAOFactory.getInstance().getEntityManager().;
+            try {
+                daoconf.charger();
+                
+    //            Object fl = daoflux.find(new Long(451));
+    //            DAOFactory.getInstance().getEntityManager().;
+    //            DAOFactory.getInstance().getEntityManager().;
+            } catch (IOException ex) {
+                Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (Exception ex) {
+                Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+            }
             
             
             
             
-            System.out.println("");
-            System.out.println("");
+
 
             daoflux.forceNotifyObserver();
             daoconf.forceNotifyObservers();
@@ -82,7 +90,7 @@ public class StartServlet implements ServletContextListener {
 //            daoflux.notifyObservers();
 //            daoconf.notifyObservers();
             
-            System.out.println("");
+
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
         }

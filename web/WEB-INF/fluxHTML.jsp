@@ -30,7 +30,7 @@
 
 <div id="sidebar">
     <p><a href="flux?action=add">Ajouter</a></p>
-    <p><a href="flux?action=list">Liste</a></p>
+    <p><a href="flux?action=recherche">Recherche</a></p>
 </div>
 
 
@@ -57,17 +57,23 @@
             <c:when test="${empty redirmap}">
                 <c:choose>
 
-                    <c:when test="${action=='list'}">
-                        <form method="POST" id="form">
+                    <c:when test="${action=='recherche'}">
+                        <form method="POST" id="pagina">
+                            <input type="hidden" id="firstResult" value="0"/>
+                            
+                             
+                            
                             <fieldset>
                                 <legend>Pages : </legend>
-                                <c:forEach var="i" begin="1" end="${nbitem}" step="${itPrPage}" varStatus="varstat">
-                                    <button type="submit" name="firstResult" value="${i-1}">${i} - ${i+varstat.step-1}</button>
-                                </c:forEach>
+                                <%--<c:import url="/WEB-INF/paginator.jsp" />--%>
+                                <div>
+                                 <span id="btPaginDiv"></span>
+                                </div>
+                               
                                 <label>Flux par page</label>
-                                <select name="itPrPage" onChange="this.form.submit();"> 
+                                <select id="itPrPage" name="itPrPage" onChange="$('#afin').click();"> 
                                     <c:forEach var="i" begin="10" end="150" step="20">
-                                        <option value="${i}" <c:if test="${itPrPage==i}"> selected="true"</c:if>>${i}</option>
+                                        <option value="${i}" <c:if test="${itPrPage==i}"> selected="selected"</c:if>>${i}</option>
                                     </c:forEach>
                                 </select> 
 
@@ -76,13 +82,14 @@
                             <fieldset>
                                 <legend>Affiner la recherche</legend>
                                 <label>Appartenant au journal : </label>
-                                <select name="journal-id">
+                                <select name="journalid" id="journalid">
                                     <option value="">TOUS</option>
                                     <c:forEach items="${listjournaux}" var="j">
-                                        <option value="${j.ID}" <c:if test="${j.ID==journalid}"> selected="true"</c:if>>${j.nom}</option>    
+                                        <option value="${j.ID}" <c:if test="${j.ID==journalid}"> selected="selected"</c:if>>${j.nom}</option>    
                                     </c:forEach>
                                 </select>
-                                <input type="submit" value="Affiner" onclick="$('#vue').val('')"id="sub" />
+                                <button type="button" id="afin">Affiner</button>
+                                <!--<input type="submit" value="Affiner" onclick="$('#vue').val('')" id="sub" />-->
 
                                 <select name="vue" id="vue" onchange="subExport()()">
                                     <option value="html">Exporter</option>
@@ -93,9 +100,11 @@
                                     function subExport(){
                                     if($('#vue').val()=='opml'){
 
-                                    $('#form').attr('target', '_blank');
-                                    $('#form').submit();
-                                    $('#form').attr('target', '');
+                                    $('#pagina').attr('target', '_blank');
+                                    $('#pagina').submit();
+                                    $('#pagina').attr('target', '');
+                                    $('#vue').val('html');
+                                    
 
                                     }
                                     }
@@ -103,18 +112,13 @@
                                 <button type="submit"  formaction="flux" formtarget="_blank" value="vue">Exporter</button>
                             </fieldset>
                         </form>
+                                <script src="AjaxFluxDyn.js"></script>
 
-
+                                
+                              
                         <form>
-                            <ul id="sall">
-                                <c:forEach items="${listflux}" var="flux">
-
-
-                                    <li><input name="id" type="checkbox" value="${flux.ID}"/><a href="flux?action=mod&id=${flux.ID}"><c:out value="${flux}"></c:out></a></li>
-
-
-
-                                </c:forEach>
+                            <ul id="resudiv">
+               
                             </ul>
                             <button type="button" value="0" id="bts">Tout sélectionner</button>
                             <select name="action">
@@ -128,12 +132,12 @@
                                 if(this.value==='1'){
                                 this.textContent='Déselectionner tout';
                                 this.value='0';
-                                $("#sall").find(':checkbox').prop('checked', false);
+                                $("#resudiv").find(':checkbox').prop('checked', false);
                                 }
                                 else if(this.value==='0'){
                                 this.textContent='Tout sélectionner';
                                 this.value='1';
-                                $("#sall").find(':checkbox').prop('checked', true);
+                                $("#resudiv").find(':checkbox').prop('checked', true);
                                 }
                                 });
                             </script>
@@ -174,21 +178,13 @@
                                 <span class="erreur"> ${form.erreurs['htmlUrl'][1]}</span>
                                 <br />
 
-
-                                <label for="periodiciteCollecte" title="L'agrégéteur déclanche la collecte tout les x secondes">Périodicié de la collecte en seconde</label>
-                                <input type="text" id="periodiciteCollecte" name="periodiciteCollecte" value="<c:out value="${flux.periodiciteCollecte}" default="900"/>">
-                                <br />
-
                                 <label>Comportement de collecte : </label>
                                 <select name="mediatorFlux">
                                     <c:forEach items="${listcomportement}" var="compo">
                                         <option value="${compo.ID}" <c:if test="${flux.mediatorFlux.ID==compo.ID}"> selected="true"</c:if> >${compo}</option>
                                     </c:forEach>
-
-                                </select>
-
-                                <br />
-
+                                </select><br />
+                                
                                 <label for="journalLie" title="Un journal comprends plusieurs flux... Si vous ne trouvez pas le journal concerné, allez dans Journal-> ajouter">Journal :</label>
                                 <select name="journalLie" id="journalLie">
                                     <option value="null">Aucun</option>
@@ -244,11 +240,7 @@
                             </c:forEach>
                         </ul>
 
-                        <script src="test.js">
-
-
-
-                        </script>
+                        <script src="test.js"></script>
 
 
                     </c:when>
@@ -305,6 +297,7 @@
                                     <td>${fl.mediatorFluxAction.dedoubloneur.compteCapture[3]}</td>
                                     <td>${fl.mediatorFluxAction.dedoubloneur.compteCapture[4]}</td>
                                     <td>
+                                        <c:set var="erreur" value="0"></c:set>
                                         <c:forEach items="${fl.incidentEnCours}" var="inci" varStatus="last">
                                             <c:set var="erreur" value="1"></c:set>
                                             ${inci.messageEreur}

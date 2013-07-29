@@ -107,7 +107,8 @@ public class ServiceCollecteur implements Observer {
                  
                         
                         //TODO : Scheduler en fonction du temps restant. il faut modifier de deuxieme paramettre de la commande. 
-                        this.poolSchedule.schedule(tmpTache, listFlux.get(i).getPeriodiciteCollecte(), TimeUnit.SECONDS);
+//                        this.poolSchedule.schedule(tmpTache, listFlux.get(i).getPeriodiciteCollecte(), TimeUnit.SECONDS);
+                        this.poolSchedule.schedule(tmpTache, listFlux.get(i).getMediatorFlux().getPeriodiciteCollecte(), TimeUnit.SECONDS);
                     }
                 }
             } else {
@@ -212,7 +213,8 @@ public class ServiceCollecteur implements Observer {
      * @param t
      */
     public void addScheduledCallable(TacheRecupCallable t) {
-        this.poolSchedule.schedule(t, t.getFlux().getPeriodiciteCollecte(), TimeUnit.SECONDS);
+//        this.poolSchedule.schedule(t, t.getFlux().getPeriodiciteCollecte(), TimeUnit.SECONDS);
+        this.poolSchedule.schedule(t, t.getFlux().getMediatorFlux().getPeriodiciteCollecte(), TimeUnit.SECONDS);
     }
 
     public ScheduledExecutorService getPoolSchedule() {

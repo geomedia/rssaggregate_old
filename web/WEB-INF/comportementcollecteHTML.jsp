@@ -64,17 +64,21 @@
                         <form method="POST">
 
                             <fieldset>
-                                
+
                                 <legend>Information propre au comportement</legend>
                                 <label>Comportement utilisé par défaut :</label>
                                 <input type="checkbox" name="defaut" <c:if test="${comportement.defaut}"> checked="true"</c:if> /><br />
-                                
-                                <label> Nom du comportement : </label>
-                                <input type="text" name="comportement_nom" value="${comportement.nom}"/><br/>
+
+                                    <label> Nom du comportement : </label>
+                                    <input type="text" name="comportement_nom" value="${comportement.nom}"/><br/>
 
 
                                 <label>Description du comportement : </label><br />
                                 <textarea name="comportement_desc" rows="10" cols="60">${comportement.description}</textarea><br />
+                                
+                                <label title="Nombre de secondes entre deux levée de flux">Periodicité de collecte : </label>
+                                <input  name="periodiciteCollecte" type="text" value="${comportement.periodiciteCollecte}" />
+                                    
                             </fieldset>
 
 
@@ -84,25 +88,23 @@
                                 <input name="requester_time_out" value="${comportement.requesteur.timeOut}"/><br />
 
 
-                                
+
                                 <label>Request Property</label><button type="button"  onclick="addProp();">ajouter</button>
-                                
+
                                 <script>
                                     function addProp(){
                                     $('#blocProp').append('<label>cle : </label><input type="text" name="requestPropertyCle" />');
                                     $('#blocProp').append('<label>valeur : </label><input type="text" value="${tab[1]}" name="requestPropertyValue" /><br />');
                                     }
-                                    
+
                                 </script>
                                 <div id="blocProp">
-                                        <c:forEach items="${comportement.requesteur.requestProperty}" var="tab">
-                                    <input type="text" value="${tab[0]}" name="requestPropertyCle" />
-                                    <input type="text" value="${tab[1]}" name="requestPropertyValue" /><br />
-                                </c:forEach>
+                                    <c:forEach items="${comportement.requesteur.requestProperty}" var="tab">
+                                        <input type="text" value="${tab[0]}" name="requestPropertyCle" />
+                                        <input type="text" value="${tab[1]}" name="requestPropertyValue" /><br />
+                                    </c:forEach>
                                 </div>
 
-                            
-                                    
 
                             </fieldset>
 

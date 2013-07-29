@@ -164,6 +164,7 @@ public class Simpleadd extends HttpServlet {
             String s3 = request.getParameter("periodicite");
 
 
+            
 
             int i;
             String tatdeFlux = request.getParameter("txt");
@@ -176,14 +177,15 @@ public class Simpleadd extends HttpServlet {
                 try {
                     Flux fl = new Flux(st.nextToken());
                     fl.setActive(Boolean.TRUE);
-                    fl.setPeriodiciteCollecte(60);
+//                    fl.setPeriodiciteCollecte(60);
 
                     if (j != null) {
                         fl.setJournalLie(j);
                     }
                     fl.setMediatorFlux(compo);
 
-                    fl.setPeriodiciteCollecte(new Integer(s3));
+                    
+//                    fl.setPeriodiciteCollecte(new Integer(s3));
 
                     try {
                         dao.creer(fl);

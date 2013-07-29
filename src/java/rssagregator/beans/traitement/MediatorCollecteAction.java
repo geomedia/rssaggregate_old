@@ -118,6 +118,14 @@ public class MediatorCollecteAction implements Serializable, Cloneable, Callable
     private AbstrDedoublonneur dedoubloneur;
     @Transient
     private Integer nbrItemCollecte;
+    
+        /**
+     * Nombre de secondes séparant deux moissonage du flux
+     */
+    @Column(name = "periodiciteCollecte")
+    private Integer periodiciteCollecte;
+    
+    
 
     /**
      * Le médiator utilise tout les objets de service pour effectuer l'action
@@ -235,6 +243,7 @@ public class MediatorCollecteAction implements Serializable, Cloneable, Callable
         MediatorCollecteAction collecteAction = new MediatorCollecteAction();
 
         collecteAction.setDefaut(false);
+        collecteAction.periodiciteCollecte = 3600;
 
         collecteAction.requesteur = Requester.getDefaulfInstance();
         collecteAction.parseur = RomeParse.getDefaultInstance();
@@ -301,7 +310,7 @@ public class MediatorCollecteAction implements Serializable, Cloneable, Callable
     public MediatorCollecteAction() {
     }
 
-    public IfsParseur getParseur() {
+    public AbstrParseur getParseur() {
         return parseur;
     }
 
@@ -340,6 +349,15 @@ public class MediatorCollecteAction implements Serializable, Cloneable, Callable
     public void setDefaut(Boolean defaut) {
         this.defaut = defaut;
     }
+
+    public Integer getPeriodiciteCollecte() {
+        return periodiciteCollecte;
+    }
+
+    public void setPeriodiciteCollecte(Integer periodiciteCollecte) {
+        this.periodiciteCollecte = periodiciteCollecte;
+    }
+    
 
     @Override
     public String toString() {

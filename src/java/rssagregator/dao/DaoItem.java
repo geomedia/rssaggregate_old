@@ -13,9 +13,11 @@ import javax.persistence.RollbackException;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import org.eclipse.persistence.internal.jpa.querydef.BasicCollectionJoinImpl;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -31,7 +33,8 @@ import rssagregator.beans.Item;
  */
 public class DaoItem extends AbstrDao {
 
-    Flux where_clause_flux = null;
+//    Flux where_clause_flux = null;
+    List<Flux> where_clause_Flux;
     String order_by;
     Boolean order_desc;
     Integer fistResult;
@@ -45,7 +48,7 @@ public class DaoItem extends AbstrDao {
         em = daof.getEntityManager();
         this.dAOFactory = daof;
         this.classAssocie = Item.class;
-
+        where_clause_Flux = new ArrayList<Flux>();
         order_desc = false;
     }
     private static final String REQ_FIND_BY_HASH = "SELECT i FROM Item i where i.hashContenu=:hash";
@@ -58,8 +61,6 @@ public class DaoItem extends AbstrDao {
 
     /**
      * *
-     *
-     *
      * @param hash
      */
     /**
@@ -81,12 +82,12 @@ public class DaoItem extends AbstrDao {
         } catch (Exception e) {
             return null;
         }
-
     }
 
     public List<Item> findCretaria() {
 
 //        em = dAOFactory.getEntityManager();
+        int i;
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
         List<Predicate> listWhere = new ArrayList<Predicate>();
@@ -94,23 +95,19 @@ public class DaoItem extends AbstrDao {
         CriteriaQuery<Item> cq = cb.createQuery(Item.class);
         Root<Item> root = cq.from(Item.class);
 
-        //La jointure avec whereclause
-        if (where_clause_flux != null) {
-            Join joinFlux = root.join("listFlux");
 
-            listWhere.add(cb.equal(joinFlux.get("ID"), where_clause_flux.getID()));
-//            cq.where(cb.equal(joinFlux.get("ID"), where_clause_flux.getID()));
+        if (where_clause_Flux != null && where_clause_Flux.size() > 0) {
+            Join joinFlux = root.join("listFlux");
+            listWhere.add(joinFlux.in(where_clause_Flux));
         }
 
         if (date1 != null && date2 != null) {
             listWhere.add(cb.and(cb.between(root.<Date>get("dateRecup"), date1, date2)));
         }
-
-
 //        
         // Le ORDER BY
         if (order_by != null) {
-            if (order_desc!= null && order_desc) {
+            if (order_desc != null && order_desc) {
                 System.out.println("DESC");
                 cq.orderBy(cb.desc(root.get(order_by)));
             } else {
@@ -119,10 +116,9 @@ public class DaoItem extends AbstrDao {
             }
         }
 
-
         // On applique les wheres
-        int i;
         if (listWhere.size() == 1) {
+
             cq.where(listWhere.get(0));
         } else if (listWhere.size() > 1) {
             Predicate pr = cb.and(listWhere.get(0));
@@ -132,45 +128,31 @@ public class DaoItem extends AbstrDao {
             cq.where(pr);
         }
 
-
-
         // application de la limite
         TypedQuery<Item> tq = em.createQuery(cq);
-
         if (fistResult != null && maxResult != null) {
             tq.setMaxResults(maxResult);
             tq.setFirstResult(fistResult);
-            System.out.println("Y A DE LA LIMITE");
         } else {
-            System.out.println("PAS DE LIMITE");
         }
-
-
         return tq.getResultList();
     }
 
     public static void main(String[] args) {
 
-        System.out.println("dd");
-
         DaoItem dao = DAOFactory.getInstance().getDaoItem();
-
-
 
         DateTimeFormatter fmt = DateTimeFormat.forPattern("dd/MM/yyyy");
         DateTime dateTime = fmt.parseDateTime("01/01/2014");
         Date date1 = dateTime.toDate();
 
-
         dateTime = fmt.parseDateTime("01/01/2015");
         Date date2 = dateTime.toDate();
-
 
         dao.setDate1(date1);
         dao.setDate2(date2);
 
         List<Item> resu = dao.findCretaria();
-        System.out.println("nbr : " + resu.size());
     }
 
     /**
@@ -190,20 +172,14 @@ public class DaoItem extends AbstrDao {
         CriteriaQuery cq = cb.createQuery(Item.class);
         Root root = cq.from(Item.class);
 
-
-        //La jointure avec whereclause
-        if (where_clause_flux != null) {
+        if (where_clause_Flux != null && where_clause_Flux.size() > 0) {
             Join joinFlux = root.join("listFlux");
-
-            listWhere.add(cb.equal(joinFlux.get("ID"), where_clause_flux.getID()));
-//            cq.where(cb.equal(joinFlux.get("ID"), where_clause_flux.getID()));
+            listWhere.add(joinFlux.in(where_clause_Flux));
         }
 
         if (date1 != null && date2 != null) {
             listWhere.add(cb.and(cb.between(root.<Date>get("dateRecup"), date1, date2)));
-            System.out.println("DDDDDDDDDDDDDAATE");
         }
-
 
         // On applique les wheres
         int i;
@@ -220,11 +196,7 @@ public class DaoItem extends AbstrDao {
         cq.select(cb.count(root));
         TypedQuery<Item> tq = em.createQuery(cq);
 
-
-
         List resu = tq.getResultList();
-        System.out.println("RESU size : " + resu.size());
-        System.out.println("RESU 0 : " + resu.get(0));
 
         try {
             Integer retour = new Integer(resu.get(0).toString());
@@ -233,70 +205,13 @@ public class DaoItem extends AbstrDao {
             System.out.println("ERRRRR");
             return null;
         }
-
-
-
-        //La jointure avec whereclause
-//        if (where_clause_flux != null) {
-//            Join joinFlux = root.join("listFlux");
-//            cq.where(cb.equal(joinFlux.get("ID"), where_clause_flux.getID()));
-//
-//        }
-//
-//        if (date1 != null && date2 != null) {
-//
-////            cq.where(cb.between(root.<Date>get("dateRecup"), date1, date2));
-////            cq.where(cb.and(cb.between(root.<Date>get("dateRecup"), date1, date2)));
-//            listWhere.add(cb.and(cb.between(root.<Date>get("dateRecup"), date1, date2)));
-//
-//
-////            cq.where(cb.and(restrictions))
-//        }
-//
-//
-//        cq.select(cb.count(root));
-//
-//        Query query = em.createQuery(cq);
-//        List resu = query.getResultList();
-//
-//
-//
-//
-//
-//        try {
-//            Integer retour = new Integer(resu.get(0).toString());
-//            return retour;
-//        } catch (Exception e) {
-//            return null;
-//        }
-
-
-// ANCIENNE VERSION AVANT CRITERIA
-//               TypedQuery<Item> tq = em.createQuery(cq);
-//               tq.
-//
-//
-//        em = dAOFactory.getEntityManager();
-////        em.getTransaction().begin();
-//        Query query = em.createQuery(REQ_COUNT_ALL);
-//        Object result = query.getSingleResult();
-////        em.close();
-//        return new Integer(result.toString());
-
-
     }
 
     public List<Item> findAllLimit(Long premier, Long nombre) {
 
-//        em = dAOFactory.getEntityManager();
-//        em.getTransaction().begin();
-
         Query query = em.createQuery(REQ_FIND_ALL_AC_LIMIT);
         query.setFirstResult(premier.intValue());
         query.setMaxResults(nombre.intValue());
-
-//        query.setParameter("prem", premier);
-//        query.setParameter("nbr", nombre);
 
 
         List<Item> listResult = query.getResultList();
@@ -384,14 +299,6 @@ public class DaoItem extends AbstrDao {
 
     }
 
-    public Flux getWhere_clause_flux() {
-        return where_clause_flux;
-    }
-
-    public void setWhere_clause_flux(Flux where_clause_flux) {
-        this.where_clause_flux = where_clause_flux;
-    }
-
     public String getOrder_by() {
         return order_by;
     }
@@ -440,6 +347,14 @@ public class DaoItem extends AbstrDao {
         this.date2 = date2;
     }
 
+    public List<Flux> getWhere_clause_Flux() {
+        return where_clause_Flux;
+    }
+
+    public void setWhere_clause_Flux(List<Flux> where_clause_Flux) {
+        this.where_clause_Flux = where_clause_Flux;
+    }
+
     public synchronized void enregistrement(Item item, Flux flux) {
 
         Boolean err = false;
@@ -477,8 +392,6 @@ public class DaoItem extends AbstrDao {
                 logger.debug("ERREURR");
             }
         }
-
-
     }
 
     /**
@@ -505,12 +418,14 @@ public class DaoItem extends AbstrDao {
      * cette commande permet donc de réinitialiser les paramettres de recherche.
      */
     public void initcriteria() {
-        where_clause_flux = null;
+//        where_clause_flux = null;
+        
+        where_clause_Flux = new ArrayList<Flux>();
         order_by = null;
-        order_desc=null;
-        fistResult=null;
-        maxResult=null;
-        date1=null;
-        date2=null;
+        order_desc = null;
+        fistResult = null;
+        maxResult = null;
+        date1 = null;
+        date2 = null;
     }
 }

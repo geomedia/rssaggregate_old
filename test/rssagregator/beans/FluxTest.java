@@ -97,19 +97,7 @@ public class FluxTest {
         fail("The test case is a prototype.");
     }
 
-    /**
-     * Test of createTask method, of class Flux.
-     */
-    @Test
-    public void testCreateTask() {
-        System.out.println("createTask");
-        Flux instance = new Flux();
-        instance.createTask();
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-  
+ 
    
 
     /**

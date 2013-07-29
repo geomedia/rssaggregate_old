@@ -68,7 +68,7 @@ public class ClemBeanUtilsTest {
         ServletRunner sr = new ServletRunner();
         sr.registerServlet("myServlet", JournauxSrvl.class.getName());
         ServletUnitClient sc = sr.newClient();
-        WebRequest request = new PostMethodWebRequest("http://localhost//RSSAgregate/journaux?action=add");
+        WebReques               t request = new PostMethodWebRequest("http://localhost//RSSAgregate/journaux?action=add");
         request.setParameter("nom", "Le monde");
 //        request.setParameter("langue", "zoulou");
 

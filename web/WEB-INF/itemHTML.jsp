@@ -50,7 +50,7 @@
 
 
 
-        <c:when test="${action=='list'}">
+        <c:when test="${action=='recherche'}">
 
             <link rel="stylesheet" href="jquery-ui.css" />
             <script src="jquery-ui.js"></script>
@@ -65,67 +65,34 @@
                 <h1>Liste des items</h1>
                 <div>
 
-                    <form method="GET" id="form">
+                    <form method="GET" id="pagina">
                         <fieldset>
                             <legend title="truc"  >Pages : </legend> 
 
                             <!--    On calcul des début et fin-->
-                            <c:choose>
-                                <c:when test="${firstResult - itPrPage<0}">
-                                    <c:set var="end2" value="0"></c:set>
-                                    <c:set var="begin2" value="10"></c:set>
-                                </c:when>
-                                <c:when test="${firstResult - (itPrPage)*5<=0}">
-                                    <c:set var="end2" value="${firstResult- itPrPage}"></c:set>
-                                    <c:set var="begin2" value="0"></c:set>
-                                </c:when>
+                            <%--<c:import url="/WEB-INF/paginator.jsp" />--%>
+                            <div>
+                            <span id="btPaginDiv"></span>
+                            
 
-                                <c:when test="${firstResult - (itPrPage)*5>=0}">
-                                    <c:set var="end2" value="${firstResult - itPrPage}"></c:set>
-                                    <c:set var="begin2" value="${firstResult - (itPrPage)*5}"></c:set>
-                                </c:when>
-                            </c:choose>
-
-                            <c:forEach var="j" begin="${begin2}" end="${end2}" step="${itPrPage}" varStatus="varstat2">
-                                <button type="submit" name="firstResult" value="${j}">${j} - ${j+varstat2.step}</button>
-                            </c:forEach>
-
-
-
-                            <c:choose>
-                                <c:when test="${firstResult + (itPrPage)*10<nbitem}">
-                                    <c:set var="begin" value="${firstResult}"></c:set>
-                                    <c:set var="end" value="${firstResult + (itPrPage)*10}"></c:set>
-                                </c:when>
-                                <c:when test="${firstResult + (itPrPage)*10>nbitem}">
-                                    <c:set var="begin" value="${firstResult}"></c:set>
-                                    <c:set var="end" value="${nbitem}"></c:set>
-
-                                </c:when>
-
-                            </c:choose>
-
-                            <c:forEach var="i" begin="${begin}" end="${end}" step="${itPrPage}"  varStatus="varstat">
-                                <button type="submit" name="firstResult" value="${i}" <c:if test="${i==firstResult}">style="color: red"</c:if>>${i} - ${i+varstat.step}<c:if test="${varstat.last}">...</c:if></button>
-                            </c:forEach>
-                      
-
-
-                            <label for="itPrPage">Item par page : </label>
-                            <select name="itPrPage" onChange="this.form.submit();"> 
-
+<!--                            <label for="itPrPage">Item par page : </label>-->
+                            Afficher :
+                            <select name="itPrPage" onChange="$('#afin').click();" id="itPrPage"> 
                                 <c:forEach var="i" begin="20" end="500" step="20">
-
                                     <option value="${i}" <c:if test="${param.itPrPage==i}"> selected="true"</c:if>>${i}</option>
                                 </c:forEach>
-
-                            </select> 
-                            <noscript>
-                            <input type="submit" value="Changer"  />
-                            </noscript>
-                            <span>nombre de résultats : ${nbitem}</span>
+                            </select> résultats par page.
+                            
+                            </div>
+                            
+                            <!--<noscript>-->
+                            <!--<input type="submit" value="Changer"  />-->
+                            <!--</noscript>-->
+                       
 
                         </fieldset>
+
+                        <input type="hidden" id="firstResult" value="0"/>
 
 
                         <br />
@@ -133,25 +100,40 @@
                             <legend>Affiner la recherche</legend>
                             <label for="flux">Lie au flux : </label>
 
-                            <select id="journalSelection">
-                                <option value="null">Journal : </option>
-                                <option id="tous">tous</option>
-                                <c:forEach items="${listJournaux}" var="j">
-                                    <option value="${j.ID}">${j.nom}</option>
-                                </c:forEach>
+                            <table>
+                                <tr>
+                                    <td>
+                                        <select id="journalSelection">
+                                            <option value="null">Journal : </option>
+                                            <option id="tous">tous</option>
+                                            <c:forEach items="${listJournaux}" var="j">
+                                                <option value="${j.ID}">${j.nom}</option>
+                                            </c:forEach>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select id="fluxSelection" name="oldid-flux" style="max-width: 300px" multiple="true">
+                                            <option value="all">Tous</option>
+                                            <c:forEach items="${listflux}" var="fl">
+                                                <option value="${fl.ID}">${fl}</option>                                
+                                            </c:forEach>
+                                        </select>
 
-                            </select>
+                                    </td>
+                                    <td>
 
+                                        <button type="button" onclick="selectflux();">--></button><br />
+                                        <button type="button" onclick="supp();"><--</button>
+                                    </td>
+                                    <td><select multiple="true" style="max-width: 300px" name="fluxSelection2" id="fluxSelection2"></select></td>
+                                </tr>
 
-                            <select id="fluxSelection" name="id-flux">
-                                <option value="all">Tous</option>
-                                <c:forEach items="${listflux}" var="fl">
-                                    <option value="${fl.ID}" <c:if test="${idflux==fl.ID}"> selected="true"</c:if>>${fl}</option>                                
-                                </c:forEach>
-                            </select>
+                            </table>
+
 
                             <script src="dynListJournauxFLux.js"></script>
-
+                            <script src="AjaxItemDyn.js"></script>
+                            <br />
 
                             <label>Ordonner par : </label>
                             <select id="order" name="order">
@@ -160,16 +142,18 @@
                                 <option value="datePub" <c:if test="${param.order=='datePub'}"> selected="true"</c:if>>Date de publication</option>
                                 <option value="listFlux" <c:if test="${param.order=='listFlux'}"> selected="true"</c:if>>Flux</option>
                                 </select>
+
+
                                 <label for="desc">Décroissant</label>
                                 <input type="checkbox" name="desc" value="true" <c:if test="${param.desc=='true'}"> checked="true"</c:if>/>
 
 
                                 <label for="date1">Date début : </label>
-                                <input type="text" name="date1" class="datepicker"/>
+                                <input type="text" name="date1" class="datepicker" id="date1"/>
                                 <label for="date2">Date fin : </label>
-                                <input type="text" name="date2" class="datepicker"/>
+                                <input type="text" name="date2" class="datepicker" id="date2"/>
 
-                                <input type="submit" value="Affiner la sélection">
+                                <input type="button" value="Affiner la sélection" id="afin">
 
                                 <select name="vue" id="vue" onchange="subExport();">
                                     <option value="html">Export</option>
@@ -183,7 +167,7 @@
                     if ($('#vue').val() == 'csv' || $('#vue').val() == 'csvexpert' || $('#vue').val() == 'xls') {
                         var old = $('#order').val();
                         $('#order').val('listFlux');
-                        $('#form').submit();
+                        $('#pagina').submit();
                         $('#order').val(old);
                     }
                 }
@@ -193,18 +177,25 @@
                         </form>
                     </div>
 
-                    <ul>
-                    <c:forEach items="${listItem}" var="ite">
-                        <li><p>
-                                <a href="item?action=read&id=${ite.ID}">${ite.titre}</a>
-                                <c:forEach items="${ite.listFlux}" var="fl">
-                                    "${fl}" 
-                                </c:forEach><fmt:formatDate value="${ite.dateRecup}" pattern="dd/MM/yyyy hh:mm:ss"/>
-                            </p>
-                            <p>${ite.description}</p>
-                        </li>
-                    </c:forEach>
-                </ul>
+                    <div>
+                        <ul id="resudiv">
+
+                        </ul>
+
+                    </div>
+
+                    <!--                    <ul>    MAINTENANT GERRÉE EN aAJAX-->  
+                <%--<c:forEach items="${listItem}" var="ite">--%>
+                <!--<li><p>-->
+                        <!--<a href="item?action=read&id=${ite.ID}">${ite.titre}</a>-->
+                <%--<c:forEach items="${ite.listFlux}" var="fl">--%>
+                    <!--"${fl}"--> 
+                <%--</c:forEach><fmt:formatDate value="${ite.dateRecup}" pattern="dd/MM/yyyy hh:mm:ss"/>--%>
+                <!--</p>-->
+                <!--<p>${ite.description}</p>-->
+                <!--</li>-->
+                <%--</c:forEach>--%>
+                <!--</ul>-->
 
 
             </div>

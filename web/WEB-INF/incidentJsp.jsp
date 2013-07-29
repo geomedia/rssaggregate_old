@@ -17,27 +17,46 @@
     <div id="header">
         <div id="logo">
             <h1>Administration des <span>Incidents</span></h1></div></div>
- 
+
 
 </div>
 
 <div id="content">
     <div class="post">
         <c:choose>
-            <c:when test="${action=='list'}">
+            <c:when test="${action=='recherche'}">
                 <h2>Liste des incidents</h2>
-                <ul>
-                    <c:forEach items="${listobj}" var="incid">
+
+                <form method="POST" id="pagina">
+
+                    <fieldset>
+                        <legend>Pages : </legend>
+                                  <div>
+                                 <span id="btPaginDiv"></span>
+                                </div>
+                        
+
+                        <input type="hidden" id="firstResult" value="0"/>
 
 
-                        <li><a href="incidents?action=mod&id=${incid.ID}">${incid.fluxLie} : ${incid.messageEreur}</a>
-                            <p>   Date début : <fmt:formatDate value="${incid.dateDebut}" pattern="dd/MM/yyyy hh:mm:ss"/>
-                                Date fin : <c:if test="${empty incid.dateFin}"><strong>Incident non clos</strong></c:if><fmt:formatDate value="${incid.dateFin}" pattern="dd/MM/yyyy hh:mm:ss"/>
-                            Durée : ${incid.duree}
-                            </p>
-                   
-                        </li>
-                    </c:forEach>
+                        <label>Flux par page</label>
+                        <select id="itPrPage" name="itPrPage" onChange="this.form.submit();"> 
+                            <c:forEach var="i" begin="25" end="150" step="25">
+                                <option value="${i}" <c:if test="${itPrPage==i}"> selected="selected"</c:if>>${i}</option>
+                            </c:forEach>
+                        </select><br />
+                        <label>Voir : </label>
+                        <input type="radio" id="clos" name="clos" value="true"<c:if test="${clos}"> checked="checked"</c:if> onclick="$('afin').click();">Incident clos
+                        <input type="radio" name="clos" value="false"<c:if test="${!clos}"> checked="checked"</c:if> onclick="$('afin').click();">Incident non clos
+
+
+                            <button type="button" id="afin" >Affiner</button>
+                        </fieldset>
+
+                    </form>
+                    <script src="AjaxIncidDyn.js"></script>
+                    <ul id="resudiv">
+                 
                 </ul>
 
             </c:when>
@@ -50,7 +69,7 @@
                 <p>Date début : <fmt:formatDate value="${incident.dateDebut}" pattern="dd/MM/yyyy hh:mm:ss"/></p>
                 <p>Date fin : <fmt:formatDate value="${incident.dateFin}" pattern="dd/MM/yyyy hh:mm:ss"/></p>
                 <p>Nombre de répétition dans la période : ${incident.nombreTentativeEnEchec}</p>
-                
+
 
 
                 <p>Message d'erreur : ${incident.messageEreur}</p>

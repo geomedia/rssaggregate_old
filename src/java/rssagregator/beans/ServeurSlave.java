@@ -15,9 +15,9 @@ public class ServeurSlave implements Serializable{
     private Long id;
 
     @Column
-    private String servHost;
+    private String host;
     
-    private String urlServletRecup;
+    private String url;
     
     private String login;
     private String pass;
@@ -53,13 +53,23 @@ public class ServeurSlave implements Serializable{
         this.id = id;
     }
 
-    public String getUrlServletRecup() {
-        return urlServletRecup;
+    public String getHost() {
+        return host;
     }
 
-    public void setUrlServletRecup(String urlServletRecup) {
-        this.urlServletRecup = urlServletRecup;
+    public void setHost(String host) {
+        this.host = host;
     }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+
 
     public Date getDateRecup() {
         return dateRecup;
@@ -69,11 +79,14 @@ public class ServeurSlave implements Serializable{
         this.dateRecup = dateRecup;
     }
 
-    public String getServHost() {
-        return servHost;
-    }
 
-    public void setServHost(String servHost) {
-        this.servHost = servHost;
+
+    @Override
+    public String toString() {
+        
+        return login+":"+pass+"@"+host+ "  "+ url;
     }
+    
+    
+    
 }

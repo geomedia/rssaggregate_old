@@ -49,7 +49,7 @@ public class SetDonnee {
         DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
         DAOConf dAOConf = DAOFactory.getInstance().getDAOConf();
 
-        dAOConf.chargerDepuisBd();
+//        dAOConf.chargerDepuisBd();
 
         daoFlux.addObserver(collecteur);
         dAOConf.addObserver(collecteur);

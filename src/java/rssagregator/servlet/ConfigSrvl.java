@@ -50,30 +50,6 @@ public class ConfigSrvl extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
 
         
-//        //pour les test à supprimer par la suite
-//        // TODO : supprimer cela
-//        
-//        DaoFlux daof = DAOFactory.getInstance().getDAOFlux();
-//        ServiceCollecteur collecteur = ServiceCollecteur.getInstance();
-//        DAOFactory.getInstance().getEntityManager().getEntityManagerFactory().getCache().evictAll();
-//        System.out.println("LILI");
-//        int i;
-//        List<Flux> lf = DAOFactory.getInstance().getDAOFlux().findAllFlux(true);
-//        for(i=0;i<lf.size(); i++){
-//            List<Item> li = lf.get(i).getItem();
-//            System.out.println("LALA");
-//            int j;
-//            for(j=0;j<li.size();j++){
-//                DAOFactory.getInstance().getEntityManager().detach(li.get(j));
-//                System.out.println("OUI");
-//            }
-//        }
-//        
-//        System.out.println("");
-        
-        
-        
-
         // Un simple attribut pour que le menu brille sur la navigation courante
         request.setAttribute("navmenu", "config");
 
@@ -105,23 +81,15 @@ public class ConfigSrvl extends HttpServlet {
         // SAUVEGARDE SI INFOS 
         if (form.getValide()) {
             try {
-                //            dao.modifier(confGenerale);
-                //            ListeFluxCollecteEtConfigConrante.getInstance().setConfCourante(confGenerale);
-                //            ListeFluxCollecteEtConfigConrante.getInstance().notifyObservers();
-                            //            ListeFluxCollecteEtConfigConrante.getInstance().modifierConf(confGenerale);
-                            
                             DAOFactory.getInstance().getDAOConf().modifierConf(confGenerale);
 
                             // Il faut notifier le changement 
             } catch (Exception ex) {
                 Logger.getLogger(ConfigSrvl.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
         }
 
-
         this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
-
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

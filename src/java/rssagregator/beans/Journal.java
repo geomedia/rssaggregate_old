@@ -12,7 +12,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import javax.persistence.Transient;
 
 /**
  * Un journal : Le monde, le Figaro... Chaque journal est instancier dans un
@@ -59,6 +58,9 @@ public class Journal extends Bean implements Serializable {
      */
     @Column(name = "urlHtmlRecapFlux", length = 2000)
     private String urlHtmlRecapFlux;
+    
+    @Column(name = "information", columnDefinition = "text")
+    private String information;
 
     public Journal() {
         this.fluxLie = new ArrayList<Flux>();
@@ -120,47 +122,12 @@ public class Journal extends Bean implements Serializable {
     public void setUrlHtmlRecapFlux(String urlHtmlRecapFlux) {
         this.urlHtmlRecapFlux = urlHtmlRecapFlux;
     }
-    
-    
-    
 
-    //    @Override
-    //    public boolean equals(Object obj) {
-    //        return false;
-    //    }
-    //    @Override
-    //    public boolean equals(Object obj) {
-    //
-    //int h1 = this.hashCode();
-    //int h2 = obj.hashCode();
-    //
-    //
-    //obj.hashCode();
-    //        Journal jc = (Journal) obj;
-    //        if(this.nom.equals(jc.nom)){
-    //            return false;
-    //        }
-    //
-    //
-    //                return true;
-    ////        if(!this.langue.equals(jc.langue))
-    ////            return false;
-    ////
-    ////
-    ////
-    ////        return true;
-    //    }
-    public static void main(String[] args) {
-        Journal j1 = new Journal();
-        j1.setNom("j1");
-        Journal j2 = new Journal();
-        j2.setNom("j1");
+    public String getInformation() {
+        return information;
+    }
 
-        if (j1.compareBeans(j2, false)) {
-            System.out.println("egal");
-        } else {
-            System.out.println("innegal");
-        }
-
+    public void setInformation(String information) {
+        this.information = information;
     }
 }

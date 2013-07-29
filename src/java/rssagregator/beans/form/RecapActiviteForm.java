@@ -52,7 +52,7 @@ public class RecapActiviteForm extends AbstrForm {
         }
 
         //récupération des flux
-        String[] tabflux = request.getParameterValues("flux");
+        String[] tabflux = request.getParameterValues("fluxSelection2");
 
         int i ;
         if (tabflux != null) {

@@ -5,11 +5,9 @@
 package rssagregator.servlet;
 
 import rssagregator.dao.DAOFactory;
-import rssagregator.dao.DaoFlux;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,7 +17,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import rssagregator.beans.Flux;
 import rssagregator.beans.RecapActivite;
 import rssagregator.beans.form.RecapActiviteForm;
 
@@ -58,8 +55,8 @@ public class RecapActiviteGeneraleSrvl extends HttpServlet {
             action = "list";
         }
         request.setAttribute("action", action);
-    
-      if (action.equals("json")) {
+
+        if (action.equals("json")) {
             response.setContentType("Content-type: text/json");
 
             // On recupère le recap de la session
@@ -74,21 +71,15 @@ public class RecapActiviteGeneraleSrvl extends HttpServlet {
             try {
                 out.println(recap.getJson());
             } catch (Exception e) {
-                  Logger.getLogger(RecapActiviteGeneraleSrvl.class.getName()).log(Level.SEVERE, null, e);
+                Logger.getLogger(RecapActiviteGeneraleSrvl.class.getName()).log(Level.SEVERE, null, e);
             }
         } else {
             //Capture de la liste des flux pour créer le menu
 
-//            DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
-//            List<Flux> list = daoFlux.findAllFlux(false);
-//            request.setAttribute("listFlux", list);
-                   request.setAttribute("listFlux", DAOFactory.getInstance().getDAOFlux().findAllFlux(false));
-            
+            request.setAttribute("listFlux", DAOFactory.getInstance().getDAOFlux().findAllFlux(false));
+
             // Liste des journaux
-                    request.setAttribute("listJournaux", DAOFactory.getInstance().getDaoJournal().findall());
-            
-            
-            
+            request.setAttribute("listJournaux", DAOFactory.getInstance().getDaoJournal().findall());
 
             RecapActivite recapActivite = new RecapActivite();
             RecapActiviteForm form = new RecapActiviteForm();
@@ -101,10 +92,9 @@ public class RecapActiviteGeneraleSrvl extends HttpServlet {
             if (request.getMethod().equals("POST")) {
 
                 recapActivite = (RecapActivite) form.bind(request, recapActivite, RecapActivite.class);
-                //On passe l'objet par le biai de la session
+                //On passe l'objet par le biai de la session, 
                 HttpSession session = request.getSession();
                 session.setAttribute("recapActivite", recapActivite);
-
                 request.setAttribute("recapActivite", recapActivite);
             }
 
@@ -112,9 +102,6 @@ public class RecapActiviteGeneraleSrvl extends HttpServlet {
             request.setAttribute("obj", recapActivite);
             request.setAttribute("form", form);
             this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
-
-
-            // mise en forme les objets à disposer dans le graphique
 
         }
     }
@@ -164,7 +151,6 @@ public class RecapActiviteGeneraleSrvl extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
-
 //    public JSONArray jsonGraphEncode(List<Item> items, RecapActivite recap) {
 //        // On commence par trier la list des items par date;
 //        Collections.sort(items);

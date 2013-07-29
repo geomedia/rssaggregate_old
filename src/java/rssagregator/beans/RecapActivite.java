@@ -84,19 +84,24 @@ public class RecapActivite {
         for (i = 0; i < this.getListFlux().size(); i++) {
 
             DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
-            daoItem.setWhere_clause_flux(this.getListFlux().get(i));
+            
+            //TODO : revoir la visualisation avec la dao multiflux
+            daoItem.setWhere_clause_Flux(this.getListFlux());
             daoItem.setDate1(this.getDate1());
             daoItem.setDate2(this.getDate2());
 
             result = daoItem.findCretaria();
-            System.out.println("Nombre de d'item : " + result.size());
+//            System.out.println("Nombre de d'item : " + result.size());
             JSONArray jSONArray = jsonGraphEncode(result, this);
             tabResult.add(jSONArray);
 //            return jSONArray.toJSONString();
         }
-        System.out.println("dd");
-        System.out.println("");
-        System.out.println(""+tabResult.toJSONString());
+        
+        
+        
+//        System.out.println("dd");
+//        System.out.println("");
+//        System.out.println(""+tabResult.toJSONString());
         return tabResult.toJSONString();
     }
 

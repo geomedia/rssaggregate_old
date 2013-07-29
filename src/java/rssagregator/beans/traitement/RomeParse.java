@@ -26,14 +26,12 @@ import javax.persistence.Transient;
  * test
  */
 @Entity
-public class RomeParse extends AbstrParseur implements IfsParseur, Cloneable {
+public class RomeParse extends AbstrParseur implements Cloneable {
     /* {author=clem}*/
 
     /***
      * Le input stream provenant du requester
      */
-
-    
     
     @Transient
     org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(RomeParse.class);
@@ -61,7 +59,7 @@ public class RomeParse extends AbstrParseur implements IfsParseur, Cloneable {
         feedInput.setXmlHealerOn(true);
 
         SyndFeed feed = feedInput.build(reader);
-        String result = "";
+//        String result = "";
 
         for (Iterator i = feed.getEntries().iterator(); i.hasNext();) {
             // Création d'un nouveau beans Item
@@ -70,17 +68,17 @@ public class RomeParse extends AbstrParseur implements IfsParseur, Cloneable {
             SyndEntry entry = (SyndEntry) i.next();
 
             if (entry.getTitle() != null) {
-                result += "Title : " + entry.getTitle() + "\n";
+//                result += "Title : " + entry.getTitle() + "\n";
                 new_item.setTitre(entry.getTitle());
             }
 
             if (entry.getLink() != null) {
-                result += "Link : " + entry.getLink() + "\n";
+//                result += "Link : " + entry.getLink() + "\n";
                 new_item.setLink(entry.getLink());
             }
 
             if (entry.getDescription() != null) {
-                result += "Dexcription : " + entry.getDescription().getValue() + "\n";
+//                result += "Dexcription : " + entry.getDescription().getValue() + "\n";
                 new_item.setDescription(entry.getDescription().getValue());
             }
 
@@ -88,7 +86,7 @@ public class RomeParse extends AbstrParseur implements IfsParseur, Cloneable {
                 int i2;
                 for (i2 = 0; i2 < entry.getContents().size(); i2++) {
                     SyndContentImpl contenu = (SyndContentImpl) entry.getContents().get(i2);
-                    result += "Contenu (atom): " + contenu.getValue() + "\n";
+//                    result += "Contenu (atom): " + contenu.getValue() + "\n";
                     new_item.setContenu(contenu.getValue());
                 }
             }
@@ -128,7 +126,7 @@ public class RomeParse extends AbstrParseur implements IfsParseur, Cloneable {
             Date datecourante = new Date();
             new_item.setDateRecup(datecourante);
 
-            result += "\n------------------------------------------\n";
+//            result += "\n------------------------------------------\n";
 //            System.out.println(result);
 
             listItems.add(new_item);
