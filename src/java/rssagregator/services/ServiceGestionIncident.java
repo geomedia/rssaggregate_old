@@ -64,6 +64,7 @@ public class ServiceGestionIncident {
      * Construceur prive, c'est un singleton...
      */
     private ServiceGestionIncident() {
+        
     }
 
     /**

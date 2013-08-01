@@ -11,11 +11,14 @@ import rssagregator.dao.DaoFlux;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.util.Enumeration;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import rssagregator.services.ServiceCollecteur;
+import rssagregator.services.ServiceJMS;
 
 /**
  *
@@ -80,15 +83,29 @@ public class StartServlet implements ServletContextListener {
             }
             
             
-            
-            
-
 
             daoflux.forceNotifyObserver();
             daoconf.forceNotifyObservers();
             //        listflux.chargerDepuisBd();
 //            daoflux.notifyObservers();
 //            daoconf.notifyObservers();
+            
+            
+            
+              ServiceJMS jMS = ServiceJMS.getInstance();
+//            ServiceJMS.getInstance().run();
+            
+            ExecutorService es = Executors.newFixedThreadPool(1);
+            es.submit(jMS);
+            
+            
+            
+            
+//            try {
+////                ServiceJMS.getInstance().startService();
+//            } catch (IOException ex) {
+//                Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+//            }
             
 
         } catch (ClassNotFoundException ex) {
@@ -101,6 +118,7 @@ public class StartServlet implements ServletContextListener {
         // On arrete les taches de collecte
 
         collecte.stopCollecte();
+        ServiceJMS.getInstance().close();
 
         destroyDriver();
     }
@@ -119,6 +137,9 @@ public class StartServlet implements ServletContextListener {
             Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Exception caught while deregistering JDBC drivers");
 //        ctx.log(prefix + "Exception caught while deregistering JDBC drivers", e);
         }
+        
+        ServiceJMS.getInstance().close();
+        
 
     }
 }

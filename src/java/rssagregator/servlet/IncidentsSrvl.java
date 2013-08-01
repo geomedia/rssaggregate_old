@@ -19,12 +19,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import rssagregator.beans.form.IncidentForm;
 import rssagregator.beans.incident.FluxIncident;
+import rssagregator.utils.ServletTool;
 
 /**
  *
  * @author clem
  */
-@WebServlet(name = "Incidents", urlPatterns = {"/incidents"})
+@WebServlet(name = "Incidents", urlPatterns = {"/incidents/*"})
 public class IncidentsSrvl extends HttpServlet {
 
     public static final String ATT_LIST = "listobj";
@@ -67,11 +68,12 @@ public class IncidentsSrvl extends HttpServlet {
         Map<String, String> redirmap = null;
 
         // récupération de l'action
-        String action = request.getParameter("action");
-        if (action == null) {
-            action = "recherche";
-        }
-        request.setAttribute("action", action);
+        String action = ServletTool.configAction(request, "recherche");
+//        String action = request.getParameter("action");
+//        if (action == null) {
+//            action = "recherche";
+//        }
+//        request.setAttribute("action", action);
 
 
         DAOIncident dao = DAOFactory.getInstance().getDAOIncident();

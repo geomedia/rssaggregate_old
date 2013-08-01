@@ -18,8 +18,8 @@
 
 </div>
 <div id="sidebar">
-    <p><a href="journaux?action=add">Ajouter</a></p>
-    <p><a href="journaux?action=list">Liste</a></p>
+    <p><a href="${rootpath}journaux/add">Ajouter</a></p>
+    <p><a href="${rootpath}journaux/list">Liste</a></p>
 </div>
 
 <div id="content">
@@ -31,24 +31,19 @@
 
         <c:choose>
             <c:when test="${not empty redirmap}">
-                <p>${form.resultat}
-                </p>
-                <p>${redirmap['msg']}. Vous serez redirigé dans 3seconde à l'adresse <a href="${redirmap['url']}">${redirmap['url']}</a></p>
-                <script type="text/JavaScript">
-                    <!--
-                    setTimeout("location.href = '${redirmap['url']}';",3000);
-                    -->
-                </script>
-
+                <c:import url="/WEB-INF/redirJspJavascriptPart.jsp" />
             </c:when>
+
             <c:when test="${empty redirmap}">
+
 
 
                 <c:choose>
                     <c:when test="${action=='list'}">
+
                         <ul>
                             <c:forEach items="${listjournaux}" var="it">
-                                <li><a href="journaux?action=mod&id=${it.ID}"><c:out value="${it.nom}"></c:out></a></li>
+                                <li><a href="${rootpath}journaux/mod?id=${it.ID}"><c:out value="${it.nom}"></c:out></a></li>
 
                             </c:forEach>
                         </ul>
@@ -57,31 +52,33 @@
                     <c:when test="${action=='mod' or action=='add'}">
                         <h2>Administration du journal : ${journal.nom}</h2>
                         <ul>
-                            <li>  <a href="journaux?action=rem&id=${journal.ID}">Supprimer journal</a></li>
-                            <li>  <a href="flux?action=list&journal-id=${journal.ID}">Parcourir les flux du journal</a></li>
-                            
+                            <li>  <a href="${rootpath}journaux/rem?id=${journal.ID}">Supprimer journal</a></li>
+                            <li>  <a href="${rootpath}flux/list?journal-id=${journal.ID}">Parcourir les flux du journal</a></li>
+
                         </ul>
-                      
-                      
+
+
                         ${form.resultat}
-                        <form method="post" action="journaux?action=<c:out value="${action}"></c:out>">
-                                <fieldset>
-                                    <legend>journal</legend>
-                                    <label for="url">Nom du journal<span class="requis">*</span></label>
-                                    <input type="text" id="nom" name="nom" value="<c:out value="${journal.nom}" />" size="20" maxlength="60" />
+                        <form method="post" action="${rootpath}journaux/${action}">
+
+
+                            <fieldset>
+                                <legend>journal</legend>
+                                <label for="url">Nom du journal<span class="requis">*</span></label>
+                                <input type="text" id="nom" name="nom" value="<c:out value="${journal.nom}" />" size="20" maxlength="60" />
                                 <span class="erreur"> ${form.erreurs['nom']}</span>
 
                                 <br />
-                                
-                                
+
+
                                 <label>urlHtmlRecapFlux : </label>
                                 <input type="text" name="urlHtmlRecapFlux" value="<c:out value="${journal.urlHtmlRecapFlux}"></c:out>"/>
 
-                                
-                                
-                                <br />
-                                <label for="langue">Langue : </label>
-                                <select name="langue" id="langue">
+
+
+                                    <br />
+                                    <label for="langue">Langue : </label>
+                                    <select name="langue" id="langue">
                                     <c:forEach items="${listLocal}" var="loc">
 
                                         <option value="${loc.key}" <c:if test="${loc.key==journal.langue}"> selected="true"</c:if>>${loc.value}</option>>
@@ -111,15 +108,17 @@
 
 
                                 <br />
-                                
+
                                 <textarea name="information">${journal.information}</textarea>
-                                
+
                                 <input type="hidden" name="id" value="${journal.ID}">
 
                                 <input type="submit" value="Inscription" class="sansLabel" />
                                 <br />
                             </fieldset>
                         </form>
+
+
                     </c:when>
                 </c:choose>
 

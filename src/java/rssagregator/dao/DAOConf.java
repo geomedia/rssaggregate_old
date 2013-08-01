@@ -143,7 +143,7 @@ public class DAOConf extends AbstrDao {
         } catch (Exception e) {
             throw new Exception("Impossible de charger la durée avant purge dans la configuration");
         }
-        
+
         //--------------Chargement du host maitre
         s = prop.getProperty("hostMaster");
         conf.setHostMaster(s);
@@ -218,8 +218,8 @@ public class DAOConf extends AbstrDao {
 
         //--------------Nombre de Thread pour la récup des flux
         prop.setProperty("nbThreadRecup", conf.getNbThreadRecup().toString());
-        PropertyLoader.save(prop, "conf.properties", "LALALA commentaire");
-        System.out.println("end");
+
+
 
         //-------------JMX Provider
         prop.setProperty("jmsprovider", conf.getJmsprovider());
@@ -239,19 +239,25 @@ public class DAOConf extends AbstrDao {
             // On construit la chaine de caractères dans le fichier host;
             chaine += slave.getHost() + " " + slave.getLogin() + " " + slave.getPass() + " " + slave.getUrl() + ";";
         }
-        chaine = chaine.substring(0, chaine.length() - 1);
+        if (chaine.length() > 0) {
+            chaine = chaine.substring(0, chaine.length() - 1);
+        }
 
         prop.setProperty("slaveserver", chaine);
 
 
-
         //-------------Durée de purge
-        prop.setProperty("purgeDuration", conf.getPurgeDuration().toString());
+        if (conf.getPurgeDuration() != null) {
+            prop.setProperty("purgeDuration", conf.getPurgeDuration().toString());
+        }
 
 
         //-------------------Host du serveur maitre
-        prop.setProperty("hostMaster", conf.getHostMaster());
+        if (conf.getHostMaster() != null) {
+            prop.setProperty("hostMaster", conf.getHostMaster());
+        }
 
-
+        PropertyLoader.save(prop, "conf.properties", "LALALA commentaire");
+        System.out.println("end");
     }
 }

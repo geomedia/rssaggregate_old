@@ -65,7 +65,7 @@
             <c:when test="${action=='mod'}">
 
                 <h2>Description de l'incident</h2>
-                <p>Flux Impacté : <a href="flux?action=mod&id=${incident.fluxLie.ID}">${incident.fluxLie}</a></p>
+                <p>Flux Impacté : <a href="flux/mod?id=${incident.fluxLie.ID}">${incident.fluxLie}</a></p>
                 <p>Date début : <fmt:formatDate value="${incident.dateDebut}" pattern="dd/MM/yyyy hh:mm:ss"/></p>
                 <p>Date fin : <fmt:formatDate value="${incident.dateFin}" pattern="dd/MM/yyyy hh:mm:ss"/></p>
                 <p>Nombre de répétition dans la période : ${incident.nombreTentativeEnEchec}</p>
@@ -75,7 +75,7 @@
                 <p>Message d'erreur : ${incident.messageEreur}</p>
                 <p>Log JAVA de l'erreur : ${incident.logErreur}</p>
 
-                <form method="POST" action="incidents?action=mod&id=${incident.ID}">
+                <form method="POST" action="incidents/mod?id=${incident.ID}">
                     <textarea name="noteIndicent" id="noteIndicent" cols="80" rows="30">${incident.noteIndicent}</textarea><br />
                     <input type="submit">
 

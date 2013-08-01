@@ -16,9 +16,8 @@ $(document).ready(function() {
 
         if (val != '') {
             $fluxSelection.empty(); // on vide la liste des départements
-
             $.ajax({
-                url: 'flux?action=list&vue=json',
+                url: 'flux/list?vue=json',
                 data: 'journalid=' + val, // on envoie $_GET['id_region']
                 dataType: 'json',
                 success: function(json) {

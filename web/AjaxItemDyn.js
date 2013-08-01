@@ -56,7 +56,7 @@ $(document).ready(function() {
 //                  ENVOIE DE LA REQUETE EN AJAX
 //-----------------------------------------------------------------
             $.ajax({
-                url: 'item?action=list&vue=jsondesc',
+                url: 'item/list?vue=jsondesc',
                 data: param + '&firstResult=' + $firstResult.val() + '&itPrPage=' + $itPrPage.val() + '&order=' + $order.val() + "&date1=" + $date1.val() + '&date2=' + $date2.val(), // on envoie $_GET['id_region']
                 dataType: 'json',
                 success: function(jsonentre) {
@@ -66,7 +66,7 @@ $(document).ready(function() {
                     var j;
                     // réécriture du 
                     for (i = 0; i < json.length; i++) {
-                        $resudiv.append('<li><a href="item?action=read&id=' + json[i]['id'] + '">' + json[i]['titre'].trim() + '</a>');
+                        $resudiv.append('<li><a href="item/read?id=' + json[i]['id'] + '">' + json[i]['titre'].trim() + '</a>');
                         var $tabflux = json[i]['flux'];
                         for (j = 0; j < $tabflux.length; j++) {
                             $resudiv.append($tabflux[j] + ' ; ');

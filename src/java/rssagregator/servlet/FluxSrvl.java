@@ -28,12 +28,14 @@ import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.dao.DaoItem;
 import rssagregator.services.ServiceCollecteur;
 import rssagregator.services.ServiceGestionIncident;
+import rssagregator.services.ServiceJMS;
+import rssagregator.utils.ServletTool;
 
 /**
  *
  * @author clem
  */
-@WebServlet(name = "Flux", urlPatterns = {"/flux"})
+@WebServlet(name = "Flux", urlPatterns = {"/flux/*"})
 public class FluxSrvl extends HttpServlet {
 
     public static final String ATT_FORM = "form";
@@ -79,12 +81,8 @@ public class FluxSrvl extends HttpServlet {
         List<Flux> flux = new ArrayList<Flux>();
         FluxForm fluxForm = null;
 
-        // récupération de l'action (list, mod del ...). Si aucune action n'est précisée, alors on list.
-        String action = request.getParameter("action");
-        if (action == null) {
-            action = "recherche";
-        }
-        request.setAttribute("action", action);
+        // récupération de l'action (list, mod del ...). Si aucune action n'est précisée, alors on recherche qui correpond à la page d'acceuil de la recherhc des flux.
+        String action = ServletTool.configAction(request, "recherche");
 
         // On récupère la sortie (html Json. Cette variable sert à configurer la vue
         String vue = request.getParameter("vue");
@@ -135,10 +133,12 @@ public class FluxSrvl extends HttpServlet {
                 Flux fluxnouv = (Flux) fluxForm.bind(request, null, Flux.class);
                 try {
                     daoFlux.creer(fluxnouv);
+                    ServiceJMS.getInstance().diffuser(fluxnouv, "add");
                     daoFlux.forceNotifyObserver();
-                    redir(request, "flux?action=mod&id=" + fluxnouv.getID(), "Ajout du Flux effectué", false);
+                    ServletTool.redir(request, "flux/mod?id=" + fluxnouv.getID(), "Ajout du Flux effectué", false);
+//                    redir
                 } catch (Exception ex) {
-                    redir(request, "flux?action=add", "ERREUR LORS DE L'AJOUT DU FLUX. : " + ex.toString(), true);
+                    ServletTool.redir(request, "flux/add", "ERREUR LORS DE L'AJOUT DU FLUX. : " + ex.toString(), true);
                     Logger.getLogger(FluxSrvl.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
@@ -148,12 +148,12 @@ public class FluxSrvl extends HttpServlet {
                 DaoFlux dao = DAOFactory.getInstance().getDAOFlux();
                 // On bind dans le flux envoyé en paramettre il s'agit forcement du premier flux de la liste des flux envoyé en id
                 Flux fluxmod = (Flux) fluxForm.bind(request, flux.get(0), Flux.class);
-                redir(request, "flux?action=mod&id=" + fluxmod.getID(), "Modification du flux effecué.", false);
+                ServletTool.redir(request, "flux/mod&id=" + fluxmod.getID(), "Modification du flux effecué.", false);
                 try {
+                    ServiceJMS.getInstance().diffuser(flux, "mod");
                     dao.modifier(fluxmod);
                 } catch (Exception ex) {
-                    redir(request, "flux?action=add", "ERREUR LORS DE La modif DU FLUX. : " + ex.toString(), true);
-                    request.setAttribute("err", "true");
+                    ServletTool.redir(request, "flux/add", "ERREUR LORS DE La modif DU FLUX. : " + ex.toString(), true);
                     Logger.getLogger(FluxSrvl.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 //La liste des flux doit notifier ses observeur (le collecteur) D'un changement
@@ -164,7 +164,7 @@ public class FluxSrvl extends HttpServlet {
                 ServiceCollecteur.getInstance().majManuellAll(flux);
             } catch (Exception ex) {
                 AbstrIncident incid = ServiceGestionIncident.getInstance().gererIncident(ex, flux);
-                redir(request, "flux?action=add", "ERREUR LORS DE La modif DU FLUX. : " + ex.toString(), true);
+                ServletTool.redir(request, "flux/maj", "ERREUR LORS DE La récup DU FLUX. : " + ex.toString(), true);
             }
 
         } // Si l'action est liste, on récupère la liste des flux
@@ -212,9 +212,10 @@ public class FluxSrvl extends HttpServlet {
             try {
                 daoFlux.removeall(flux);
                 daoFlux.forceNotifyObserver();
-                redir(request, "flux", "Suppression du flux effecué.", false);
+                
+                ServletTool.redir(request, "flux", "Suppression du flux effecué.", false);
             } catch (Exception e) {
-                redir(request, "flux?action=mod&id=", "ERREUR LORS DE LA SUPPRESSION DU FLUX. : " + e.toString(), true);
+                ServletTool.redir(request, "flux?action=mod&id=", "ERREUR LORS DE LA SUPPRESSION DU FLUX. : " + e.toString(), true);
             }
         }
 
@@ -253,22 +254,7 @@ public class FluxSrvl extends HttpServlet {
         this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
     }
 
-    /***
-     * Une méthode pour gérer la redirmap
-     * @param request
-     * @param url adresse de redirection
-     * @param msg message a afficher à l'utilisateur
-     * @param err true si il s'agit d'une erreur. false si c'est une redirection de routine, l'utilisateur est alors redirigé par javascript  secondes après.
-     */
-    private void redir(HttpServletRequest request, String url, String msg, Boolean err) {
-        redirmap = new HashMap<String, String>();
-        redirmap.put("url", url);
-        redirmap.put("msg", msg);
-        request.setAttribute("redirmap", redirmap);
-        if (err) {
-            request.setAttribute("err", "true");
-        }
-    }
+
 // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
 
     /**

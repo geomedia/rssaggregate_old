@@ -22,12 +22,13 @@ import javax.servlet.http.HttpServletResponse;
 import rssagregator.beans.Journal;
 import rssagregator.beans.form.JournalForm;
 import rssagregator.utils.CodePays;
+import rssagregator.utils.ServletTool;
 
 /**
  *
  * @author clem
  */
-@WebServlet(name = "Journaux", urlPatterns = {"/journaux"})
+@WebServlet(name = "Journaux", urlPatterns = {"/journaux/*"})
 public class JournauxSrvl extends HttpServlet {
 
     public static final String VUE = "/WEB-INF/journaljsp.jsp";
@@ -61,16 +62,12 @@ public class JournauxSrvl extends HttpServlet {
         request.setAttribute("fuseau", timeZonetab);
 //        
 
-
         // Un simple attribut pour que le menu brille sur la navigation courante
         request.setAttribute("navmenu", "journaux");
 
         // récupération de l'action
-        String action = request.getParameter("action");
-        if (action == null) {
-            action = "list";
-        }
-        request.setAttribute("action", action);
+        String action = ServletTool.configAction(request, "list");
+
 
         DaoJournal daoJournal = DAOFactory.getInstance().getDaoJournal();
         JournalForm journalForm = new JournalForm(/*daoJournal*/);
@@ -102,18 +99,11 @@ public class JournauxSrvl extends HttpServlet {
 
         if (action.equals("rem")) {
             try {
-                redirmap = new HashMap<String, String>();
-                redirmap.put("url", "journaux?action=list");
-                redirmap.put("msg", "Suppression effectuée");
-                request.setAttribute("redirmap", redirmap);
                 daoJournal.remove(journal);
-//                DAOFactory.getInstance().getDAOFlux().forceChange();
-//                DAOFactory.getInstance().getDAOFlux().notifyObservers();
-
+                ServletTool.redir(request, "journaux/list", "Suppression effectuée", false);
             } catch (Exception ex) {
                 Logger.getLogger(JournauxSrvl.class.getName()).log(Level.SEVERE, null, ex);
             }
-
         }
 
 
@@ -124,12 +114,9 @@ public class JournauxSrvl extends HttpServlet {
         if (journalForm.getValide()) {
             if (action.equals("add")) {
                 try {
-                    redirmap = new HashMap<String, String>();
-                    redirmap.put("url", "journaux?action=list");
-                    redirmap.put("msg", "Ajout effectuée ");
-                    request.setAttribute("redirmap", redirmap);
-                    daoJournal.modifier(journal);
+//                    daoJournal.modifier(journal);
                     daoJournal.creer(journal);
+                    ServletTool.redir(request, "journaux/list", "Ajout effectuée", false);
                 } catch (Exception ex) {
                     Logger.getLogger(JournauxSrvl.class.getName()).log(Level.SEVERE, null, ex);
                 }

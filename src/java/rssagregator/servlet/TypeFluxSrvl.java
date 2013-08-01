@@ -19,12 +19,13 @@ import javax.servlet.http.HttpServletResponse;
 import rssagregator.beans.FluxType;
 import rssagregator.beans.form.DAOGenerique;
 import rssagregator.beans.form.FluxTypeForm;
+import rssagregator.utils.ServletTool;
 
 /**
  *
  * @author clem
  */
-@WebServlet(name = "TypeFluxSrvl", urlPatterns = {"/TypeFluxSrvl"})
+@WebServlet(name = "TypeFluxSrvl", urlPatterns = {"/TypeFluxSrvl/*"})
 public class TypeFluxSrvl extends HttpServlet {
 
     public static final String VUE = "/WEB-INF/typefluxjsp.jsp";
@@ -44,23 +45,14 @@ public class TypeFluxSrvl extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
         response.setContentType("text/html;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
         request.setCharacterEncoding("UTF-8");
 
         request.setAttribute("navmenu", "config");
-        Map<String, String> redirmap = null;
-
-
 
         // récupération de l'action
-        String action = request.getParameter("action");
-        if (action == null) {
-            action = "list";
-        }
-        request.setAttribute("action", action);
-
+        String action = ServletTool.configAction(request, "recherche");
 
         DAOGenerique dao = DAOFactory.getInstance().getDAOGenerique();
         dao.setClassAssocie(FluxType.class);
@@ -75,24 +67,20 @@ public class TypeFluxSrvl extends HttpServlet {
             fluxType = (FluxType) dao.find(id);
         }
 
-
         // Si il y a du post on récupère les données saisies par l'utilisateur pour éviter la resaisie de l'information
         if (request.getMethod().equals("POST")) {
             fluxType = (FluxType) form.bind(request, fluxType, FluxType.class);
         }
 
-        if (action.equals("list")) {
+        if (action.equals("recherche")) {
             List<Object> list = dao.findall();
             request.setAttribute(ATT_LIST_OBJ, list);
         }
 
         if (action.equals("rem")) {
-                  redirmap = new HashMap<String, String>();
-                redirmap.put("url", "TypeFluxSrvl?action=list");
-                redirmap.put("msg", "Le type de Flux a été supprimé. Vous allez être redigigé vers la liste des TypeFlux");
-                request.setAttribute("redirmap", redirmap);
             try {
                 dao.remove(fluxType);
+                ServletTool.redir(request, "TypeFluxSrvl/recherche", "Le type de Flux a été supprimé. Vous allez être redigigé vers la liste des TypeFlux", Boolean.FALSE);
             } catch (Exception ex) {
                 Logger.getLogger(TypeFluxSrvl.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -101,48 +89,28 @@ public class TypeFluxSrvl extends HttpServlet {
         request.setAttribute(ATT_FORM, form);
         request.setAttribute(ATT_BEAN, fluxType);
 
-
         // SAUVEGARDE SI INFOS 
         if (form.getValide()) {
             if (action.equals("add")) {
                 try {
                     dao.creer(fluxType);
+                    ServletTool.redir(request, "TypeFluxSrvl/mod?id=" + fluxType.getID(), "Le type de Flux a été ajouté.", Boolean.FALSE);
                 } catch (Exception ex) {
                     Logger.getLogger(TypeFluxSrvl.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                 
-                redirmap = new HashMap<String, String>();
-                redirmap.put("url", "TypeFluxSrvl?action=mod&id=" + fluxType.getID());
-                redirmap.put("msg", "Le type de Flux a été ajouté.");
-                request.setAttribute("redirmap", redirmap);
-      
 
-               
             } else if (action.equals("mod")) {
                 try {
-                    redirmap = new HashMap<String, String>();
-                    redirmap.put("url", "TypeFluxSrvl?action=mod&id=" + fluxType.getID());
-                    redirmap.put("msg", "Modification effectée");
-                    request.setAttribute("redirmap", redirmap);
-
                     dao.modifier(fluxType);
+                    ServletTool.redir(request, "TypeFluxSrvl/mod?id=" + fluxType.getID(), "Modification effectée", Boolean.FALSE);
                 } catch (Exception ex) {
-                      redirmap.put("url", "flux?action=add");
-                redirmap.put("msg", "ERREUR LORS DE L'AJOUT DU FLUX. : " + ex.toString());
-                request.setAttribute("redirmap", redirmap);
-                          request.setAttribute("err", "true");
-                          
+                    ServletTool.redir(request, "TypeFluxSrvl/mod", "ERREUR LORS DE L'AJOUT DU TYPE DE FLUX. : " + ex.toString(), Boolean.TRUE);
                     Logger.getLogger(TypeFluxSrvl.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }
-
-
         this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
-
-
     }
-
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP

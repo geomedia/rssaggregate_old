@@ -33,7 +33,7 @@ $(document).ready(function() {
 //                  ENVOIE DE LA REQUETE EN AJAX
 //-----------------------------------------------------------------
         $.ajax({
-            url: 'incidents?action=list&vue=jsondesc',
+            url: 'incidents/list?vue=jsondesc',
             data: '&firstResult=' + $firstResult.val() + '&itPrPage=' + $itPrPage.val() + '&clos=' + $clos, // on envoie $_GET['id_region']
             dataType: 'json',
             success: function(jsonentre) {
@@ -46,7 +46,7 @@ $(document).ready(function() {
                 for (i = 0; i < json.length; i++) {
 //                        <input name="id" type="checkbox" value="${flux.ID}"/>
                     $resudiv.append('<li>' +
-                            '<a href="incidents?action=mod&id=' + json[i]['id'] + '">' +
+                            '<a href="incidents/mod?id=' + json[i]['id'] + '">' +
                             json[i]['flux'] + '</a>' +
                             '<p>' + json[i]['messageEreur'] + '</p>' +
                             '<p>Date début : ' + json[i]['dateDebut'] + ' - Date fin : ' + json[i]['dateFin'] + '</p>'+

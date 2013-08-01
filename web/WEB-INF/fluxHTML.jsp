@@ -27,10 +27,9 @@
 
 </div>
 
-
 <div id="sidebar">
-    <p><a href="flux?action=add">Ajouter</a></p>
-    <p><a href="flux?action=recherche">Recherche</a></p>
+    <p><a href="${rootpath}flux/add">Ajouter</a></p>
+    <p><a href="${rootpath}flux/recherche">Recherche</a></p>
 </div>
 
 
@@ -44,10 +43,10 @@
                 </p>
                 <p>${redirmap['msg']}. </p>
                 <c:if test="${err!='true'}">
-                    Vous serez redirigé dans 3 secondes à l'adresse : <a href="${redirmap['url']}">${redirmap['url']}</a>
+                    Vous serez redirigé dans 3 secondes à l'adresse : <a href="${rootpath}${redirmap['url']}">${redirmap['url']}</a>
                     <script type="text/JavaScript">
                         <!--
-                        setTimeout("location.href = '${redirmap['url']}';",3000);
+                        setTimeout("location.href = '${rootpath}${redirmap['url']}';",3000);
                         -->
                     </script>
                 </c:if>
@@ -57,19 +56,18 @@
             <c:when test="${empty redirmap}">
                 <c:choose>
 
+
                     <c:when test="${action=='recherche'}">
                         <form method="POST" id="pagina">
                             <input type="hidden" id="firstResult" value="0"/>
-                            
-                             
-                            
+
                             <fieldset>
                                 <legend>Pages : </legend>
                                 <%--<c:import url="/WEB-INF/paginator.jsp" />--%>
                                 <div>
-                                 <span id="btPaginDiv"></span>
+                                    <span id="btPaginDiv"></span>
                                 </div>
-                               
+
                                 <label>Flux par page</label>
                                 <select id="itPrPage" name="itPrPage" onChange="$('#afin').click();"> 
                                     <c:forEach var="i" begin="10" end="150" step="20">
@@ -104,7 +102,7 @@
                                     $('#pagina').submit();
                                     $('#pagina').attr('target', '');
                                     $('#vue').val('html');
-                                    
+
 
                                     }
                                     }
@@ -112,16 +110,16 @@
                                 <button type="submit"  formaction="flux" formtarget="_blank" value="vue">Exporter</button>
                             </fieldset>
                         </form>
-                                <script src="AjaxFluxDyn.js"></script>
+                        <script src="${rootpath}AjaxFluxDyn.js"></script>
 
-                                
-                              
-                        <form>
+
+
+                        <form id="formaction2">
                             <ul id="resudiv">
-               
+
                             </ul>
                             <button type="button" value="0" id="bts">Tout sélectionner</button>
-                            <select name="action">
+                            <select name="action" id="act">
                                 <option value="rem">Supprimer</option>
                                 <option value="maj">Mettre à jour</option>
                             </select>
@@ -141,27 +139,41 @@
                                 }
                                 });
                             </script>
-                            <input type="submit" value="OK"/>
+                            <button type="button" onclick="actionsub()"> OK</button>
                         </form>
+                        <script>
+                            //Petite fonction pour la soumission du formulaire permettant la mise à jour et la suppression en nombre
+                            function actionsub() {
+                            action = $('#act').val();
+
+                            $('#formaction2').attr('action', '${rootpath}flux/'+action);
+                            $('#formaction2').submit();
+                            }
+
+                        </script>
+
+
 
 
                     </c:when>
                     <c:when test="${action=='read-item' or action=='mod' or action=='read-incident'}">
                         <h1>Administration du flux : ${flux.url}</h1>
                         <ul>
-                            <li><a href="item?id-flux=${flux.ID}">Parcourir les items du flux</a></li>
-                            <li><a href="flux?action=mod&id=${flux.ID}">Configurer le flux</a></li>
-                            <li><a href="flux?action=maj&id=${flux.ID}">Mettre à jour manuellement</a></li>
-                            <li><a href="flux?action=rem&id=${flux.ID}">Supprimer le flux</a></li>
-                            <li><a href="flux?action=read-incident&id=${flux.ID}">Parcourir les incidents</a></li>
+                            <li><a href="${rootpath}item?id-flux=${flux.ID}">Parcourir les items du flux</a></li>
+                            <li><a href="${rootpath}flux/mod?id=${flux.ID}">Configurer le flux</a></li>
+                            <li><a href="${rootpath}flux/maj?id=${flux.ID}">Mettre à jour manuellement</a></li>
+                            <li><a href="${rootpath}flux/rem?id=${flux.ID}">Supprimer le flux</a></li>
+                            <li><a href="${rootpath}flux/read-incident&id=${flux.ID}">Parcourir les incidents</a></li>
                         </ul>
-                    </c:when>
+                    </c:when> 
                 </c:choose>
 
                 <c:choose> 
                     <c:when test="${action=='add' or action=='mod'}">
                         ${form.resultat}
-                        <form method="post" action="flux?action=<c:out value="${action}"></c:out>">
+                        <form method="POST" action="${rootpath}flux/${action}" id="formbean">
+
+                            <input type="hidden" value="<c:out value="${action}"></c:out>" name="action">
                                 <fieldset>
                                     <legend>Paramètres :</legend>
 
@@ -184,7 +196,7 @@
                                         <option value="${compo.ID}" <c:if test="${flux.mediatorFlux.ID==compo.ID}"> selected="true"</c:if> >${compo}</option>
                                     </c:forEach>
                                 </select><br />
-                                
+
                                 <label for="journalLie" title="Un journal comprends plusieurs flux... Si vous ne trouvez pas le journal concerné, allez dans Journal-> ajouter">Journal :</label>
                                 <select name="journalLie" id="journalLie">
                                     <option value="null">Aucun</option>
@@ -232,6 +244,8 @@
                         </form>
 
 
+
+
                         <p>Debug : Recap des levée</p>
                         <ul>
                             <c:forEach items="${flux.debug}" var="deb">
@@ -240,7 +254,7 @@
                             </c:forEach>
                         </ul>
 
-                        <script src="test.js"></script>
+                        <script src="${rootpath}test.js"></script>
 
 
                     </c:when>
@@ -285,9 +299,9 @@
                                 <th>Statut</th>
                             </tr>
 
-                            
-                                 * 1=nombre item trouvé ; 2 dedoub memoire; 3 BDD item lié ;4 BDD item déjà présente mais lien ajouté ;  5 item nouvelles
-                            
+
+                            * 1=nombre item trouvé ; 2 dedoub memoire; 3 BDD item lié ;4 BDD item déjà présente mais lien ajouté ;  5 item nouvelles
+
                             <c:forEach items="${flux}" var="fl">
                                 <tr>
                                     <td> ${fl}</td>
@@ -303,7 +317,7 @@
                                             ${inci.messageEreur}
                                         </c:forEach>
                                         <c:if test="${erreur!=1}">OK</c:if>
-                                </tr>
+                                    </tr>
                             </c:forEach>
                         </table>
                     </c:when>

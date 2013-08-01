@@ -22,7 +22,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import rssagregator.beans.form.AbstrForm;
 import rssagregator.beans.form.JournalForm;
-import rssagregator.servlet.JournauxSrvl;
+import rssagregator.servlet.JournauxSrvlOLD;
 
 /**
  *
@@ -66,7 +66,7 @@ public class ClemBeanUtilsTest {
 
         // On génère une requete en faisant passer des paramètres similaires au jounal 1 .
         ServletRunner sr = new ServletRunner();
-        sr.registerServlet("myServlet", JournauxSrvl.class.getName());
+        sr.registerServlet("myServlet", JournauxSrvlOLD.class.getName());
         ServletUnitClient sc = sr.newClient();
         WebReques               t request = new PostMethodWebRequest("http://localhost//RSSAgregate/journaux?action=add");
         request.setParameter("nom", "Le monde");

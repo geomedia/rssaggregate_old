@@ -20,12 +20,13 @@ import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.beans.form.ConfForm;
 import rssagregator.services.ServiceCollecteur;
+import rssagregator.utils.ServletTool;
 
 /**
  *
  * @author clem
  */
-@WebServlet(name = "Config", urlPatterns = {"/config"})
+@WebServlet(name = "Config", urlPatterns = {"/config/*"})
 public class ConfigSrvl extends HttpServlet {
 
     public static final String VUE = "/WEB-INF/configjsp.jsp";
@@ -49,29 +50,22 @@ public class ConfigSrvl extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
         request.setCharacterEncoding("UTF-8");
 
-        
+
         // Un simple attribut pour que le menu brille sur la navigation courante
         request.setAttribute("navmenu", "config");
 
 
+        String action = ServletTool.configAction(request, "mod");
+        
 
         Conf confGenerale = null;
-//        DAOGenerique dao = DAOFactory.getInstance().getDAOGenerique();
-//        dao.setClassAssocie(Conf.class);
-        ConfForm form = new ConfForm(/*dao*/);
+        ConfForm form = new ConfForm();
 
-
-        // On récupère la config dans la base de donnée
-        
-//        List<Object> listconf = dao.findall();
-//        confGenerale = (Conf) listconf.get(0);
-
-//        confGenerale = ListeFluxCollecteEtConfigConrante.getInstance().getConfCourante();
         confGenerale = DAOFactory.getInstance().getDAOConf().getConfCourante();
-                
 
+        System.out.println("ACTION : " + action);
 //Si l'utilisateur à posté on bind
-        if (request.getMethod().equals("POST")) {
+        if (request.getMethod().equals("POST") && action.equals("mod")) {
             confGenerale = (Conf) form.bind(request, confGenerale, Conf.class);
         }
 
@@ -79,11 +73,13 @@ public class ConfigSrvl extends HttpServlet {
         request.setAttribute(ATT_BEANS, confGenerale);
 
         // SAUVEGARDE SI INFOS 
-        if (form.getValide()) {
+        if (form.getValide()){
             try {
-                            DAOFactory.getInstance().getDAOConf().modifierConf(confGenerale);
-
-                            // Il faut notifier le changement 
+                DAOFactory.getInstance().getDAOConf().modifierConf(confGenerale);
+                            // Il faut notifier le changement pour recharger le service de reception
+                DAOFactory.getInstance().getDAOConf().forceNotifyObservers();
+                ServletTool.redir(request, "config/mod", "Modification de la config effectuée", Boolean.FALSE);
+    
             } catch (Exception ex) {
                 Logger.getLogger(ConfigSrvl.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -132,7 +128,4 @@ public class ConfigSrvl extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
-
-
-
 }

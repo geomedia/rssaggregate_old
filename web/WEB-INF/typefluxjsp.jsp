@@ -18,8 +18,8 @@
 
 </div>
 <div id="sidebar">
-    <p><a href="TypeFluxSrvl?action=add">Ajouter</a></p>
-    <p><a href="TypeFluxSrvl?action=list">Liste</a></p>
+    <p><a href="${rootpath}TypeFluxSrvl/add">Ajouter</a></p>
+    <p><a href="${rootpath}TypeFluxSrvl/recherche">Liste</a></p>
 </div>
 
 <div id="content">
@@ -27,66 +27,35 @@
 
         <c:choose >
             <c:when test="${not empty redirmap}">
-
-                               <p>${form.resultat}
-                </p>
-                <p>${redirmap['msg']}. Vous serez redirigé dans 3seconde à l'adresse <a href="${redirmap['url']}">${redirmap['url']}</a></p>
-                <script type="text/JavaScript">
-                    <!--
-                    setTimeout("location.href = '${redirmap['url']}';",3000);
-                    -->
-                </script>
-                
-                
+                <c:import url="/WEB-INF/redirJspJavascriptPart.jsp" />
             </c:when>
             <c:when test="${empty redirmap}">
 
                 <c:choose>
-                    <c:when test="${action=='list'}">
+                    <c:when test="${action=='recherche'}">
+                        
                         <ul>
                             <c:forEach items="${list}" var="t"> 
-                                <li><a href="TypeFluxSrvl?action=mod&id=${t.ID}"> ${t.denomination}</a></li>
+                                <li><a href="${rootpath}TypeFluxSrvl/mod?id=${t.ID}"> ${t.denomination}</a></li>
                                 </c:forEach>
                         </ul>
                     </c:when>
-                    
+
                     <c:when test="${action=='mod' or action=='add'}">
                         <div>
                             <ul>
-                                <li><a href="TypeFluxSrvl?action=rem&id=${obj.ID}">Supprimer ce type</a></li>
-                                
+                                <li><a href="${rootpath}TypeFluxSrvl/rem?id=${obj.ID}">Supprimer ce type</a></li>
                             </ul>
-                            
-                            
                         </div>
-                        
-                <form method="post" action="TypeFluxSrvl?action=${action}&id=${obj.ID}">
-                    
-                    <label for="denomination">Dénomination : </label>
-                    <input name="denomination" value="${obj.denomination}"/>
 
-                    
-                    <input type="submit"/>
-
-
-                </form>
-
-            </c:when>
-                    
-                    
-                    
-                    
+                        <form method="POST" action="${rootpath}TypeFluxSrvl/${action}?id=${obj.ID}">
+                            <label for="denomination">Dénomination : </label>
+                            <input name="denomination" value="${obj.denomination}"/>
+                            <input type="submit"/>
+                        </form>
+                    </c:when>
                 </c:choose>
             </c:when>
-
-            
-
         </c:choose>
-
-
-
-
-
-    </div>
 </div>
 <c:import url="/WEB-INF/footerjsp.jsp" />

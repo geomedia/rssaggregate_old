@@ -20,12 +20,13 @@ import org.joda.time.format.DateTimeFormatter;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.beans.form.ItemForm;
+import rssagregator.utils.ServletTool;
 
 /**
  *
  * @author clem
  */
-@WebServlet(name = "Item", urlPatterns = {"/item"})
+@WebServlet(name = "Item", urlPatterns = {"/item/*"})
 public class ItemSrvl extends HttpServlet {
 
     public String VUE = null;
@@ -51,11 +52,13 @@ public class ItemSrvl extends HttpServlet {
 
         System.out.println("coucou");
         
-        String action = request.getParameter("action");
-        if (action == null) {
-            action = "recherche";
-        }
-        request.setAttribute("action", action);
+        
+        String action = ServletTool.configAction(request, "recherche");
+//        String action = request.getParameter("action");
+//        if (action == null) {
+//            action = "recherche";
+//        }
+//        request.setAttribute("action", action);
 
         //récupération de la vue
         String vue = request.getParameter("vue");

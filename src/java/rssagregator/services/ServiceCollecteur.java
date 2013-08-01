@@ -95,7 +95,6 @@ public class ServiceCollecteur implements Observer {
                 // On inscrit les taches actives au pool schedule
                 int i;
                 for (i = 0; i < listFlux.size(); i++) {
-                         logger.debug("AJOUT");
                     if (listFlux.get(i).getActive()) {
                         // On schedule
 //                        listFlux.get(i).createTask();

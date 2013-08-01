@@ -88,7 +88,7 @@ public class ConfForm extends AbstrForm {
 
         String m1 = request.getParameter("pass1");
         String m2 = request.getParameter("pass2");
-      
+
         if (m1 != null && m2 != null) {
             if (m1.equals(m2) && m1.length() > 3) {
                 conf.setPass(m1);
@@ -96,62 +96,63 @@ public class ConfForm extends AbstrForm {
                 erreurs.put("pass", new String[]{s, "mot de passe incorrect"});
             }
         }
-        
+
         //--------------------JMS Provider
         s = request.getParameter("jmsprovider");
-        if(s!= null && !s.isEmpty()){
+        if (s != null && !s.isEmpty()) {
             conf.setJmsprovider(s);
         }
-        
+
         //-------------------Master statut
         s = request.getParameter("master");
-        if(s==null){
+        if (s == null) {
             conf.setMaster(false);
-        }
-        else{
+        } else {
             conf.setMaster(true);
         }
-        
+
         // ------------------Serveur esaclaves lié à la config
         String[] tabslavehost = request.getParameterValues("hostslave");
-        String[]  tabslavelogin = request.getParameterValues("loginSlave");
-        String[]  tabslavepass = request.getParameterValues("loginSlave");
+        String[] tabslavelogin = request.getParameterValues("loginSlave");
+        String[] tabslavepass = request.getParameterValues("loginSlave");
         String[] tabUrlSlave = request.getParameterValues("urlSlave");
         int i;
-        
-        
+
+
         conf.setServeurSlave(new ArrayList<ServeurSlave>());
-        if(tabslavehost!=null && tabslavelogin!=null && tabslavepass != null && tabUrlSlave!=null){
-            if(tabslavehost.length == tabslavelogin.length && tabslavepass.length == tabslavehost.length && tabslavehost.length== tabUrlSlave.length){
-              for(i=0; i<tabslavehost.length;i++){
-                  ServeurSlave slave = new ServeurSlave();
-                  slave.setHost(tabslavehost[i]);
-                  slave.setLogin(tabslavelogin[i]);
-                  slave.setPass(tabslavepass[i]);
-                  slave.setUrl(tabUrlSlave[i]);
-                  System.out.println(slave);
-                  conf.getServeurSlave().add(slave);
-              }  
+        if (tabslavehost != null && tabslavelogin != null && tabslavepass != null && tabUrlSlave != null) {
+            if (tabslavehost.length == tabslavelogin.length && tabslavepass.length == tabslavehost.length && tabslavehost.length == tabUrlSlave.length) {
+                for (i = 0; i < tabslavehost.length; i++) {
+                    ServeurSlave slave = new ServeurSlave();
+                    slave.setHost(tabslavehost[i]);
+                    slave.setLogin(tabslavelogin[i]);
+                    slave.setPass(tabslavepass[i]);
+                    slave.setUrl(tabUrlSlave[i]);
+                    System.out.println(slave);
+                    conf.getServeurSlave().add(slave);
+                }
             }
         }
-        
-        
-        
+
+
+
         // ------------------Host du serveur maitre
         s = request.getParameter("hostMaster");
         conf.setHostMaster(s);
-        
-        
+
+
         //-------------------DureePurge
         s = request.getParameter("purgeDuration");
-        try {
-            Integer val = new Integer(s);
-            conf.setPurgeDuration(val);
-        } catch (Exception e) {
-            erreurs.put("purgeDuration", new String[]{s, "Il faut un nombre entier"});
+        if (s != null) {
+            try {
+                Integer val = new Integer(s);
+                conf.setPurgeDuration(val);
+            } catch (Exception e) {
+                erreurs.put("purgeDuration", new String[]{s, "Il faut un nombre entier"});
+            }
         }
-     
-        
+
+
 
         if (erreurs.isEmpty()) {
             resultat = "Traitement effectué";
@@ -161,6 +162,13 @@ public class ConfForm extends AbstrForm {
             resultat = "Erreur lors de la validation des données";
             valide = false;
         }
+
+        for (i = 0; i < erreurs.size(); i++) {
+//            System.out.println("erreur"+ erreurs.get(i)[0]+"   //  " + erreurs.get(i)[1]);
+            System.out.println("" + erreurs.toString());
+        }
+
+
         return objEntre;
     }
 
