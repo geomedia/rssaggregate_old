@@ -133,8 +133,12 @@ public class FluxSrvl extends HttpServlet {
                 Flux fluxnouv = (Flux) fluxForm.bind(request, null, Flux.class);
                 try {
                     daoFlux.creer(fluxnouv);
-                    ServiceJMS.getInstance().diffuser(fluxnouv, "add");
-                    daoFlux.forceNotifyObserver();
+                    //On enregistre le flux auprès des services (JMS et collecteur) puis on on demande au flux de notifier le changement
+                    fluxnouv.enregistrerAupresdesService();
+                    fluxnouv.forceChangeStatut();
+                    fluxnouv.notifyObservers("add");
+
+                    //On met en place la redirection de l'utilisateur
                     ServletTool.redir(request, "flux/mod?id=" + fluxnouv.getID(), "Ajout du Flux effectué", false);
 //                    redir
                 } catch (Exception ex) {
@@ -148,16 +152,21 @@ public class FluxSrvl extends HttpServlet {
                 DaoFlux dao = DAOFactory.getInstance().getDAOFlux();
                 // On bind dans le flux envoyé en paramettre il s'agit forcement du premier flux de la liste des flux envoyé en id
                 Flux fluxmod = (Flux) fluxForm.bind(request, flux.get(0), Flux.class);
-                ServletTool.redir(request, "flux/mod&id=" + fluxmod.getID(), "Modification du flux effecué.", false);
+                ServletTool.redir(request, "flux/mod?id=" + fluxmod.getID(), "Modification du flux effecué.", false);
                 try {
-                    ServiceJMS.getInstance().diffuser(flux, "mod");
                     dao.modifier(fluxmod);
+                    
+                     //Diffussion de la modification auprès des services
+                    fluxmod.enregistrerAupresdesService();
+                    fluxmod.notifyObservers("mod");
+                    
                 } catch (Exception ex) {
                     ServletTool.redir(request, "flux/add", "ERREUR LORS DE La modif DU FLUX. : " + ex.toString(), true);
                     Logger.getLogger(FluxSrvl.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                //La liste des flux doit notifier ses observeur (le collecteur) D'un changement
-                daoFlux.forceNotifyObserver();
+       
+                
+//                daoFlux.forceNotifyObserver();
             }
         } else if (action.equals("maj")) {
             try {
@@ -211,7 +220,8 @@ public class FluxSrvl extends HttpServlet {
             // On tente de supprimer. Si une exeption est levée pendant la suppression. On redirige l'utilisateur différement
             try {
                 daoFlux.removeall(flux);
-                daoFlux.forceNotifyObserver();
+                
+//                daoFlux.forceNotifyObserver();
                 
                 ServletTool.redir(request, "flux", "Suppression du flux effecué.", false);
             } catch (Exception e) {
@@ -246,7 +256,12 @@ public class FluxSrvl extends HttpServlet {
             VUE = "/WEB-INF/fluxOPML.jsp";
         } else if (vue.equals("jsondesc")) {
             VUE = "/WEB-INF/fluxJSONDesc.jsp";
-        } else {
+        } 
+        else if(vue.equals("fluxXMLsync")){
+            VUE ="/WEB-INF/fluxXMLsync.jsp";
+            System.out.println("coucou");
+        }
+        else {
             response.setContentType("text/html;charset=UTF-8");
             response.setCharacterEncoding("UTF-8");
             VUE = "/WEB-INF/fluxHTML.jsp";

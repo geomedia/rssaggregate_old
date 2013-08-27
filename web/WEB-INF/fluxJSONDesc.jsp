@@ -2,7 +2,7 @@
     Document   : itemJSONDesc
     Created on : 15 juil. 2013, 18:32:45
     Author     : clem
-    DESC        : Cette servlet permet de mettre en force la description des flux au format json. Les paramettre firstresult itprPage et nbItem permettent de construire le paginator en javascript
+    DESC        : Cette servlet permet de mettre en force la description des flux au format json. Les paramettre firstresult itprPage et nbItem permettent de construire le paginator en javascript. Dans cette vue, on n'a besoin que de peu d'information sur les flux : leur facon de se présenter par tostring et leur ID
 --%>
 
 
@@ -11,7 +11,7 @@
 <%@page import="rssagregator.beans.Item"%>
 <%@page import="java.util.List"%>
 <%@page import="org.json.simple.JSONArray"%>
-<%@ page language="java" contentType="application/json; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@page contentType="text/xml" pageEncoding="UTF-8"%>
 
 
 <%

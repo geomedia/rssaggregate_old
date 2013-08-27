@@ -23,7 +23,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany; 
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -35,6 +35,8 @@ import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.config.CacheIsolationType;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoFlux;
+import rssagregator.services.ServiceCollecteur;
+import rssagregator.services.ServiceJMS;
 
 /**
  * Une des entités les plus importantes... Il s'agit d'un flux de syndication
@@ -45,7 +47,7 @@ import rssagregator.dao.DaoFlux;
 @Table(name = "flux")
 @Cacheable(value = true)
 @Cache(type = CacheType.FULL, coordinationType = CacheCoordinationType.SEND_NEW_OBJECTS_WITH_CHANGES, isolation = CacheIsolationType.SHARED)
-public class Flux extends Bean implements Observer, Serializable {
+public class Flux extends AbstrObservableBeans implements Observer, Serializable {
 
 //    @PersistenceContext(type= PersistenceContextType.EXTENDED)
 //private EntityManager em;
@@ -58,8 +60,6 @@ public class Flux extends Bean implements Observer, Serializable {
      */
     @Column(name = "url", length = 2000, nullable = false, unique = true)
     private String url;
-
-    
     /**
      * Permet de déterminer si le flux doit être collecté ou non
      */
@@ -86,6 +86,13 @@ public class Flux extends Bean implements Observer, Serializable {
     @Transient
     private TacheRecupCallable tacheRechup;
     /**
+     * *
+     * Cette tâche de récupération est utilisée lorsque l'utilisateur demande
+     * manuellement la mise à jour du flux
+     */
+    @Transient
+    private TacheRecupCallable tacheRechupManuelle;
+    /**
      * Lors du lancement d'une collecte par la tache de récupération, cette
      * liste est mise à jour lorsque à la fin de la collecte, la tache notifie
      * au flux ses résultats. On trouve dans ces résultats des items déja
@@ -96,8 +103,8 @@ public class Flux extends Bean implements Observer, Serializable {
     private List<Item> listDernierItemCollecte;
     /**
      *
-     * Liste des Item du flux. La relation est possédée par l'item !! Il faut passer par la DAO pour obtenir la liste des items. 
-     * Item
+     * Liste des Item du flux. La relation est possédée par l'item !! Il faut
+     * passer par la DAO pour obtenir la liste des items. Item
      */
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, mappedBy = "listFlux")
     private List<Item> item;
@@ -128,32 +135,27 @@ public class Flux extends Bean implements Observer, Serializable {
      */
 //    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.DETACH})
     @CascadeOnDelete
-    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH}, fetch = FetchType.LAZY)
+    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST}, fetch = FetchType.LAZY)
     private FluxType typeFlux;
     /**
      * Un flux peut appratenir à un journal. Un journal peut contenir plusieurs
      * flux
      */
 // On veut que le flux ne puisse pas créer de journaux mais simplment se lier. Ce n'est pas à la dao du flux de de créer des journaux.
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private Journal journalLie;
-
     /**
      * Le mediator flux permet d'assigner un flux un comportement de collecte.
      * Un médiator est une configuration de parseur Raffineur etc.
-     */  
-    @OneToOne(cascade = CascadeType.MERGE)
+     */
+    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private MediatorCollecteAction mediatorFlux;
-    
-    
-    
-    /***
+    /**
+     * *
      * C'est une copie du modèle.
      */
     @Transient
     private MediatorCollecteAction mediatorFluxAction;
-    
-    
     /**
      * On ne persiste pas ce champs
      */
@@ -183,8 +185,6 @@ public class Flux extends Bean implements Observer, Serializable {
      * urlRubrique. Si pas de réponse, on remonte vers la racine du site. On
      * enlève une sous répertoire par tentative.
      */
-    
-    
     // TODO : supprimer ceci à la fin
     /**
      * *
@@ -193,17 +193,13 @@ public class Flux extends Bean implements Observer, Serializable {
      */
     @Transient
     List<DebugRecapLeveeFlux> debug;
-    
-
-    
-    
-    /***
-     * Les incident en cours sont gardée en mémoire mais pas persisté. Il faut les charger au démarrage.
+    /**
+     * *
+     * Les incident en cours sont gardée en mémoire mais pas persisté. Il faut
+     * les charger au démarrage.
      */
     @Transient
     List<FluxIncident> incidentEnCours;
-    
-    
 
     public List<DebugRecapLeveeFlux> getDebug() {
         return debug;
@@ -232,9 +228,6 @@ public class Flux extends Bean implements Observer, Serializable {
         this.item = new ArrayList<Item>();
         this.listDernierItemCollecte = new ArrayList<Item>();
     }
-    
-    
-    
 
     public MediatorCollecteAction getMediatorFluxAction() {
         return mediatorFluxAction;
@@ -244,7 +237,6 @@ public class Flux extends Bean implements Observer, Serializable {
         this.mediatorFluxAction = mediatorFluxAction;
     }
 
-    
     public String getUrl() {
         return url;
     }
@@ -260,7 +252,6 @@ public class Flux extends Bean implements Observer, Serializable {
 //    public void setPeriodiciteCollecte(Integer periodiciteCollecte) {
 //        this.periodiciteCollecte = periodiciteCollecte;
 //    }
-
     public Boolean getActive() {
         return active;
     }
@@ -285,17 +276,22 @@ public class Flux extends Bean implements Observer, Serializable {
         this.lastEmpruntes = lastEmpruntes;
     }
 
-    //    public TacheRecup getTacheRechup() {
-    //        return tacheRechup;
-    //    }
-    //
-    //    public void setTacheRechup(TacheRecup tacheRechup) {
-    //        this.tacheRechup = tacheRechup;
-    //    }
+    /**
+     * *
+     * Pointeur vers la tache schedule permettant de récupérer le flux
+     *
+     * @return
+     */
     public TacheRecupCallable getTacheRechup() {
         return tacheRechup;
     }
 
+    /**
+     * *
+     * Pointeur vers la tache schedule permettant de récupérer le flux
+     *
+     * @param tacheRechup
+     */
     public void setTacheRechup(TacheRecupCallable tacheRechup) {
         this.tacheRechup = tacheRechup;
     }
@@ -373,25 +369,39 @@ public class Flux extends Bean implements Observer, Serializable {
 
         this.mediatorFlux = MediatorCollecteAction.getDefaultCollectAction();
         this.incidentsLie = new ArrayList<FluxIncident>();
-        
+
         this.incidentEnCours = new ArrayList<FluxIncident>();
+        this.setChanged();
+
+        // On enregistre le Flux auprès des services qu'il doit notifier lors de ses changement d'états
+//        this.addObserver(ServiceCollecteur.getInstance());
+//        this.addObserver(ServiceJMS.getInstance());
+
     }
+    
+    
+    
 
     public Flux(String url) {
-        this.debug = new ArrayList<DebugRecapLeveeFlux>();
-        this.item = new LinkedList<Item>();
-//        this.lastEmpruntes = new ArrayList<String>();
-        this.lastEmpruntes = new LinkedList<String>();
-
-        this.mediatorFlux = MediatorCollecteAction.getDefaultCollectAction();
-        this.incidentsLie = new ArrayList<FluxIncident>();
+        this();
         this.url = url;
+//        this.debug = new ArrayList<DebugRecapLeveeFlux>();
+//        this.item = new LinkedList<Item>();
+////        this.lastEmpruntes = new ArrayList<String>();
+//        this.lastEmpruntes = new LinkedList<String>();
+//
+//        this.mediatorFlux = MediatorCollecteAction.getDefaultCollectAction();
+//        this.incidentsLie = new ArrayList<FluxIncident>();
 
-//        this.periodiciteCollecte = 3600;
-        this.active = Boolean.TRUE;
-        
-        this.incidentEnCours = new ArrayList<FluxIncident>();
-
+//
+////        this.periodiciteCollecte = 3600;
+//        this.active = Boolean.TRUE;
+//
+//        this.incidentEnCours = new ArrayList<FluxIncident>();
+//        this.setChanged();
+//        
+//                this.addObserver(ServiceCollecteur.getInstance());
+//        this.addObserver(ServiceJMS.getInstance());
     }
 
     @Override
@@ -406,7 +416,6 @@ public class Flux extends Bean implements Observer, Serializable {
 //    public void createTask() {
 //        this.tacheRechup = new TacheRecupCallable(this);
 //    }
-
     public Boolean getErreurDerniereLevee() {
         return erreurDerniereLevee;
     }
@@ -459,8 +468,6 @@ public class Flux extends Bean implements Observer, Serializable {
         this.incidentEnCours = incidentEnCours;
     }
 
-    
-    
     /**
      * *
      * Parcours les incidents et retourne ceux qui ne sont pas clos, cad ceux
@@ -556,6 +563,14 @@ public class Flux extends Bean implements Observer, Serializable {
 
     }
 
+    public TacheRecupCallable getTacheRechupManuelle() {
+        return tacheRechupManuelle;
+    }
+
+    public void setTacheRechupManuelle(TacheRecupCallable tacheRechupManuelle) {
+        this.tacheRechupManuelle = tacheRechupManuelle;
+    }
+
     void addItem(Item nouvellesItems) {
         this.item.add(nouvellesItems);
     }
@@ -616,17 +631,35 @@ public class Flux extends Bean implements Observer, Serializable {
 
             outline.getChildren().add(subOutline);
         }
-        
+
         if (this.getTypeFlux() != null) {
             // On ajoute un attribut non conventionnelle pour préciser le type de flux 
             Attribute att = new Attribute("typeFlux", this.getTypeFlux().getDenomination());
-   
+
             List<Attribute> listAtt = new ArrayList<Attribute>();
             listAtt.add(att);
             outline.getAttributes().add(att);
-            
-            }
-        return outline;
 
+        }
+        return outline;
+    }
+
+//    public void forceNotifyObserver() {
+//        this.setChanged();
+//        this.notifyObservers();
+//    }
+    
+
+
+
+    @Override
+    /***
+     * Enregistre le flux auprès des service JMS et Service de collecte. Cette procédure ne peut être faite dans le constructeur à cause de l'ORM
+     */
+    public void enregistrerAupresdesService() {
+        this.deleteObservers();
+        
+        this.addObserver(ServiceCollecteur.getInstance());
+        this.addObserver(ServiceJMS.getInstance());
     }
 }

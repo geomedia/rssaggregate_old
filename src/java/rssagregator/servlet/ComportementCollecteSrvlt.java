@@ -5,7 +5,6 @@
 package rssagregator.servlet;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +19,7 @@ import rssagregator.beans.form.ComportementCollecteForm;
 import rssagregator.beans.traitement.MediatorCollecteAction;
 import rssagregator.dao.DAOComportementCollecte;
 import rssagregator.dao.DAOFactory;
+import rssagregator.utils.ServletTool;
 
 /**
  * Cette servlet permet de configurer des MediatorCollecte, elle configure
@@ -28,7 +28,7 @@ import rssagregator.dao.DAOFactory;
  *
  * @author clem
  */
-@WebServlet(name = "ComportementCollecteSrvlt", urlPatterns = {"/ComportementCollecte"})
+@WebServlet(name = "ComportementCollecteSrvlt", urlPatterns = {"/ComportementCollecte/*"})
 public class ComportementCollecteSrvlt extends HttpServlet {
 
     public String VUE = "/WEB-INF/comportementcollecteHTML.jsp";
@@ -47,12 +47,9 @@ public class ComportementCollecteSrvlt extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        
         request.setCharacterEncoding("UTF-8");
         response.setContentType("text/html;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
-
-
 
         redirmap = null;
 
@@ -65,10 +62,11 @@ public class ComportementCollecteSrvlt extends HttpServlet {
         request.setAttribute("navmenu", "config");
 
         // récupération de l'action
-        String action = request.getParameter("action");
-        if (action == null) {
-            action = "list";
-        }
+        String action = ServletTool.configAction(request, "list");
+//        String action = request.getParameter("action");
+//        if (action == null) {
+//            action = "list";
+//        }
         request.setAttribute("action", action);
 
 
@@ -79,24 +77,26 @@ public class ComportementCollecteSrvlt extends HttpServlet {
             vue = "html";
         }
         request.setAttribute("vue", vue);
-
-
         request.setAttribute("redirmap", redirmap);
 
+        /**
+         * *==============================================================================================
+         * . . . . . . . . . . . . . . . . . . . . .GESTION DES ACTION
+         *///==============================================================================================
         if (action.equals("mod") || action.equals("rem")) {
             try {
                 obj = (MediatorCollecteAction) dao.find(new Long(request.getParameter("id")));
-                System.out.println("" + obj.getNom());
+                obj.enregistrerAupresdesService();
             } catch (Exception e) {
             }
         }
-
+        System.out.println("LALA");
 
         if (request.getMethod().equals("POST")) {
             obj = (MediatorCollecteAction) form.bind(request, obj, MediatorCollecteAction.class);
         }
 
-
+        //----------------------------------------ACTION LIST ---------------------------------------------
         if (action.equals("list")) {
             //On récupère la liste des comportements
             List<Object> listcomportement = dao.findall();
@@ -104,19 +104,24 @@ public class ComportementCollecteSrvlt extends HttpServlet {
         }
 
         if (form.getValide()) {
+            //-----------------------------------------ACTION ADD --------------------------------------------
             if (action.equals("add")) {
                 try {
                     dao.creer(obj);
-
+                    obj.enregistrerAupresdesService();
+                    obj.forceChangeStatut();
+                    obj.notifyObservers(action);
                     redir(request, "ComportementCollecte?action=mod&id=" + obj.getID(), "Ajout effectué");
                 } catch (Exception ex) {
                     Logger.getLogger(ComportementCollecteSrvlt.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-
+            //--------------------------------------ACTION MODIF--------------------------------------------------------
             if (action.equals("mod")) {
                 try {
                     dao.modifier(obj);
+                    obj.forceChangeStatut();
+                    obj.notifyObservers(action);
                     redir(request, "ComportementCollecte", "Modification effectuée");
                 } catch (Exception ex) {
                     Logger.getLogger(ComportementCollecteSrvlt.class.getName()).log(Level.SEVERE, null, ex);
@@ -124,10 +129,13 @@ public class ComportementCollecteSrvlt extends HttpServlet {
 
             }
         }
-
+        //-----------------------------------ACTION REMOVE------------------------------------------------------------
         if (action.equals("rem")) {
             try {
                 dao.remove(obj);
+                obj.forceChangeStatut();
+                obj.notifyObservers(action);
+                
                 redir(request, "ComportementCollecte?action=list", "Suppression effectuée.");
             } catch (Exception ex) {
                 Logger.getLogger(ComportementCollecteSrvlt.class.getName()).log(Level.SEVERE, null, ex);

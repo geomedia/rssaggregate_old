@@ -14,30 +14,43 @@
     </head>
     <body>
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+        <c:set var="rootpath" value="/RSSAgregate/" scope="request"></c:set>
 
-        <div id="banner">
-            <a href ="/RSSAgregate/index">
+
+            <div id="banner">
+                <a href ="/RSSAgregate/index">
                 <%
-                    if(DAOFactory.getInstance().getDAOConf().getConfCourante().getMaster()){
+                    if (DAOFactory.getInstance().getDAOConf().getConfCourante().getMaster()) {
                         out.println("<img src=\"/RSSAgregate/ress/img/logo_mastervert.png\"/>");
-                    }else{
+                        request.setAttribute("master", true);
+                    } else {
                         out.println("<img src=\"/RSSAgregate/ress/img/logo_masterrouge.png\"/>");
+                        request.setAttribute("master", false);
                     }
-                        
-                    %>
-    
+
+                %>
+
             </a>
-                    Statut JMS : <%
-                    if(ServiceJMS.getInstance().getStatutConnection()){
-                        out.println("OK");
-                    }
-                    else{
-                        out.println("Erreur");
-                    }
-                    %>
+                <div id="JMS">Statut JMS <span id="JMSstat"><%
+                if (ServiceJMS.getInstance().getStatutConnection()) {
+                    out.println("OK");
+                } else {
+                    out.println("Erreur");
+                    %></span>
+                <button type="button" id="jmsrecoBT">Reconnection</button>
+                <span id="pinfoJMS"></span>
+                <script src="JMSReconnection.js"></script>
+            </div>
+
+
+    
+            
+            <%
+                }
+            %>
         </div>
 
-        <c:set var="rootpath" value="/RSSAgregate/" scope="request"></c:set>
+
 
 
         <div id="menu-wrapper">

@@ -12,15 +12,18 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
+import rssagregator.services.ServiceJMS;
 
 /**
  * Les types de flux sont associé aux flux. Un type de flux corresponds aux
  * catégorie génériques des journaux : internationnal, politique, a la une,
- * environnement...
+ * environnement... Les type de flux doivent être enregistré auprès du service
+ * JMS. Pour cela un utilise le pattern observer. Le beans est ainsi un
+ * observable qui a pour observer le service JMS
  */
 @Entity
 @Cacheable(value = true)
-public class FluxType implements Serializable {
+public class FluxType extends AbstrObservableBeans implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -35,8 +38,7 @@ public class FluxType implements Serializable {
      */
 //    @OneToMany(mappedBy = "typeFlux", cascade = {CascadeType.MERGE})
 //    @Transient
-
-   @CascadeOnDelete
+    @CascadeOnDelete
     @OneToMany(mappedBy = "typeFlux", cascade = {CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
     private List<Flux> fluxLie;
 
@@ -66,5 +68,14 @@ public class FluxType implements Serializable {
 
     public FluxType() {
         this.fluxLie = new ArrayList<Flux>();
+    }
+
+    @Override
+    /**
+     * *
+     * Ajoute le service JMS comme observateur au beans
+     */
+    public void enregistrerAupresdesService() {
+        this.addObserver(ServiceJMS.getInstance());
     }
 }

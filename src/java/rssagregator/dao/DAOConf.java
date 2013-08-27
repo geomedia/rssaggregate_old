@@ -40,11 +40,10 @@ public class DAOConf extends AbstrDao {
      * *
      * Modifi le statut Change de L'observable.
      */
-    public void forceNotifyObservers() {
-        this.setChanged();
-        notifyObservers();
-    }
-
+//    public void forceNotifyObservers() {
+//        this.setChanged();
+//        notifyObservers();
+//    }
     /**
      * *
      * Charge la configuration du serveur à partir du fichier conf.properties
@@ -53,9 +52,7 @@ public class DAOConf extends AbstrDao {
      * @throws Exception
      */
     public void charger() throws IOException, Exception {
-
         Conf conf = new Conf();
-
         Properties prop = PropertyLoader.load("conf.properties");
 
         // Chargement de la valeur active dans le fichier properties
@@ -112,7 +109,23 @@ public class DAOConf extends AbstrDao {
                 serveurSlave.setUrl(split[3]);
                 conf.getServeurSlave().add(serveurSlave);
             }
-        } else {
+
+            // Chargement du jour de synchronisation
+            String jourSync = PropertyLoader.loadProperti("conf.properties", "jourSync");
+            conf.setJourSync(jourSync);
+            System.out.println("JOUR SYNC : " + jourSync);
+
+            //Chargement de l'heure de synchronisation
+            String heureSync = PropertyLoader.loadProperti("conf.properties", "heureSync");
+            try {
+                conf.setHeureSync(new Integer(heureSync));
+                System.out.println("HEURE SYNC CHARGE : " + heureSync);
+
+            } catch (Exception e) {
+                throw new Exception("Impossible de charger la valeur heure sync dans le fichier properties");
+            }
+
+        } else { // Si c'est un serveur esclave
             String purgeDuration = prop.getProperty("purgeDuration");
             try {
                 Integer val = new Integer(purgeDuration);
@@ -147,9 +160,6 @@ public class DAOConf extends AbstrDao {
         //--------------Chargement du host maitre
         s = prop.getProperty("hostMaster");
         conf.setHostMaster(s);
-
-
-
 
         this.confCourante = conf;
     }
@@ -208,6 +218,7 @@ public class DAOConf extends AbstrDao {
     public void modifierConf(Conf conf) throws Exception {
 
         Properties prop = PropertyLoader.load("conf.properties");
+        
 
         //--------------- Enregistrement du statut actif//innactif
         if (conf.getActive()) {
@@ -255,6 +266,16 @@ public class DAOConf extends AbstrDao {
         //-------------------Host du serveur maitre
         if (conf.getHostMaster() != null) {
             prop.setProperty("hostMaster", conf.getHostMaster());
+        }
+
+        //---------------JOUR de synchronisation
+        if (conf.getJourSync() != null) {
+            prop.setProperty("jourSync", conf.getJourSync());
+        }
+
+        //----------------HEURE de synchronisation
+        if (conf.getHeureSync() != null) {
+            prop.setProperty("heureSync", conf.getHeureSync().toString());
         }
 
         PropertyLoader.save(prop, "conf.properties", "LALALA commentaire");

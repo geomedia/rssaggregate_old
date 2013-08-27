@@ -13,11 +13,9 @@ import javax.persistence.RollbackException;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import org.eclipse.persistence.internal.jpa.querydef.BasicCollectionJoinImpl;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -25,22 +23,23 @@ import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 
 /**
- *
+ * La DAO permettabt d'échanger des items avec la base de données SQL.
  * @author clem
- *
- *
  *
  */
 public class DaoItem extends AbstrDao {
 
 //    Flux where_clause_flux = null;
-    List<Flux> where_clause_Flux;
-    String order_by;
-    Boolean order_desc;
-    Integer fistResult;
-    Integer maxResult;
-    Date date1;
-    Date date2;
+    //----------------------Variable clause de la requête critéria-------------------------------
+    List<Flux> where_clause_Flux; // List de flux pour la where clause 
+    String order_by; // Nom du flux pour la clause order
+    Boolean order_desc; // Donné ordre descendant
+    Integer fistResult; // Première clause de la limite 
+    Integer maxResult; // nombre maximum d'item à retourner
+    Date date1; // Borne de date début
+    Date date2; // Borne de date début
+    String hashNotIn; // where where hash
+    //-------------------------------------------------------------------------------------------
     protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DaoItem.class);
 
     protected DaoItem(DAOFactory daof) {
@@ -84,6 +83,13 @@ public class DaoItem extends AbstrDao {
         }
     }
 
+    /**
+     * *
+     * Lance la requete criteria. Ili faut veiller auparavant à configurer les
+     * critères propre à la dao (where_clauseflux; orderby; hash...)
+     *
+     * @return
+     */
     public List<Item> findCretaria() {
 
 //        em = dAOFactory.getEntityManager();
@@ -96,16 +102,18 @@ public class DaoItem extends AbstrDao {
         Root<Item> root = cq.from(Item.class);
 
 
+        //---------------------------WHERE CLAUSE FLUX------------------------
         if (where_clause_Flux != null && where_clause_Flux.size() > 0) {
             Join joinFlux = root.join("listFlux");
             listWhere.add(joinFlux.in(where_clause_Flux));
         }
 
+        //----------------------CRITERE DE DATE-------------------------------
         if (date1 != null && date2 != null) {
             listWhere.add(cb.and(cb.between(root.<Date>get("dateRecup"), date1, date2)));
         }
 //        
-        // Le ORDER BY
+        // -----------------------Le ORDER BY---------------------------------
         if (order_by != null) {
             if (order_desc != null && order_desc) {
                 System.out.println("DESC");
@@ -115,6 +123,23 @@ public class DaoItem extends AbstrDao {
                 cq.orderBy(cb.asc(root.get(order_by)));
             }
         }
+
+
+        // -----------------------Where clause Hash NOT IN-------------
+//        hashNotIn = "4444,5555,666";
+        if (hashNotIn != null && !hashNotIn.isEmpty()) {
+            String[] tabhash = hashNotIn.split(", ");
+
+            List<String> listhash = new ArrayList<String>();
+            for (int j = 0; j < tabhash.length; j++) {
+                listhash.add(tabhash[j]);
+            }
+
+//            listWhere.add(cb.and(root.get("hashContenu").  in(listhash)));
+            listWhere.add(cb.and(cb.not(root.get("hashContenu").in(listhash))));
+
+        }
+
 
         // On applique les wheres
         if (listWhere.size() == 1) {
@@ -355,15 +380,34 @@ public class DaoItem extends AbstrDao {
         this.where_clause_Flux = where_clause_Flux;
     }
 
-    public synchronized void enregistrement(Item item, Flux flux) {
+    public String getHashNotIn() {
+        return hashNotIn;
+    }
 
+    public void setHashNotIn(String hashNotIn) {
+        this.hashNotIn = hashNotIn;
+    }
+
+    /**
+     * *
+     * Enregistre l'item pour le flux. Cette méthode doit être employé en
+     * priorité (et non la méthode crée() car elle bloque synchronise la dao
+     * afin d'éviter les conflit d'écriture. Si l'item précisé est déjà
+     * enregistré dans la base de données, la dao retrouve cette item dans la
+     * base et lié au flux envoyé en argument
+     *
+     * @param item : item devant être enregistré
+     * @param flux : flux devant être associé à l'item
+     */
+    public synchronized void enregistrement(Item item, Flux flux) {
         Boolean err = false;
 
+        // Si l'item est nouvelle (elle n'a pas d'id)
         if (item.getID() != null) {
             err = true;
         }
 
-        // Si l'item est nouvelle (elle n'a pas d'id)
+        
         if (!err) {
             try {
                 em.getTransaction().begin();
@@ -381,6 +425,8 @@ public class DaoItem extends AbstrDao {
 
         if (err) {
             Item it = findByHash(item.getHashContenu());
+            logger.debug("item : " + it);
+            logger.debug("flux : " + flux);
             it.getListFlux().add(flux);
             logger.debug("Item déjà existente lors de l'enregistrement");
             try {
@@ -419,7 +465,7 @@ public class DaoItem extends AbstrDao {
      */
     public void initcriteria() {
 //        where_clause_flux = null;
-        
+
         where_clause_Flux = new ArrayList<Flux>();
         order_by = null;
         order_desc = null;

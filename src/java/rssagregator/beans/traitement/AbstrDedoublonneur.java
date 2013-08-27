@@ -26,7 +26,7 @@ import rssagregator.beans.Item;
 
 /**
  *
- * @author clem
+ * @author clem 
  */
 //@Entity()
 @Entity
@@ -50,17 +50,17 @@ public abstract class AbstrDedoublonneur implements Serializable,Cloneable {
     @Transient
     protected Logger logger = Logger.getLogger(AbstrDedoublonneur.class);
     @Column(name = "deboubTitle")
-    private Boolean deboubTitle;
+    protected Boolean deboubTitle;
     @Column(name = "dedoubLink")
-    private Boolean dedoubLink;
+    protected Boolean dedoubLink;
     @Column(name = "deboudDesc")
-    private Boolean deboudDesc;
+    protected Boolean deboudDesc;
     @Column(name = "dedoubDatePub")
-    private Boolean dedoubDatePub;
+    protected Boolean dedoubDatePub;
     @Column(name = "dedouGUID")
-    private Boolean dedouGUID;
+    protected Boolean dedouGUID;
     @Column(name = "dedoubCategory")
-    private Boolean dedoubCategory;
+    protected Boolean dedoubCategory;
     
     /***
      * 1=nombre item trouvé ; 2 dedoub memoire; 3 BDD item lié ;4 BDD item déjà présente mais lien ajouté ;  5 item nouvelles
@@ -202,7 +202,7 @@ public abstract class AbstrDedoublonneur implements Serializable,Cloneable {
                 concat += item.getCategorie();
             }
 
-
+ 
 //                concat = item.getTitre() + item.getDescription();
             MessageDigest digest = MessageDigest.getInstance("MD5");
 
@@ -229,4 +229,7 @@ public abstract class AbstrDedoublonneur implements Serializable,Cloneable {
         
         return clone; //To change body of generated methods, choose Tools | Templates.
     }
+    
+    
+    
 }

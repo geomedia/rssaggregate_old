@@ -112,7 +112,8 @@ public class Simpleadd extends HttpServlet {
                 }
             }
 
-            DAOFactory.getInstance().getDAOFlux().forceNotifyObserver();
+//            DAOFactory.getInstance().getDAOFlux().forceNotifyObserver();
+            ServiceCollecteur.getInstance().update(null, "reload all");
         }
         if (action.equals("recolte")) {
             ServiceCollecteur collecte = ServiceCollecteur.getInstance();
@@ -126,7 +127,7 @@ public class Simpleadd extends HttpServlet {
                 collecte.majManuellAll(listFlux);
 
             } catch (Exception ex) {
-                Logger.getLogger(Test.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(Simpleadd.class.getName()).log(Level.SEVERE, null, ex);
             }
 
             DateTime dtFIN = new DateTime();
@@ -199,7 +200,8 @@ public class Simpleadd extends HttpServlet {
                 }
 
             }
-            dao.forceNotifyObserver();
+            
+//            dao.forceNotifyObserver();
         }
 
         this.getServletContext().getRequestDispatcher("/WEB-INF/simpleadd.jsp").forward(request, response);

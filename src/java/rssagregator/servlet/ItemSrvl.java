@@ -23,6 +23,21 @@ import rssagregator.beans.form.ItemForm;
 import rssagregator.utils.ServletTool;
 
 /**
+ * La servlet permettant de gérer l'acces des utilisateurs aux items. Elle est
+ * aussi utilisée dans le processus de synchronisation. Cette servlet doit gérer
+ * les types d'action suivant :  
+ * <ul>
+ * <li><strong>read : </strong>l'utilisateur a demandé a lire les informations
+ * détaillées d'une items. </li>
+ * <li><strong>rechercher : </strong> Permet de charger la page html permettant
+ * d'interroger les données items contenues dans la base de données</li>
+ * <li><strong>list : </strong>utilisé par l'interface ajax pour interroger la
+ * base de donnée et renvoyé des informations sur les flux au format Json</li>
+ * <li><strong>xmlsync :</strong> utilisée par le serveur maitre pour récupérer
+ * des données items sur le serveur esclave. Les données sont envoyées au format
+ * XML</li>
+ * </ul>
+ *
  *
  * @author clem
  */
@@ -49,16 +64,7 @@ public class ItemSrvl extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
         request.setCharacterEncoding("UTF-8");
 
-
-        System.out.println("coucou");
-        
-        
         String action = ServletTool.configAction(request, "recherche");
-//        String action = request.getParameter("action");
-//        if (action == null) {
-//            action = "recherche";
-//        }
-//        request.setAttribute("action", action);
 
         //récupération de la vue
         String vue = request.getParameter("vue");
@@ -66,73 +72,82 @@ public class ItemSrvl extends HttpServlet {
             vue = "html";
         }
 
-
-        // On récupère le type de sélection.
-        String type = request.getParameter("type");
-
-
         //DAO
         DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
         daoItem.initcriteria();
-        ItemForm form = new ItemForm();
 
+        ItemForm form = new ItemForm();
 
         Item item = null;
 
-        // On récupère l'item si un id est demandé dans le get
-        String idString = request.getParameter("id");
-        if (idString != null && !idString.equals("")) {
-            Long id = new Long(request.getParameter("id"));
-            request.setAttribute("id", id);
-            item = (Item) daoItem.find(id);
+
+
+        request.setAttribute("navmenu", "item");
+        /**
+         * **=================================================================================
+         * ...................................ACTION READ
+         *///*=================================================================================
+        // L'action read permet de lire les informations détaillées sur une item. Elle a besoin de gérer les paramettres suivant :
+        //          - id : Il s'agit de l'id de l'item à lire
+        if (action.equals("read")) {
+            String idString = request.getParameter("id");
+            if (idString != null && !idString.equals("")) {
+                Long id = new Long(idString);
+                request.setAttribute("id", id);
+                item = (Item) daoItem.find(id);
+            }
+            request.setAttribute(ATT_ITEM, item);
         }
 
-
-        //Action liste demander en ajax pour retour JSON
+        /**
+         * *=================================================================================
+         * ....................................ACTION LIST :
+         *///=================================================================================
+        //Il s'agit de l'action demandant en AJAX des informations sur les items. Elles seront renvoyées en JSON. 
         if (action.equals("list")) {
 
             /**
              * Entrée des parametres pour compléter les vues
              */
             // On récupère le premier et dernier résult pour former des limites de requêtes.
-                Integer nbrItemPrPage;
-                try {
-                    nbrItemPrPage = new Integer(request.getParameter("itPrPage"));
-                } catch (Exception e) {
-                    nbrItemPrPage = 20;
-                }
-                request.setAttribute("itPrPage", nbrItemPrPage);
-                daoItem.setMaxResult(nbrItemPrPage);
+            Integer nbrItemPrPage;
+            try {
+                nbrItemPrPage = new Integer(request.getParameter("itPrPage"));
+            } catch (Exception e) {
+                nbrItemPrPage = 20;
+            }
+            request.setAttribute("itPrPage", nbrItemPrPage);
+            daoItem.setMaxResult(nbrItemPrPage);
 
-                //Récupération du firs result
-                Integer firsResult;
-                try {
-                    firsResult = new Integer(request.getParameter("firstResult"));
-                    daoItem.setFistResult(firsResult);
-                    request.setAttribute("firstResult", firsResult);
-                    System.out.println("FIRST result  : " + firsResult);
-
-                } catch (Exception e) {
-                    firsResult = 0;
-                    System.out.println("ERR first");
-                }
-                request.setAttribute("firsResult", firsResult);
+            //Récupération du firs result
+            Integer firsResult;
+            try {
+                firsResult = new Integer(request.getParameter("firstResult"));
                 daoItem.setFistResult(firsResult);
+                request.setAttribute("firstResult", firsResult);
+                System.out.println("FIRST result  : " + firsResult);
 
-           
+            } catch (Exception e) {
+                firsResult = 0;
+                System.out.println("ERR first");
+            }
+            request.setAttribute("firsResult", firsResult);
+            daoItem.setFistResult(firsResult);
+
+
 
             // SI on doit restreindre la sélection à un flux 
             try {
                 String[] tabIdFluxString = request.getParameterValues("fluxSelection2");
                 List<Flux> listFluxEntites = new ArrayList<Flux>();
-                
+
                 int i;
-                for(i=0;i<tabIdFluxString.length;i++){
+                for (i = 0; i < tabIdFluxString.length; i++) {
                     Flux f = (Flux) DAOFactory.getInstance().getDAOFlux().find(new Long(tabIdFluxString[i]));
                     listFluxEntites.add(f);
                 }
                 daoItem.setWhere_clause_Flux(listFluxEntites);
-                
+
             } catch (Exception e) {
                 System.out.println("ERRRRRRRR" + e);
                 daoItem.setWhere_clause_Flux(null);
@@ -175,34 +190,74 @@ public class ItemSrvl extends HttpServlet {
             //On récupère le nombre max d'item
             Integer nbItem = daoItem.findNbMax();
             request.setAttribute("nbitem", nbItem);
-            
+
 
             //En fonction de la sélection demander on formule la bonne recherche
             List<Item> listItem;
-            
+
             // si la vue est csv il faut enlever les limites
-            if(!vue.equals("html") ^ vue.equals("jsondesc")){ // en java le ^ est un XOR
+            if (!vue.equals("html") ^ vue.equals("jsondesc")) { // en java le ^ est un XOR
                 daoItem.setFistResult(null);
                 daoItem.setMaxResult(null);
             }
-            
+
             listItem = daoItem.findCretaria();
             request.setAttribute("listItem", listItem);
         }
-        
+
+        /**
+         * *=================================================================================
+         * .............................ACTION RECHERCHER
+         *///================================================================================
         // Action recherche, correspond à la demande de la page permettant de lister les flux. Il est nécessaire de fournir les paramettres permettant de construire les menus déroulant dans la JSP
-        if(action.equals("recherche")){
-                 // On récupère la liste des flux utile à la génération du menu déroulant
-                request.setAttribute("listflux", DAOFactory.getInstance().getDAOFlux().findAllFlux(false));
+        if (action.equals("recherche")) {
+            // On récupère la liste des flux utile à la génération du menu déroulant
+            request.setAttribute("listflux", DAOFactory.getInstance().getDAOFlux().findAllFlux(false));
 
-                //List des journaux
-                request.setAttribute("listJournaux", DAOFactory.getInstance().getDaoJournal().findall());
+            //List des journaux
+            request.setAttribute("listJournaux", DAOFactory.getInstance().getDaoJournal().findall());
         }
-        
-        request.setAttribute(ATT_ITEM, item);
-        request.setAttribute("navmenu", "item");
 
 
+
+
+
+        /**
+         * *=================================================================================
+         * .............................ACTION XML SYNC
+         *///================================================================================
+        // Il s'agit de l'action permettant au serveur maitre de récupérer des items sur le serveur esclave. Il effectue une requete en POST avec pour attribut : 
+        //      - idflux : le flux pour lequel il veut des information
+        //      - hash  : une longue chaine de caractère comprenant les hashs des items qu'il a pu capturer pour le flux en question. La servlet doit renvoyer les items ne possédant pas ces hash
+        //      - date1 : critère de date pour la synchronisation. Ce critère s'applique sur la date de récupération
+        //      - date2 : critère de date de fin
+        if (action.equals("xmlsync")) {
+            // Récupération des critères expliqué plus haut. On a déjà l'id
+            String hash = request.getParameter("hash");
+            String date1 = request.getParameter("date1");
+            String date2 = request.getParameter("date2");
+            String idflux = request.getParameter("idflux");
+            
+            
+            Flux flux = (Flux) DAOFactory.getInstance().getDAOFlux().find(new Long(idflux));
+            List<Flux> lFl = new ArrayList<Flux>();
+            lFl.add(flux);
+
+            // Configuration de la dao pour obtention des items concerné
+            daoItem.setHashNotIn(hash);
+            daoItem.setWhere_clause_Flux(lFl);
+
+            List<Item> listItems = daoItem.findCretaria();
+            request.setAttribute("listItem", listItems);
+
+        }
+
+
+
+        /**
+         * *=================================================================================
+         * ...............................GESTION DE LA VUE
+         *///=================================================================================
         //utilisation de la vue en fonction des paramettres envoyé par l'utilisateur.
         if (vue.equals("html")) {
             VUE = "/WEB-INF/itemHTML.jsp";
@@ -213,16 +268,18 @@ public class ItemSrvl extends HttpServlet {
         } else if (vue.equals("csvexpert")) {
             response.setHeader("Content-Disposition", "attachment; filename = items-export.csv");
             VUE = "/WEB-INF/itemexpertCSV.jsp";
-        }
-        else if(vue.equals("jsondesc")){
+        } else if (vue.equals("jsondesc")) {
             System.out.println("ZOUZou");
             VUE = "/WEB-INF/itemJSONDesc.jsp";
-        }
-        else if (vue.equals("xls")) {
+        } else if (vue.equals("xls")) {
             response.setHeader("Content-Disposition", "attachment; filename = itemss-export.xls");
             VUE = "/WEB-INF/itemXLS.jsp";
+        } else if (vue.equals("xmlsync")) {
+            System.out.println("OUIIIII");
+            VUE = "/WEB-INF/itemXMLsync.jsp";
         }
-        
+        System.out.println("LAAA");
+
         this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
     }
 

@@ -32,8 +32,6 @@ public class PropertyLoader {
     public static Properties load(String filename) throws IOException, FileNotFoundException {
         Properties properties = new Properties();
         InputStream is = PropertyLoader.class.getClassLoader().getResourceAsStream(filename);
-       
-        
         properties.load(is);
 
         is.close();
@@ -43,18 +41,14 @@ public class PropertyLoader {
 
     public static void save(Properties prop, String filename, String comment) throws URISyntaxException, FileNotFoundException, IOException {
 
-
         URL resourceUrl =  PropertyLoader.class.getClassLoader().getResource(filename);
+        System.out.println("URL DU FICHIER PROP : "+resourceUrl.toURI());
 //        URL truc = PropertyLoader.class.getClassLoader().getResourceAsStream(filename).;
-        
         
         File file = new File(resourceUrl.toURI());
         System.out.println("LA PATH : "+file.getAbsolutePath());
-
-        
         OutputStream os = new FileOutputStream(file);
         prop.store(os, "lalala");
-
         os.close();
 
     }

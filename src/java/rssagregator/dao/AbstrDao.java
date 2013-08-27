@@ -23,7 +23,7 @@ import rssagregator.beans.Flux;
  *
  * @author clem
  */
-public abstract class AbstrDao extends Observable {
+public abstract class AbstrDao {
 
     protected EntityManager em;
     protected EntityManagerFactory emf;

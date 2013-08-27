@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 import javax.persistence.Query;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Journal;
+import rssagregator.services.ServiceCollecteur;
 
 /**
  * @author clem
@@ -91,10 +92,15 @@ public class DaoJournal extends AbstrDao {
         int i;
         for(i=0;i<listflux.size(); i++){
             daoFlux.remove(listflux.get(i));
-            System.out.println("SUPPRESSION D'UN FLUX A PAETIR DU JOURNAL");
+            // On désactive le flux pour que l'objet cesse d'être ajouté au collecteur
+            listflux.get(i).setActive(false);
+
+            System.out.println("SUPPRESSION D'UN FLUX A PARTIR DU JOURNAL");
+            
             
         }
-        DAOFactory.getInstance().getDAOFlux().forceNotifyObserver();
+        ServiceCollecteur.getInstance().update(null, "reload all");
+//        DAOFactory.getInstance().getDAOFlux().forceNotifyObserver();
 //        DAOFactory.getInstance().getDAOFlux().notifyObservers();
         
         journal.setFluxLie(new ArrayList<Flux>());

@@ -11,12 +11,16 @@ import rssagregator.dao.DaoFlux;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import rssagregator.beans.Conf;
+import rssagregator.beans.Flux;
+import rssagregator.services.DaemonCentral;
 import rssagregator.services.ServiceCollecteur;
 import rssagregator.services.ServiceJMS;
 
@@ -30,6 +34,9 @@ public class StartServlet implements ServletContextListener {
 //    private ListeFluxCollecteEtConfigConrante listflux;
     private static final String ATT_SERVICE_COLLECTE = "collecte";
     private ServiceCollecteur collecte;
+    org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(StartServlet.class);
+    DaemonCentral daemonCentral;
+    ExecutorService es; // On n'arrive pas a lancer le daemon sans passer par l'executor service, dommage
 
     /**
      * *
@@ -40,87 +47,112 @@ public class StartServlet implements ServletContextListener {
      */
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-            System.out.println("DEBUTT");
-            
-            DAOFactory.getInstance();
-            
-            DaoFlux daoflux = DAOFactory.getInstance().getDAOFlux();
-            DAOConf daoconf = DAOFactory.getInstance().getDAOConf();
-            System.out.println("");
-            
-            // Initialisation de la liste des flux.
-//            listflux = ListeFluxCollecteEtConfigConrante.getInstance();
+        //On lance le daemon central avec une périodicité de 5 minutes 300 000 milisecondes
+        daemonCentral = DaemonCentral.getInstance();
+        es = Executors.newFixedThreadPool(1);
+        es.submit(daemonCentral);
 
-            // Initialisation du  collecteur
-            collecte = ServiceCollecteur.getInstance();
+//        daemonCentral.run();
 
-            // On enregistre les service comme observer et la liste des flux comme observable
-//            listflux.addObserver(collecte);
-            daoflux.addObserver(collecte);
-            daoconf.addObserver(collecte);
+//        logger.info("Chargement du context initial");
+//        try {
+//            Class.forName("com.mysql.jdbc.Driver");
 
-
-            
-            // On charge la liste des flux depuis la base de donnée
+//            DAOFactory.getInstance();
+//
+//            DaoFlux daoflux = DAOFactory.getInstance().getDAOFlux();
+//            DAOConf daoconf = DAOFactory.getInstance().getDAOConf();
+//
 //            daoflux.chargerDepuisBd();
-            
-            
-//            daoconf.chargerDepuisBd();
-            
-            try {
-                daoconf.charger();
-                
-    //            Object fl = daoflux.find(new Long(451));
-    //            DAOFactory.getInstance().getEntityManager().;
-    //            DAOFactory.getInstance().getEntityManager().;
-            } catch (IOException ex) {
-                Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (Exception ex) {
-                Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            
-            
-
-            daoflux.forceNotifyObserver();
-            daoconf.forceNotifyObservers();
-            //        listflux.chargerDepuisBd();
-//            daoflux.notifyObservers();
-//            daoconf.notifyObservers();
-            
-            
-            
-              ServiceJMS jMS = ServiceJMS.getInstance();
-//            ServiceJMS.getInstance().run();
-            
-            ExecutorService es = Executors.newFixedThreadPool(1);
-            es.submit(jMS);
-            
-            
-            
-            
+//
 //            try {
-////                ServiceJMS.getInstance().startService();
+//                daoconf.charger();
 //            } catch (IOException ex) {
 //                Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+//            } catch (Exception ex) {
+//                Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
 //            }
-            
-
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
-        }
+//
+//            // Initialisation du  collecteur
+//            collecte = ServiceCollecteur.getInstance();
+//
+//            // On charge la conf et on notifi le collecteur
+//            Conf conf = daoconf.getConfCourante();
+//            conf.addObserver(collecte);
+//            conf.forceNotifyObserver();
+//
+//            // Pour chaque flux, on inscrit le collecteur comme observeur
+//            List<Flux> listflux = daoflux.findAllFlux(true);
+//            int i;
+//            for (i = 0; i < listflux.size(); i++) {
+//                listflux.get(i).addObserver(collecte);
+//                listflux.get(i).forceNotifyObserver();
+//            }
+//
+//            //TODO : On sésactive JMS pour l'instant
+//            ServiceJMS jMS = ServiceJMS.getInstance();
+//            ExecutorService es = Executors.newFixedThreadPool(1);
+//            es.submit(jMS);
+//            
+//
+//
+//
+//            // On enregistre les service comme observer et la liste des flux comme observable
+////            listflux.addObserver(collecte);
+////            daoflux.addObserver(collecte);
+//
+//
+//
+//            // On charge la liste des flux depuis la base de donnée
+////            daoflux.chargerDepuisBd();
+//
+//
+////            daoconf.chargerDepuisBd();
+//
+////            try {
+////                daoconf.charger();
+////                
+////    //            Object fl = daoflux.find(new Long(451));
+////    //            DAOFactory.getInstance().getEntityManager().;
+////    //            DAOFactory.getInstance().getEntityManager().;
+////            } catch (IOException ex) {
+////                Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+////            } catch (Exception ex) {
+////                Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+////            }
+//
+//
+//
+//            //        listflux.chargerDepuisBd();
+////            daoflux.notifyObservers();
+////            daoconf.notifyObservers();
+//
+//
+//
+////            try {
+//////                ServiceJMS.getInstance().startService();
+////            } catch (IOException ex) {
+////                Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+////            }
+//
+//
+//        } catch (ClassNotFoundException ex) {
+//            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+//        }
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         // On arrete les taches de collecte
-
-        collecte.stopCollecte();
-        ServiceJMS.getInstance().close();
+        logger.debug("Fermeture de l'Application");
+        daemonCentral.stop();
+        
+        es.shutdown();
+        logger.debug("[OK] Fermeture du daemoncentral");
 
         destroyDriver();
+        logger.debug("[OK] Déenregistremnet des driver JDBC");
+        logger.debug("[OK] Fin de la procédure de fermeture");
     }
 
     public void destroyDriver() {
@@ -137,9 +169,9 @@ public class StartServlet implements ServletContextListener {
             Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Exception caught while deregistering JDBC drivers");
 //        ctx.log(prefix + "Exception caught while deregistering JDBC drivers", e);
         }
-        
-        ServiceJMS.getInstance().close();
-        
+
+
+
 
     }
 }

@@ -3,9 +3,11 @@ package rssagregator.beans;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Observable;
+import org.joda.time.Hours;
 
 
-public class Conf implements Serializable {
+public class Conf extends Observable implements Serializable {
 
     public Conf() {
     this.active = true;
@@ -18,26 +20,28 @@ public class Conf implements Serializable {
 //    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long ID;
     
-    
+    /***
+     * Le nom du serveur. Permet la configuration dans le serveur JMS
+     */
     String servname;
     
+    /***
+     * L'host du provider JMS pour la synchronisation
+     */
     String jmsprovider;
     
     /**
      * Nombre de thread de récupération
      */
-//    @Column(name = "nbthreadrecup")
     private Integer nbThreadRecup;
     /**
      * Delai au bout duquel les données doivent être stoquées supprimée de la
      * base de données. Si 0 pas de durée. Ce int est un nombre de jours
      */ 
-//    @Transient
     private Integer purgeDuration;
     /**
      * Statut du serveur. Peut prendre deux valeurs, 1 pour maitre 0 pour esclave
      */
-//    @Transient
     private Boolean master;
     /**
      * Les serveur slaves doivent connaitre l'ip du serveur maitre (seul lui est
@@ -47,14 +51,23 @@ public class Conf implements Serializable {
      * de la configuration du serveru en maitre (attribution du paramètre
      * statutServer)
      */
-//    @Transient
     private String hostMaster;
     /**
      * *
      * Liste des serveur esclaves utiles au serveur maitre
      */
-//    @OneToMany(cascade = CascadeType.ALL)
     private List<ServeurSlave> serveurSlave;
+
+    /***
+     * Le jour pour lequel la synchro doit être effectuée. Cette variable prend les valeures; lu, ma, me, je,ve, sa ,di
+     */
+    private String jourSync;
+    
+    /***
+     * L'heure de la synchro . de 00 à 23
+     */
+    private Integer heureSync;
+    
     
     /***
      * Spécifie si le serveur est actif ou non, c'est à dire, si il collecte ou non l'information. 
@@ -157,9 +170,28 @@ public class Conf implements Serializable {
     public void setPass(String pass) {
         this.pass = pass;
     }
-    
-    
-    
-    
+
+    public void forceNotifyObserver() {
+        this.setChanged();
+        this.notifyObservers();
+    }
+
+    public String getJourSync() {
+        return jourSync;
+    }
+
+    public void setJourSync(String jourSync) {
+        this.jourSync = jourSync;
+    }
+
+    public Integer getHeureSync() {
+        return heureSync;
+    }
+
+    public void setHeureSync(Integer heureSync) {
+        this.heureSync = heureSync;
+    }
+
+  
     
 }

@@ -16,6 +16,7 @@
     <!--        <non-jta-data-source>postconf</non-jta-data-source>
         -->
     <class>rssagregator.Truc</class>
+    <class>rssagregator.services.ServiceSynchro</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
       <property name="eclipselink.ddl-generation" value="create-tables"/>

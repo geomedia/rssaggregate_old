@@ -29,36 +29,26 @@
 
 
 <div id="sidebar">
-    <p><a href="ComportementCollecte?action=add">Ajouter</a></p>
-    <p><a href="ComportementCollecte?action=list">Liste</a></p>
+    <p><a href="${rootpath}ComportementCollecte/add">Ajouter</a></p>
+    <p><a href="${rootpath}ComportementCollecte/list">Liste</a></p>
 </div>
 
 <div id="content">
     <div class="post">
         <c:choose >
+            
+       
             <c:when test="${not empty redirmap}">
-                <p>${form.resultat}
-                </p>
-                <p>${redirmap['msg']}. </p>
-                <c:if test="${err!='true'}">
-                    Vous serez redirigé dans 3 secondes à l'adresse : <a href="${redirmap['url']}">${redirmap['url']}</a>
-                    <script type="text/JavaScript">
-                        <!--
-                        setTimeout("location.href = '${redirmap['url']}';",3000);
-                        -->
-                    </script>
-                </c:if>
-
-
+                     <!--redicrection si il y a des erreur-->
+                <c:import url="/WEB-INF/redirJspJavascriptPart.jsp" />
             </c:when>
+            
             <c:when test="${empty redirmap}">
-
-
                 <c:choose>
-
                     <c:when test="${action=='add' or action=='mod'}">
+                           <!--Affichage du formulaire permettant de gérer le comportement lors de action ADD ou MOD-->
                         <ul>
-                            <li><a href="ComportementCollecte?action=rem&id=${comportement.ID}">Supprimer le comportement</a></li>
+                            <li><a href="${rootpath}ComportementCollecte/rem?id=${comportement.ID}">Supprimer le comportement</a></li>
                         </ul>
 
                         <form method="POST">
@@ -142,7 +132,7 @@
                     <c:when test="${action=='list'}">
 
                         <c:forEach items="${list}" var="compo">
-                            <li><a href="ComportementCollecte?action=mod&id=${compo.ID}">${compo}</a></li>
+                            <li><a href="${rootpath}ComportementCollecte/mod?id=${compo.ID}">${compo}</a></li>
 
                         </c:forEach>
 

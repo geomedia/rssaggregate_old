@@ -18,8 +18,11 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
 import rssagregator.beans.Flux;
+import rssagregator.beans.FluxType;
 import rssagregator.beans.Item;
 import rssagregator.beans.Journal;
+import rssagregator.beans.traitement.MediatorCollecteAction;
+import rssagregator.services.ServiceCollecteur;
 import rssagregator.services.ServiceGestionIncident;
 
 /**
@@ -30,6 +33,7 @@ public class DaoFlux extends AbstrDao {
 
 //    public List<Flux> listFlux;
     private static String REQ_FIND_ALL = "SELECT f FROM Flux f";
+    org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DaoFlux.class);
 
     /**
      * *
@@ -92,7 +96,7 @@ public class DaoFlux extends AbstrDao {
 
         // On supprime la liste de flux du flux
         flux.setItem(new ArrayList<Item>());
-        em.getTransaction().begin(); 
+        em.getTransaction().begin();
         em.remove(em.merge(flux));
         em.getTransaction().commit();
 
@@ -119,10 +123,11 @@ public class DaoFlux extends AbstrDao {
 
     /**
      * *
-     * Charger données (list flux et config) depuis la base de données. Les
-     * dernier hash des items sont aussi chargé
+     * Charger les flux depuis la base de données. Les
+     * dernier hash des items sont aussi chargé pour résidé en mémoire
      */
     public void chargerDepuisBd() {
+        logger.info("Chargement des flux depuis la base de données");
 
         //Chargement de la liste des flux depuis la BDD
         DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
@@ -146,8 +151,8 @@ public class DaoFlux extends AbstrDao {
     /**
      * *
      * Ajoute un flux à la liste des flux collecté puis persiste dans la base de
-     * donées. La modification est ensuite notifiée aux observeur (le service de
-     * collecte collecteurs)
+     * donées. Pour chacun des objet lié au flux (journal comportement, type), on va vérifier que l'objet n'est pas déjà présent dans la base de donnée pour éviter la double créeation par la cascade persit.
+     * A la fin de l'enregistrement, on met le change statut du bean flux a true afin qu'il puisse si besoin est être notifié aux observeur (le service de collecte).
      *
      * @param obj Le flux a créer
      */
@@ -157,12 +162,57 @@ public class DaoFlux extends AbstrDao {
         // On va remplir la date en force
         Flux fl = (Flux) obj;
         fl.setCreated(new Date());
+        
+ 
+        /***
+         * La cascade persist nous oblige à vérifier que chacun des objet lié n'est pas déjà existant. 
+         * Si il est existant, il faut retrouver ces objet et les mettre dans le flux avant de persister. 
+         * Si on ne le fait pas, l'ORM va chercher à créer 2x la même chose et provoquer une erreur
+         * **/
+        
+        MediatorCollecteAction m = fl.getMediatorFlux();
+        if(m!=null){
+            //Si le médiator n'est pas contenu dans l'em (parce que si il est dans l'em pas de problème, l'ORM se s'emmelera pas les pattes !)
+            if(!em.contains(m)){
+                //On va le chercher dans la base de données
+                MediatorCollecteAction mContenu = em.find(MediatorCollecteAction.class, m.getID());
+               if(mContenu!=null){
+                   fl.setMediatorFlux(mContenu);
+               }
+            }
+        }
+        
+        //Même traitement pour les journaux
+        Journal j = fl.getJournalLie();
+        if(j!=null){
+            if(!em.contains(j)){
+                Journal jContenu = em.find(Journal.class, j.getID());
+                if(jContenu != null){
+                    fl.setJournalLie(jContenu);
+                }
+            }
+        }
+        
+        //Même traitement pour les Type de flux
+        FluxType ft = fl.getTypeFlux();
+        if(ft != null){
+            if(!em.contains(ft))
+            {
+                FluxType ftContenu = em.find(FluxType.class, ft.getID());
+                if(ftContenu != null){
+                    fl.setTypeFlux(ftContenu);
+                }
+            } 
+        }
+        
+        
 
         em.getTransaction().begin();
         em.persist(fl);
         em.getTransaction().commit();
-
-//        forceNotifyObserver();
+        fl.addObserver(ServiceCollecteur.getInstance());
+        fl.forceChangeStatut();
+        fl.notifyObservers();
     }
 
     /**
@@ -185,14 +235,42 @@ public class DaoFlux extends AbstrDao {
         return retourList;
     }
 
+    
+    
+    @Override
+    /***
+     * Redéclaration de la méthode modifié. En plus de l'eefet classique de la méthode modifié, cette méthode bloque la DaoFlux. Elle change aussi le changeStatut du beans modifié (un flux est un observable)
+     */
+    public synchronized void modifier(Object obj) throws Exception {
+ 
+        Flux flux = (Flux)obj;
+                try {
+            if (flux.getID() != null && flux.getID() >= 0) {
+//                em = dAOFactory.getEntityManager();
+                em.getTransaction().begin();
+                em.merge(flux);
+                em.getTransaction().commit();
+                flux.forceChangeStatut();
+            }
+
+        } catch (RollbackException e) {
+            ServiceGestionIncident.getInstance().gererIncident(e, flux);
+            System.out.println("EXEPTION BDD");
+            throw e;
+        }
+    }
+
+    
+    
     /**
      * *
-     * Enregistre les modifications du flux dans la base de donnée. Notifi
-     * l'observer
+     * Enregistre les modifications du flux dans la base de donnée. SI Erreur,
+     * on consigne en utilisant le service de gestion des incidents l'observer
      *
      * @param flux
      */
-    public synchronized void modifierFlux(Flux flux) throws IllegalStateException, RollbackException, Exception {
+    @Deprecated
+    public synchronized void modifierFluxZ(Flux flux) throws IllegalStateException, RollbackException, Exception {
 
         try {
             if (flux.getID() != null && flux.getID() >= 0) {
@@ -200,7 +278,7 @@ public class DaoFlux extends AbstrDao {
                 em.getTransaction().begin();
                 em.merge(flux);
                 em.getTransaction().commit();
-
+                flux.forceChangeStatut();
             }
 
         } catch (RollbackException e) {
@@ -214,11 +292,10 @@ public class DaoFlux extends AbstrDao {
      * *
      * Modifi le statut Change de L'observable et notifi les observer.
      */
-    public void forceNotifyObserver() {
-        this.setChanged();
-        this.notifyObservers();
-    }
-
+//    public void forceNotifyObserver() {
+//        this.setChanged();
+//        this.notifyObservers();
+//    }
     /**
      * *
      * Trouve le nombre max de flux. Le journal envoyé en argument permet de

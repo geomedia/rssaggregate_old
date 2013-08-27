@@ -6,18 +6,14 @@ package rssagregator.beans.form;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
-import rssagregator.beans.ClemBeanUtils;
 import rssagregator.beans.Conf;
 import rssagregator.beans.ServeurSlave;
-import rssagregator.dao.AbstrDao;
 
 /**
- *
+ * La class permettant de vérifier et binder les données saisie par l'utilisateur avec le beans <strong>Conf</strong
  * @author clem
  */
 public class ConfForm extends AbstrForm {
@@ -25,7 +21,7 @@ public class ConfForm extends AbstrForm {
     public ConfForm(/*AbstrDao dao*/) {
 //        super(dao);
     }
-
+ 
     @Override
     public Object bind(HttpServletRequest request, Object objEntre, Class type) {
         erreurs = new HashMap<String, String[]>();
@@ -40,7 +36,6 @@ public class ConfForm extends AbstrForm {
         } else {
             conf.setActive(false);
         }
-
 
 
         //=====================================================================================
@@ -81,7 +76,7 @@ public class ConfForm extends AbstrForm {
         }
 
 
-        //------------------------------Pass
+        //------------------------------Pass du serveur courant
 
         s = request.getParameter("pass1");
         conf.setPass(s);
@@ -114,7 +109,7 @@ public class ConfForm extends AbstrForm {
         // ------------------Serveur esaclaves lié à la config
         String[] tabslavehost = request.getParameterValues("hostslave");
         String[] tabslavelogin = request.getParameterValues("loginSlave");
-        String[] tabslavepass = request.getParameterValues("loginSlave");
+        String[] tabslavepass = request.getParameterValues("passSlave");
         String[] tabUrlSlave = request.getParameterValues("urlSlave");
         int i;
 
@@ -128,13 +123,10 @@ public class ConfForm extends AbstrForm {
                     slave.setLogin(tabslavelogin[i]);
                     slave.setPass(tabslavepass[i]);
                     slave.setUrl(tabUrlSlave[i]);
-                    System.out.println(slave);
                     conf.getServeurSlave().add(slave);
                 }
             }
         }
-
-
 
         // ------------------Host du serveur maitre
         s = request.getParameter("hostMaster");
@@ -152,7 +144,32 @@ public class ConfForm extends AbstrForm {
             }
         }
 
+        //-------------------------Jour de la synchronisation
+        s = request.getParameter("jourSync");
+        if (s != null && (s.equals("lu") || s.equals("ma") || s.equals("me") || s.equals("je") || s.equals("ve") || s.equals("sa") || s.equals("di"))) {
+            conf.setJourSync(s);
+            System.out.println("JOURRRR : " + s);
+        }
 
+        //-------------------------Heure de synchronisation
+        s = request.getParameter("heureSync");
+        if (s != null) {
+            Integer val=null;
+            try {
+                val = new Integer(s);
+            } catch (Exception e) {
+                erreurs.put("heureSync", new String[]{s, "Ceci n'est pas un nombre entier"});
+            }
+  
+            if(val !=null && (val <0 || val >23)){
+                erreurs.put("heureSync", new String[]{s, "Il faut un entier entre 0 et 23"});
+            }
+            else{
+                conf.setHeureSync(val);
+            }
+        }
+
+        //=============================================================================================
 
         if (erreurs.isEmpty()) {
             resultat = "Traitement effectué";
@@ -167,7 +184,6 @@ public class ConfForm extends AbstrForm {
 //            System.out.println("erreur"+ erreurs.get(i)[0]+"   //  " + erreurs.get(i)[1]);
             System.out.println("" + erreurs.toString());
         }
-
 
         return objEntre;
     }

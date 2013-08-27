@@ -12,6 +12,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import rssagregator.services.ServiceJMS;
 
 /**
  * Un journal : Le monde, le Figaro... Chaque journal est instancier dans un
@@ -19,7 +20,7 @@ import javax.persistence.OneToMany;
  */
 @Entity
 @Cacheable(value = true)
-public class Journal extends Bean implements Serializable {
+public class Journal extends AbstrObservableBeans implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -129,5 +130,13 @@ public class Journal extends Bean implements Serializable {
 
     public void setInformation(String information) {
         this.information = information;
+    }
+
+    @Override
+    /***
+     * Ajoute le service JMS comme observer du beans. 
+     */
+    public void enregistrerAupresdesService() {
+        this.addObserver(ServiceJMS.getInstance());
     }
 }

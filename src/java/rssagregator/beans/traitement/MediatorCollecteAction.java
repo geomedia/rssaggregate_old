@@ -24,11 +24,13 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.xml.ws.http.HTTPException;
+import rssagregator.beans.AbstrObservableBeans;
 import rssagregator.beans.DebugRecapLeveeFlux;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoItem;
+import rssagregator.services.ServiceJMS;
 
 /**
  * Cette classe gère les relations entre un ou plusieurs flux et les differents
@@ -44,7 +46,7 @@ import rssagregator.dao.DaoItem;
  */
 @Entity
 @Table(name = "tr_mediatocollecteaction")
-public class MediatorCollecteAction implements Serializable, Cloneable, Callable<List<Item>> {
+public class MediatorCollecteAction extends AbstrObservableBeans implements Serializable, Cloneable, Callable<List<Item>> {
 
     @Transient
     org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(MediatorCollecteAction.class);
@@ -115,7 +117,7 @@ public class MediatorCollecteAction implements Serializable, Cloneable, Callable
      * Dédoublonneur du médiateur.
      */
     @OneToOne(cascade = CascadeType.ALL)
-    private AbstrDedoublonneur dedoubloneur;
+    protected AbstrDedoublonneur dedoubloneur;
     @Transient
     private Integer nbrItemCollecte;
     
@@ -308,6 +310,7 @@ public class MediatorCollecteAction implements Serializable, Cloneable, Callable
     }
 
     public MediatorCollecteAction() {
+        
     }
 
     public AbstrParseur getParseur() {
@@ -326,14 +329,24 @@ public class MediatorCollecteAction implements Serializable, Cloneable, Callable
         this.myNettoyeur = myNettoyeur;
     }
 
+    //    public AbstrDedoublonneur getDedoubloneur() {
+    //        return dedoubloneur;
+    //    }
+    //
+    //    public void setDedoubloneur(Dedoubloneur dedoubloneur) {
+    //        this.dedoubloneur = dedoubloneur;
+    //    }
+    
     public AbstrDedoublonneur getDedoubloneur() {
         return dedoubloneur;
     }
 
-    public void setDedoubloneur(Dedoubloneur dedoubloneur) {
+    public void setDedoubloneur(AbstrDedoublonneur dedoubloneur) {
         this.dedoubloneur = dedoubloneur;
     }
 
+    
+    
     public Integer getNbrItemCollecte() {
         return nbrItemCollecte;
     }
@@ -357,7 +370,6 @@ public class MediatorCollecteAction implements Serializable, Cloneable, Callable
     public void setPeriodiciteCollecte(Integer periodiciteCollecte) {
         this.periodiciteCollecte = periodiciteCollecte;
     }
-    
 
     @Override
     public String toString() {
@@ -416,5 +428,13 @@ public class MediatorCollecteAction implements Serializable, Cloneable, Callable
     @Override
     public List<Item> call() throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    /***
+     * Enregistre le Comportement de collecte auprès du service JMS pour assurer sa diffussion sur les serveurs esclaves (la synchronisation)
+     */
+    public void enregistrerAupresdesService() {
+        this.addObserver(ServiceJMS.getInstance());
     }
 }

@@ -17,7 +17,7 @@ import java.util.logging.Logger;
 
 
 /**
- *
+ *      Cette classe contient un des méthode static permettant de manier du XML. Notamment des outils pour sérialiser et désérialiser des objets. 
  * @author clem
  */
 public class XMLTool {
@@ -32,6 +32,7 @@ public class XMLTool {
             encoder.writeObject(bean);
             encoder.flush();
         } catch (Exception e) {
+            System.out.println(""+e);
         } finally {
             arrayOutputStream.close();
             encoder.close();
@@ -40,6 +41,12 @@ public class XMLTool {
         return retour;
     }
 
+    /***
+     * Désérialize à partir de la chaine de caractère; la chaine doit contenir un contenu xml obtenu à partir de la méthode serilize de la même classe.
+     * @param xml
+     * @return
+     * @throws IOException 
+     */
     public static Object unSerialize(String xml) throws IOException {
         StringReader reader = new StringReader(xml);
 
@@ -58,6 +65,25 @@ public class XMLTool {
         }
         return bean;
     }
+    
+/***
+ * Désérialize à partir d'un inputStream. L'input Stream doit contenir du code XML Généré à partir de la méthode sérialize.
+ * @param in
+ * @return 
+ */    
+    public static Object unSerialize(InputStream in){
+        XMLDecoder decoder = new XMLDecoder(in);
+        Object bean = null;
+        try {
+            bean = decoder.readObject();
+        } catch (Exception e) {
+        }
+        finally{
+            decoder.close();
+        }
+        return bean;
+    }
+    
 
     // TEST DE LA DESERIALISATION
     public static void main(String[] args) {

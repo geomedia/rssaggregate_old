@@ -3,7 +3,6 @@ package rssagregator.beans.traitement;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.Entity;
-import javax.persistence.Inheritance;
 import org.apache.log4j.Logger;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
