@@ -63,7 +63,7 @@ $(document).ready(function() {
                     $resudiv.append('<li>' +
                             '<input name="id" type="checkbox" value="' + json[i]['id'] + '">' +
                             '</input>' +
-                            '<a href="flux/mod?id=' + json[i]['id'] + '">' + json[i]['flux'].trim() + '</a>');
+                            '<a href="/RSSAgregate/flux/read?id=' + json[i]['id'] + '">' + json[i]['flux'].trim() + '</a>');
                     $resudiv.append('</li>');
                 }
 

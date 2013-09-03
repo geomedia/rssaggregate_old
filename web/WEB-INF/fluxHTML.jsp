@@ -18,7 +18,6 @@
 
 
 
-
 <div id="header-wrapper">
     <div id="header">
         <div id="logo">
@@ -151,10 +150,6 @@
                             }
 
                         </script>
-
-
-
-
                     </c:when>
                     <c:when test="${action=='read-item' or action=='mod' or action=='read-incident'}">
                         <h1>Administration du flux : ${flux.url}</h1>
@@ -243,34 +238,15 @@
                             </fieldset>
                         </form>
 
-
-
-
                         <p>Debug : Recap des levée</p>
                         <ul>
                             <c:forEach items="${flux.debug}" var="deb">
                                 <li>${deb.date}    Nombre item : ${deb.nbrRecup} </li>
-
                             </c:forEach>
                         </ul>
-
                         <script src="${rootpath}test.js"></script>
-
-
                     </c:when>
-                    <c:when test="${action=='read-item'}">
 
-                        <h2>Parcourir les items</h2>
-                        <ul>
-                            <c:forEach items="${flux.item}" var="it">
-                                <li class="item"><h3><a href="item?action=read&id=${it.ID}">${it.titre}</a></h3>
-
-                                    <p>Date mise en ligne : <fmt:formatDate value="${it.datePub}" pattern="dd/MM/yyyy hh:mm:ss"/></p>
-
-                                </li>
-                            </c:forEach>
-                        </ul>
-                    </c:when>
 
 
                     <c:when test="${action=='read-incident'}">
@@ -302,7 +278,7 @@
 
                             * 1=nombre item trouvé ; 2 dedoub memoire; 3 BDD item lié ;4 BDD item déjà présente mais lien ajouté ;  5 item nouvelles
 
-                            <c:forEach items="${flux}" var="fl">
+                            <c:forEach items="${listflux}" var="fl">
                                 <tr>
                                     <td> ${fl}</td>
                                     <td>${fl.mediatorFluxAction.dedoubloneur.compteCapture[0]}</td>
@@ -320,6 +296,19 @@
                                     </tr>
                             </c:forEach>
                         </table>
+                    </c:when>
+                            
+                    <c:when test="${action=='read'}">
+                        <p><a href="${rootpath}flux/mod?id=${flux.ID}">Editer</a></p>
+                       
+                        <p><strong>Url : </strong> ${flux.url}</p>
+                        <p><strong>Nom du flux :</strong> ${flux.nom}</p>
+                        <p><strong>Page HTML :</strong> ${flux.htmlUrl}</p>
+                        <p><strong>Comportement de collecte :</strong> ${flux.mediatorFlux}</p>
+                        <p><strong>Journal : </strong>${flux.journalLie}</p>
+                        <p><strong>Type de flux :</strong> ${flux.typeFlux}</p>
+                        <p><strong>Ajouté le :</strong> ${flux.created}</p>
+
                     </c:when>
                 </c:choose>
             </c:when>

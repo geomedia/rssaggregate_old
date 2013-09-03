@@ -103,6 +103,7 @@ public abstract class AbstrDao {
             Class classasso = this.getClassAssocie();
 
             String req = "SELECT f FROM " + classasso.getSimpleName() + " f";
+            System.out.println("req : " + req);
             Query query = em.createQuery(req);
 //            query.setHint("eclipselink.cache-usage", "CheckCacheOnly");
 

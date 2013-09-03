@@ -4,6 +4,7 @@
  */
 package rssagregator.beans.form;
 
+import java.util.HashMap;
 import javax.servlet.http.HttpServletRequest;
 import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.traitement.Dedoubloneur;
@@ -16,13 +17,14 @@ import rssagregator.beans.traitement.RomeParse;
  * @author clem
  */
 public class ComportementCollecteForm extends AbstrForm {
-    
-        protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(ComportementCollecteForm.class);
+
+    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(ComportementCollecteForm.class);
 
     @Override
     public Object bind(HttpServletRequest request, Object objEntre, Class type) {
-        
-        
+
+
+        erreurs = new HashMap<String, String[]>();
 
         MediatorCollecteAction collecte = (MediatorCollecteAction) objEntre;
         if (collecte == null) {
@@ -33,8 +35,8 @@ public class ComportementCollecteForm extends AbstrForm {
             if (collecte.getDedoubloneur() == null) {
                 collecte.setDedoubloneur(new Dedoubloneur());
             }
-            
-            if(collecte.getParseur()==null){
+
+            if (collecte.getParseur() == null) {
                 collecte.setParseur(new RomeParse());
             }
         }
@@ -43,23 +45,24 @@ public class ComportementCollecteForm extends AbstrForm {
         String s;
         try {
             s = request.getParameter("requester_time_out");
+            System.out.println("IIIIIIIIIIIIII : " + s);
 //            collecte.getRequesteur().setTimeOut(PARAM_timeout);
             Integer intval = new Integer(s);
             collecte.getRequesteur().setTimeOut(intval);
         } catch (Exception e) {
-            logger.error("Erreur lors du bind du paramettre Time Out");
+            logger.error("Erreur lors du bind du paramettre Time Out"+e);
         }
 
-        
+
         // Récup de la périodicité de collecte
         try {
-            
+
             s = request.getParameter("periodiciteCollecte");
             Integer val = new Integer(s);
             collecte.setPeriodiciteCollecte(val);
         } catch (Exception e) {
         }
-        
+
 
         String[] cle = request.getParameterValues("requestPropertyCle");
         String[] valeur = request.getParameterValues("requestPropertyValue");
@@ -132,19 +135,21 @@ public class ComportementCollecteForm extends AbstrForm {
         // Les paramettre propre au mediateur Comportement collect
         collecte.setNom(request.getParameter("comportement_nom"));
         collecte.setDescription(request.getParameter("comportement_desc"));
-        
+
         // comportement par défaut
         s = request.getParameter("defaut");
-        if(s==null || s.isEmpty()){
+        if (s == null || s.isEmpty()) {
             collecte.setDefaut(false);
-        }
-        else{
+        } else {
             collecte.setDefaut(true);
         }
-        
-        
 
-        this.setValide(true);
+        if (erreurs.isEmpty()) {
+            this.setValide(true);
+        }
+        else{
+            this.setValide(false);
+        }
 
         return collecte;
 

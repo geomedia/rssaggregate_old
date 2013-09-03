@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 import rssagregator.beans.FluxType;
 import rssagregator.beans.form.DAOGenerique;
 import rssagregator.beans.form.FluxTypeForm;
+import static rssagregator.servlet.ComportementCollecteSrvlt.ATT_SERV_NAME;
 import rssagregator.utils.ServletTool;
 
 /**
@@ -31,7 +32,9 @@ import rssagregator.utils.ServletTool;
  * <li>rem : Supprime un type de flux</li>
  * <li>recherche : Permet de dresser la liste des type de flux</li>
  * </ul>
- * <p>Une vue unique est utilisée par cette servlet pour générer une page HTML permettant à l'utilisateur d'éffectuer ses action : /WEB-INF/typefluxjsp.jsp</p>
+ * <p>Une vue unique est utilisée par cette servlet pour générer une page HTML
+ * permettant à l'utilisateur d'éffectuer ses action :
+ * /WEB-INF/typefluxjsp.jsp</p>
  *
  * @author clem
  */
@@ -39,9 +42,10 @@ import rssagregator.utils.ServletTool;
 public class TypeFluxSrvl extends HttpServlet {
 
     public static final String VUE = "/WEB-INF/typefluxjsp.jsp";
-    public static final String ATT_FORM = "form";
-    public static final String ATT_BEAN = "obj";
+    public static final String ATT_FORM_JSP = "form";
+    public static final String ATT_BEAN_JSP = "obj";
     public static final String ATT_LIST_OBJ = "list";
+    public static final String ATT_SRVLT_NAME = "TypeFluxSrvl";
 
     /**
      * Processes requests for both HTTP
@@ -62,76 +66,40 @@ public class TypeFluxSrvl extends HttpServlet {
 
         DAOGenerique dao = DAOFactory.getInstance().getDAOGenerique();
         dao.setClassAssocie(FluxType.class);
-        FluxType fluxType = null;
-        FluxTypeForm form = new FluxTypeForm();
 
-        // On récupère le flux dans la base de donnée si il est précisé
-        String idString = request.getParameter("id");
-        if (idString != null && !idString.equals("")) {
-            Long id = new Long(idString);
-            request.setAttribute("id", id);
-            fluxType = (FluxType) dao.find(id);
-        }
+        request.setAttribute("srlvtname", ATT_SRVLT_NAME);
 
-        // Si il y a du post on récupère les données saisies par l'utilisateur pour éviter la resaisie de l'information
-        if (request.getMethod().equals("POST")) {
-            fluxType = (FluxType) form.bind(request, fluxType, FluxType.class);
-        }
-
-
-        request.setAttribute(ATT_FORM, form);
-        request.setAttribute(ATT_BEAN, fluxType);
 
 
         /**
          * *===================================================================================================================
          * || . . . . . . . . . . . . . . . . . . . . . . .GESTION DES ACTIONS.
-         * . . . . . . . . . . . . . . . . . . . . . . . ||
          *///===================================================================================================================
         //------------------------------------------------SUPPRESSION------------------------------------------------------------
         if (action.equals("rem")) {
-            try {
-                dao.remove(fluxType);
-                fluxType.enregistrerAupresdesService();
-                fluxType.forceChangeStatut();
-                fluxType.notifyObservers(action);
-                ServletTool.redir(request, "TypeFluxSrvl/recherche", "Le type de Flux a été supprimé. Vous allez être redigigé vers la liste des TypeFlux", Boolean.FALSE);
-            } catch (Exception ex) {
-                Logger.getLogger(TypeFluxSrvl.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            ServletTool.actionREM(request, FluxType.class, Boolean.TRUE);
+
         }
 
-        if (form.getValide()) {
-            //----------------------------------------AJOUT----------------------------------------------------------------------
-            if (action.equals("add")) {
-                try {
-                    dao.creer(fluxType);
-                    fluxType.enregistrerAupresdesService();
-                    fluxType.forceChangeStatut();
-                    fluxType.notifyObservers(action);
-                    ServletTool.redir(request, "TypeFluxSrvl/mod?id=" + fluxType.getID(), "Le type de Flux a été ajouté.", Boolean.FALSE);
-                } catch (Exception ex) {
-                    Logger.getLogger(TypeFluxSrvl.class.getName()).log(Level.SEVERE, null, ex);
-                }
+//        if (form.getValide()) {
+        //----------------------------------------AJOUT----------------------------------------------------------------------
+        if (action.equals("add")) {
+            ServletTool.actionADD(request, ATT_BEAN_JSP, ATT_FORM_JSP, FluxType.class, Boolean.TRUE);
 
-                //------------------------------------ACTION : MODIFICATION------------------------------------------------------------
-            } else if (action.equals("mod")) {
-                try {
-                    dao.modifier(fluxType);
-                    fluxType.enregistrerAupresdesService();
-                    fluxType.forceChangeStatut();
-                    fluxType.notifyObservers(action);
-                    ServletTool.redir(request, "TypeFluxSrvl/mod?id=" + fluxType.getID(), "Modification effectée", Boolean.FALSE);
-                } catch (Exception ex) {
-                    ServletTool.redir(request, "TypeFluxSrvl/mod", "ERREUR LORS DE L'AJOUT DU TYPE DE FLUX. : " + ex.toString(), Boolean.TRUE);
-                    Logger.getLogger(TypeFluxSrvl.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            } //---------------------------------------ACTION RECHERCHE---------------------------------------------------------------------
-            else if (action.equals("recherche")) {
-                List<Object> list = dao.findall();
-                request.setAttribute(ATT_LIST_OBJ, list);
-            }
+
+            //------------------------------------ACTION : MODIFICATION------------------------------------------------------------
+        } else if (action.equals("mod")) {
+            ServletTool.actionMOD(request, ATT_BEAN_JSP, ATT_FORM_JSP, FluxType.class, Boolean.TRUE);
+
+        } //---------------------------------------ACTION RECHERCHE---------------------------------------------------------------------
+        else if (action.equals("recherche")) {
+            List<Object> list = dao.findall();
+            request.setAttribute(ATT_LIST_OBJ, list);
+        } else if (action.equals("read")) {
+            ServletTool.actionREAD(request, FluxType.class, ATT_BEAN_JSP);
         }
+
+//        }
         this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
     }
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

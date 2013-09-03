@@ -5,17 +5,13 @@
 package rssagregator.dao;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import rssagregator.beans.Flux;
-import rssagregator.beans.Item;
 import rssagregator.beans.incident.FluxIncident;
 
 /**
@@ -97,11 +93,30 @@ public class DAOIncident extends AbstrDao {
      */
     public List<FluxIncident> findIncidentOuvert(Long fluxId) {
         String req = "SELECT i FROM incidentflux i JOIN i.fluxLie flux WHERE i.ID=:idflux";
-
         Query query = em.createQuery(req);
         query.setParameter("idflux", fluxId);
         return query.getResultList();
     }
+    
+    
+    public List<FluxIncident> findAllOpenIncident(){
+        String req = "SELECT i FROM incidentflux i WHERE i.dateFin IS NULL";
+//        String req = "SELECT i FROM incidentflux i";
+        Query query = em.createQuery(req);
+        
+        List<FluxIncident> l = query.getResultList();
+        for (int i = 0; i < l.size(); i++) {
+            FluxIncident fluxIncident = l.get(i);
+            System.out.println("INCIDENT : " + fluxIncident);
+        }
+        System.out.println("FIN");
+        return l;
+    }
+    public static void main(String[] args) {
+        DAOIncident dao = DAOFactory.getInstance().getDAOIncident();
+        dao.findAllOpenIncident();
+    }
+    
 
 //        @Override
 //    public FluxIncident find(Long id) {

@@ -30,5 +30,7 @@ public class FluxIncident extends AbstrIncident implements Serializable  {
     public void setFluxLie(Flux fluxLie) {
         this.fluxLie = fluxLie;
     }
+    
+    
 
 }

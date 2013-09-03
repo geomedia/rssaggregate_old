@@ -78,4 +78,14 @@ public class FluxType extends AbstrObservableBeans implements Serializable {
     public void enregistrerAupresdesService() {
         this.addObserver(ServiceJMS.getInstance());
     }
+
+    @Override
+    public String toString() {
+        if (this.denomination != null && !this.denomination.isEmpty()) {
+            return this.denomination;
+        }
+        else{
+            return "??";
+        }
+    }
 }

@@ -19,12 +19,13 @@ import rssagregator.beans.ServeurSlave;
 import rssagregator.beans.form.DAOGenerique;
 import rssagregator.beans.form.ServeurSlaveForm;
 import rssagregator.dao.DAOFactory;
+import rssagregator.utils.ServletTool;
 
 /**
- *
+ *  CETTE SERVLET N'EST PLUS UTILISÉE; IL FAUT MAINTENANT PASSER DIRECTEMENT PAR LA CONF !!
  * @author clem
  */
-@WebServlet(name = "slave", urlPatterns = {"/slave"})
+@WebServlet(name = "slave", urlPatterns = {"/slave/*"})
 public class ServeurSlaveSrlvt extends HttpServlet {
 
     public static final String VUE = "/WEB-INF/serveurslavejsp.jsp";
@@ -56,11 +57,7 @@ public class ServeurSlaveSrlvt extends HttpServlet {
 
 
         // récupération de l'action
-        String action = request.getParameter("action");
-        if (action == null) {
-            action = "list";
-        }
-        request.setAttribute("action", action);
+        String action = ServletTool.configAction(request, "list");
 
         DAOGenerique dao = DAOFactory.getInstance().getDAOGenerique();
         dao.setClassAssocie(ServeurSlave.class);

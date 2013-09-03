@@ -26,6 +26,6 @@ public class JournalForm extends AbstrForm{
             throw new Exception("Ne peut être null");
         }
     }
-    
+        
     
 }

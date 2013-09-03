@@ -34,6 +34,10 @@ import rssagregator.utils.XMLTool;
 public class TacheSynchroRecupItem implements Callable<List<Item>> {
 
     protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheSynchroRecupItem.class);
+    /***
+     * Si périodique est à true, en fin de tâche on réajoute
+     */
+    Boolean periodique;
 
     /**
      * *

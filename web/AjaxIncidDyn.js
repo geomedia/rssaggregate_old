@@ -46,7 +46,7 @@ $(document).ready(function() {
                 for (i = 0; i < json.length; i++) {
 //                        <input name="id" type="checkbox" value="${flux.ID}"/>
                     $resudiv.append('<li>' +
-                            '<a href="incidents/mod?id=' + json[i]['id'] + '">' +
+                            '<a href="incidents/read?id=' + json[i]['id'] + '">' +
                             json[i]['flux'] + '</a>' +
                             '<p>' + json[i]['messageEreur'] + '</p>' +
                             '<p>Date début : ' + json[i]['dateDebut'] + ' - Date fin : ' + json[i]['dateFin'] + '</p>'+

@@ -19,11 +19,12 @@ Author     : clem
     <p><a href="${rootpath}config">générale</a></p>
     <p><a href="${rootpath}ComportementCollecte">Gérer les compotement </a></p>
     <p><a href="${rootpath}TypeFluxSrvl">Gérer les types de flux </a></p>
-    <p><a href="${rootpath}slave">Gérer les serveurs esclave</a></p>
+    <p><a href="${rootpath}user">Gérer les utilisateurs </a></p>
+    <!--<p><a href="${rootpath}slave">Gérer les serveurs esclave</a></p>-->
     <c:if test="${!master}"><p><a href="${rootpath}config/importflux">Obtenir flux du serveur maitre</a></p></c:if>
     <c:if test="${master}"><p><a href="${rootpath}config/importitem">Récupérer les données des serveurs esclaces<a></p></c:if>
                     </div> 
-                   <div id="content">
+                    <div id="content">
                         <div class="post">
 
                             <h1>Administration du serveur</h1>
@@ -92,108 +93,78 @@ Author     : clem
 
                                             </form>
 
+                                                <script src="${rootpath}changePass.js"></script> 
                                             <script>
-                                                    $(document).ready(function() {
-                                                        masterSelect();
-                                                    })
-
-                                                    function changepass() {
-                                                        if ($('#btchgpass').val() === '0') {
-                                                            $('#chgpass').append('<label>Mot de pass</label><input name="pass1" id="pass1"/> <br /> <label>Retaper : </label><input name="pass2" id="pass2"/>');
-                                                            $('#btchgpass').text('Annuler le changement de mot de passe');
-                                                            $('#btchgpass').val('1')
-                                                        }
-                                                        else if ($('#btchgpass').val() === '1') {
-                                                            $('#btchgpass').val(0);
-                                                            $('#chgpass').empty();
-                                                            $('#btchgpass').text('Changer de mot de passe');
-                                                        }
-                                                    }
-                                                    function  subfunction() {
-                                                        if ($('#btchgpass').val() === '0') {
-                                                            $('#form').submit();
-                                                        }
-                                                        else if ($('#btchgpass').val() === '1') {
-                                                            if ($('#pass1').val() === $('#pass2').val()) {
-                                                                //Exeptionnellement on fait une vérification de mot saisie coté client. Elle est a réeffectuer coté serveur mais du fait de l'enploi de l'ajout dynamique de la div contenant des mot de passe, on ne peut notifier le client par la voie classique.
-                                                                if ($('#pass1').val().length < 3) {
-                                                                    alert('mot de passe trop court');
-                                                                } else {
-                                                                    $('#form').submit();
-                                                                }
-                                                            }
-                                                            else {
-                                                                alert('Les deux mots de pass ne conindent pas !!');
-                                                            }
-                                                        }
-                                                    }
+                                                $(document).ready(function() {
+                                                masterSelect();
+                                                })
 
 
-                                                    // Cette fonction est executé lors du click sur la checkbox permettant de définir le serveur comme master
-                                                    var serveurSlave = [
+                                                // Cette fonction est executé lors du click sur la checkbox permettant de définir le serveur comme master
+                                                var serveurSlave = [
                                             <c:forEach items="${conf.serveurSlave}" var="serv">
-                                                        {
-                                                            login: '${serv.login}',
-                                                            pass: '${serv.pass}',
-                                                            host: '${serv.host}',
-                                                            urlServletRecup: '${serv.url}',
-                                                        },</c:forEach>
-                                                    ];
-                                                    function masterSelect() {
-                                                        if ($('#master').prop('checked')) {
-                                                            $('#divSlave').empty();
-                                                            $('#divSlave').append("<div><label>Jour de la synronisation : </label><select name=\"jourSync\" id=\"jourSync\">*\n\
-                                           <option value=\"lu\">Lundi</option>\n\
-                                            <option value=\"ma\">Mardi</option>\n\
-                                            <option value=\"me\">Mercredi</option>\n\
-                                            <option value=\"je\">Jeudi</option>\n\
-                                            <option value=\"ve\">Vendredi</option>\n\
-                                            <option value=\"sa\">Samedi</option>\n\
-                                            <option value=\"di\">Dimanche</option>\n\
-                        </select></div>");
-                                                            $('#jourSync option[value="${conf.jourSync}"]').prop('selected', true); // On sélectionne la valeure courante
+                                                {
+                                                login: '${serv.login}',
+                                                pass: '${serv.pass}',
+                                                host: '${serv.host}',
+                                                urlServletRecup: '${serv.url}',
+                                                },</c:forEach>
+                                                ];
+                                                function masterSelect() {
+                                                if ($('#master').prop('checked')) {
+                                                $('#divSlave').empty();
+                                                $('#divSlave').append("<div><label>Jour de la synronisation : </label><select name=\"jourSync\" id=\"jourSync\">*\n\
+                                                <option value=\"lu\">Lundi</option>\n\
+                                                <option value=\"ma\">Mardi</option>\n\
+                                                <option value=\"me\">Mercredi</option>\n\
+                                                <option value=\"je\">Jeudi</option>\n\
+                                                <option value=\"ve\">Vendredi</option>\n\
+                                                <option value=\"sa\">Samedi</option>\n\
+                                                <option value=\"di\">Dimanche</option>\n\
+                                                </select></div>");
+                                                $('#jourSync option[value="${conf.jourSync}"]').prop('selected', true); // On sélectionne la valeure courante
 
-                                                            $('#divSlave').append("<div><label title=\"un chiffre de 0 à 23\">Heure de synchronisation : </label>\n\
-                        <input type\"text\" name=\"heureSync\" value=\"${conf.heureSync}\" />\n\
-                                <span class=\"erreur\">${form.erreurs['heureSync'][1]}</span>\n\
-                        </div>");
+                                            $('#divSlave').append("<div><label title=\"un chiffre de 0 à 23\">Heure de synchronisation : </label>\n\
+                                            <input type\"text\" name=\"heureSync\" value=\"${conf.heureSync}\" />\n\
+                                            <span class=\"erreur\">${form.erreurs['heureSync'][1]}</span>\n\
+                                            </div>");
 
 
-                                                            $('#divSlave').append('<button type="button" onclick="addSlave()">ajouter des serveurs esclaves</button>');
+                                            $('#divSlave').append('<button type="button" onclick="addSlave()">ajouter des serveurs esclaves</button>');
 
-                                                            for (i = 0; i < serveurSlave.length; i++) {
-                                                                s = serveurSlave[i];
+                                            for (i = 0; i < serveurSlave.length; i++) {
+                                            s = serveurSlave[i];
 
-                                                                $('#divSlave').append('<div id="slave' + i + '"><label title="ip ou le dns du serveur a joindre">host :</label><input name="hostslave" value="' + s['host'] + '"/> \n\
-                                                <label>login :</label><input type="text" name="loginSlave" value="' + s['login'] + '" /> \n\
-                                                <label>pass : </label><input type="text" name="passSlave" value="' + s['pass'] + '" />\n\
-                                                <label title="exemple : http://172.17.200.197:8080/RSSAgregate">Url application  : </label><input type="text" name="urlSlave" value="' + s['urlServletRecup'] + '"/>\n\
-                                                <button value="' + i + '" type="button" onclick="remSlave(this)">Supprimer</button></div>');
-                                                            }
-                                                        }
-                                                        else {
-                                                            $('#divSlave').empty();
-                                                            $('#divSlave').append('<label>Host du serveur maître</label><input type="text" name="hostMaster" value="${conf.hostMaster}" />\n\
+                                            $('#divSlave').append('<div id="slave' + i + '"><label title="ip ou le dns du serveur a joindre">host :</label><input name="hostslave" value="' + s['host'] + '"/> \n\
+                                            <label>login :</label><input type="text" name="loginSlave" value="' + s['login'] + '" /> \n\
+                                            <label>pass : </label><input type="text" name="passSlave" value="' + s['pass'] + '" />\n\
+                                            <label title="exemple : http://172.17.200.197:8080/RSSAgregate">Url application  : </label><input type="text" name="urlSlave" value="' + s['urlServletRecup'] + '"/>\n\
+                                            <button value="' + i + '" type="button" onclick="remSlave(this)">Supprimer</button></div>');
+                                            }
+                                            }
+                                            else {
+                                            $('#divSlave').empty();
+                                            $('#divSlave').append('<label>Host du serveur maître</label><input type="text" name="hostMaster" value="${conf.hostMaster}" />\n\
                                             <br /><label>Durée avant purge</label><input type="text" name="purgeDuration" value="${conf.purgeDuration}" /><span class="erreur"> ${form.erreurs['purgeDuration'][1]}</span>');
-                                                        }
-                                                    }
+                                            }
+                                            }
 
 
-                                                    //Fonction utilisé pour ajouter un serveur esclave dans la page
-                                                    function addSlave() {
-                                                        nbenfants = $('#divSlave div').length;
-                                                        $('#divSlave').append('<div id="slave' + nbenfants + '"><label>host :</label><input name="hostslave" value=""/> \n\
+                                            //Fonction utilisé pour ajouter un serveur esclave dans la page
+                                            function addSlave() {
+                                            nbenfants = $('#divSlave div').length;
+                                            $('#divSlave').append('<div id="slave' + nbenfants + '"><label>host :</label><input name="hostslave" value=""/> \n\
                                             <label>login :</label><input type="text" name="loginSlave" value="" /> \n\
                                             <label>pass : </label><input type="text" name="passSlave" value="" />\n\
                                             <label>Url Recupération : </label><input type="text" name="urlSlave" value=""/>\n\
                                             <button value="' + nbenfants + '" type="button" onclick="remSlave(this)">Supprimer</button></div>');
-                                                    }
-                                                    //Fonction utilisé pour supprimer un serveur esclave dans la page
+                                            }
+                                            //Fonction utilisé pour supprimer un serveur esclave dans la page
 
-                                                    function remSlave(bt) {
-                                                        divname = '#slave' + bt.value;
-                                                        $(divname).remove()();
-                                                    }
+                                            function remSlave(bt) {
+                                            divname = '#slave' + bt.value;
+                                            $(divname).remove()();
+                                            }
 
                                         </script>
                                     </c:when>
@@ -214,14 +185,14 @@ Author     : clem
                                         <!--ACTION : IMPORT ITEM-->
                                         <!--ce bloc est utilisé lorsque qu'on demande la synchronisation manuelle des items des serveur esclaves-->
                                     </c:when>
-                                        <c:when test="${action=='importitem'}">
-                                            <h2>Liste des items rapportées par synchronisation : </h2>
-                                            <ul>
+                                    <c:when test="${action=='importitem'}">
+                                        <h2>Liste des items rapportées par synchronisation : </h2>
+                                        <ul>
                                             <c:forEach items="${listitemtrouve}" var="item">
                                                 <li>${item.titre}</li>
-                                            </c:forEach>
-                                            </ul>
-                                        </c:when>
+                                                </c:forEach>
+                                        </ul>
+                                    </c:when>
 
 
                                 </c:choose>

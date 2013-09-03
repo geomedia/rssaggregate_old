@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import rssagregator.beans.Conf;
 import rssagregator.beans.ServeurSlave;
+import rssagregator.beans.UserAccount;
 import rssagregator.beans.form.DAOGenerique;
 import rssagregator.utils.PropertyLoader;
 
@@ -53,7 +54,9 @@ public class DAOConf extends AbstrDao {
      */
     public void charger() throws IOException, Exception {
         Conf conf = new Conf();
-        Properties prop = PropertyLoader.load("conf.properties");
+//        Properties prop = PropertyLoader.load("conf.properties");
+        String propfile = PropertyLoader.loadProperti("serv.properties", "conf"); // On commence par charger le nom du fichier properties externe à partir du fichier serv.properties
+        Properties prop = PropertyLoader.loadFromFile(propfile);
 
         // Chargement de la valeur active dans le fichier properties
         String active = prop.getProperty("active");
@@ -97,7 +100,7 @@ public class DAOConf extends AbstrDao {
 
         // Chargement de la liste des serveur esclave si le serveur est maitre
         if (conf.getMaster()) {
-            String slaveserver = PropertyLoader.loadProperti("conf.properties", "slaveserver");
+            String slaveserver = prop.getProperty("slaveserver"); //PropertyLoader.loadProperti("conf.properties", "slaveserver");
             String[] slavetab = slaveserver.split("; ");
             for (int i = 0; i < slavetab.length; i++) {
                 String string = slavetab[i];
@@ -111,12 +114,12 @@ public class DAOConf extends AbstrDao {
             }
 
             // Chargement du jour de synchronisation
-            String jourSync = PropertyLoader.loadProperti("conf.properties", "jourSync");
+            String jourSync = prop.getProperty("jourSync");//PropertyLoader.loadProperti("conf.properties", "jourSync");
             conf.setJourSync(jourSync);
             System.out.println("JOUR SYNC : " + jourSync);
 
             //Chargement de l'heure de synchronisation
-            String heureSync = PropertyLoader.loadProperti("conf.properties", "heureSync");
+            String heureSync = prop.getProperty("heureSync");// PropertyLoader.loadProperti("conf.properties", "heureSync");
             try {
                 conf.setHeureSync(new Integer(heureSync));
                 System.out.println("HEURE SYNC CHARGE : " + heureSync);
@@ -160,6 +163,38 @@ public class DAOConf extends AbstrDao {
         //--------------Chargement du host maitre
         s = prop.getProperty("hostMaster");
         conf.setHostMaster(s);
+        
+        //--------------Chargement de l'utilisateur root par default
+        String m = prop.getProperty("rootuser");
+        String p = prop.getProperty("rootpath");
+        UserAccount u = new UserAccount();
+        u.setMail(m);
+        u.setPass(p);
+        u.setAdminstatut(Boolean.TRUE);
+        
+        // On cherche si cet utilisateur est bien dans la base de données
+        DAOUser daou = DAOFactory.getInstance().getDAOUser();
+        UserAccount uBdd = daou.findPrMail(m);
+        
+        // Si, on n'a pas trouvé dans la base de données
+        if(uBdd == null){
+            System.out.println("CREATION");
+            daou.creer(u);
+        }
+        //Si les deux ne sont pas egaux en conten u
+        else if(!uBdd.equals(u)){
+            System.out.println("MISE A JOUR DE L'UTILISATEUR ROOT DANS LA BDD !! ");
+            uBdd.setMail(m);
+            uBdd.setPass(p);
+            daou.modifier(uBdd);
+        }
+        else{
+            System.out.println("INNEGALLLLS");
+        }
+        
+        
+        
+         
 
         this.confCourante = conf;
     }
@@ -216,9 +251,27 @@ public class DAOConf extends AbstrDao {
      * @throws Exception
      */
     public void modifierConf(Conf conf) throws Exception {
-
-        Properties prop = PropertyLoader.load("conf.properties");
+        System.out.println("MOF DE LA CONFF");
+//        Properties prop = PropertyLoader.load("conf.properties");
+        String propfile = PropertyLoader.loadProperti("serv.properties", "conf");
+//        Properties prop = PropertyLoader.loadFromFile(propfile);
+        Properties prop = new Properties();
         
+        //-----------------NOM DU SERVER
+        if(conf.getServname()!=null && !conf.getServname().isEmpty()){
+            prop.setProperty("servname", conf.getServname());
+        }
+        
+        //---------------Login
+        if(conf.getLogin()!=null && !conf.getLogin().isEmpty()){
+            prop.setProperty("login", conf.getLogin());
+        }
+        
+        //----------------Mot de passe 
+        if(conf.getPass() != null && !conf.getPass().isEmpty()){
+            prop.setProperty("pass", conf.getPass());
+        }
+
 
         //--------------- Enregistrement du statut actif//innactif
         if (conf.getActive()) {
@@ -278,7 +331,10 @@ public class DAOConf extends AbstrDao {
             prop.setProperty("heureSync", conf.getHeureSync().toString());
         }
 
-        PropertyLoader.save(prop, "conf.properties", "LALALA commentaire");
+//        PropertyLoader.save(prop, propfile, "les commentaire ont disparu reportez vous à la doc du projet dsl !");
+        PropertyLoader.saveToFile(prop, propfile, "les commentaire ont disparu reportez vous à la doc du projet dsl !");
+        
+//        PropertyLoader.save(prop, "conf.properties", "LALALA commentaire");
         System.out.println("end");
     }
 }

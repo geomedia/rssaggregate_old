@@ -55,6 +55,12 @@ public class Journal extends AbstrObservableBeans implements Serializable {
     
     
     /***
+     * La page d'accueil du journal 
+     */
+    @Column(name = "urlAccueil", length = 2000)
+    private String urlAccueil;
+    
+    /***
      * Il s'agit de la page html permettant de trouver tous les flux RSS. Pour de nombreux journaux, on a une page de ce type. 
      */
     @Column(name = "urlHtmlRecapFlux", length = 2000)
@@ -131,6 +137,16 @@ public class Journal extends AbstrObservableBeans implements Serializable {
     public void setInformation(String information) {
         this.information = information;
     }
+
+    public String getUrlAccueil() {
+        return urlAccueil;
+    }
+
+    public void setUrlAccueil(String urlAccueil) {
+        this.urlAccueil = urlAccueil;
+    }
+    
+    
 
     @Override
     /***

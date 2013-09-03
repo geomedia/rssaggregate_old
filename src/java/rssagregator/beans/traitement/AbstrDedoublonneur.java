@@ -205,9 +205,7 @@ public abstract class AbstrDedoublonneur implements Serializable,Cloneable {
  
 //                concat = item.getTitre() + item.getDescription();
             MessageDigest digest = MessageDigest.getInstance("MD5");
-
             digest.reset();
-
             byte[] hash = digest.digest(concat.getBytes());
             String hashString = new String(HexUtils.toHexString(hash));
             item.setHashContenu(hashString);

@@ -33,8 +33,9 @@ public class JournauxSrvl extends HttpServlet {
 
     public static final String VUE = "/WEB-INF/journaljsp.jsp";
     public static final String ATT_FORM = "form";
-    public static final String ATT_JOURNAL = "journal";
+    public static final String ATT_JOURNAL = "bean";
     public static final String ATT_LIST_JOURNAUX = "listjournaux";
+    public static final String ATT_SERV_NAME = "journaux"; // Le nom de la servlet. utile pour construire des url dans la vue
 
     /**
      * Processes requests for both HTTP
@@ -51,7 +52,6 @@ public class JournauxSrvl extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
         request.setCharacterEncoding("UTF-8");
-        Map<String, String> redirmap = null;
 
         request.setAttribute("listLocal", CodePays.getLanMap().entrySet().iterator());
         request.setAttribute("listCountry", CodePays.getCountryMap().entrySet().iterator());
@@ -66,84 +66,57 @@ public class JournauxSrvl extends HttpServlet {
         request.setAttribute("navmenu", "journaux");
 
         // récupération de l'action
-        String action = ServletTool.configAction(request, "list");
+        String action = ServletTool.configAction(request, "recherche");
+        request.setAttribute("srlvtname", ATT_SERV_NAME);
+
 
 
         DaoJournal daoJournal = DAOFactory.getInstance().getDaoJournal();
         JournalForm journalForm = new JournalForm(/*daoJournal*/);
         Journal journal = null;
 
-        //        // On récupère le flux dans la base de donnée si il est précisé
-        String idString = request.getParameter("id");
-        if (idString != null && !idString.equals("")) {
-            Long id = new Long(idString);
-            request.setAttribute("id", id);
-
-            journal = (Journal) daoJournal.find(id);
-//            DAOFactory.getInstance().getEntityManager().refresh(journal); // Si on ne refresh pas le journal la liste des flux n'est pas chargée
-            System.out.println("NOMBRE DE FLUX AVANT BIND : " + journal.getFluxLie().size());
-        }
-
-
-        // Si il y a du post on récupère les données saisies par l'utilisateur pour éviter la resaisie de l'information
-        if (request.getMethod().equals("POST")) {
-            journal = (Journal) journalForm.bind(request, journal, Journal.class);
-            System.out.println("NOMBRE DE FLUX APRES BIND : " + journal.getFluxLie().size());
-        }
-
         request.setAttribute(ATT_FORM, journalForm);
         request.setAttribute(ATT_JOURNAL, journal);
 
         /**
          * *===================================================================================================
-         * GESTION DES ACTIONS
+         * .....................................GESTION DES ACTIONS
          *///===================================================================================================
-        //--------------------------------ACTION LIST---------------------------------------------------------
-        if (action.equals("list")) {
+        //--------------------------------ACTION RECHERCHE ---------------------------------------------------------
+        if (action.equals("recherche")) {
             List<Object> listJournaux = daoJournal.findall();
             request.setAttribute(ATT_LIST_JOURNAUX, listJournaux);
+        } //--------------------------------------ACTION REM--------------------------------------------------
+        else if (action.equals("rem")) {
+            ServletTool.actionREM(request, Journal.class, Boolean.TRUE);
+//            try {
+//                journal = (Journal) daoJournal.find(new Long(request.getParameter("id")));
+//                try {
+//                    daoJournal.remove(journal);
+//                    journal.enregistrerAupresdesService();
+//                    journal.forceChangeStatut();
+//                    journal.notifyObservers(action);
+//                    ServletTool.redir(request, "journaux/recherche", "Suppression effectuée", false);
+//                } catch (Exception ex) {
+//                    Logger.getLogger(JournauxSrvl.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//            } catch (Exception e) {
+//                ServletTool.redir(request, "journaux/recherche", "Ce journal n'existe pas", true);
+//            }
         }
 
-        //--------------------------------------ACTION REM--------------------------------------------------
-        if (action.equals("rem")) {
-            try {
-                daoJournal.remove(journal);
-                journal.enregistrerAupresdesService();
-                journal.forceChangeStatut();
-                journal.notifyObservers(action);
-                ServletTool.redir(request, "journaux/list", "Suppression effectuée", false);
-            } catch (Exception ex) {
-                Logger.getLogger(JournauxSrvl.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
 
-        // SAUVEGARDE SI INFOS 
-        if (journalForm.getValide()) {
-            //---------------------------------ACTION ADD ---------------------------------------------------
-            if (action.equals("add")) {
-                try {
-                    daoJournal.creer(journal);
-                    journal.enregistrerAupresdesService();
-                    journal.forceChangeStatut();
-                    journal.notifyObservers(action);
-                    ServletTool.redir(request, "journaux/list", "Ajout effectuée", false);
-                } catch (Exception ex) {
-                    Logger.getLogger(JournauxSrvl.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-            //-----------------------------------ACTION MOD ---------------------------------------------------
-            else if (action.equals("mod")) {
-                try {
-                    daoJournal.modifier(journal);
-                    journal.enregistrerAupresdesService();
-                    journal.forceChangeStatut();
-                    journal.notifyObservers(action);
-                    ServletTool.redir(request, "journaux/list", "Mofication effectuées", false);
-                } catch (Exception ex) {
-                    ServletTool.redir(request, "journaux/add", "ERREUR LORS DE L'AJOUT DU JOURNAL. : " + ex.toString(), Boolean.TRUE);
-                    Logger.getLogger(JournauxSrvl.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
+        //---------------------------------ACTION ADD ---------------------------------------------------
+        if (action.equals("add")) {
+            ServletTool.actionADD(request, ATT_JOURNAL, ATT_FORM, Journal.class, Boolean.TRUE);
+
+        } //-----------------------------------ACTION MOD ---------------------------------------------------
+        else if (action.equals("mod")) {
+            ServletTool.actionMOD(request, ATT_JOURNAL, ATT_FORM, Journal.class, Boolean.TRUE);
+            
+        } //-------------------------------ACTION READ-------------------------------------------------------
+        else if (action.equals("read")) {
+            ServletTool.actionREAD(request, Journal.class, ATT_JOURNAL);
         }
 
 

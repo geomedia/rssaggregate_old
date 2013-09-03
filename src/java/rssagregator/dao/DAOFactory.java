@@ -9,7 +9,13 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import rssagregator.beans.Flux;
+import rssagregator.beans.FluxType;
+import rssagregator.beans.Journal;
+import rssagregator.beans.UserAccount;
 import rssagregator.beans.form.DAOGenerique;
+import rssagregator.beans.incident.FluxIncident;
+import rssagregator.beans.traitement.MediatorCollecteAction;
 
 /**
  *
@@ -17,9 +23,7 @@ import rssagregator.beans.form.DAOGenerique;
  */
 public class DAOFactory {
 
-    
-    private static DaoItem daoItem ;
-    
+    private static DaoItem daoItem;
     protected String PERSISTENCE_UNIT_NAME = "RSSAgregatePU2";
     private static DAOFactory instance = new DAOFactory();
     public List<EntityManager> listEm = new ArrayList<EntityManager>();
@@ -40,7 +44,7 @@ public class DAOFactory {
     private DAOFactory() {
         emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
         em = emf.createEntityManager();
-        
+
         // Attention aux singleton et au multi threading
         daoItem = new DaoItem(this);
         daoflux = new DaoFlux(this);
@@ -72,9 +76,9 @@ public class DAOFactory {
     }
 
     public DaoItem getDaoItem() {
-        
-        if(daoItem==null){
-            daoItem =  new DaoItem(this);
+
+        if (daoItem == null) {
+            daoItem = new DaoItem(this);
         }
 //        DaoItem daoItem = new DaoItem(this);
         return daoItem;
@@ -118,7 +122,45 @@ public class DAOFactory {
         return this.em;
     }
 
+    public DAOUser getDAOUser() {
+        DAOUser dao = new DAOUser(this);
+        return dao;
+    }
+
     public void closeem() {
         this.em.close();
+    }
+
+    /**
+     * *
+     * Instancie et retourne une dao a partir du type de beans envoyé en
+     * argument
+     *
+     * @param beansClass : La class du beans devant être géré par la dao
+     * @throws UnsupportedOperationException : Si aucune dao n'a été trouvé, emission d'une exception
+     * @return : La dao permettant de gérer le type de beans correspondant à la class envoyée en argument 
+     */
+    public AbstrDao getDaoFromType(Class beansClass) throws UnsupportedOperationException{
+        if (beansClass.equals(Flux.class)) {
+            return getDAOFlux();
+        } else if (FluxIncident.class.isAssignableFrom(beansClass)) {
+            return getDAOIncident();
+        }
+        else if(beansClass.equals(Journal.class)){
+            return getDaoJournal();
+        }
+        else if(beansClass.equals(MediatorCollecteAction.class)){
+            return getDAOComportementCollecte();
+        }
+        else if(beansClass.equals(FluxType.class)){
+            DAOGenerique d = getDAOGenerique();
+            d.setClassAssocie(beansClass);
+            return d;
+        }
+        else if (beansClass.equals(UserAccount.class)){
+            return getDAOUser();
+        }
+
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

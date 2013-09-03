@@ -309,8 +309,14 @@ public class MediatorCollecteAction extends AbstrObservableBeans implements Seri
         this.ID = ID;
     }
 
+    /***
+     * Constructeur par défault. Des objets de traitement basique sont crée pour le Comportement.
+     */
     public MediatorCollecteAction() {
-        
+        this.dedoubloneur = new Dedoubloneur();
+        this.requesteur = new Requester();
+        this.dedoubloneur = new Dedoubloneur();
+        this.parseur = new RomeParse();
     }
 
     public AbstrParseur getParseur() {

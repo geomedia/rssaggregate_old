@@ -1,5 +1,6 @@
 package rssagregator.beans.incident;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Cacheable;
@@ -19,6 +20,7 @@ import org.eclipse.persistence.config.CacheIsolationType;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import rssagregator.dao.DaoItem;
+import rssagregator.utils.PropertyLoader;
 
 /**
  * *
@@ -157,6 +159,22 @@ public class AbstrIncident implements Serializable {
 
     public void setGravite(Integer gravite) {
         this.gravite = gravite;
+    }
+    
+    /***
+     * Retourne l'url permettant d'accéder à l'interface administrative de cette entitée
+     * @return
+     * @throws IOException Emmet une exeption si la variable servurl n'a pu être chargée depuis le fichier serv.properties
+     */
+    public String getUrlAdmin() throws IOException{
+        String url = PropertyLoader.loadProperti("serv.properties", "servurl");
+        //On rajoute un / a la fin de l'url si besoin est
+        if(url!=null && url.charAt(url.length()-1)!='/'){
+            url+="/";
+        }
+        String retour = url+"incidents/read?id="+ID.toString(); 
+        System.out.println("URL : " + url);
+        return retour;
     }
 
     /**

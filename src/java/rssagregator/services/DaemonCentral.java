@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import rssagregator.beans.Conf;
@@ -38,7 +39,7 @@ public class DaemonCentral implements Runnable {
     /**
      * Permet de lancer des tâches tel que l'écriture dans le fichier "still alive";
      */
-    ExecutorService executorServiceAdministratif;
+    ScheduledExecutorService executorServiceAdministratif;
     org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DaemonCentral.class);
     /**
      * Durée d'attente dans la boucle du daemon en milisecodnes
@@ -87,8 +88,10 @@ public class DaemonCentral implements Runnable {
             Class.forName("com.mysql.jdbc.Driver");
 
             //On initialise l'executor du daemon
-            executorServiceAdministratif = Executors.newFixedThreadPool(10);
-
+//            executorServiceAdministratif = Executors.newFixedThreadPool(10);
+            executorServiceAdministratif = Executors.newScheduledThreadPool(10);
+            
+      
 
             DAOFactory.getInstance();
 

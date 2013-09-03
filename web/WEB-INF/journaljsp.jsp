@@ -19,7 +19,7 @@
 </div>
 <div id="sidebar">
     <p><a href="${rootpath}journaux/add">Ajouter</a></p>
-    <p><a href="${rootpath}journaux/list">Liste</a></p>
+    <p><a href="${rootpath}journaux/recherche">Liste</a></p>
 </div>
 
 <div id="content">
@@ -39,61 +39,50 @@
 
 
                 <c:choose>
-                    <c:when test="${action=='list'}">
-
+                    <c:when test="${action=='recherche'}">
                         <ul>
                             <c:forEach items="${listjournaux}" var="it">
-                                <li><a href="${rootpath}journaux/mod?id=${it.ID}"><c:out value="${it.nom}"></c:out></a></li>
-
+                                <li><a href="${rootpath}journaux/read?id=${it.ID}"><c:out value="${it.nom}"></c:out></a></li>
                             </c:forEach>
                         </ul>
                     </c:when> 
 
                     <c:when test="${action=='mod' or action=='add'}">
-                        <h2>Administration du journal : ${journal.nom}</h2>
+                        <h2>Administration du journal : ${bean.nom}</h2>
                         <ul>
-                            <li>  <a href="${rootpath}journaux/rem?id=${journal.ID}">Supprimer journal</a></li>
-                            <li>  <a href="${rootpath}flux/list?journal-id=${journal.ID}">Parcourir les flux du journal</a></li>
-
+                            <li>  <a href="${rootpath}journaux/rem?id=${bean.ID}">Supprimer journal</a></li>
+                            <li>  <a href="${rootpath}flux/list?journal-id=${bean.ID}">Parcourir les flux du journal</a></li>
                         </ul>
-
 
                         ${form.resultat}
                         <form method="post" action="${rootpath}journaux/${action}">
-
-
                             <fieldset>
                                 <legend>journal</legend>
                                 <label for="url">Nom du journal<span class="requis">*</span></label>
-                                <input type="text" id="nom" name="nom" value="<c:out value="${journal.nom}" />" size="20" maxlength="60" />
+                                <input type="text" id="nom" name="nom" value="<c:out value="${bean.nom}" />" size="20" maxlength="60" />
                                 <span class="erreur"> ${form.erreurs['nom']}</span>
-
                                 <br />
-
-
+                                
+                                
+                                <label>Page Accueil du journal : </label>
+                                <input type="text" name="urlAccueil" value="<c:out value="${bean.urlAccueil}" />"/><br />
+                                
                                 <label>urlHtmlRecapFlux : </label>
-                                <input type="text" name="urlHtmlRecapFlux" value="<c:out value="${journal.urlHtmlRecapFlux}"></c:out>"/>
-
-
-
+                                <input type="text" name="urlHtmlRecapFlux" value="<c:out value="${bean.urlHtmlRecapFlux}"></c:out>"/>
                                     <br />
                                     <label for="langue">Langue : </label>
                                     <select name="langue" id="langue">
                                     <c:forEach items="${listLocal}" var="loc">
-
-                                        <option value="${loc.key}" <c:if test="${loc.key==journal.langue}"> selected="true"</c:if>>${loc.value}</option>>
-
+                                        <option value="${loc.key}" <c:if test="${loc.key==bean.langue}"> selected="true"</c:if>>${loc.value}</option>>
                                     </c:forEach>
                                 </select>
-
 
                                 <br />
                                 <label for="pays">Pays :</label>
                                 <select name="pays" id="pays">
                                     <c:forEach items="${listCountry}" var="country">
-                                        <option value="${country.key}" <c:if test="${country.key==journal.pays}"> selected="true"</c:if>>${country.value}</option>
+                                        <option value="${country.key}" <c:if test="${country.key==bean.pays}"> selected="true"</c:if>>${country.value}</option>
                                     </c:forEach>
-
                                 </select>
 
                                 <br />
@@ -101,25 +90,32 @@
                                 <label for="">Fuseau Horaire : </label>
                                 <select name="fuseauHorraire">
                                     <c:forEach items="${fuseau}" var="fus">
-                                        <option value="${fus}" <c:if test="${fus==journal.fuseauHorraire}"> selected="true"</c:if> >${fus}</option>
-
+                                        <option value="${fus}" <c:if test="${fus==bean.fuseauHorraire}"> selected="true"</c:if> >${fus}</option>
                                     </c:forEach>
                                 </select>
 
 
                                 <br />
 
-                                <textarea name="information">${journal.information}</textarea>
+                                <textarea name="information">${bean.information}</textarea>
 
-                                <input type="hidden" name="id" value="${journal.ID}">
+                                <input type="hidden" name="id" value="${bean.ID}">
 
                                 <input type="submit" value="Inscription" class="sansLabel" />
                                 <br />
                             </fieldset>
                         </form>
-
-
                     </c:when>
+                        <c:when test="${action=='read'}">
+                            <p><a href="${rootpath}${srlvtname}/mod?id=${bean.ID}">EDITER</a></p>
+                            <p><strong>Titre :</strong> ${bean.nom}</p>
+                            <p><strong>Page accueil : </strong>${bean.urlAccueil}</p>
+                            <p><strong>Page HTML recaptulatif des flux : </strong>${bean.urlHtmlRecapFlux}</p>
+                            <p><strong>Langue : </strong>${bean.langue}</p>
+                            <p><strong>Pays : </strong>${bean.pays}</p>
+                            <p><strong>Fuseau Horraire : </strong>${bean.fuseauHorraire}</p>
+                            <p><strong>Information : </strong>${bean.information}</p>
+                        </c:when>
                 </c:choose>
 
             </c:when>

@@ -33,10 +33,10 @@
 
                 <c:choose>
                     <c:when test="${action=='recherche'}">
-                        
+
                         <ul>
                             <c:forEach items="${list}" var="t"> 
-                                <li><a href="${rootpath}TypeFluxSrvl/mod?id=${t.ID}"> ${t.denomination}</a></li>
+                                <li><a href="${rootpath}TypeFluxSrvl/read?id=${t.ID}"> ${t.denomination}</a></li>
                                 </c:forEach>
                         </ul>
                     </c:when>
@@ -54,8 +54,13 @@
                             <input type="submit"/>
                         </form>
                     </c:when>
+                    <c:when test="${action=='read'}">
+                        <p><a href="${rootpath}${srlvtname}/mod?id=${obj.ID}">EDITER</a></p>
+                        <p><strong>Dénomination : </strong>${obj.denomination}</p>
+                    </c:when>
                 </c:choose>
             </c:when>
         </c:choose>
+    </div>
 </div>
 <c:import url="/WEB-INF/footerjsp.jsp" />

@@ -1,3 +1,4 @@
+<%@page import="rssagregator.beans.UserAccount"%>
 <%@page import="rssagregator.services.ServiceJMS"%>
 <%@page import="rssagregator.dao.DAOFactory"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -10,7 +11,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>JSP Page</title>
 
-        <link href="/RSSAgregate/style.css" type="text/css" rel="stylesheet" media="all"/>
+        <link href="/RSSAgregate/ress/style.css" type="text/css" rel="stylesheet" media="all"/>
     </head>
     <body>
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
@@ -31,6 +32,20 @@
                 %>
 
             </a>
+                                <div>
+                    <%
+                   UserAccount u =  (UserAccount)session.getAttribute("authuser");
+                   if(u!=null){
+                       out.println(u.getMail());
+                       %><a href="${rootpath}ident/logout">Deconnection</a><%
+                   }
+                   else{
+                       out.print("deco");
+                   }
+      
+                    %>
+                    
+                </div>
                 <div id="JMS">Statut JMS <span id="JMSstat"><%
                 if (ServiceJMS.getInstance().getStatutConnection()) {
                     out.println("OK");
@@ -41,6 +56,8 @@
                 <span id="pinfoJMS"></span>
                 <script src="JMSReconnection.js"></script>
             </div>
+                
+               
 
 
     

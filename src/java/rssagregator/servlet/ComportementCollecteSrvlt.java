@@ -19,6 +19,7 @@ import rssagregator.beans.form.ComportementCollecteForm;
 import rssagregator.beans.traitement.MediatorCollecteAction;
 import rssagregator.dao.DAOComportementCollecte;
 import rssagregator.dao.DAOFactory;
+import static rssagregator.servlet.IncidentsSrvl.ATT_SERV_NAME;
 import rssagregator.utils.ServletTool;
 
 /**
@@ -32,6 +33,9 @@ import rssagregator.utils.ServletTool;
 public class ComportementCollecteSrvlt extends HttpServlet {
 
     public String VUE = "/WEB-INF/comportementcollecteHTML.jsp";
+    public static final String ATT_FORM_JSP = "form";
+    public static final String ATT_BEAN_JSP = "bean";
+    public static final String ATT_SERV_NAME = "ComportementCollecte";
     Map<String, String> redirmap = null;
 
     /**
@@ -62,12 +66,14 @@ public class ComportementCollecteSrvlt extends HttpServlet {
         request.setAttribute("navmenu", "config");
 
         // récupération de l'action
-        String action = ServletTool.configAction(request, "list");
+        String action = ServletTool.configAction(request, "recherche");
 //        String action = request.getParameter("action");
 //        if (action == null) {
 //            action = "list";
 //        }
         request.setAttribute("action", action);
+
+        request.setAttribute("srlvtname", ATT_SERV_NAME);
 
 
         // On récupère la sortie (html Json. Cette variable sert à configurer la vue
@@ -83,67 +89,63 @@ public class ComportementCollecteSrvlt extends HttpServlet {
          * *==============================================================================================
          * . . . . . . . . . . . . . . . . . . . . .GESTION DES ACTION
          *///==============================================================================================
-        if (action.equals("mod") || action.equals("rem")) {
-            try {
-                obj = (MediatorCollecteAction) dao.find(new Long(request.getParameter("id")));
-                obj.enregistrerAupresdesService();
-            } catch (Exception e) {
-            }
-        }
-        System.out.println("LALA");
+//        if (action.equals("mod") || action.equals("rem") || action.equals("read")) {
+//            try {
+//                obj = (MediatorCollecteAction) dao.find(new Long(request.getParameter("id")));
+//                obj.enregistrerAupresdesService();
+//            } catch (Exception e) {
+//            }
+//        }
+//
+//        if (request.getMethod().equals("POST")) {
+//            obj = (MediatorCollecteAction) form.bind(request, obj, MediatorCollecteAction.class);
+//        }
 
-        if (request.getMethod().equals("POST")) {
-            obj = (MediatorCollecteAction) form.bind(request, obj, MediatorCollecteAction.class);
-        }
-
-        //----------------------------------------ACTION LIST ---------------------------------------------
-        if (action.equals("list")) {
+        //----------------------------------------ACTION RECHERCHE ---------------------------------------------
+        if (action.equals("recherche")) {
             //On récupère la liste des comportements
             List<Object> listcomportement = dao.findall();
             request.setAttribute("list", listcomportement);
         }
 
-        if (form.getValide()) {
-            //-----------------------------------------ACTION ADD --------------------------------------------
-            if (action.equals("add")) {
-                try {
-                    dao.creer(obj);
-                    obj.enregistrerAupresdesService();
-                    obj.forceChangeStatut();
-                    obj.notifyObservers(action);
-                    redir(request, "ComportementCollecte?action=mod&id=" + obj.getID(), "Ajout effectué");
-                } catch (Exception ex) {
-                    Logger.getLogger(ComportementCollecteSrvlt.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-            //--------------------------------------ACTION MODIF--------------------------------------------------------
-            if (action.equals("mod")) {
-                try {
-                    dao.modifier(obj);
-                    obj.forceChangeStatut();
-                    obj.notifyObservers(action);
-                    redir(request, "ComportementCollecte", "Modification effectuée");
-                } catch (Exception ex) {
-                    Logger.getLogger(ComportementCollecteSrvlt.class.getName()).log(Level.SEVERE, null, ex);
-                }
+//        if (form.getValide()) {
+        //-----------------------------------------ACTION ADD --------------------------------------------
+        if (action.equals("add")) {
+            ServletTool.actionADD(request, ATT_BEAN_JSP, ATT_FORM_JSP, MediatorCollecteAction.class, Boolean.TRUE);
+//            if (form.getValide()) {
+//                try {
+//                    dao.creer(obj);
+//                    obj.enregistrerAupresdesService();
+//                    obj.forceChangeStatut();
+//                    obj.notifyObservers(action);
+//                    redir(request, "ComportementCollecte/mod?id=" + obj.getID(), "Ajout effectué");
+//                } catch (Exception ex) {
+//                    Logger.getLogger(ComportementCollecteSrvlt.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//            }
+        } //--------------------------------------ACTION MODIF--------------------------------------------------------
+        else if (action.equals("mod")) {
+            ServletTool.actionMOD(request, ATT_BEAN_JSP, ATT_FORM_JSP, MediatorCollecteAction.class, Boolean.TRUE);
 
-            }
-        }
-        //-----------------------------------ACTION REMOVE------------------------------------------------------------
-        if (action.equals("rem")) {
-            try {
-                dao.remove(obj);
-                obj.forceChangeStatut();
-                obj.notifyObservers(action);
-                
-                redir(request, "ComportementCollecte?action=list", "Suppression effectuée.");
-            } catch (Exception ex) {
-                Logger.getLogger(ComportementCollecteSrvlt.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        } //-----------------------------------ACTION REMOVE------------------------------------------------------------
+        else if (action.equals("rem")) {
+            ServletTool.actionREM(request, MediatorCollecteAction.class, Boolean.TRUE);
+//            try {
+//                dao.remove(obj);
+//                obj.forceChangeStatut();
+//                obj.notifyObservers(action);
+//
+//                redir(request, "ComportementCollecte?action=list", "Suppression effectuée.");
+//            } catch (Exception ex) {
+//                Logger.getLogger(ComportementCollecteSrvlt.class.getName()).log(Level.SEVERE, null, ex);
+//            }
+        } //--------------------------------------------ACTION READ --------------------------------------------------------
+        else if (action.equals("read")) {
+            ServletTool.actionREAD(request, MediatorCollecteAction.class, ATT_BEAN_JSP);
         }
 
 
-        request.setAttribute("comportement", obj);
+//        request.setAttribute("bean", obj);
 
         this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
     }

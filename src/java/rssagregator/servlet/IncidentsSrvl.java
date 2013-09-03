@@ -18,11 +18,18 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import rssagregator.beans.form.IncidentForm;
+import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.FluxIncident;
+import static rssagregator.servlet.JournauxSrvl.ATT_SERV_NAME;
 import rssagregator.utils.ServletTool;
 
 /**
- *
+ * Gère les action : <ul>
+ * <li>read</li>
+ * <li>rechercher</li>
+ * </li>list<li/>
+ * </li>mod</li>
+ * </ul>
  * @author clem
  */
 @WebServlet(name = "Incidents", urlPatterns = {"/incidents/*"})
@@ -31,7 +38,9 @@ public class IncidentsSrvl extends HttpServlet {
     public static final String ATT_LIST = "listobj";
     public static final String ATT_FORM = "form";
     public static final String ATT_OBJ = "incident";
-    public String VUE = "/WEB-INF/incidentJsp.jsp";
+    public String VUE = "/WEB-INF/incidentHTML.jsp";
+    public static final String ATT_SERV_NAME = "incidents";
+    
 
     /**
      * Processes requests for both HTTP
@@ -57,8 +66,6 @@ public class IncidentsSrvl extends HttpServlet {
             vue = "html";
         }
 
-
-
         Integer firstResult = null;
         Integer itPrPage;
         Boolean clos;
@@ -69,6 +76,7 @@ public class IncidentsSrvl extends HttpServlet {
 
         // récupération de l'action
         String action = ServletTool.configAction(request, "recherche");
+        request.setAttribute("srlvtname", ATT_SERV_NAME);
 //        String action = request.getParameter("action");
 //        if (action == null) {
 //            action = "recherche";
@@ -78,23 +86,29 @@ public class IncidentsSrvl extends HttpServlet {
 
         DAOIncident dao = DAOFactory.getInstance().getDAOIncident();
         IncidentForm form = new IncidentForm();
-        FluxIncident incident = null;
+        request.setAttribute("form", form);
+        
+        
+//        FluxIncident incident = null;
+//        String idString = request.getParameter("id");
+//        if (idString != null && !idString.equals("")) {
+//            Long id = new Long(request.getParameter("id"));
+//            request.setAttribute("id", id);
+//            incident = (FluxIncident) dao.find(id);
+//
+////            flux = (Flux) daoFlux.find(id);
+//        }
 
 
-        String idString = request.getParameter("id");
-        if (idString != null && !idString.equals("")) {
-            Long id = new Long(request.getParameter("id"));
-            request.setAttribute("id", id);
-            incident = (FluxIncident) dao.find(id);
-
-//            flux = (Flux) daoFlux.find(id);
-        }
+//        if (request.getMethod().equals("POST") && action.equals("mod")) {
+//            form.bind(request, incident, FluxIncident.class);
+//        }
 
 
-        if (request.getMethod().equals("POST") && action.equals("mod")) {
-            form.bind(request, incident, FluxIncident.class);
-        }
-
+        //============================================================================================
+        //                              GESTION DES ACTIONS
+        //============================================================================================
+        //----------------------------------ACTION : RECHERCHE
         if (action.equals("list")) {
 
             try {
@@ -129,28 +143,17 @@ public class IncidentsSrvl extends HttpServlet {
             //recup de la list des incidents
             List<FluxIncident> listAll = dao.findCriteria();
             request.setAttribute(ATT_LIST, listAll);
-        } else if (action.equals("mod")) {
-            if (form.getValide()) {
-                try {
-                    dao.modifier(incident);
-                } catch (Exception ex) {
-                    redirmap = new HashMap<String, String>();
-                    redirmap.put("url", "flux?action=add");
-                    redirmap.put("msg", "ERREUR LORS DE L'AJOUT DU FLUX. : " + ex.toString());
-                    request.setAttribute("redirmap", redirmap);
-                    request.setAttribute("err", "true");
-                    Logger.getLogger(IncidentsSrvl.class.getName()).log(Level.SEVERE, null, ex);
-                }
+        } //---------------------------------------------ACTION MODIFICATION----------------------------
+        else if (action.equals("mod")) {
 
-            }
+            ServletTool.actionMOD(request, ATT_OBJ, ATT_FORM, FluxIncident.class, false);
+            //---------------------------------------ACTION : READ-------------------------------------
+        } else if (action.equals("read")) {
+            ServletTool.actionREAD(request, FluxIncident.class, ATT_OBJ);
         }
 
 
-        request.setAttribute(ATT_FORM, form);
-        request.setAttribute(ATT_OBJ, incident);
-        
-        
-        
+
         // gestion de la vue et de l'envoie vers la JSP
         if (vue.equals("jsondesc")) {
             System.out.println("JsonDesc");
@@ -158,7 +161,7 @@ public class IncidentsSrvl extends HttpServlet {
         }
 
         if (vue.equals("html")) {
-            VUE = "/WEB-INF/incidentJsp.jsp";
+            VUE = "/WEB-INF/incidentHTML.jsp";
         }
         this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
 

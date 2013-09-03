@@ -47,8 +47,51 @@
         <description>Description</description>
         <role-name>manager-script</role-name>
     </security-role>
-        <security-role>
+    <security-role>
         <description>Description</description>
         <role-name>admin</role-name>
     </security-role>
+    
+    
+    
+    <!--Le filtre permettant de forcer l'identification-->
+    <filter>
+        <filter-name>AuthFilter</filter-name>
+        <filter-class>rssagregator.servlet.FilterIdent</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>AuthFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    
+    
+    <!--Le filtre permettant de restreindre l'accès aux servlet permettant de modifier les entités (flux, journaux etc). Les action de moficication sont restreintes.-->
+    <filter>
+        <filter-name>RestrictionFilter</filter-name>
+        <filter-class>rssagregator.servlet.FilterBasicBeans</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>RestrictionFilter</filter-name>
+        <url-pattern>/flux/*</url-pattern>
+        <url-pattern>/TypeFluxSrvl/*</url-pattern>
+        <url-pattern>/journaux/*</url-pattern>
+        <url-pattern>/incidents/*</url-pattern>
+        <url-pattern>/ComportementCollecte/*</url-pattern>
+        <url-pattern>/user/*</url-pattern>
+    </filter-mapping>
+    
+    
+    <!--Filtre permettant de restreindre l'acces uniquement aux administrateurs-->
+    <filter>
+        <filter-name>RestrictionAdmin</filter-name>
+        <filter-class>rssagregator.servlet.FilterAdminOnly</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>RestrictionAdmin</filter-name>
+        <url-pattern>/config/*</url-pattern>
+        <url-pattern>/user/*</url-pattern>
+    </filter-mapping>
+    
+    
+
 </web-app>
