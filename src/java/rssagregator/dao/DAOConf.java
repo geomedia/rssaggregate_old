@@ -5,14 +5,12 @@
 package rssagregator.dao;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import rssagregator.beans.Conf;
 import rssagregator.beans.ServeurSlave;
 import rssagregator.beans.UserAccount;
-import rssagregator.beans.form.DAOGenerique;
 import rssagregator.utils.PropertyLoader;
 
 /**
@@ -20,7 +18,7 @@ import rssagregator.utils.PropertyLoader;
  * @author clem
  */
 public class DAOConf extends AbstrDao {
-
+org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DaoFlux.class);
     private Conf confCourante;
 
     public DAOConf(DAOFactory dAOFactory) {
@@ -170,7 +168,10 @@ public class DAOConf extends AbstrDao {
         UserAccount u = new UserAccount();
         u.setMail(m);
         u.setPass(p);
+        u.setUsername("root");
         u.setAdminstatut(Boolean.TRUE);
+        u.setAdminMail(Boolean.FALSE);
+        
         
         // On cherche si cet utilisateur est bien dans la base de données
         DAOUser daou = DAOFactory.getInstance().getDAOUser();
@@ -178,24 +179,17 @@ public class DAOConf extends AbstrDao {
         
         // Si, on n'a pas trouvé dans la base de données
         if(uBdd == null){
-            System.out.println("CREATION");
+            logger.debug("Création du compte root dans la BDD");
             daou.creer(u);
         }
         //Si les deux ne sont pas egaux en conten u
         else if(!uBdd.equals(u)){
-            System.out.println("MISE A JOUR DE L'UTILISATEUR ROOT DANS LA BDD !! ");
+            logger.debug("Mise à jour du compte root dans la BDD");
             uBdd.setMail(m);
             uBdd.setPass(p);
             daou.modifier(uBdd);
         }
-        else{
-            System.out.println("INNEGALLLLS");
-        }
-        
-        
-        
-         
-
+       
         this.confCourante = conf;
     }
 
