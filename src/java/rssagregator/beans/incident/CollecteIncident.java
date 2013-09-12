@@ -10,14 +10,14 @@ import rssagregator.beans.Flux;
 /** 
  *  Les erreurs de captation sont consigné dans des objets redéfinissant cette classe abstraite. Il peut s'agir d'erreur de parsage, d'erreur http (404, site indisponible etc...)
  */
-@Entity(name = "incidentflux")
-public class FluxIncident extends AbstrIncident implements Serializable  {
+@Entity(name = "i_collecteincident")
+public class CollecteIncident extends AbstrIncident implements Serializable  {
 
   /** 
    *  Un objet flux peut posséder différents incidents. Un incident ne possède qu'un flux. 
    */
     
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @ManyToOne(fetch = FetchType.EAGER, cascade ={CascadeType.MERGE, CascadeType.REFRESH})
     private Flux fluxLie;
       
  

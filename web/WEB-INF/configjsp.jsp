@@ -187,11 +187,18 @@ Author     : clem
                                     </c:when>
                                     <c:when test="${action=='importitem'}">
                                         <h2>Liste des items rapportées par synchronisation : </h2>
-                                        <ul>
-                                            <c:forEach items="${listitemtrouve}" var="item">
-                                                <li>${item.titre}</li>
+                                        
+                                            <c:forEach items="${tacheGenerale.synchroSlave}" var="synch">
+                                                <h2>Recup sur le serveur : ${synch.serveurSlave}</h2>
+                                                <p>Etat : <c:if test="${synch.exeption==null}">OK</c:if><c:if test="${synch.exeption!=null}">ERREUR</c:if></p>
+                                                <ul>
+                                                <c:forEach items="${synch.itemTrouvees}" var="it">
+                                                    <li>${it}</li>
                                                 </c:forEach>
-                                        </ul>
+                                                </ul>
+                                            
+                                                </c:forEach>
+                                        
                                     </c:when>
 
 

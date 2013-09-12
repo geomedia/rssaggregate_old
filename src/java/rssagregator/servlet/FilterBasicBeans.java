@@ -17,7 +17,7 @@ import javax.servlet.http.HttpSession;
 import rssagregator.beans.Conf;
 import rssagregator.beans.UserAccount;
 import rssagregator.dao.DAOFactory;
-import rssagregator.services.ServiceJMS;
+import rssagregator.services.ServiceSynchro;
 
 /**
  * C'est un filtre appliqué aux servlet : <ul>
@@ -69,7 +69,7 @@ public class FilterBasicBeans implements Filter {
             //Pour les action de modification (add, mod, rem)
             if (action.equals("add") || action.equals("mod") || action.equals("rem")) {
                 //On vérifie le statut JMS
-                Boolean statutJMS = ServiceJMS.getInstance().getStatutConnection();
+                Boolean statutJMS = ServiceSynchro.getInstance().getStatutConnection();
                 // Si le serveur est maitre, qu'il possede des esclaves et que la connection JMS n'est pas active
                 if (conf.getMaster() && conf.getServeurSlave().size() > 0 && !statutJMS) {
                     System.out.println("Filtre");

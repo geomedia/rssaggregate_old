@@ -3,8 +3,10 @@ package rssagregator.beans.incident;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Observable;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -19,7 +21,9 @@ import org.eclipse.persistence.annotations.CacheType;
 import org.eclipse.persistence.config.CacheIsolationType;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
-import rssagregator.dao.DaoItem;
+import rssagregator.beans.Conf;
+import rssagregator.dao.DAOFactory;
+import rssagregator.services.ServiceMailNotifier;
 import rssagregator.utils.PropertyLoader;
 
 /**
@@ -29,11 +33,11 @@ import rssagregator.utils.PropertyLoader;
  */
 @Cacheable(value = true)
 //@Cache(shared = true)
-//@Entity(name = "incident")
-@MappedSuperclass()
+@Entity(name = "i_superclass")
+//@MappedSuperclass()
 @Cache(size = 100, type = CacheType.CACHE, isolation = CacheIsolationType.SHARED, coordinationType = CacheCoordinationType.SEND_NEW_OBJECTS_WITH_CHANGES)
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE) // Peu de champs supplémentaires dans les autres entités, on va conserver la stratégie la plus simple
-public class AbstrIncident implements Serializable {
+@Inheritance(strategy = InheritanceType.JOINED) // Peu de champs supplémentaires dans les autres entités, on va conserver la stratégie la plus simple
+public class AbstrIncident extends Observable implements Serializable {
 
     @Transient
     protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(AbstrIncident.class);
@@ -167,13 +171,27 @@ public class AbstrIncident implements Serializable {
      * @throws IOException Emmet une exeption si la variable servurl n'a pu être chargée depuis le fichier serv.properties
      */
     public String getUrlAdmin() throws IOException{
-        String url = PropertyLoader.loadProperti("serv.properties", "servurl");
+        Conf c = DAOFactory.getInstance().getDAOConf().getConfCourante();
+        
+        
+//        String url = PropertyLoader.loadProperti("serv.properties", "servurl");
+        String url = c.getServurl();
+        
+        
+        System.out.println("URL : " + url);
         //On rajoute un / a la fin de l'url si besoin est
-        if(url!=null && url.charAt(url.length()-1)!='/'){
-            url+="/";
+        System.out.println("URL LENGHT : " + url.length());
+        System.out.println("LAST CHAR : " + url.charAt(url.length()-1));
+        if(url!=null && url.length()>1){
+            Character ch = url.charAt(url.length()-1);
+            if(!ch.equals(new Character('/'))){
+            url+="/";    
+            }
         }
         String retour = url+"incidents/read?id="+ID.toString(); 
-        System.out.println("URL : " + url);
+        
+        System.out.println("RETOUR : " + url);
+        System.out.println("FIN URL ADMIN");
         return retour;
     }
 
@@ -212,4 +230,51 @@ public class AbstrIncident implements Serializable {
         }
         return null;
     }
+    
+    
+    /***
+     * Un incident doit être enregistré auprès des service : <ul>
+     * <li>Mail : car lors de la création d'un inscident le service mail doit réagir en envoyant une premiere alerte d'urgence</li>
+     * </ul>
+     */
+    public void EnregistrerAupresdesService(){
+        this.addObserver(ServiceMailNotifier.getInstance());
+    }
+    public void forceChangeStatut(){
+        this.setChanged();
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final AbstrIncident other = (AbstrIncident) obj;
+        if ((this.messageEreur == null) ? (other.messageEreur != null) : !this.messageEreur.equals(other.messageEreur)) {
+            return false;
+        }
+        if ((this.noteIndicent == null) ? (other.noteIndicent != null) : !this.noteIndicent.equals(other.noteIndicent)) {
+            return false;
+        }
+        if ((this.logErreur == null) ? (other.logErreur != null) : !this.logErreur.equals(other.logErreur)) {
+            return false;
+        }
+        if (this.bloquant != other.bloquant && (this.bloquant == null || !this.bloquant.equals(other.bloquant))) {
+            return false;
+        }
+        if (this.dateDebut != other.dateDebut && (this.dateDebut == null || !this.dateDebut.equals(other.dateDebut))) {
+            return false;
+        }
+        return true;
+    }
+    
 }

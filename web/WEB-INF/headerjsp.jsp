@@ -1,5 +1,6 @@
+<%@page import="rssagregator.services.ServiceSynchro"%>
 <%@page import="rssagregator.beans.UserAccount"%>
-<%@page import="rssagregator.services.ServiceJMS"%>
+
 <%@page import="rssagregator.dao.DAOFactory"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
@@ -47,7 +48,7 @@
                     
                 </div>
                 <div id="JMS">Statut JMS <span id="JMSstat"><%
-                if (ServiceJMS.getInstance().getStatutConnection()) {
+                if ( ServiceSynchro.getInstance().getStatutConnection()) {
                     out.println("OK");
                 } else {
                     out.println("Erreur");

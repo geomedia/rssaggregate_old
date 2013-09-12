@@ -16,7 +16,7 @@ import rssagregator.beans.form.AbstrForm;
 import rssagregator.beans.form.FORMFactory;
 import rssagregator.dao.AbstrDao;
 import rssagregator.dao.DAOFactory;
-import rssagregator.services.ServiceJMS;
+import rssagregator.services.ServiceSynchro;
 
 /**
  * Une série de methode static pouvant être utilisée dans les Servlet du projet.
@@ -98,7 +98,7 @@ public class ServletTool {
         //Pour les action de modification (add, mod del)
         if (action.equals("add") || action.equals("mod") || action.equals("del")) {
             //On vérifie le statut JMS
-            Boolean statutJMS = ServiceJMS.getInstance().getStatutConnection();
+            Boolean statutJMS = ServiceSynchro.getInstance().getStatutConnection();
             // Si le serveur est maitre, qu'il possede des esclaves et que la connection JMS n'est pas active
             if (conf.getMaster() && conf.getServeurSlave().size() > 0 && !statutJMS) {
                 request.setAttribute("accesmsg", "La connection n'est pas active. Votre action demande que la connection JMS soit active afin de répercuter les éventuelles moficications sur les serveurs esclaves");

@@ -5,29 +5,32 @@
 package rssagregator.services;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Observable;
-import java.util.Observer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import rssagregator.beans.Conf;
 import rssagregator.beans.Flux;
-import rssagregator.beans.TacheRecupCallable;
+import rssagregator.beans.incident.AbstrIncident;
+import rssagregator.beans.incident.AnomalieCollecte;
 import rssagregator.dao.DAOFactory;
 
 /**
  * Cette classe permet d'instancier le service de collecte du projet. Elle est
- * organisé autours de deux objets priomordiaux : le pool de tache schedulé qui
+ * organisée autours de deux objets priomordiaux : le pool de tache schedulé qui
  * permet de lancer périodiquement les tache lié aux flux ; et le pool de tache
  * manuelle qui permet annectodiquement de lancer la mise à jour des flux
  *
  * @author clem
  */
-public class ServiceCollecteur implements Observer {
+public class ServiceCollecteur extends AbstrService {
 
     org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(ServiceCollecteur.class);
 //    ListeFluxCollecte fluxCollecte; On le récupère maintenant directement depuis le singleton de collecte
@@ -38,10 +41,8 @@ public class ServiceCollecteur implements Observer {
      * Constructeur du singleton
      */
     private ServiceCollecteur() {
-        poolSchedule = Executors.newScheduledThreadPool(10);
-
+        super(Executors.newScheduledThreadPool(30));
         ThreadFactoryPrioitaire factoryPrioitaire = new ThreadFactoryPrioitaire();
-//        poolPrioritaire = Executors.newFixedThreadPool(30, factoryPrioitaire);
         poolPrioritaire = Executors.newFixedThreadPool(30);
     }
 
@@ -59,11 +60,6 @@ public class ServiceCollecteur implements Observer {
     }
     /**
      * *
-     * Le pool schedulé permettant de lancer périodiquement des tâches.
-     */
-    private ScheduledExecutorService poolSchedule;
-    /**
-     * *
      * Le pool de thread permettant de lancer des récupération de flux en
      * passant devant le pool schedulé
      */
@@ -71,21 +67,42 @@ public class ServiceCollecteur implements Observer {
 
     /**
      * *
-     * Update le service de récupération avec les données du dernier beans. Pour
-     * recharger complètement le service, on peut demander la mise à jour avec
-     * Observable null et argument Strin "reload all"
+     * Update le service de récupération. Plusieurs observable sont gérés : <ul>
+     * <li>Les flux : lors de l'ajout de la modification ou suppression, le
+     * service doit être informé afin de recharger son pool de thread en
+     * conséquence</li>
+     * <li>Tache de récup : A la fin de l'éxecution d'une tâche de récupération,
+     * le service est notifié. Il décide si il faut schedule la tache, cad le
+     * remettre dans son pool. Si la tache est en échec (présence d'une
+     * exeption), il faut appel au service de gestion des incidents</li>
+     * <li>Conf</li>
+     * </ul>
+     * <p>Le deuxieme argument permet de préciser les actions au service. C'est
+     * notamment utile lors de la modifiction ou ajour d'un flux. Les actions
+     * suivantes doivent être gérée : <ul>
+     * <li>add</li>
+     * <li>mod</li>
+     * <li>rem</li>
+     * </li>reload all : permet de recharger completement le service</li>
+     * </ul>
      *
-     * @param o : Le beans ne notifiant auprès du service : un Flux ou la Conf
-     * @param arg Une information sur la nature du changement. A ce jour, C'est
-     * une chaine de caractère : add, mod, del.
+     * </p>
+     *
+     *
+     * @param o : L'observable se notifiant auprès du service (Flux, Conf,
+     * Tache)
+     * @param arg Une précision sur l'action : une chaine de caractère exemple :
+     * add, mod, del.
      */
     @Override
     public void update(Observable o, Object arg) {
 
 
-        /***========================================================================================
-         *                                Ajout ou modification d'un FLUX       
+        /**
+         * *========================================================================================
+         * ........................Ajout ou modification d'un FLUX
          *///========================================================================================
+        //Lorsque l'utilisateur modifi les flux, le service de collecte doit en être informé. 
         if (o instanceof Flux) {
             Flux flux = (Flux) o;
             // Si c'est flux a ajouter
@@ -94,10 +111,10 @@ public class ServiceCollecteur implements Observer {
 
                 // Si le flux est actif alors, on ajoute une tache schedulé dans le collecteur
                 if (flux.getActive()) {
-                    TacheRecupCallable tmpTache = new TacheRecupCallable(flux, true, true);
+                    TacheRecupCallable tmpTache = new TacheRecupCallable(flux, this, true, true);
                     tmpTache.setTacheSchedule(true);
                     //TODO : Scheduler en fonction du temps restant. il faut modifier de deuxieme paramettre de la commande. 
-                    this.poolSchedule.schedule(tmpTache, flux.getMediatorFlux().getPeriodiciteCollecte(), TimeUnit.SECONDS);
+                    this.executorService.schedule(tmpTache, flux.getMediatorFlux().getPeriodiciteCollecte(), TimeUnit.SECONDS);
                     flux.setTacheRechup(tmpTache);
                     logger.debug("ajout de sa tâche");
                 }
@@ -108,35 +125,82 @@ public class ServiceCollecteur implements Observer {
                  * Si le flux a été modifié, On annule sa tâche, on en crée une
                  * nouvelle et l'on l'envoie dans le scheduler.
                  */
-                if(flux.getTacheRechup()!=null){
-                                    flux.getTacheRechup().setAnnulerTache(Boolean.TRUE);
+                if (flux.getTacheRechup() != null) {
+                    flux.getTacheRechup().setAnnulerTache(Boolean.TRUE);
                 }
                 //SI le flux est actif, on lui crée une nouvelle tâche que l'on réinjecte
                 if (flux.getActive()) {
-                    TacheRecupCallable tmpTache = new TacheRecupCallable(flux, true, true);
+                    TacheRecupCallable tmpTache = new TacheRecupCallable(flux, this, true, true);
                     tmpTache.setTacheSchedule(true);
                     //TODO : Scheduler en fonction du temps restant. il faut modifier de deuxieme paramettre de la commande. 
-                    this.poolSchedule.schedule(tmpTache, flux.getMediatorFlux().getPeriodiciteCollecte(), TimeUnit.SECONDS);
+                    this.executorService.schedule(tmpTache, flux.getMediatorFlux().getPeriodiciteCollecte(), TimeUnit.SECONDS);
                     logger.debug("renouvellement de la tâche du flux modifié");
                     flux.setTacheRechup(tmpTache);
                 }
             }
         }
-        
-        /**========================================================================================
-         *              BLOC PERMETTANT LE RECHARGEMENT COMPLET DU SERVICE.
-         *///======================================================================================
 
+        /**
+         * *========================================================================================
+         * .........................GESTION DU RETOUR DES TACHES SCHEDULE
+         *///========================================================================================
+        if (o instanceof AbstrTacheSchedule) {
+            //-----------------------------------TACHE DE RECUPÉRATION DES FLUX-----------------------------
+            if (o.getClass().equals(TacheRecupCallable.class)) {
+                TacheRecupCallable tache = (TacheRecupCallable) o;
+                logger.debug("reception du retour d'un flux");
+                //Si c'est une tâche schedulé, on la réajoute 
+                if (tache.getTacheSchedule() && !tache.annulerTache) {
+                    executorService.schedule(tache, tache.getFlux().getMediatorFlux().getPeriodiciteCollecte(), TimeUnit.SECONDS);
+                }
+                //Si il y a eu une exeption lors de l'execution de la tache. On fait fait gérer l'incident
+                if (tache.getExeption() != null) {
+                    AbstrIncident incident = ServiceGestionIncident.getInstance().gererIncident(tache.getExeption(), tache.getFlux());
+                    tache.setIncident(incident);
+                }
+            } //---------------------------Tache générale de vérification de la capture
+            else if (o.getClass().equals(TacheVerifComportementFluxGeneral.class)) {
+                TacheVerifComportementFluxGeneral cast = (TacheVerifComportementFluxGeneral) o;
+                if (cast.schedule) {
+                    DateTime dtCurrent = new DateTime();
+                    DateTime next = dtCurrent.plusDays(1).withHourOfDay(2);// withDayOfWeek(DateTimeConstants.SUNDAY);
+                    Duration dur = new Duration(dtCurrent, next);
+                    executorService.schedule(cast, dur.getStandardSeconds(), TimeUnit.SECONDS);
+                }
+            } //------------------------Tache de vérification de la capture pour un flux
+            else if (o.getClass().equals(TacheVerifComportementFLux.class)) {
+                TacheVerifComportementFLux cast = (TacheVerifComportementFLux) o;
+                if (cast.getExeption() == null) {
+                    if (cast.getAnomalie()) { // Si la tache a déterminée une annomalie de capture
+                        AnomalieCollecte anomalie = new AnomalieCollecte();
+                        anomalie.setDateDebut(new Date());
+                        anomalie.setFluxLie(cast.getFlux());
+                        anomalie.feedWithTask(cast);
+                        try {
+                            DAOFactory.getInstance().getDaoFromType(AnomalieCollecte.class).creer(anomalie);
+                        } catch (Exception ex) {
+                            Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                }
+            }
+            gererIncident((AbstrTacheSchedule) o);
+        }
+
+        /**
+         * ========================================================================================
+         * ............BLOC PERMETTANT LE RECHARGEMENT COMPLET DU SERVICE.
+         *///======================================================================================
         // Si l'élément Observable est la conf ou si On a donnée l'ordre reload all
         if ((o instanceof Conf) || (o == null && arg instanceof String && arg.equals("reload all"))) {
-                        logger.info("Rechargement complet du Service de Collecte");
+            logger.info("Rechargement complet du Service de Collecte");
             // On va recharger tout le Pool Schedulé
             Integer nbThread = DAOFactory.getInstance().getDAOConf().getConfCourante().getNbThreadRecup();
             // On tue les tache en cours
-            List<Runnable> listFutur = this.poolSchedule.shutdownNow();
-            
+            List<Runnable> listFutur = this.executorService.shutdownNow();
+
             // On recréer le Pool
-            this.poolSchedule = Executors.newScheduledThreadPool(nbThread);
+            this.executorService = Executors.newScheduledThreadPool(nbThread);
 
             List<Flux> listFlux = DAOFactory.getInstance().getDAOFlux().findAllFlux(true);
             System.out.println("NBR DE FLUX : " + listFlux.size());
@@ -146,10 +210,10 @@ public class ServiceCollecteur implements Observer {
             for (i = 0; i < listFlux.size(); i++) {
                 if (listFlux.get(i).getActive()) {
                     // On schedule
-                    TacheRecupCallable tmpTache = new TacheRecupCallable(listFlux.get(i), true, true);
+                    TacheRecupCallable tmpTache = new TacheRecupCallable(listFlux.get(i), this, true, true);
                     listFlux.get(i).setTacheRechup(tmpTache);
                     //TODO : Scheduler en fonction du temps restant. il faut modifier de deuxieme paramettre de la commande. 
-                    this.poolSchedule.schedule(tmpTache, listFlux.get(i).getMediatorFlux().getPeriodiciteCollecte(), TimeUnit.SECONDS);
+                    this.executorService.schedule(tmpTache, listFlux.get(i).getMediatorFlux().getPeriodiciteCollecte(), TimeUnit.SECONDS);
                 }
             }
         }
@@ -265,22 +329,21 @@ public class ServiceCollecteur implements Observer {
 //        }
     }
 
-
-
     /**
      * *
-     * Stope le service de collecte en fermant proprement les deux pool de tâches
-     * de collecte
+     * Stope le service de collecte en fermant proprement les deux pool de
+     * tâches de collecte
      */
     public void stopCollecte() {
         // Fermeture du scheduler
-        this.poolSchedule.shutdownNow();
+        this.executorService.shutdownNow();
         this.poolPrioritaire.shutdownNow();
     }
-    
 
-    /***
+    /**
+     * *
      * Cette méthode n'est maintenant plus utilisée au profit de majManuellAll()
+     *
      * @param flux
      * @throws Exception
      * @deprecated
@@ -288,9 +351,9 @@ public class ServiceCollecteur implements Observer {
     @Deprecated
     public void majManuelle(Flux flux) throws Exception {
         System.out.println("");
-        TacheRecupCallable task = new TacheRecupCallable(flux, false, true);
+        TacheRecupCallable task = new TacheRecupCallable(flux, this, false, true);
 
-        Future<Boolean> t = this.poolPrioritaire.submit(task);
+        Future<TacheRecupCallable> t = this.poolPrioritaire.submit(task);
 
         t.get(30, TimeUnit.SECONDS);
         // A la fin de la tache, il faut rafraichir le context objet et la base de donnée.
@@ -310,12 +373,12 @@ public class ServiceCollecteur implements Observer {
         int i;
         List<TacheRecupCallable> listTache = new ArrayList<TacheRecupCallable>();
         for (i = 0; i < listFlux.size(); i++) {
-            TacheRecupCallable task = new TacheRecupCallable(listFlux.get(i), false, true);
+            TacheRecupCallable task = new TacheRecupCallable(listFlux.get(i), this, false, true);
             listTache.add(task);
             listFlux.get(i).setTacheRechupManuelle(task);
         }
         DateTime dtDebut = new DateTime();
-        List<Future<Boolean>> listFutur = this.poolPrioritaire.invokeAll(listTache);
+        List<Future<TacheRecupCallable>> listFutur = this.poolPrioritaire.invokeAll(listTache);
     }
 
     /**
@@ -329,39 +392,46 @@ public class ServiceCollecteur implements Observer {
      */
     public void addScheduledCallable(TacheRecupCallable t) {
 //        this.poolSchedule.schedule(t, t.getFlux().getPeriodiciteCollecte(), TimeUnit.SECONDS);
-        this.poolSchedule.schedule(t, t.getFlux().getMediatorFlux().getPeriodiciteCollecte(), TimeUnit.SECONDS);
-    }
-
-    /***
-     * Retoune le pool l'executeur de thread dans lequel sont inscrit les flux actifs
-     * @return 
-     */
-    public ScheduledExecutorService getPoolSchedule() {
-        return poolSchedule;
+        this.executorService.schedule(t, t.getFlux().getMediatorFlux().getPeriodiciteCollecte(), TimeUnit.SECONDS);
     }
 
     /**
-     * modifier le pool l'executeur de thread dans lequel sont inscrit les flux actifs
-     * @param poolSchedule 
-     */
-    public void setPoolSchedule(ScheduledExecutorService poolSchedule) {
-        this.poolSchedule = poolSchedule;
-    }
-
-    
-    /***
-     * Retoune le pool prioritaire du service. Il s'agit du pool pour lancer des collectes manuelle. Celles ci sont lancée avec une priorité suppréieure au pool schedulé
-     * @return 
+     * *
+     * Retoune le pool prioritaire du service. Il s'agit du pool pour lancer des
+     * collectes manuelle. Celles ci sont lancée avec une priorité suppréieure
+     * au pool schedulé
+     *
+     * @return
      */
     public ExecutorService getPoolPrioritaire() {
         return poolPrioritaire;
     }
 
-    /***
+    /**
+     * *
      * Définir le pool prioritaire
-     * @param poolPrioritaire 
+     *
+     * @param poolPrioritaire
      */
     public void setPoolPrioritaire(ExecutorService poolPrioritaire) {
         this.poolPrioritaire = poolPrioritaire;
+    }
+
+    @Override
+    public void instancierTaches() {
+
+        TacheVerifComportementFluxGeneral comportementFluxGeneral = new TacheVerifComportementFluxGeneral(this);
+        DateTime dtCurrent = new DateTime();
+        DateTime next = dtCurrent.plusDays(1).withHourOfDay(2);// withDayOfWeek(DateTimeConstants.SUNDAY);
+        Duration dur = new Duration(dtCurrent, next);
+        this.executorService.schedule(comportementFluxGeneral, dur.getStandardSeconds(), TimeUnit.SECONDS);
+        
+        
+        //TODO : Instancier la collecte par ce biais pour plus de normalisation. 
+    }
+
+    @Override
+    protected void gererIncident(AbstrTacheSchedule tache) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

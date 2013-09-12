@@ -12,7 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
-import rssagregator.services.ServiceJMS;
+import rssagregator.services.ServiceSynchro;
 
 /**
  * Les types de flux sont associé aux flux. Un type de flux corresponds aux
@@ -76,7 +76,7 @@ public class FluxType extends AbstrObservableBeans implements Serializable {
      * Ajoute le service JMS comme observateur au beans
      */
     public void enregistrerAupresdesService() {
-        this.addObserver(ServiceJMS.getInstance());
+        this.addObserver(ServiceSynchro.getInstance());
     }
 
     @Override

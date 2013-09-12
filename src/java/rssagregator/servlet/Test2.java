@@ -6,11 +6,15 @@ package rssagregator.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import rssagregator.services.ServiceSynchro;
+import rssagregator.services.TacheTest;
 
 /**
  *
@@ -35,21 +39,13 @@ public class Test2 extends HttpServlet {
         PrintWriter out = response.getWriter();
         
         
-        // On capture ce qui est dans le post        String post = "idflux=" + URLEncoder.encode("101", "UTF-8");
-//                post += "&hash=" + URLEncoder.encode(hashString, "UTF-8");
-//                post += "&vue=" + URLEncoder.encode("xmlsync", "UTF-8");
-        
-        
-        String hash = request.getParameter("hash");
-        String vue = request.getParameter("vue");
-        String idflux = request.getParameter("idflux");
-        
-        System.out.println("===Recut ===");
-        System.out.println("hash : " + hash);
-        System.out.println("vue : " + vue);
-        System.out.println("idflux : " + idflux);
-        
-        System.out.println("=== FIN ===");
+        ServiceSynchro jMS = ServiceSynchro.getInstance();
+        TacheTest tache = new TacheTest(jMS);
+        try {
+            tache.call();
+        } catch (Exception ex) {
+            Logger.getLogger(Test2.class.getName()).log(Level.SEVERE, null, ex);
+        }
         try {
             /* TODO output your page here. You may use following sample code. */
             out.println("<!DOCTYPE html>");

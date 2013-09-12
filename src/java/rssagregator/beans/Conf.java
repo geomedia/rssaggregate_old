@@ -4,7 +4,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
-import org.joda.time.Hours;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeConstants;
+import org.joda.time.Duration;
 
 
 public class Conf extends Observable implements Serializable {
@@ -68,6 +70,11 @@ public class Conf extends Observable implements Serializable {
      */
     private Integer heureSync;
     
+    /***
+     * L'adresse http du server exemple http://ip/RSSAgregade
+     */
+    private String servurl;
+    
     
     /***
      * Spécifie si le serveur est actif ou non, c'est à dire, si il collecte ou non l'information. 
@@ -77,6 +84,12 @@ public class Conf extends Observable implements Serializable {
     
     private String login;
     private String pass;
+    
+    
+    /***
+     * Il s'agit de la path contenant les fichiers de conf du serveur
+     */
+    private String varpath;
 
     public void verifConf() {
     }
@@ -192,6 +205,37 @@ public class Conf extends Observable implements Serializable {
         this.heureSync = heureSync;
     }
 
-  
+    public String getServurl() {
+        return servurl;
+    }
+
+    public void setServurl(String servurl) {
+        this.servurl = servurl;
+    }
+
+    public String getVarpath() {
+        return varpath;
+    }
+
+    public void setVarpath(String varpath) {
+        this.varpath = varpath;
+    }
+    
+    
+    
+    
+    
+    /***
+     * Retourne le nombre de seconde avant la prochaine synchronisation du serveur maitre 
+     * @return 
+     */
+    public Long getDurationSync(){
+        DateTime dtCurrent = new DateTime();
+        DateTime next = dtCurrent.withDayOfWeek(DateTimeConstants.SUNDAY);
+        Duration dur = new Duration(dtCurrent, next);
+        return dur.getStandardSeconds();
+        
+    }
+
     
 }

@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import rssagregator.beans.Journal;
-import rssagregator.services.ServiceJMS;
+import rssagregator.services.ServiceSynchro;
 
 /**
  *
@@ -42,7 +42,7 @@ public class JMSTest extends HttpServlet {
             Journal j = new Journal();
             j.setNom("Le journal à toto");
             
-            ServiceJMS.getInstance().diffuser(j, "test");
+            ServiceSynchro.getInstance().diffuser(j, "test");
         } catch (JMSException ex) {
             Logger.getLogger(JMSTest.class.getName()).log(Level.SEVERE, null, ex);
         }

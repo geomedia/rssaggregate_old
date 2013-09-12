@@ -6,13 +6,16 @@
 --%>
 
 
+<%@page import="rssagregator.beans.incident.CollecteIncident"%>
+
+<%@page import="rssagregator.beans.incident.AbstrIncident"%>
 <%@page import="java.util.Locale"%>
 <%@page import="org.joda.time.format.DateTimeFormat"%>
 <%@page import="org.joda.time.format.ISODateTimeFormat"%>
 <%@page import="org.apache.log4j.helpers.DateTimeDateFormat"%>
 <%@page import="org.joda.time.format.DateTimeFormatter"%>
 <%@page import="org.joda.time.DateTime"%>
-<%@page import="rssagregator.beans.incident.FluxIncident"%>
+
 <%@page import="rssagregator.beans.Flux"%>
 <%@page import="org.json.simple.JSONObject"%>
 <%@page import="rssagregator.beans.Item"%>
@@ -32,16 +35,24 @@
     export.put("items", array);
 
 
-    List<FluxIncident> listIncident = (List<FluxIncident>) request.getAttribute("listobj");
+    List<AbstrIncident> listIncident = (List<AbstrIncident>) request.getAttribute("listobj");
 
     int i;
     for (i = 0; i < listIncident.size(); i++) {
         JSONObject obj = new JSONObject();
+        AbstrIncident inc = listIncident.get(i);
 
         obj.put("id", listIncident.get(i).getID());
         obj.put("messageEreur", listIncident.get(i).getMessageEreur());
-        obj.put("flux", listIncident.get(i).getFluxLie().toString());
-
+        if(inc instanceof CollecteIncident){
+            CollecteIncident fli = (CollecteIncident)inc;
+        obj.put("flux", fli.getFluxLie().toString());
+        }
+//        else if(inc instanceof ServerIncident){
+//            ServerIncident si = (ServerIncident)inc;
+//            obj.put("flux", si.getServiceEnErreur());
+//            
+//        }
 
 
         //gestion de la date de début de l'incident. On va renvoyer une chaine de caractère formaté dans le json pour facilietr le travail en javascript

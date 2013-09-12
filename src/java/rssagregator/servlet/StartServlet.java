@@ -4,25 +4,17 @@
  */
 package rssagregator.servlet;
 
-import java.io.IOException;
-import rssagregator.dao.DAOConf;
-import rssagregator.dao.DAOFactory;
-import rssagregator.dao.DaoFlux;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-import rssagregator.beans.Conf;
-import rssagregator.beans.Flux;
-import rssagregator.services.DaemonCentral;
+import rssagregator.services.ServiceServer;
 import rssagregator.services.ServiceCollecteur;
-import rssagregator.services.ServiceJMS;
 
 /**
  *
@@ -35,7 +27,7 @@ public class StartServlet implements ServletContextListener {
     private static final String ATT_SERVICE_COLLECTE = "collecte";
     private ServiceCollecteur collecte;
     org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(StartServlet.class);
-    DaemonCentral daemonCentral;
+    ServiceServer daemonCentral;
     ExecutorService es; // On n'arrive pas a lancer le daemon sans passer par l'executor service, dommage
 
     /**
@@ -48,9 +40,10 @@ public class StartServlet implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         //On lance le daemon central avec une périodicité de 5 minutes 300 000 milisecondes
-        daemonCentral = DaemonCentral.getInstance();
+        daemonCentral = ServiceServer.getInstance();
         es = Executors.newFixedThreadPool(1);
         es.submit(daemonCentral);
+//        daemonCentral.instancierTaches();
 
 //        daemonCentral.run();
 

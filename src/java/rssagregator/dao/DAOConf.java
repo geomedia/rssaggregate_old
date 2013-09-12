@@ -65,6 +65,13 @@ org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DaoFlux.class
         } else {
             throw new Exception("Impossible de lire la valeur de active");
         }
+        
+        
+        //Chargement du varpath (Ou sont normalement les fichier log et properties)
+        String varpath = PropertyLoader.loadProperti("serv.properties", "varpath");
+        conf.setVarpath(varpath);
+        
+        
 
         //Chargement du nom du serveur
         String servname = prop.getProperty("servname");
@@ -162,9 +169,14 @@ org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DaoFlux.class
         s = prop.getProperty("hostMaster");
         conf.setHostMaster(s);
         
+        
+        //-----------Chargement de l'adresse http du server
+        s = prop.getProperty("servurl");
+        conf.setServurl(s);
+        
         //--------------Chargement de l'utilisateur root par default
         String m = prop.getProperty("rootuser");
-        String p = prop.getProperty("rootpath");
+        String p = prop.getProperty("rootpass");
         UserAccount u = new UserAccount();
         u.setMail(m);
         u.setPass(p);
@@ -324,6 +336,12 @@ org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DaoFlux.class
         if (conf.getHeureSync() != null) {
             prop.setProperty("heureSync", conf.getHeureSync().toString());
         }
+        
+        //-------------adresse HTTP du Serveur
+        if(conf.getServurl()!= null){
+            prop.setProperty("servurl", conf.getServurl());
+        }
+ 
 
 //        PropertyLoader.save(prop, propfile, "les commentaire ont disparu reportez vous à la doc du projet dsl !");
         PropertyLoader.saveToFile(prop, propfile, "les commentaire ont disparu reportez vous à la doc du projet dsl !");

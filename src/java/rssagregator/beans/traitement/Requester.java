@@ -60,8 +60,10 @@ public class Requester extends AbstrRequesteur {
 //        }
         conn.setInstanceFollowRedirects(true);
         conn.connect();
+       
         
         this.httpStatut = conn.getResponseCode();
+        System.out.println("HTTP STATUT : " + this.httpStatut.toString());
 //        System.out.println("CODE : " + httpStatut);
         if (httpStatut != 200) {
             logger.info("Erreur HTTP : " + httpStatut + ". " + urlArg);

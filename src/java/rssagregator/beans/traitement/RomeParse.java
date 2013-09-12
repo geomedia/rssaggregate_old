@@ -5,6 +5,7 @@ import com.sun.syndication.feed.synd.SyndContentImpl;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.io.FeedException;
+import com.sun.syndication.io.ParsingFeedException;
 import com.sun.syndication.io.SyndFeedInput;
 
 import java.io.IOException;
@@ -144,7 +145,7 @@ public class RomeParse extends AbstrParseur implements Cloneable {
     public static RomeParse getDefaultInstance() {
         RomeParse parse = new RomeParse();
 
-        return parse;
+        return parse; 
     }
 
 
@@ -163,15 +164,17 @@ public class RomeParse extends AbstrParseur implements Cloneable {
     }
 
 
-    public void run() {
-  
-        
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+
 
     @Override
-    public  List<Item> call() throws Exception {
-        return execute(xmlIS);
+    public  List<Item> call() throws ParsingFeedException, Exception {
+        try {
+            return execute(xmlIS);
+        } catch (Exception e) {
+            logger.debug("Exeption : " + e.getClass());
+            throw e;
+        }
+        
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

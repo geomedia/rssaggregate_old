@@ -12,55 +12,77 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import rssagregator.beans.incident.FluxIncident;
+import rssagregator.beans.incident.CollecteIncident;
+import rssagregator.beans.incident.JMSPerteConnectionIncident;
 
 /**
  *
  * @author clem
  */
-public class DAOIncident extends AbstrDao {
+public class DAOIncident<T> extends AbstrDao {
 
     Boolean clos;
     Integer fistResult;
     Integer maxResult;
+    Boolean nullLastNotification;
+    
     private static final String REQ_FIND_ALL_AC_LIMIT = "SELECT i FROM incidentflux i LEFT JOIN i.fluxLie flux ORDER BY i.dateFin DESC";
-//        private static final String REQ_FIND = "SELECT i FROM incidentflux i LEFT JOIN i.fluxLie flux WHERE id=:id";
 
-//JOIN item.listFlux flux
-    protected DAOIncident(DAOFactory dAOFactory) {
-        this.classAssocie = FluxIncident.class;
-        this.dAOFactory = dAOFactory;
-        em = dAOFactory.getEntityManager();
+    //        private static final String REQ_FIND = "SELECT i FROM incidentflux i LEFT JOIN i.fluxLie flux WHERE id=:id";
+    public DAOIncident() {
     }
 
-    public List<FluxIncident> findAllLimit(Long premier, Long nombre) {
+    
+    
+    
+//JOIN item.listFlux flux
+    protected DAOIncident(DAOFactory dAOFactory) {
+        this.classAssocie = CollecteIncident.class;
+        this.dAOFactory = dAOFactory;
+        em = dAOFactory.getEntityManager();
+        nullLastNotification = false;
+        clos = false;
+    }
+
+    
+    @Deprecated
+    public List<T> findAllLimit(Long premier, Long nombre) {
         em = dAOFactory.getEntityManager();
 //        em.getTransaction().begin();
         Query query = em.createQuery(REQ_FIND_ALL_AC_LIMIT);
         query.setFirstResult(premier.intValue());
         query.setMaxResults(nombre.intValue());
-        List<FluxIncident> listResult = query.getResultList();
+        List<T> listResult = query.getResultList();
 
         return listResult;
 
     }
 
-    public List<FluxIncident> findCriteria() {
+    public List<T> findCriteria(Class<T> T) {
+      
         CriteriaBuilder cb = em.getCriteriaBuilder();
 
-        CriteriaQuery<FluxIncident> cq = cb.createQuery(FluxIncident.class);
-        Root<FluxIncident> root = cq.from(FluxIncident.class);
+        CriteriaQuery<T> cq = cb.createQuery(T);
+        Root<T> root = cq.from(T);
         List<Predicate> listWhere = new ArrayList<Predicate>();
 
 
         if (clos) {
+            System.out.println("CLOS");
             listWhere.add(cb.isNotNull(root.get("dateFin")));
         } else {
+            System.out.println("NON CLOS");
             listWhere.add(cb.isNull(root.get("dateFin")));
+        }
+        
+         System.out.println("FIND criteria");
+        if(nullLastNotification){
+            System.out.println("SET LAST NOTIF FALSE");
+            listWhere.add(cb.isNull(root.get("lastNotification")));
         }
 
 
-
+ 
         // On applique les wheres
         int i;
         if (listWhere.size() == 1) {
@@ -73,15 +95,21 @@ public class DAOIncident extends AbstrDao {
             cq.where(pr);
         }
 
-        TypedQuery<FluxIncident> tq = em.createQuery(cq);
+        TypedQuery<T> tq = em.createQuery(cq);
         if (fistResult != null && maxResult != null) {
             tq.setMaxResults(maxResult);
             tq.setFirstResult(fistResult);
         }
 
+        
+List l = tq.getResultList();
+        for (int j = 0; j < l.size(); j++) {
+            Object object = l.get(j);
+            System.out.println(object);
+            
+        }
 
-
-        return tq.getResultList();
+        return l;
     }
 
     /**
@@ -91,35 +119,66 @@ public class DAOIncident extends AbstrDao {
      * @param fluxId : l'id du flux
      * @return
      */
-    public List<FluxIncident> findIncidentOuvert(Long fluxId) {
-        String req = "SELECT i FROM incidentflux i JOIN i.fluxLie flux WHERE i.ID=:idflux";
+    @Deprecated
+    public List<T> findIncidentOuvert(Long fluxId) {
+        String req = "SELECT i FROM incidentflux i JOIN i.fluxLie flux WHERE flux.ID=:idflux AND i.dateFin IS NULL";
         Query query = em.createQuery(req);
         query.setParameter("idflux", fluxId);
         return query.getResultList();
     }
     
-    
-    public List<FluxIncident> findAllOpenIncident(){
+
+    /***
+     * Ne prend pas en compte la généricité. Ne permet que de trouver des incident de flux
+     * @return 
+     */
+    public List<T> findAllOpenIncident(){
         String req = "SELECT i FROM incidentflux i WHERE i.dateFin IS NULL";
 //        String req = "SELECT i FROM incidentflux i";
         Query query = em.createQuery(req);
         
-        List<FluxIncident> l = query.getResultList();
+        List<T> l = query.getResultList();
         for (int i = 0; i < l.size(); i++) {
-            FluxIncident fluxIncident = l.get(i);
+            T fluxIncident = l.get(i);
             System.out.println("INCIDENT : " + fluxIncident);
         }
         System.out.println("FIN");
         return l;
     }
     public static void main(String[] args) {
-        DAOIncident dao = DAOFactory.getInstance().getDAOIncident();
-        dao.findAllOpenIncident();
+        
+        //Test de la methode flux incident
+//        DAOIncident dao = DAOFactory.getInstance().getDAOIncident();
+//        List<FluxIncident> list =  dao.findAllOpenIncident();
+//        for (int i = 0; i < list.size(); i++) {
+//            CollecteIncident fluxIncident = list.get(i);
+//            System.out.println(""+fluxIncident);
+//        }
+        
+        
+        // Test de la méthode findIncidentOuvert
+//         DAOIncident dao = DAOFactory.getInstance().getDAOIncident();
+//         List<CollecteIncident> list =  dao.findIncidentOuvert(new Long(355));
+//         for (int i = 0; i < list.size(); i++) {
+//            CollecteIncident fluxIncident = list.get(i);
+//             System.out.println(fluxIncident);
+//        }
+        
+        DAOIncident<JMSPerteConnectionIncident> dao = new DAOIncident<JMSPerteConnectionIncident>(DAOFactory.getInstance());
+        dao.setClos(false);
+        List l = dao.findCriteria(JMSPerteConnectionIncident.class);
+        System.out.println("LIST SIZE : " + l.size());
+        for (int i = 0; i < l.size(); i++) {
+            Object object = l.get(i);
+            System.out.println(""+object);
+        }
+        
+        
     }
     
 
 //        @Override
-//    public FluxIncident find(Long id) {
+//    public CollecteIncident find(Long id) {
 //            
 //            
 //        return super.find(id); //To change body of generated methods, choose Tools | Templates.
@@ -127,12 +186,12 @@ public class DAOIncident extends AbstrDao {
 //    
 //    
 //    
-    public Integer findnbMax() {
+    public Integer findnbMax(Class<T> T) {
         
             CriteriaBuilder cb = em.getCriteriaBuilder();
 
-        CriteriaQuery cq = cb.createQuery(FluxIncident.class);
-        Root<FluxIncident> root = cq.from(FluxIncident.class);
+        CriteriaQuery cq = cb.createQuery(T);
+        Root<CollecteIncident> root = cq.from(T);
         List<Predicate> listWhere = new ArrayList<Predicate>();
 
 
@@ -169,8 +228,8 @@ public class DAOIncident extends AbstrDao {
 //        
 //        CriteriaBuilder cb = em.getCriteriaBuilder();
 //
-//        CriteriaQuery cq = cb.createQuery(FluxIncident.class);
-//        Root root = cq.from(FluxIncident.class);
+//        CriteriaQuery cq = cb.createQuery(CollecteIncident.class);
+//        Root root = cq.from(CollecteIncident.class);
 
         //La jointure avec whereclause
 //        if (j != null) {
@@ -216,4 +275,14 @@ public class DAOIncident extends AbstrDao {
     public void setMaxResult(Integer maxResult) {
         this.maxResult = maxResult;
     }
+
+    public Boolean getNullLastNotification() {
+        return nullLastNotification;
+    }
+
+    public void setNullLastNotification(Boolean nullLastNotification) {
+        this.nullLastNotification = nullLastNotification;
+    }
+    
+    
 }

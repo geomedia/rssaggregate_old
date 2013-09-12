@@ -4,15 +4,21 @@
  */
 package rssagregator.services;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
+import java.util.Observable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import rssagregator.beans.Conf;
 import rssagregator.beans.Flux;
+import rssagregator.beans.incident.AliveIncident;
 import rssagregator.dao.DAOConf;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoFlux;
@@ -25,7 +31,7 @@ import rssagregator.servlet.StartServlet;
  *
  * @author clem
  */
-public class DaemonCentral implements Runnable {
+public class ServiceServer extends AbstrService implements Runnable {
 
     /**
      * *
@@ -34,26 +40,28 @@ public class DaemonCentral implements Runnable {
      */
     private Boolean isStart;
     private ServiceCollecteur serviceCollecteur;
-    private ServiceJMS serviceJMS;
-    private static DaemonCentral instance = new DaemonCentral(true, 10000);
+    private ServiceSynchro serviceJMS;
+    private static ServiceServer instance = new ServiceServer(true, 10000);
+    private ServiceMailNotifier serviceMail;
     /**
-     * Permet de lancer des tâches tel que l'écriture dans le fichier "still alive";
+     * Permet de lancer des tâches tel que l'écriture dans le fichier "still
+     * alive";
      */
-    ScheduledExecutorService executorServiceAdministratif;
-    org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DaemonCentral.class);
+//    ScheduledExecutorService executorServiceAdministratif;
+    org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(ServiceServer.class);
     /**
      * Durée d'attente dans la boucle du daemon en milisecodnes
      */
     private Integer daemonTime;
 
-    private DaemonCentral(Boolean isStart, Integer daemonTime) {
+    private ServiceServer(Boolean isStart, Integer daemonTime) {
         this.isStart = isStart;
         this.daemonTime = daemonTime;
     }
 
-    public static DaemonCentral getInstance() {
+    public static ServiceServer getInstance() {
         if (instance == null) {
-            instance = new DaemonCentral(true, 10000);
+            instance = new ServiceServer(true, 10000);
         }
         return instance;
     }
@@ -71,7 +79,7 @@ public class DaemonCentral implements Runnable {
 
         //On ferme le daemon
         this.isStart = false;
-        executorServiceAdministratif.shutdownNow();
+        executorService.shutdownNow();
         logger.debug("[OK] Fermeture des tâches administratives");
     }
 
@@ -89,9 +97,7 @@ public class DaemonCentral implements Runnable {
 
             //On initialise l'executor du daemon
 //            executorServiceAdministratif = Executors.newFixedThreadPool(10);
-            executorServiceAdministratif = Executors.newScheduledThreadPool(10);
-            
-      
+            executorService = Executors.newScheduledThreadPool(10);
 
             DAOFactory.getInstance();
 
@@ -120,16 +126,22 @@ public class DaemonCentral implements Runnable {
             List<Flux> listflux = daoflux.findAllFlux(true);
             int i;
             for (i = 0; i < listflux.size(); i++) {
+
                 listflux.get(i).enregistrerAupresdesService();
                 listflux.get(i).forceChangeStatut();
                 // Il ne faut pour une fois notifier que le service de collecte pas de service JMS
                 ServiceCollecteur.getInstance().update(listflux.get(i), "add");
             }
 
-            serviceJMS = ServiceJMS.getInstance();
-            executorServiceAdministratif.submit(serviceJMS);
+            serviceJMS = ServiceSynchro.getInstance();
+            serviceJMS.instancierTaches();
+//            executorServiceAdministratif.submit(serviceJMS);
 
 
+            serviceMail = ServiceMailNotifier.getInstance();
+            serviceMail.instancierTaches();
+
+        instancierTaches();
 
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
@@ -138,7 +150,7 @@ public class DaemonCentral implements Runnable {
             try {
                 Thread.sleep(daemonTime);
             } catch (InterruptedException ex) {
-                Logger.getLogger(DaemonCentral.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ServiceServer.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
 
@@ -165,5 +177,57 @@ public class DaemonCentral implements Runnable {
      */
     public void setIsStart(Boolean isStart) {
         this.isStart = isStart;
+    }
+
+    @Override
+    public void instancierTaches() {
+        Conf c = DAOFactory.getInstance().getDAOConf().getConfCourante();
+        System.out.println("=======================================");
+        System.out.println("VAR PATH : " + c.getVarpath());
+        System.out.println("=======================================");
+
+
+        TacheStillAlive stillAlive = new TacheStillAlive(new File(c.getVarpath() + "stillalive"), this);
+        stillAlive.setSchedule(true);
+        executorService.submit(stillAlive);
+
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    /**
+     * *
+     * Les tâche gérée par le service centrales se notifient par cette methode.
+     * tache : <ul>
+     * <li>steel alive <li>
+     * </ul>
+     */
+    public void update(Observable o, Object arg) {
+
+
+        if (o instanceof AbstrTacheSchedule) {
+
+
+            if (o.getClass().equals(TacheStillAlive.class)) {
+                TacheStillAlive cast = (TacheStillAlive) o;
+                if (cast.getRupture()) {
+                    AliveIncident incident = new AliveIncident();
+                    DateTimeFormatter fmt = DateTimeFormat.forPattern("dd MMMM yyyy à hh'h'mm");
+                    incident.setMessageEreur("Il semble que l'application n'était pas ouverte entre : " + fmt.print(new DateTime(cast.getDebutRupture())) + " et : " + fmt.print(new DateTime(cast.getFinRupture())));
+
+                }
+                if (cast.getSchedule()) {
+                    executorService.schedule(cast, 15, TimeUnit.SECONDS);
+                }
+            }
+            gererIncident((AbstrTacheSchedule) o);
+        }
+
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    protected void gererIncident(AbstrTacheSchedule tache) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

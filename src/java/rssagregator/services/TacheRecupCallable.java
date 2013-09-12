@@ -2,24 +2,43 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package rssagregator.beans;
+package rssagregator.services;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Observable;
-import java.util.concurrent.Callable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Observer;
+import rssagregator.beans.Flux;
+import rssagregator.beans.Item;
 import rssagregator.beans.incident.AbstrIncident;
-import rssagregator.services.ServiceCollecteur;
-import rssagregator.services.ServiceGestionIncident;
+import rssagregator.beans.incident.CollecteIncident;
+import rssagregator.beans.incident.Incidable;
 
 /**
  *
  * @author clem
  */
-public class TacheRecupCallable extends Observable implements Callable<Boolean> {
+public class TacheRecupCallable extends AbstrTacheSchedule<TacheRecupCallable> implements Incidable{
 
+    public TacheRecupCallable(Observer s) {
+        super(s);
+        annulerTache = false;
+    }
+
+    /**
+     * *
+     *
+     * @param flux :Le flux attribuer à la tâche
+     * @param s : Le service devant gérer la tâche
+     * @param tacheSchedule : Indique si il s'agit d'une tache schedulé (qui
+     * doit être réajouté au service en fin de traitement)
+     * @param persit :Faut t'il persister dans la base de données
+     */
+    public TacheRecupCallable(Flux flux, Observer s, Boolean tacheSchedule, Boolean persit) {
+        this(s);
+        this.flux = flux;
+        this.tacheSchedule = tacheSchedule;
+        this.persit = persit;
+    }
     org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheRecupCallable.class);
     /**
      * *
@@ -36,10 +55,10 @@ public class TacheRecupCallable extends Observable implements Callable<Boolean> 
      * Cette variable est ainsi modifié au lancement de la méthode run
      */
     public Date DateDerniereRecup;
-    /**
-     * *
-     * Lorsqu'une exeption survient, on stocke sa référence ici
-     */
+//    /**
+//     * *
+//     * Lorsqu'une exeption survient, on stocke sa référence ici
+//     */
     public AbstrIncident incident;
     /**
      * *
@@ -63,75 +82,41 @@ public class TacheRecupCallable extends Observable implements Callable<Boolean> 
 
     /**
      * *
-     * Création d'une tache. Par défaut la tache est
-     *
-     * @param flux Le flux attribuer à la tâche
-     * @param schedule Indique si il s'agit d'une tache schedulé (qui doit être
-     * réenvoyé dans le pool durant son traitement)
-     * @param persister Faut t'il persister dans la base de données les
-     * résultats obtenus par la tache
-     */
-    public TacheRecupCallable(Flux flux, Boolean schedule, Boolean persister) {
-        this.flux = flux;
-        this.addObserver(flux);
-        incident = null;
-        tacheSchedule = schedule;
-        persit = persister;
-        annulerTache = false;
-    }
-
-    /**
-     * *
-     *
      * @return un booleen true si ok false si exeption capturé et géré. mais pas
      * vraiment utilisé dans le reste du programme
      * @throws Exception
      */
     @Override
-    public Boolean call() throws Exception {
+    public TacheRecupCallable call() throws Exception {
+        System.out.println("DAns la tache");
         // On block le flux pour eviter que la tache automanique et la tache manuelle agissent en même temps.
         synchronized (this.flux) {
+            System.out.println("Dans le synchro");
             // Si la tache n'a pas été annulé elle se déroule normalement.
-            if (!annulerTache) {
-                flux.setTacheRechup(this);
-                //On crée une copie du mediator devant être employé. C'est notre façon d'être thread safe
-                try {
+            try {
+                System.out.println("Annule : " + annulerTache);
+                if (!annulerTache) {
+                    flux.setTacheRechup(this);
+                    //On crée une copie du mediator devant être employé. C'est notre façon d'être thread safe
+//                    try {
                     this.flux.setMediatorFluxAction(this.flux.getMediatorFlux().genererClone());
 
-                } catch (Exception e) {
-                    logger.error("Erreur lors de la génération du clone");
-                }
-
-                //On lance la capture en utilisant le mediator qui vient d'être crée. Les erreurs sont générée ici
-                try {
                     nouvellesItems = this.flux.getMediatorFluxAction().executeActions(this.flux);
-                } catch (Exception e) {
-                    //si erreur on leve l'exeption et on lance l'enregistremnet de celle ci. on stoppe la tache
-                    this.incident = ServiceGestionIncident.getInstance().gererIncident(e, flux);
 
-                    // On réajoute la tache c'est le flux est schedulé
-                    if (flux.getActive() && this.tacheSchedule) {
-                        ServiceCollecteur.getInstance().addScheduledCallable(this);
-                    }
+                    // Tout s'est bien déroulé on va donc fermer les incidents du flux et renvoyé true
+                    ServiceGestionIncident.fermerLesIncidentsDuFlux(flux);
+                    return this;
 
-
-                    logger.error("capture de l'erreur du mediateur : " + e); //Logger.getLogger(TacheRecupCallable.class.getName()).log(Level.SEVERE, null, e);
-                    return false;
+                } else { // Si la tache est annulée.
+                    return null;
                 }
-
-
-                // Tout s'est bien déroulé on va donc fermer les incidents du flux et renvoyé true
-                ServiceGestionIncident.fermerLesIncidentsDuFlux(flux);
-
-                // On réajoute la tache c'est le flux est schedulé
-                if (flux.getActive() && this.tacheSchedule) {
-                    ServiceCollecteur.getInstance().addScheduledCallable(this);
-                }
-
-                // On returne true si tout est ok. 
-                return true; // cette variable n'est pas vraiment utilisé
+            } catch (Exception e) {
+                this.setExeption(e);
+                return this;
+            } finally { // Dans tous les cas on notifi
+                setChanged();
+                notifyObservers();
             }
-            return false;
         }
     }
 
@@ -167,19 +152,6 @@ public class TacheRecupCallable extends Observable implements Callable<Boolean> 
         this.incident = incident;
     }
 
-//    public static void main(String[] args) {
-//        Flux f = new Flux();
-//        f.setUrl("http://rss.lemkonde.fr/c/205/f/3050/index.rss");
-//
-//
-//        TacheRecupCallable t = new TacheRecupCallable(f);
-//        try {
-//            t.call();
-//        } catch (Exception ex) {
-//            System.out.println("TACHERECUPCALLABLE : CAPTURE D'UNE EXEPTION");
-//            Logger.getLogger(TacheRecupCallable.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//    }
     /**
      * *
      * Indique si cette tache est une tache schedulé devant être rajouté à la
@@ -247,4 +219,21 @@ public class TacheRecupCallable extends Observable implements Callable<Boolean> 
     public void setAnnulerTache(Boolean annulerTache) {
         this.annulerTache = annulerTache;
     }
+
+    @Override
+    public void fermerLesIncidentOuvert() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public AbstrIncident getIncidenOuvert() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Class getTypeIncident() {
+        return CollecteIncident.class;
+    }
+
+
 }

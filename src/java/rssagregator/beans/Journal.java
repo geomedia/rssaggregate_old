@@ -12,7 +12,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import rssagregator.services.ServiceJMS;
+import rssagregator.services.ServiceSynchro;
 
 /**
  * Un journal : Le monde, le Figaro... Chaque journal est instancier dans un
@@ -153,6 +153,6 @@ public class Journal extends AbstrObservableBeans implements Serializable {
      * Ajoute le service JMS comme observer du beans. 
      */
     public void enregistrerAupresdesService() {
-        this.addObserver(ServiceJMS.getInstance());
+        this.addObserver(ServiceSynchro.getInstance());
     }
 }

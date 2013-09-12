@@ -7,11 +7,8 @@ package rssagregator.servlet;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DAOIncident;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -19,9 +16,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import rssagregator.beans.form.IncidentForm;
 import rssagregator.beans.incident.AbstrIncident;
-import rssagregator.beans.incident.FluxIncident;
-import static rssagregator.servlet.JournauxSrvl.ATT_SERV_NAME;
+import rssagregator.beans.incident.CollecteIncident;
+import rssagregator.beans.incident.MailIncident;
+import rssagregator.beans.incident.SynchroIncident;
 import rssagregator.utils.ServletTool;
+import static rssagregator.utils.ServletTool.redir;
 
 /**
  * Gère les action : <ul>
@@ -30,6 +29,7 @@ import rssagregator.utils.ServletTool;
  * </li>list<li/>
  * </li>mod</li>
  * </ul>
+ *
  * @author clem
  */
 @WebServlet(name = "Incidents", urlPatterns = {"/incidents/*"})
@@ -40,7 +40,6 @@ public class IncidentsSrvl extends HttpServlet {
     public static final String ATT_OBJ = "incident";
     public String VUE = "/WEB-INF/incidentHTML.jsp";
     public static final String ATT_SERV_NAME = "incidents";
-    
 
     /**
      * Processes requests for both HTTP
@@ -84,24 +83,24 @@ public class IncidentsSrvl extends HttpServlet {
 //        request.setAttribute("action", action);
 
 
-        DAOIncident dao = DAOFactory.getInstance().getDAOIncident();
+//        DAOIncident dao = DAOFactory.getInstance().getDAOIncident();
         IncidentForm form = new IncidentForm();
         request.setAttribute("form", form);
-        
-        
-//        FluxIncident incident = null;
+
+
+//        CollecteIncident incident = null;
 //        String idString = request.getParameter("id");
 //        if (idString != null && !idString.equals("")) {
 //            Long id = new Long(request.getParameter("id"));
 //            request.setAttribute("id", id);
-//            incident = (FluxIncident) dao.find(id);
+//            incident = (CollecteIncident) dao.find(id);
 //
 ////            flux = (Flux) daoFlux.find(id);
 //        }
 
 
 //        if (request.getMethod().equals("POST") && action.equals("mod")) {
-//            form.bind(request, incident, FluxIncident.class);
+//            form.bind(request, incident, CollecteIncident.class);
 //        }
 
 
@@ -110,6 +109,47 @@ public class IncidentsSrvl extends HttpServlet {
         //============================================================================================
         //----------------------------------ACTION : RECHERCHE
         if (action.equals("list")) {
+            //Récupération du type 
+
+            Class c = null;
+             DAOIncident dao = null;
+
+
+
+            try {
+                System.out.println("AAA");
+                c = Class.forName("rssagregator.beans.incident." + request.getParameter("type"));
+                System.out.println("CLASS : " + c);
+                dao = (DAOIncident) DAOFactory.getInstance().getDaoFromType(c);
+                if (!AbstrIncident.class.isAssignableFrom(c)) {
+                    throw new Exception("non");
+                }
+            } catch (Exception e) {
+                System.out.println("ERR" + e);
+            }
+
+            System.out.println("DAO : " + dao);
+            System.out.println("CLASS : " + c);
+
+           
+            String type = request.getParameter("type");
+
+
+
+
+//            if (type.equals("FluxIncident")) {
+//                dao = (DAOIncident<CollecteIncident>) DAOFactory.getInstance().getDaoFromType(CollecteIncident.class);
+//                c = CollecteIncident.class;
+//
+//            } else if (type.equals("ServerIncident")) {
+//                System.out.println("SERVEUR INCIDENT");
+//                dao = (DAOIncident<MailIncident>) DAOFactory.getInstance().getDaoFromType(MailIncident.class);
+//                c = MailIncident.class;
+//            } else if (type.equals("SynchroIncident")) {
+//                dao = (DAOIncident) DAOFactory.getInstance().getDaoFromType(SynchroIncident.class);
+//                c = SynchroIncident.class;
+//            }
+
 
             try {
                 firstResult = new Integer(request.getParameter("firstResult"));
@@ -137,24 +177,36 @@ public class IncidentsSrvl extends HttpServlet {
             dao.setClos(clos);
             request.setAttribute("clos", clos);
 
-            Integer nbItem = dao.findnbMax();
+            Integer nbItem = dao.findnbMax(c);
             request.setAttribute("nbitem", nbItem);
 
             //recup de la list des incidents
-            List<FluxIncident> listAll = dao.findCriteria();
+            List<Object> listAll = dao.findCriteria(c);
+            System.out.println("TAILLE LISTE : " + listAll.size());
             request.setAttribute(ATT_LIST, listAll);
-        } //---------------------------------------------ACTION MODIFICATION----------------------------
-        else if (action.equals("mod")) {
+        } else if (action.equals("mod")) {
 
-            ServletTool.actionMOD(request, ATT_OBJ, ATT_FORM, FluxIncident.class, false);
+            ServletTool.actionMOD(request, ATT_OBJ, ATT_FORM, CollecteIncident.class, false);
             //---------------------------------------ACTION : READ-------------------------------------
         } else if (action.equals("read")) {
-            ServletTool.actionREAD(request, FluxIncident.class, ATT_OBJ);
+
+            // Récupération le type d'incident
+            String type = request.getParameter("type");
+            try {
+                Class c = Class.forName("rssagregator.beans.incident." + request.getParameter("type"));
+                if (!AbstrIncident.class.isAssignableFrom(c)) {
+                    throw new Exception("non");
+                }
+                ServletTool.actionREAD(request, c, ATT_OBJ);
+
+            } //               Class c = Class.forName("rssagregator.beans.incident.CollecteIncident");
+            catch (ClassNotFoundException ex) {
+                redir(request, ATT_SERV_NAME + "/read?id=" + request.getParameter("id"), "L'entité demandée n'existe pas !", Boolean.TRUE);
+            } catch (Exception ex) {
+                redir(request, ATT_SERV_NAME + "/read?id=" + request.getParameter("id"), "L'entité demandée n'existe pas !", Boolean.TRUE);
+            }
         }
-
-
-
-        // gestion de la vue et de l'envoie vers la JSP
+// gestion de la vue et de l'envoie vers la JSP
         if (vue.equals("jsondesc")) {
             System.out.println("JsonDesc");
             VUE = "/WEB-INF/incidentJSONDesc.jsp";
@@ -167,6 +219,10 @@ public class IncidentsSrvl extends HttpServlet {
 
     }
 
+//    public static void main(String[] args) throws ClassNotFoundException {
+//        Class c = Class.forName("rssagregator.beans.incident.FluxIncident");
+//        System.out.println("Class" + c.toString());
+//    }
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP

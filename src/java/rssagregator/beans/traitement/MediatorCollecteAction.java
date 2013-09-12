@@ -30,7 +30,7 @@ import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoItem;
-import rssagregator.services.ServiceJMS;
+import rssagregator.services.ServiceSynchro;
 
 /**
  * Cette classe gère les relations entre un ou plusieurs flux et les differents
@@ -145,13 +145,15 @@ public class MediatorCollecteAction extends AbstrObservableBeans implements Seri
         //-----------------------
         // REQUESTEUR
         //-----------------------
-
+        System.out.println("Execute Ici OK");
         if (requesteur.timeOut == null) {
             requesteur.timeOut = 15;
             System.out.println("");
         }
         this.requesteur.requete(flux.getUrl());
         InputStream retourInputStream = this.requesteur.getHttpInputStream();
+        
+        logger.debug("1 - OKI JUSQUE la");
 
         //-----------------------------
         //  Parseur
@@ -160,9 +162,13 @@ public class MediatorCollecteAction extends AbstrObservableBeans implements Seri
         parseur.setXmlIS(retourInputStream);
 
         ExecutorService executor = Executors.newFixedThreadPool(1);
+logger.debug("2 - OKI JUSQUE la");
         Future<List<Item>> futurs = executor.submit(parseur);
+        logger.debug("3 - OKI JUSQUE la");
+        
+        
         List<Item> listItem = futurs.get(requesteur.getTimeOut(), TimeUnit.SECONDS);
-
+logger.debug("4 - OKI JUSQUE la");
         this.nbrItemCollecte = listItem.size();
 
         //-----------------------------
@@ -182,6 +188,7 @@ public class MediatorCollecteAction extends AbstrObservableBeans implements Seri
         int i;
         DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
         for (i = 0; i < listItem.size(); i++) {
+            System.out.println("ITEMM");
             //On précise à la nouvelle item qu'elle appartient au flux collecté
             listItem.get(i).getListFlux().add(flux);
 //                if (persit) {
@@ -441,6 +448,6 @@ public class MediatorCollecteAction extends AbstrObservableBeans implements Seri
      * Enregistre le Comportement de collecte auprès du service JMS pour assurer sa diffussion sur les serveurs esclaves (la synchronisation)
      */
     public void enregistrerAupresdesService() {
-        this.addObserver(ServiceJMS.getInstance());
+        this.addObserver(ServiceSynchro.getInstance());
     }
 }

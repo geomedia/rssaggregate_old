@@ -1,5 +1,6 @@
 package rssagregator.beans;
 
+import rssagregator.services.TacheRecupCallable;
 import com.sun.syndication.feed.opml.Attribute;
 import com.sun.syndication.feed.opml.Opml;
 import com.sun.syndication.feed.opml.Outline;
@@ -15,7 +16,7 @@ import java.util.Observer;
 import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import rssagregator.beans.incident.FluxIncident;
+import rssagregator.beans.incident.CollecteIncident;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -36,7 +37,7 @@ import org.eclipse.persistence.config.CacheIsolationType;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoFlux;
 import rssagregator.services.ServiceCollecteur;
-import rssagregator.services.ServiceJMS;
+import rssagregator.services.ServiceSynchro;
 
 /**
  * Une des entités les plus importantes... Il s'agit d'un flux de syndication
@@ -112,12 +113,12 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
      * Un objet flux peut posséder différents incidents. Un incident ne possède
      * qu'un flux.
      *
-     * @element-type FluxIncident
+     * @element-type CollecteIncident
      */
 //    @OneToMany(mappedBy = "flux", cascade = CascadeType.ALL)
 //    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true,fetch = FetchType.LAZY)
     @OneToMany(mappedBy = "fluxLie", cascade = {CascadeType.ALL}, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<FluxIncident> incidentsLie;
+    private List<CollecteIncident> incidentsLie;
     /**
      *
      * @element-type InfoCollecte
@@ -198,8 +199,20 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
      * Les incident en cours sont gardée en mémoire mais pas persisté. Il faut
      * les charger au démarrage.
      */
-    @Transient
-    List<FluxIncident> incidentEnCours;
+//    @Transient
+//    List<FluxIncident> incidentEnCours;
+    /**
+     * *
+     * 
+     * Variable qui permet à l'utilisateur de qualifié le flux de stable. On
+     * considère qu'il est stable si le flux ne subit pas trop d'anomalie et
+     * qu'il renvoie un nombre d'item assez régulier. Les flux qualifié de
+     * stable son sujet a être vérifier par les tache de verification de
+     * comportement. On peut qualifier un flux de non stable pour eviter les
+     * notification abusive. Un flux non stable continu tout de même à être
+     * revevé
+     */
+    protected Boolean estStable;
 
     public List<DebugRecapLeveeFlux> getDebug() {
         return debug;
@@ -368,19 +381,16 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
         this.lastEmpruntes = new LinkedList<String>();
 
         this.mediatorFlux = MediatorCollecteAction.getDefaultCollectAction();
-        this.incidentsLie = new ArrayList<FluxIncident>();
+        this.incidentsLie = new ArrayList<CollecteIncident>();
 
-        this.incidentEnCours = new ArrayList<FluxIncident>();
+//        this.incidentEnCours = new ArrayList<FluxIncident>();
         this.setChanged();
 
         // On enregistre le Flux auprès des services qu'il doit notifier lors de ses changement d'états
 //        this.addObserver(ServiceCollecteur.getInstance());
-//        this.addObserver(ServiceJMS.getInstance());
+//        this.addObserver(ServiceSynchro.getInstance());
 
     }
-    
-    
-    
 
     public Flux(String url) {
         this();
@@ -401,7 +411,7 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
 //        this.setChanged();
 //        
 //                this.addObserver(ServiceCollecteur.getInstance());
-//        this.addObserver(ServiceJMS.getInstance());
+//        this.addObserver(ServiceSynchro.getInstance());
     }
 
     @Override
@@ -432,11 +442,11 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
         this.ID = ID;
     }
 
-    public List<FluxIncident> getIncidentsLie() {
+    public List<CollecteIncident> getIncidentsLie() {
         return incidentsLie;
     }
 
-    public void setIncidentsLie(List<FluxIncident> incidentsLie) {
+    public void setIncidentsLie(List<CollecteIncident> incidentsLie) {
         this.incidentsLie = incidentsLie;
     }
 
@@ -464,10 +474,21 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
         this.modified = modified;
     }
 
-    public void setIncidentEnCours(List<FluxIncident> incidentEnCours) {
-        this.incidentEnCours = incidentEnCours;
+    public Boolean getEstStable() {
+        return estStable;
     }
 
+    public void setEstStable(Boolean estStable) {
+        this.estStable = estStable;
+    }
+    
+    
+    
+    
+
+//    public void setIncidentEnCours(List<FluxIncident> incidentEnCours) {
+//        this.incidentEnCours = incidentEnCours;
+//    }
     /**
      * *
      * Parcours les incidents et retourne ceux qui ne sont pas clos, cad ceux
@@ -475,8 +496,18 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
      *
      * @return
      */
-    public List<FluxIncident> getIncidentEnCours() {
-        return incidentEnCours;
+    public List<CollecteIncident> getIncidentEnCours() {
+        List<CollecteIncident> incid = getIncidentsLie();
+        List<CollecteIncident> retour = new ArrayList<CollecteIncident>();
+
+        for (int i = 0; i < incid.size(); i++) {
+            CollecteIncident fluxIncident = incid.get(i);
+            if (fluxIncident.getDateFin() == null) {
+                retour.add(fluxIncident);
+            }
+        }
+
+        return retour;
 //        List<FluxIncident> iRetour = new ArrayList<FluxIncident>();
 //        
 //        List<FluxIncident> fluxIncidents;
@@ -500,10 +531,10 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
      * @return L'incident ouvert du même type que Classc ou null si rien n'a été
      * trouvé
      */
-    public FluxIncident getIncidentOuverType(Class c) {
+    public CollecteIncident getIncidentOuverType(Class c) {
 //        List<AbstrFluxIncident> listRetour = new ArrayList<AbstrFluxIncident>();
 
-        List<FluxIncident> list = this.getIncidentEnCours();
+        List<CollecteIncident> list = this.getIncidentEnCours();
         int i;
         for (i = 0; i < list.size(); i++) {
             if (list.get(i).getClass().equals(c)) {
@@ -522,7 +553,7 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
      */
     public void fermerLesIncidentOuvert() {
         int i;
-        List<FluxIncident> incidentOuvert = this.getIncidentEnCours();
+        List<CollecteIncident> incidentOuvert = this.getIncidentEnCours();
 
         for (i = 0; i < incidentOuvert.size(); i++) {
             // On vérifi quand même que la date de fin est bien null
@@ -648,18 +679,15 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
 //        this.setChanged();
 //        this.notifyObservers();
 //    }
-    
-
-
-
     @Override
-    /***
-     * Enregistre le flux auprès des service JMS et Service de collecte. Cette procédure ne peut être faite dans le constructeur à cause de l'ORM
+    /**
+     * *
+     * Enregistre le flux auprès des service JMS et Service de collecte. Cette
+     * procédure ne peut être faite dans le constructeur à cause de l'ORM
      */
     public void enregistrerAupresdesService() {
         this.deleteObservers();
-        
         this.addObserver(ServiceCollecteur.getInstance());
-        this.addObserver(ServiceJMS.getInstance());
+        this.addObserver(ServiceSynchro.getInstance());
     }
 }

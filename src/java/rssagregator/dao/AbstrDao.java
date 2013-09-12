@@ -4,18 +4,13 @@
  */
 package rssagregator.dao;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Observable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.Persistence;
 import javax.persistence.Query;
-import rssagregator.beans.Flux;
 
 /**
  * Les DAO étende observable car certaine (flux, conf), sont enregistrée auprès
@@ -37,6 +32,7 @@ public abstract class AbstrDao {
 //        em = dAOFactory.getEntityManager();
         em.getTransaction().begin();
         em.persist(obj);
+
         em.getTransaction().commit();
 
 //        em.close();
@@ -51,9 +47,15 @@ public abstract class AbstrDao {
 
         if (retour != null && retour instanceof Long && (Long) retour >= 0) {
 //            em = dAOFactory.getEntityManager();
-            em.getTransaction().begin();
-            em.merge(obj);
-            em.getTransaction().commit();
+            try {
+                System.out.println("ON MODIF");
+                em.getTransaction().begin();
+                em.merge(obj);
+                em.getTransaction().commit();
+            } catch (Exception e) {
+                System.out.println("ERR : " + e);
+            }
+
         }
     }
 
@@ -67,6 +69,7 @@ public abstract class AbstrDao {
     public Object find(Long id) {
 //        em = dAOFactory.getEntityManager();
         Class laclass = this.getClassAssocie();
+        System.out.println("LA CLASS : " + laclass);
         try {
             Object resu = em.find(laclass, id);
             return resu;

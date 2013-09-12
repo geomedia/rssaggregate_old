@@ -13,7 +13,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import rssagregator.beans.incident.FluxIncident;
+import rssagregator.beans.incident.CollecteIncident;
 
 
 /**
@@ -108,8 +108,8 @@ public class FluxTest {
         System.out.println("getIncidentEnCours");
         Flux instance = new Flux();
         
-        FluxIncident incid1 = new FluxIncident();
-        FluxIncident incid2 = new FluxIncident();
+        CollecteIncident incid1 = new CollecteIncident();
+        CollecteIncident incid2 = new CollecteIncident();
         
         incid1.setDateFin(new Date(new Long(6000)));
         
@@ -117,7 +117,7 @@ public class FluxTest {
         instance.getIncidentsLie().add(incid1);
         instance.getIncidentsLie().add(incid2);
         
-        List<FluxIncident> incidentEncours = instance.getIncidentEnCours();
+        List<CollecteIncident> incidentEncours = instance.getIncidentEnCours();
         
         
         if(incidentEncours.size()!=1){

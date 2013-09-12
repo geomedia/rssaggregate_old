@@ -10,7 +10,6 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.mail.Authenticator;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
@@ -53,14 +52,14 @@ public class Testmail extends HttpServlet {
 
 //        envoyerMailSMTP("smtp.gmail.com", true);
         InternetAddress[] address = new InternetAddress[1];
-        try {
-            address[0] = new InternetAddress("clement.rillon@gmail.com");
-            ServiceMailNotifier.getInstance().envoyerMail(address, "mon truc", "Ceci est un mail de test");
-        } catch (AddressException ex) {
-            Logger.getLogger(Testmail.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (MessagingException ex) {
-            Logger.getLogger(Testmail.class.getName()).log(Level.SEVERE, null, ex);
-        }
+//        try {
+//            address[0] = new InternetAddress("clement.rillon@gmail.com");
+//            ServiceMailNotifier.getInstance().envoyerMail(address, "mon truc", "Ceci est un mail de test");
+//        } catch (AddressException ex) {
+//            Logger.getLogger(Testmail.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (MessagingException ex) {
+//            Logger.getLogger(Testmail.class.getName()).log(Level.SEVERE, null, ex);
+//        }
 
 
 

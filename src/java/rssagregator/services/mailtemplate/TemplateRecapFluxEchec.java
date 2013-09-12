@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package rssagregator.utils;
+package rssagregator.services.mailtemplate;
 
 import java.io.IOException;
 import java.util.List;
@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import rssagregator.beans.incident.FluxIncident;
+import rssagregator.beans.incident.CollecteIncident;
 
 /**
  * Cette classe est utilisée pour générer de corps des mail de notification. Ce
@@ -27,9 +27,9 @@ import rssagregator.beans.incident.FluxIncident;
  *
  * @author clem
  */
-public class MailTemplate {
+public class TemplateRecapFluxEchec {
 
-    List<FluxIncident> listIncidentFlux;
+    List<CollecteIncident> listIncidentFlux;
 
     
     /***
@@ -45,7 +45,7 @@ public class MailTemplate {
 
         
         for (int i = 0; i < listIncidentFlux.size(); i++) {
-            FluxIncident fluxIncident = listIncidentFlux.get(i);
+            CollecteIncident fluxIncident = listIncidentFlux.get(i);
 
             corps += "<li>";
             corps += "<p>"+fluxIncident.getFluxLie()+". ";
@@ -53,7 +53,7 @@ public class MailTemplate {
                 corps+= "<a href=\""+fluxIncident.getUrlAdmin()+"\">voir détail de l'erreur</a>";
                 System.out.println("URL : " + fluxIncident.getUrlAdmin());
             } catch (IOException ex) {
-                Logger.getLogger(MailTemplate.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(TemplateRecapFluxEchec.class.getName()).log(Level.SEVERE, null, ex);
             }
             corps+="</p>";
             
@@ -69,11 +69,11 @@ public class MailTemplate {
         return corps;
     }
 
-    public List<FluxIncident> getListIncidentFlux() {
+    public List<CollecteIncident> getListIncidentFlux() {
         return listIncidentFlux;
     }
 
-    public void setListIncidentFlux(List<FluxIncident> listIncidentFlux) {
+    public void setListIncidentFlux(List<CollecteIncident> listIncidentFlux) {
         this.listIncidentFlux = listIncidentFlux;
     }
 }

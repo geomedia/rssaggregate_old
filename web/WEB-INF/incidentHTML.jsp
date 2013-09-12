@@ -21,7 +21,7 @@
 
 </div>
 
-<div id="content">
+<div id="content"> 
     <div class="post">
 
         <c:choose>
@@ -43,10 +43,15 @@
                                 </div>
 
 
-                                <input type="hidden" id="firstResult" value="0"/>
+                                <input type="hidden" id="firstResult" value="0"/> 
 
-
-                                <label>Flux par page</label>
+                                <label>Type D'incident :</label>
+                                Flux :<input type="radio" name="type" value="CollecteIncident" checked="checked" id="type" />
+                                Synchronisation : <input type="radio" name="type" value="SynchroIncident">
+                                Mail : <input type="radio" name="type" value="MailIncident"/>
+                                
+                                <br />
+                                <label>Entité par page</label>
                                 <select id="itPrPage" name="itPrPage" onChange="this.form.submit();"> 
                                     <c:forEach var="i" begin="25" end="150" step="25">
                                         <option value="${i}" <c:if test="${itPrPage==i}"> selected="selected"</c:if>>${i}</option>
@@ -80,6 +85,8 @@
                         <p>Log JAVA de l'erreur : ${incident.logErreur}</p>
 
                         <form method="POST" action="${rootpath}incidents/mod?id=${incident.ID}">
+                            <label>Clore l'incident : </label><input type="checkbox" name="dateFin"/><br />
+
                             <textarea name="noteIndicent" id="noteIndicent" cols="80" rows="30">${incident.noteIndicent}</textarea><br />
                             <input type="submit">
                         </form>
@@ -87,9 +94,18 @@
 
                     </c:when>
                     <c:when test="${action=='read'}">
-                        
+
                         <p><a href="${rootpath}incidents/mod?id=${incident.ID}">EDITER</a></p>
-                        <p><strong>Flux impacté : </strong>${incident.fluxLie}</p>
+
+                        <c:if test="${incident['class'].simpleName=='FluxIncident'}">
+                            <p><strong>Flux impacté : </strong>${incident.fluxLie}</p>
+                        </c:if>
+                        <c:if test="${incident['class'].simpleName=='ServerIncident'}">
+                            <p><strong>Service impacté : </strong>${incident.serviceEnErreur}</p>
+                        </c:if>
+
+
+
                         <p><strong>Date début :</strong> <fmt:formatDate value="${incident.dateDebut}" pattern="dd/MM/yyyy hh:mm:ss"/></p>
                         <p><strong>Date fin :</strong> <fmt:formatDate value="${incident.dateFin}" pattern="dd/MM/yyyy hh:mm:ss"/></p>
                         <p><strong>Nombre de répétition dans la période :</strong> ${incident.nombreTentativeEnEchec}</p>

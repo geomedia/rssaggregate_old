@@ -25,16 +25,17 @@ $(document).ready(function() {
         //Récupération des paramettres dans le formulaire, il seront utilisé plus bas dans la requête ajax
         $itPrPage = $('#itPrPage');
         $firstResult = $('#firstResult');
-
+        $typeincident=$('input:checked[name="type"]');
         // Gestion de la selection pour clos ou non clos;
         $clos = $('#clos').prop('checked');
+        alert($typeincident.val());
 
 //-----------------------------------------------------------------
 //                  ENVOIE DE LA REQUETE EN AJAX
 //-----------------------------------------------------------------
         $.ajax({
             url: 'incidents/list?vue=jsondesc',
-            data: '&firstResult=' + $firstResult.val() + '&itPrPage=' + $itPrPage.val() + '&clos=' + $clos, // on envoie $_GET['id_region']
+            data: '&firstResult=' + $firstResult.val() + '&itPrPage=' + $itPrPage.val() + '&clos=' + $clos+'&type='+$typeincident.val(), // on envoie $_GET['id_region']
             dataType: 'json',
             success: function(jsonentre) {
 
@@ -46,7 +47,7 @@ $(document).ready(function() {
                 for (i = 0; i < json.length; i++) {
 //                        <input name="id" type="checkbox" value="${flux.ID}"/>
                     $resudiv.append('<li>' +
-                            '<a href="incidents/read?id=' + json[i]['id'] + '">' +
+                            '<a href="incidents/read?id=' + json[i]['id'] + '&type='+$typeincident.val()+'">' +
                             json[i]['flux'] + '</a>' +
                             '<p>' + json[i]['messageEreur'] + '</p>' +
                             '<p>Date début : ' + json[i]['dateDebut'] + ' - Date fin : ' + json[i]['dateFin'] + '</p>'+

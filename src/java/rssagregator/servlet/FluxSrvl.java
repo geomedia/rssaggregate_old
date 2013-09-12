@@ -170,7 +170,7 @@ public class FluxSrvl extends HttpServlet {
                 System.out.println("" + e);
             }
 
-            list = daoFlux.findCretaria(journalLie, order_by, order_desc, firstResult, itPrPage);
+            list = daoFlux.findCretaria(journalLie, order_by, order_desc, firstResult, itPrPage, null, null);
 
             request.setAttribute(ATT_LISTOBJ, list);
             //-----------------------------------------------------ACTION REMOVE ---------------------------------------

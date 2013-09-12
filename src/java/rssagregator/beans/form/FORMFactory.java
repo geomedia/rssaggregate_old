@@ -8,7 +8,7 @@ import rssagregator.beans.Flux;
 import rssagregator.beans.FluxType;
 import rssagregator.beans.Journal;
 import rssagregator.beans.UserAccount;
-import rssagregator.beans.incident.FluxIncident;
+import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.beans.traitement.MediatorCollecteAction;
 
 /**
@@ -37,7 +37,7 @@ public class FORMFactory {
      * @return 
      */
     public AbstrForm getForm(Class beansClass){
-        if(FluxIncident.class.isAssignableFrom(beansClass)){
+        if(CollecteIncident.class.isAssignableFrom(beansClass)){
             return new IncidentForm();
         }
         else if(beansClass.equals(Flux.class)){

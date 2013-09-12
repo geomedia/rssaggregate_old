@@ -11,6 +11,10 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.jms.JMSException;
@@ -25,7 +29,8 @@ import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.beans.form.ConfForm;
 import rssagregator.dao.DAOConf;
-import rssagregator.services.ServiceJMS;
+import rssagregator.services.ServiceSynchro;
+import rssagregator.services.TacheSynchroHebdomadaire;
 import rssagregator.services.TacheSynchroRecupItem;
 import rssagregator.utils.ServletTool;
 import rssagregator.utils.XMLTool;
@@ -126,10 +131,17 @@ public class ConfigSrvl extends HttpServlet {
          *///=====================================================================================
         if (action.equals("importitem") && confcourante.getMaster()) {
             // On lance manuellement la tâche de Synchro
-            TacheSynchroRecupItem recupItem = new TacheSynchroRecupItem();
+            ScheduledExecutorService es = Executors.newSingleThreadScheduledExecutor();
+            
+            TacheSynchroHebdomadaire recupItem = new TacheSynchroHebdomadaire(ServiceSynchro.getInstance());
             List<Item> list = null;
             try {
-                list = recupItem.call();
+                TacheSynchroHebdomadaire fut = recupItem.call();
+                request.setAttribute("tacheGenerale", fut);
+                
+                
+//                list = fut.getItemTrouvees(); // TODO il faudra mettre un delai limite lors qu'on aura fait des test grandeur nature.
+//                list = recupItem.call();
                 request.setAttribute("listitemtrouve", list);
             } catch (Exception ex) {
                 Logger.getLogger(ConfigSrvl.class.getName()).log(Level.SEVERE, null, ex);
@@ -167,7 +179,7 @@ public class ConfigSrvl extends HttpServlet {
             String msg = ""; // Il s'agit du message devant informer l'utilisateur sur le relancement du serveur JMS
 
             try {
-                ServiceJMS.getInstance().startService();
+                ServiceSynchro.getInstance().openConnection();
                 msg = "OK";
             } catch (NamingException ex) {
                 Logger.getLogger(ConfigSrvl.class.getName()).log(Level.SEVERE, null, ex);
