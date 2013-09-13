@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.persistence.Query;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Journal;
 import rssagregator.services.ServiceCollecteur;
@@ -104,11 +103,11 @@ public class DaoJournal extends AbstrDao {
 //        DAOFactory.getInstance().getDAOFlux().notifyObservers();
         
         journal.setFluxLie(new ArrayList<Flux>());
-        em = DAOFactory.getInstance().getEntityManager();
-        
-        em.getTransaction().begin();
-        em.remove(em.merge(obj));
-        em.getTransaction().commit();
+        super.remove(obj);
+//        em = DAOFactory.getInstance().getEntityManager();
+//        em.getTransaction().begin();
+//        em.remove(em.merge(obj));
+//        em.getTransaction().commit();
 //        super.remove(obj); //To change body of generated methods, choose Tools | Templates.
         
          

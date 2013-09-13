@@ -334,12 +334,11 @@ public class ServiceCollecteur extends AbstrService {
      * Stope le service de collecte en fermant proprement les deux pool de
      * tâches de collecte
      */
-    public void stopCollecte() {
-        // Fermeture du scheduler
-        this.executorService.shutdownNow();
-        this.poolPrioritaire.shutdownNow();
-    }
-
+//    public void stopCollecte() {
+//        // Fermeture du scheduler
+//        this.executorService.shutdownNow();
+//        this.poolPrioritaire.shutdownNow();
+//    }
     /**
      * *
      * Cette méthode n'est maintenant plus utilisée au profit de majManuellAll()
@@ -390,11 +389,10 @@ public class ServiceCollecteur extends AbstrService {
      *
      * @param t Le RUNNABLE qui doit être ajouté au pool
      */
-    public void addScheduledCallable(TacheRecupCallable t) {
-//        this.poolSchedule.schedule(t, t.getFlux().getPeriodiciteCollecte(), TimeUnit.SECONDS);
-        this.executorService.schedule(t, t.getFlux().getMediatorFlux().getPeriodiciteCollecte(), TimeUnit.SECONDS);
-    }
-
+//    public void addScheduledCallable(TacheRecupCallable t) {
+////        this.poolSchedule.schedule(t, t.getFlux().getPeriodiciteCollecte(), TimeUnit.SECONDS);
+//        this.executorService.schedule(t, t.getFlux().getMediatorFlux().getPeriodiciteCollecte(), TimeUnit.SECONDS);
+//    }
     /**
      * *
      * Retoune le pool prioritaire du service. Il s'agit du pool pour lancer des
@@ -420,18 +418,36 @@ public class ServiceCollecteur extends AbstrService {
     @Override
     public void instancierTaches() {
 
+        //Il doit commencer par charger la conf 
+        Conf conf = DAOFactory.getInstance().getDAOConf().getConfCourante();
+        update(conf, null);
+
+        //---------------TACHES DE COLLECTE--------------
+
+        List<Flux> listf = DAOFactory.getInstance().getDAOFlux().findAllFlux(Boolean.TRUE);
+        for (int i = 0; i < listf.size(); i++) {
+            Flux flux = listf.get(i);
+            update(flux, "add");
+        }
+
+        //----------------TACHE TacheVerifComportementFluxGeneral
         TacheVerifComportementFluxGeneral comportementFluxGeneral = new TacheVerifComportementFluxGeneral(this);
         DateTime dtCurrent = new DateTime();
         DateTime next = dtCurrent.plusDays(1).withHourOfDay(2);// withDayOfWeek(DateTimeConstants.SUNDAY);
         Duration dur = new Duration(dtCurrent, next);
         this.executorService.schedule(comportementFluxGeneral, dur.getStandardSeconds(), TimeUnit.SECONDS);
-        
-        
-        //TODO : Instancier la collecte par ce biais pour plus de normalisation. 
+
     }
 
     @Override
     protected void gererIncident(AbstrTacheSchedule tache) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void stopService() throws SecurityException, RuntimeException {
+        this.poolPrioritaire.shutdownNow();
+        this.executorService.shutdownNow();
+
     }
 }

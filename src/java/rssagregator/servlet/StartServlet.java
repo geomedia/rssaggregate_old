@@ -7,8 +7,6 @@ package rssagregator.servlet;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.util.Enumeration;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletContextEvent;
@@ -28,7 +26,6 @@ public class StartServlet implements ServletContextListener {
     private ServiceCollecteur collecte;
     org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(StartServlet.class);
     ServiceServer daemonCentral;
-    ExecutorService es; // On n'arrive pas a lancer le daemon sans passer par l'executor service, dommage
 
     /**
      * *
@@ -41,8 +38,9 @@ public class StartServlet implements ServletContextListener {
     public void contextInitialized(ServletContextEvent sce) {
         //On lance le daemon central avec une périodicité de 5 minutes 300 000 milisecondes
         daemonCentral = ServiceServer.getInstance();
-        es = Executors.newFixedThreadPool(1);
-        es.submit(daemonCentral);
+        daemonCentral.instancierTaches();
+//        es = Executors.newFixedThreadPool(1);
+//        es.submit(daemonCentral);
 //        daemonCentral.instancierTaches();
 
 //        daemonCentral.run();
@@ -138,10 +136,10 @@ public class StartServlet implements ServletContextListener {
     public void contextDestroyed(ServletContextEvent sce) {
         // On arrete les taches de collecte
         logger.debug("Fermeture de l'Application");
-        daemonCentral.stop();
+        daemonCentral.stopService();
         
-        es.shutdown();
-        logger.debug("[OK] Fermeture du daemoncentral");
+//        es.shutdown();
+//        logger.debug("[OK] Fermeture du daemoncentral");
 
         destroyDriver();
         logger.debug("[OK] Déenregistremnet des driver JDBC");

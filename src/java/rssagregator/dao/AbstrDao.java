@@ -10,7 +10,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
+import rssagregator.beans.BeanSynchronise;
+import rssagregator.services.ServiceSynchro;
 
 /**
  * Les DAO étende observable car certaine (flux, conf), sont enregistrée auprès
@@ -26,15 +29,27 @@ public abstract class AbstrDao {
     protected DAOFactory dAOFactory;
 //    protected static String REQ_FIND_ALL = "SELECT zazaza";
     protected Class classAssocie;
+    org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(AbstrDao.class);
 
     public void creer(Object obj) throws Exception {
         //Il faut initialiser le em
 //        em = dAOFactory.getEntityManager();
-        em.getTransaction().begin();
+        EntityTransaction tr = em.getTransaction();
+        tr.begin();
         em.persist(obj);
+        try {
+            if (BeanSynchronise.class.isAssignableFrom(obj.getClass())) {
+                ServiceSynchro.getInstance().diffuser(obj, "add");
+            }
+            tr.commit();
+        } catch (Exception e) {
+            logger.error("Echec de la suppression du beans : " + e);
+            tr.rollback();
+            throw e;
+        }
 
-        em.getTransaction().commit();
-
+//        em.getTransaction().begin();
+//        em.getTransaction().commit();
 //        em.close();
     }
 
@@ -47,15 +62,26 @@ public abstract class AbstrDao {
 
         if (retour != null && retour instanceof Long && (Long) retour >= 0) {
 //            em = dAOFactory.getEntityManager();
-            try {
-                System.out.println("ON MODIF");
-                em.getTransaction().begin();
-                em.merge(obj);
-                em.getTransaction().commit();
-            } catch (Exception e) {
-                System.out.println("ERR : " + e);
-            }
 
+            EntityTransaction tr = em.getTransaction();
+//            System.out.println("ON MODIF");
+            tr.begin();
+//            em.getTransaction().begin();
+            em.merge(obj);
+            try {
+                // Si il s'agit d'un beans devant être synchronisé On lance la diff
+                if (BeanSynchronise.class.isAssignableFrom(obj.getClass())) {
+                    ServiceSynchro.getInstance().diffuser(obj, "mod");
+                }
+                tr.commit();
+
+            } catch (Exception e) {
+                // SI il y a une erreur lors du comit ou de la diffusion JMS On rollback
+                logger.error("erreur lors de la modification du beans : " + e);
+//                em.getTransaction().rollback();
+                tr.rollback();
+                throw e;
+            }
         }
     }
 
@@ -88,12 +114,27 @@ public abstract class AbstrDao {
      */
     public void remove(Object obj) throws Exception {
 //        em = dAOFactory.getEntityManager();
-        em.getTransaction().begin();
-//        em.remove(obj);
-
+        EntityTransaction tr = em.getTransaction();
+        tr.begin();
         em.remove(em.merge(obj));
 
-        em.getTransaction().commit();
+        try {
+            if (BeanSynchronise.class.isAssignableFrom(obj.getClass())) {
+                ServiceSynchro.getInstance().diffuser(obj, "rem");
+            }
+            tr.commit();
+            em.getTransaction().commit();
+        } catch (Exception e) {
+
+            tr.rollback();
+            logger.error("Erreur lors de la suppression du beans : " + e);
+        }
+//        em.getTransaction().begin();
+//        em.remove(obj);
+
+
+
+
 //        em.close();
     }
 

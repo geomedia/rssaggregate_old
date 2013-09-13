@@ -7,10 +7,7 @@ package rssagregator.dao;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.persistence.Query;
-import javax.persistence.RollbackException;
 import javax.persistence.TransactionRequiredException;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -22,10 +19,7 @@ import rssagregator.beans.Flux;
 import rssagregator.beans.FluxType;
 import rssagregator.beans.Item;
 import rssagregator.beans.Journal;
-import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.beans.traitement.MediatorCollecteAction;
-import rssagregator.services.ServiceCollecteur;
-import rssagregator.services.ServiceGestionIncident;
 
 /**
  *
@@ -109,9 +103,10 @@ public class DaoFlux extends AbstrDao {
         flux.setItem(new ArrayList<Item>());
 
         //On supprime le flux
-        em.getTransaction().begin();
-        em.remove(em.merge(flux));
-        em.getTransaction().commit();
+        super.remove(flux);
+//        em.getTransaction().begin();
+//        em.remove(em.merge(flux));
+//        em.getTransaction().commit();
 
     }
 
@@ -155,6 +150,9 @@ public class DaoFlux extends AbstrDao {
             DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
             List<String> dernierHash = daoItem.findLastHash(fl, 100);
             fl.setLastEmpruntes(dernierHash);
+            
+            //On enregistre le flux à ses services
+            fl.enregistrerAupresdesService();
 
 
             //On doit également charger les incident en cours pour les flux
@@ -223,15 +221,16 @@ public class DaoFlux extends AbstrDao {
                 }
             }
         }
+        
+        super.modifier(fl);
 
 
-
-        em.getTransaction().begin();
-        em.persist(fl);
-        em.getTransaction().commit();
-        fl.addObserver(ServiceCollecteur.getInstance());
-        fl.forceChangeStatut();
-        fl.notifyObservers();
+//        em.getTransaction().begin();
+//        em.persist(fl);
+//        em.getTransaction().commit();
+//        fl.addObserver(ServiceCollecteur.getInstance());
+//        fl.forceChangeStatut();
+//        fl.notifyObservers();
     }
 
     /**
@@ -264,21 +263,22 @@ public class DaoFlux extends AbstrDao {
     public synchronized void modifier(Object obj) throws Exception {
 
         Flux flux = (Flux) obj;
+        super.modifier(flux);
 
-        try {
-            if (flux.getID() != null && flux.getID() >= 0) {
-//                em = dAOFactory.getEntityManager();
-                em.getTransaction().begin();
-                em.merge(flux);
-                em.getTransaction().commit();
-                flux.forceChangeStatut();
-            }
-
-        } catch (RollbackException e) {
-            ServiceGestionIncident.getInstance().gererIncident(e, flux);
-            System.out.println("EXEPTION BDD");
-            throw e;
-        }
+//        try {
+//            if (flux.getID() != null && flux.getID() >= 0) {
+////                em = dAOFactory.getEntityManager();
+//                em.getTransaction().begin();
+//                em.merge(flux);
+//                em.getTransaction().commit();
+//                flux.forceChangeStatut();
+//            }
+//
+//        } catch (RollbackException e) {
+//            ServiceGestionIncident.getInstance().gererIncident(e, flux);
+//            System.out.println("EXEPTION BDD");
+//            throw e;
+//        }
     }
 
     /**
@@ -288,24 +288,25 @@ public class DaoFlux extends AbstrDao {
      *
      * @param flux
      */
-    @Deprecated
-    public synchronized void modifierFluxZ(Flux flux) throws IllegalStateException, RollbackException, Exception {
-
-        try {
-            if (flux.getID() != null && flux.getID() >= 0) {
-//                em = dAOFactory.getEntityManager();
-                em.getTransaction().begin();
-                em.merge(flux);
-                em.getTransaction().commit();
-                flux.forceChangeStatut();
-            }
-
-        } catch (RollbackException e) {
-            ServiceGestionIncident.getInstance().gererIncident(e, flux);
-            System.out.println("EXEPTION BDD");
-            throw e;
-        }
-    }
+//    @Deprecated
+//    public synchronized void modifierFluxZ(Flux flux) throws IllegalStateException, RollbackException, Exception {
+//
+//        
+//        try {
+//            if (flux.getID() != null && flux.getID() >= 0) {
+////                em = dAOFactory.getEntityManager();
+//                em.getTransaction().begin();
+//                em.merge(flux);
+//                em.getTransaction().commit();
+//                flux.forceChangeStatut();
+//            }
+//
+//        } catch (RollbackException e) {
+//            ServiceGestionIncident.getInstance().gererIncident(e, flux);
+//            System.out.println("EXEPTION BDD");
+//            throw e;
+//        }
+//    }
 
     /**
      * *

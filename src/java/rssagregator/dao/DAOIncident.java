@@ -68,16 +68,12 @@ public class DAOIncident<T> extends AbstrDao {
 
 
         if (clos) {
-            System.out.println("CLOS");
             listWhere.add(cb.isNotNull(root.get("dateFin")));
         } else {
-            System.out.println("NON CLOS");
             listWhere.add(cb.isNull(root.get("dateFin")));
         }
         
-         System.out.println("FIND criteria");
         if(nullLastNotification){
-            System.out.println("SET LAST NOTIF FALSE");
             listWhere.add(cb.isNull(root.get("lastNotification")));
         }
 

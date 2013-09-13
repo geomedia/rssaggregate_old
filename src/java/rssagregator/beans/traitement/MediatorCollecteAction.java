@@ -25,6 +25,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.xml.ws.http.HTTPException;
 import rssagregator.beans.AbstrObservableBeans;
+import rssagregator.beans.BeanSynchronise;
 import rssagregator.beans.DebugRecapLeveeFlux;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
@@ -46,7 +47,7 @@ import rssagregator.services.ServiceSynchro;
  */
 @Entity
 @Table(name = "tr_mediatocollecteaction")
-public class MediatorCollecteAction extends AbstrObservableBeans implements Serializable, Cloneable, Callable<List<Item>> {
+public class MediatorCollecteAction extends AbstrObservableBeans implements Serializable, Cloneable, BeanSynchronise {
 
     @Transient
     org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(MediatorCollecteAction.class);
@@ -168,6 +169,7 @@ logger.debug("2 - OKI JUSQUE la");
         
         
         List<Item> listItem = futurs.get(requesteur.getTimeOut(), TimeUnit.SECONDS);
+        executor.shutdownNow();
 logger.debug("4 - OKI JUSQUE la");
         this.nbrItemCollecte = listItem.size();
 
@@ -438,10 +440,7 @@ logger.debug("4 - OKI JUSQUE la");
         }
     }
 
-    @Override
-    public List<Item> call() throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+
 
     @Override
     /***

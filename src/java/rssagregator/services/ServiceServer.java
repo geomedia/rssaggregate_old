@@ -31,7 +31,7 @@ import rssagregator.servlet.StartServlet;
  *
  * @author clem
  */
-public class ServiceServer extends AbstrService implements Runnable {
+public class ServiceServer extends AbstrService {
 
     /**
      * *
@@ -54,7 +54,14 @@ public class ServiceServer extends AbstrService implements Runnable {
      */
     private Integer daemonTime;
 
+    public ServiceServer(ScheduledExecutorService executorService1) {
+        super(executorService1);
+    }
+
+    
+    
     private ServiceServer(Boolean isStart, Integer daemonTime) {
+        this(Executors.newSingleThreadScheduledExecutor());
         this.isStart = isStart;
         this.daemonTime = daemonTime;
     }
@@ -66,22 +73,7 @@ public class ServiceServer extends AbstrService implements Runnable {
         return instance;
     }
 
-    /**
-     * *
-     * Demande au daemon de fermer tous les services lancés
-     */
-    public void stop() {
-        //On ferme les services
-        serviceCollecteur.stopCollecte();
-        logger.debug("[OK] Fin du Processus de collecte");
-        serviceJMS.close();
-        logger.debug("[OK] Fin du service JMS");
 
-        //On ferme le daemon
-        this.isStart = false;
-        executorService.shutdownNow();
-        logger.debug("[OK] Fermeture des tâches administratives");
-    }
 
     /**
      * Démarre le service. Commence par charger la conf et des informations dans
@@ -89,74 +81,19 @@ public class ServiceServer extends AbstrService implements Runnable {
      * sync, mail). termine sur une boucle infinie permettant d'écrire toute les
      * x seconces dans un fichier still alive
      */
-    @Override
-    public void run() {
-        logger.info("Chargement du context initial");
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-
-            //On initialise l'executor du daemon
-//            executorServiceAdministratif = Executors.newFixedThreadPool(10);
-            executorService = Executors.newScheduledThreadPool(10);
-
-            DAOFactory.getInstance();
-
-            DaoFlux daoflux = DAOFactory.getInstance().getDAOFlux();
-            DAOConf daoconf = DAOFactory.getInstance().getDAOConf();
-
-            daoflux.chargerDepuisBd();
-
-            try {
-                daoconf.charger();
-            } catch (IOException ex) {
-                Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (Exception ex) {
-                Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
-            }
-
-            // Initialisation du  collecteur
-            serviceCollecteur = ServiceCollecteur.getInstance();
-
-            // On charge la conf et on notifi le collecteur
-            Conf conf = daoconf.getConfCourante();
-            conf.addObserver(serviceCollecteur);
-            conf.forceNotifyObserver();
-
-            // On demande au collecteur de charger chacun des flux. On ne peut pas passer par le classique notifiObserver car les flux sont aussi enregistré au service JMS qui lui ne doit pas être avertis à ce moment
-            List<Flux> listflux = daoflux.findAllFlux(true);
-            int i;
-            for (i = 0; i < listflux.size(); i++) {
-
-                listflux.get(i).enregistrerAupresdesService();
-                listflux.get(i).forceChangeStatut();
-                // Il ne faut pour une fois notifier que le service de collecte pas de service JMS
-                ServiceCollecteur.getInstance().update(listflux.get(i), "add");
-            }
-
-            serviceJMS = ServiceSynchro.getInstance();
-            serviceJMS.instancierTaches();
-//            executorServiceAdministratif.submit(serviceJMS);
-
-
-            serviceMail = ServiceMailNotifier.getInstance();
-            serviceMail.instancierTaches();
-
-        instancierTaches();
-
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        while (isStart) {
-            try {
-                Thread.sleep(daemonTime);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(ServiceServer.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-
-
-    }
-
+//    @Override
+//    public void run() {
+//      
+//        while (isStart) {
+//            try {
+//                Thread.sleep(daemonTime);
+//            } catch (InterruptedException ex) {
+//                Logger.getLogger(ServiceServer.class.getName()).log(Level.SEVERE, null, ex);
+//            }
+//        }
+//
+//
+//    }
     /**
      * *
      * Boolen critère de la boucle infinie du daemon. tant qu'il est vrai le
@@ -179,8 +116,91 @@ public class ServiceServer extends AbstrService implements Runnable {
         this.isStart = isStart;
     }
 
+    /**
+     * *
+     * Lance les autres services de l'application : <ul>
+     * <li>ServiceMail</li>
+     * <li>ServiceCollecte</li>
+     * <li>ServiceSynchro</li>
+     * </ul>
+     * Ainsi que les tâches propres au ServiceServeur : <ul>
+     * <li>StillAlive</li>
+     * <li>...</li>
+     * </ul>
+     */
     @Override
     public void instancierTaches() {
+        logger.info("Lancement des services");
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+
+            //On initialise initialise le pool du service
+            executorService = Executors.newScheduledThreadPool(10);
+
+            // On initialise la DAO FACTORY
+            DAOFactory.getInstance();
+
+            //-------------------CHARGEMENT DE LA CONF
+
+            DAOConf daoconf = DAOFactory.getInstance().getDAOConf();
+            try {
+                daoconf.charger();
+            } catch (IOException ex) {
+                Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (Exception ex) {
+                Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            // On charge la conf et on notifi le collecteur
+            Conf conf = daoconf.getConfCourante();
+            conf.enregistrerAupresdesService();
+
+
+            // -----------------Chargement des flux
+            DaoFlux daoflux = DAOFactory.getInstance().getDAOFlux();
+            daoflux.chargerDepuisBd();
+
+            // On demande au collecteur de charger chacun des flux. On ne peut pas passer par le classique notifiObserver car les flux sont aussi enregistré au service JMS qui lui ne doit pas être avertis à ce moment
+//            List<Flux> listflux = daoflux.findAllFlux(true);
+//            for (int i = 0; i < listflux.size(); i++) {
+//                listflux.get(i).enregistrerAupresdesService();
+//                listflux.get(i).forceChangeStatut();
+//                // Il ne faut pour une fois notifier que le service de collecte pas de service JMS
+//                ServiceCollecteur.getInstance().update(listflux.get(i), "add");
+//            }
+
+
+
+            // Instanciation des services
+            serviceCollecteur = ServiceCollecteur.getInstance();
+            serviceJMS = ServiceSynchro.getInstance();
+            serviceMail = ServiceMailNotifier.getInstance();
+
+            //Lancement des service
+
+            serviceCollecteur.instancierTaches();
+            serviceJMS.instancierTaches();
+            serviceMail.instancierTaches();
+
+//            conf.addObserver(serviceCollecteur);
+//            conf.forceNotifyObserver();
+
+
+
+
+
+//            executorServiceAdministratif.submit(serviceJMS);
+
+
+
+
+
+
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+
+
         Conf c = DAOFactory.getInstance().getDAOConf().getConfCourante();
         System.out.println("=======================================");
         System.out.println("VAR PATH : " + c.getVarpath());
@@ -229,5 +249,44 @@ public class ServiceServer extends AbstrService implements Runnable {
     @Override
     protected void gererIncident(AbstrTacheSchedule tache) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void stopService() throws RuntimeException, SecurityException {
+        //On ferme les services
+        logger.info("Fermeture des Service");
+        try {
+            serviceCollecteur.stopService();
+            logger.debug("[OK] Fin du Processus de collecte");
+        } catch (Exception e) {
+            logger.error("Echec de la fermeture du Service de collecte : " + e);
+        }
+
+        try {
+            serviceJMS.stopService();
+            logger.debug("[OK] Fin du service de Synchro");
+        } catch (Exception e) {
+            logger.error("Echec lors de la fermeture du service de Synchro : " + e);
+        }
+
+
+        try {
+            serviceMail.stopService();
+            logger.debug("[OK] FIN de service Mail");
+        } catch (Exception e) {
+            logger.error("Echec de la fermeture du Service MAIL : " + e);
+        }
+
+
+
+        //On ferme le daemon
+        this.isStart = false;
+        try {
+            executorService.shutdownNow();
+            logger.debug("[OK] Fermeture des tâches administratives");
+        } catch (Exception e) {
+            logger.error("Lors de la cloture du pool du Service Serveur");
+        }
+
     }
 }

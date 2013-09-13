@@ -20,7 +20,7 @@ import rssagregator.services.ServiceSynchro;
  */
 @Entity
 @Cacheable(value = true)
-public class Journal extends AbstrObservableBeans implements Serializable {
+public class Journal extends AbstrObservableBeans implements Serializable, BeanSynchronise {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

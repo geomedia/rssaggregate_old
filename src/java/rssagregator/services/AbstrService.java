@@ -20,10 +20,10 @@ public abstract class AbstrService implements Observer {
         executorService = executorService1;
     }
 
-    public AbstrService() {
-        ScheduledExecutorService exe = Executors.newScheduledThreadPool(1);
-        this.executorService = exe;
-    }
+//    public AbstrService() {
+//        ScheduledExecutorService exe = Executors.newScheduledThreadPool(1);
+//        this.executorService = exe;
+//    }
 
     /**
      * *
@@ -64,4 +64,10 @@ public abstract class AbstrService implements Observer {
      * @param tache
      */
     protected abstract void gererIncident(AbstrTacheSchedule tache);
+    
+    
+    /***
+     * Permet de stoper le service. Cette méthode doit être redéfini par tous les service. Chacun est chargé de clore les tache lancée et détruire son pool de thread
+     */
+    public abstract void stopService() throws SecurityException, RuntimeException;
 }

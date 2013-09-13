@@ -89,7 +89,6 @@ public class StillAlivePOJO {
             retour = false;
         }
 
-        logger.debug("fin OK : " + retour);
         return retour;
     }
 

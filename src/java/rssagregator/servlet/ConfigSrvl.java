@@ -11,10 +11,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.jms.JMSException;
@@ -31,7 +27,6 @@ import rssagregator.beans.form.ConfForm;
 import rssagregator.dao.DAOConf;
 import rssagregator.services.ServiceSynchro;
 import rssagregator.services.TacheSynchroHebdomadaire;
-import rssagregator.services.TacheSynchroRecupItem;
 import rssagregator.utils.ServletTool;
 import rssagregator.utils.XMLTool;
 
@@ -131,7 +126,7 @@ public class ConfigSrvl extends HttpServlet {
          *///=====================================================================================
         if (action.equals("importitem") && confcourante.getMaster()) {
             // On lance manuellement la tâche de Synchro
-            ScheduledExecutorService es = Executors.newSingleThreadScheduledExecutor();
+//            ScheduledExecutorService es = Executors.newSingleThreadScheduledExecutor();
             
             TacheSynchroHebdomadaire recupItem = new TacheSynchroHebdomadaire(ServiceSynchro.getInstance());
             List<Item> list = null;

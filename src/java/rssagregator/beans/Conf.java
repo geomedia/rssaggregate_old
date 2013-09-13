@@ -7,9 +7,10 @@ import java.util.Observable;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.Duration;
+import rssagregator.services.ServiceCollecteur;
 
 
-public class Conf extends Observable implements Serializable {
+public class Conf extends AbstrObservableBeans implements Serializable {
 
     public Conf() {
     this.active = true;
@@ -235,6 +236,17 @@ public class Conf extends Observable implements Serializable {
         Duration dur = new Duration(dtCurrent, next);
         return dur.getStandardSeconds();
         
+    }
+
+    
+    /***
+     * Inscrit le beans aux service : <ul>
+     * <li>Collecteur</li>
+     * </ul>
+     */
+    @Override
+    public void enregistrerAupresdesService() {
+        this.addObserver(ServiceCollecteur.getInstance());
     }
 
     

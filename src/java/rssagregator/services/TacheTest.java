@@ -6,7 +6,6 @@ package rssagregator.services;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
 import rssagregator.beans.Item;
 
 /**

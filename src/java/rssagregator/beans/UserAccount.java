@@ -20,7 +20,7 @@ import org.apache.tomcat.util.buf.HexUtils;
  * @author clem
  */
 @Entity
-public class UserAccount implements Serializable {
+public class UserAccount implements Serializable, BeanSynchronise{
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

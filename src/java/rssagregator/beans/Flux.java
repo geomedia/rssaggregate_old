@@ -48,7 +48,7 @@ import rssagregator.services.ServiceSynchro;
 @Table(name = "flux")
 @Cacheable(value = true)
 @Cache(type = CacheType.FULL, coordinationType = CacheCoordinationType.SEND_NEW_OBJECTS_WITH_CHANGES, isolation = CacheIsolationType.SHARED)
-public class Flux extends AbstrObservableBeans implements Observer, Serializable {
+public class Flux extends AbstrObservableBeans implements Observer, Serializable, BeanSynchronise {
 
 //    @PersistenceContext(type= PersistenceContextType.EXTENDED)
 //private EntityManager em;
@@ -688,6 +688,6 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
     public void enregistrerAupresdesService() {
         this.deleteObservers();
         this.addObserver(ServiceCollecteur.getInstance());
-        this.addObserver(ServiceSynchro.getInstance());
+//        this.addObserver(ServiceSynchro.getInstance());
     }
 }

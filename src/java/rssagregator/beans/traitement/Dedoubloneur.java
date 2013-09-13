@@ -10,7 +10,6 @@ import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoItem;
 
 @Entity(name = "Dedoubloneur")
-
 public class Dedoubloneur extends AbstrDedoublonneur {
 
     private static String description = "le dédoublonneur permet .....";

@@ -17,6 +17,7 @@ import rssagregator.beans.form.DAOGenerique;
 import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.AnomalieCollecte;
 import rssagregator.beans.incident.CollecteIncident;
+import rssagregator.beans.incident.Incidable;
 import rssagregator.beans.incident.IncidentFactory;
 import rssagregator.beans.incident.JMSPerteConnectionIncident;
 import rssagregator.beans.incident.MailIncident;
@@ -30,8 +31,9 @@ import rssagregator.services.TacheSynchroRecupItem;
  *
  * @author clem
  */
-public class DAOFactory {
+public class DAOFactory<T extends AbstrDao> {
 
+    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DAOFactory.class);
     private static DaoItem daoItem;
     protected String PERSISTENCE_UNIT_NAME = "RSSAgregatePU2";
     private static DAOFactory instance = new DAOFactory();
@@ -151,77 +153,92 @@ public class DAOFactory {
      * @return : La dao permettant de gérer le type de beans correspondant à la
      * class envoyée en argument
      */
-    public AbstrDao getDaoFromType(Class beansClass) throws UnsupportedOperationException {
+    public T getDaoFromType(Class beansClass) throws UnsupportedOperationException {
+
+        T dao = null;
+
         if (beansClass.equals(Flux.class)) {
-            return getDAOFlux();
+            dao = (T) getDAOFlux();
+//            return (T) getDAOFlux();
         } else if (CollecteIncident.class.isAssignableFrom(beansClass)) {
-            return getDAOIncident();
+            dao = (T) getDAOIncident();
         } else if (beansClass.equals(Journal.class)) {
-            return getDaoJournal();
+            dao = (T) getDaoJournal();
         } else if (beansClass.equals(MediatorCollecteAction.class)) {
-            return getDAOComportementCollecte();
+            dao = (T) getDAOComportementCollecte();
         } else if (beansClass.equals(FluxType.class)) {
             DAOGenerique d = getDAOGenerique();
             d.setClassAssocie(beansClass);
-            return d;
+            dao = (T) d;
         } else if (beansClass.equals(UserAccount.class)) {
-            return getDAOUser();
+            dao = (T) getDAOUser();
         } else if (beansClass.equals(MailIncident.class)) {
-            DAOIncident<MailIncident> dao = new DAOIncident<MailIncident>(this);
+            dao = (T) new DAOIncident<MailIncident>(this);
             dao.setClassAssocie(beansClass);
-            return dao;
-//            return new DAOIncident();
         } else if (beansClass.equals(SynchroIncident.class)) {
-            System.out.println("FACTORY SynchroIncident");
-            DAOIncident<SynchroIncident> dao = new DAOIncident<SynchroIncident>(this);
+            dao = (T) new DAOIncident<SynchroIncident>(this);
             dao.setClassAssocie(beansClass);
-            return dao;
         } else if (beansClass.equals(JMSPerteConnectionIncident.class)) {
-            System.out.println("FACTORY JMSPerteConnectionIncident");
-            DAOIncident<JMSPerteConnectionIncident> dao = new DAOIncident<JMSPerteConnectionIncident>(this);
+            dao = (T) new DAOIncident<JMSPerteConnectionIncident>(this);
             dao.setClassAssocie(beansClass);
-            return dao;
-        }
-        else if(beansClass.equals(AbstrIncident.class)){
-            DAOIncident<AbstrIncident> dao = new DAOIncident<AbstrIncident>(this);
+        } else if (beansClass.equals(AbstrIncident.class)) {
+            dao = (T) new DAOIncident<AbstrIncident>(this);
             dao.setClassAssocie(beansClass);
-            System.out.println("DAO : AbstrIncident");
-            
-            return dao;
-        }
-        
-        else if(beansClass.equals(AnomalieCollecte.class)){
-            DAOIncident<AnomalieCollecte> dao = new DAOIncident<AnomalieCollecte>(this);
+        } else if (beansClass.equals(AnomalieCollecte.class)) {
+            dao = (T) new DAOIncident<AnomalieCollecte>(this);
             dao.setClassAssocie(beansClass);
-            return dao;
         }
 
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if (dao != null) {
+            return dao;
+        } else {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.            
+        }
     }
 
     /**
      * *
      * Pour obtenir une permettant de gérer des incidents en rapport avec la
-     * tâche envoyé en argument. Exemple si on envoie une TacheLancerConnectionJMS, on obtient une DAOIncident<JMSPerteConnectionIncident>
+     * tâche envoyé en argument. Exemple si on envoie une
+     * TacheLancerConnectionJMS, on obtient une
+     * DAOIncident<JMSPerteConnectionIncident>
      *
      * @param tache
-     * @return
+     * @return retourne la dao
+     * @throws UnsupportedOperationException  : si la tache envoyé n'inplémenta pas incidable ou si la factory n'est pas capable de générer une tao pour la tâche
      */
-    public AbstrDao getDAOFromTask(AbstrTacheSchedule tache) {
-        
+    /***
+     * 
+     * @param tache
+     * @return
+     * @throws TypeNotPresentException 
+     */
+    public T getDAOFromTask(AbstrTacheSchedule tache)throws TypeNotPresentException{
+
         IncidentFactory s = new IncidentFactory();
-        
-        if(tache.getClass().equals(TacheLancerConnectionJMS.class)){
-            DAOIncident<JMSPerteConnectionIncident> dao = new DAOIncident<JMSPerteConnectionIncident>(this);
-            dao.setClassAssocie(JMSPerteConnectionIncident.class);
-            return dao;
+
+        if (Incidable.class.isAssignableFrom(tache.getClass())) {
+            logger.debug("incidable");
+            Incidable cast = (Incidable) tache;
+
+            Class incidClass = cast.getTypeIncident();
+            return (T) getDaoFromType(incidClass);
         }
-        else if(tache.getClass().equals(TacheSynchroRecupItem.class)){
-            DAOIncident<SynchroIncident> dao = new DAOIncident<SynchroIncident>(this);
-            dao.setClassAssocie(SynchroIncident.class);
-            return dao;
+        else{
+                    throw new UnsupportedOperationException("La tâche envoyée n'est pas incidable."); //To change body of generated methods, choose Tools | Templates.
         }
-        
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+
+
+//        if (tache.getClass().equals(TacheLancerConnectionJMS.class)) {
+//            DAOIncident<JMSPerteConnectionIncident> dao = new DAOIncident<JMSPerteConnectionIncident>(this);
+//            dao.setClassAssocie(JMSPerteConnectionIncident.class);
+//            return (T) dao;
+//        } else if (tache.getClass().equals(TacheSynchroRecupItem.class)) {
+//            DAOIncident<SynchroIncident> dao = new DAOIncident<SynchroIncident>(this);
+//            dao.setClassAssocie(SynchroIncident.class);
+//            return (T) dao;
+//        }
+
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

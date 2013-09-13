@@ -12,7 +12,7 @@ import rssagregator.dao.DaoFlux;
 
 /**
  * Cette tâche est lancée tous les jours à à 02h. Chaque flux La tache de
- * vérification est lancée
+ * vérification est lancée. Il s'agit de vérifier pour chacun si on n'observe pas une chute ou hausse significative du nombre d'items capturée.
  *
  * @author clem
  */

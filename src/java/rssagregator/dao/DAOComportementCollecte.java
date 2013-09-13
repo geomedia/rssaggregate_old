@@ -23,9 +23,10 @@ public class DAOComportementCollecte extends AbstrDao {
 
     @Override
     public void creer(Object obj) throws Exception {
-        em.getTransaction().begin();
-        em.persist(obj);
-        em.getTransaction().commit();
+        super.creer(obj);
+//        em.getTransaction().begin();
+//        em.persist(obj);
+//        em.getTransaction().commit();
 //        MediatorCollecteAction objMed = (MediatorCollecteAction) obj;
 
         configDefault((MediatorCollecteAction)obj);
@@ -43,7 +44,7 @@ public class DAOComportementCollecte extends AbstrDao {
 
 
     /***
-     * Si le comportement envoyé est di par defaut, la méthode parcours l'ensemble des autres comportement pour leur enlever cette particularitée
+     * Si le comportement envoyé est dit par defaut, la méthode parcours l'ensemble des autres comportement pour leur enlever cette particularitée
      * @param mediator : le comportement de capture qui vient d'être configuré comme par défaut
      */
     public void configDefault(MediatorCollecteAction mediator) {
