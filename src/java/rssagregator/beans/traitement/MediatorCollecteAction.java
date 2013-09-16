@@ -7,7 +7,6 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -24,14 +23,12 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.xml.ws.http.HTTPException;
-import rssagregator.beans.AbstrObservableBeans;
 import rssagregator.beans.BeanSynchronise;
 import rssagregator.beans.DebugRecapLeveeFlux;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoItem;
-import rssagregator.services.ServiceSynchro;
 
 /**
  * Cette classe gère les relations entre un ou plusieurs flux et les differents
@@ -47,7 +44,7 @@ import rssagregator.services.ServiceSynchro;
  */
 @Entity
 @Table(name = "tr_mediatocollecteaction")
-public class MediatorCollecteAction extends AbstrObservableBeans implements Serializable, Cloneable, BeanSynchronise {
+public class MediatorCollecteAction implements Serializable, Cloneable, BeanSynchronise {
 
     @Transient
     org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(MediatorCollecteAction.class);
@@ -154,7 +151,6 @@ public class MediatorCollecteAction extends AbstrObservableBeans implements Seri
         this.requesteur.requete(flux.getUrl());
         InputStream retourInputStream = this.requesteur.getHttpInputStream();
         
-        logger.debug("1 - OKI JUSQUE la");
 
         //-----------------------------
         //  Parseur
@@ -163,14 +159,12 @@ public class MediatorCollecteAction extends AbstrObservableBeans implements Seri
         parseur.setXmlIS(retourInputStream);
 
         ExecutorService executor = Executors.newFixedThreadPool(1);
-logger.debug("2 - OKI JUSQUE la");
         Future<List<Item>> futurs = executor.submit(parseur);
         logger.debug("3 - OKI JUSQUE la");
         
         
         List<Item> listItem = futurs.get(requesteur.getTimeOut(), TimeUnit.SECONDS);
         executor.shutdownNow();
-logger.debug("4 - OKI JUSQUE la");
         this.nbrItemCollecte = listItem.size();
 
         //-----------------------------
@@ -442,11 +436,16 @@ logger.debug("4 - OKI JUSQUE la");
 
 
 
+//    @Override
+//    /***
+//     * Enregistre le Comportement de collecte auprès du service JMS pour assurer sa diffussion sur les serveurs esclaves (la synchronisation)
+//     */
+//    public void enregistrerAupresdesService() {
+//        this.addObserver(ServiceSynchro.getInstance());
+//    }
+
     @Override
-    /***
-     * Enregistre le Comportement de collecte auprès du service JMS pour assurer sa diffussion sur les serveurs esclaves (la synchronisation)
-     */
-    public void enregistrerAupresdesService() {
-        this.addObserver(ServiceSynchro.getInstance());
+    public Boolean synchroImperative() {
+        return true;
     }
 }

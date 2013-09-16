@@ -23,6 +23,13 @@ public class AnomalieCollecte extends CollecteIncident {
 
 //    Map<Date, Integer> compteflux;
     
+    /***
+     * A portériori, les administrateurs ont à déterminer si cette anomalie de collecte est normale ou si il s'agit d'une erreur technique du site.
+     */
+    Boolean causeTechniqueSiteJournal;
+    
+    Boolean causeChangementLigneEditoriale;
+    
 
     /***
      * Permet de construire le message de l'incident à partir de la tache. Le message est au format html
@@ -49,4 +56,23 @@ public class AnomalieCollecte extends CollecteIncident {
             
         }
     }
+
+    public Boolean getCauseTechniqueSiteJournal() {
+        return causeTechniqueSiteJournal;
+    }
+
+    public void setCauseTechniqueSiteJournal(Boolean causeTechniqueSiteJournal) {
+        this.causeTechniqueSiteJournal = causeTechniqueSiteJournal;
+    }
+
+    public Boolean getCauseChangementLigneEditoriale() {
+        return causeChangementLigneEditoriale;
+    }
+
+    public void setCauseChangementLigneEditoriale(Boolean causeChangementLigneEditoriale) {
+        this.causeChangementLigneEditoriale = causeChangementLigneEditoriale;
+    }
+    
+    
+    
 }

@@ -77,6 +77,7 @@ public class AbstrIncident extends Observable implements Serializable {
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     protected Date lastNotification;
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    @Column(name = "dateDebut", nullable = false)
     protected Date dateDebut;
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     protected Date dateFin;

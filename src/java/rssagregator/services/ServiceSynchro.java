@@ -31,6 +31,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.RollbackException;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import rssagregator.beans.BeanSynchronise;
 import rssagregator.beans.Conf;
 import rssagregator.beans.Flux;
 import rssagregator.beans.FluxType;
@@ -217,7 +218,7 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
      * @throws IOException
      */
     public void diffuser(Object bean, String action) throws JMSException, IOException {
-        if (diffusionNecessaire()) {
+        if (diffusionNecessaire(bean, action)) {
             logger.debug("Diffussion d'un Beans par JMS");
             if (connection != null) {
                 Session sessionDiff = connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
@@ -227,7 +228,7 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
                 MapMessage mapMessage = sessionDiff.createMapMessage();
                 String beanSerialise = XMLTool.serialise(bean);
 
-                System.out.println("" + beanSerialise);
+//                System.out.println("" + beanSerialise);
 
                 mapMessage.setStringProperty("bean", beanSerialise);
                 mapMessage.setStringProperty("action", action);
@@ -238,8 +239,7 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
                 mapMessage.acknowledge();
                 sessionDiff.close();
                 logger.debug("Diffusion du Beans effectuée");
-            }
-            else{
+            } else {
                 throw new JMSException("La connection au service JMS est innactive.");
             }
         }
@@ -723,16 +723,29 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
      * *
      * Methode permettant de savoir si d'après la config, un beans crée modifie
      * ou supprimé doit être diffusé. Il doit être diffusé si le serveur est
-     * maitre et qu'il possède des esclaves
+     * maitre et qu'il possède des esclaves. La méthode synchroImperative des beans synchronisable est employé pour faire dire au beans si il doit ou non être synchronisé. On sait par exemple que le compte root est un bean Useraccount ne devant pas être  synchronisé.
      *
      * @return
      */
-    public Boolean diffusionNecessaire() {
+    public Boolean diffusionNecessaire(Object bean, String action) {
         Conf c = DAOFactory.getInstance().getDAOConf().getConfCourante();
+        System.out.println("C : " + c);
+        // Le contexte demande t'il la synchronisation (Serveur maitre en possession d'esclave)
         if (c.getMaster() && c.getServeurSlave().size() > 0) {
-            return true;
+            if (BeanSynchronise.class.isAssignableFrom(bean.getClass())) {
+                BeanSynchronise b = (BeanSynchronise) bean;
+                return b.synchroImperative();
+            }
         } else {
             return false;
         }
+
+        return true;
+//        if (c.getMaster() && c.getServeurSlave().size() > 0) {
+//            return true;
+//        } else {
+//            return false;
+//        }
+//    }
     }
 }

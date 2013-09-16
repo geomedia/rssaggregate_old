@@ -7,7 +7,10 @@ package rssagregator.beans;
 import java.util.Observable;
 
 /**
- *
+ *  Un beans Observable est un objet métier devant notifier ses changement d'état auprès de services (exemple le service de collecte). Liste des beans observable : <ul>
+ * <li>Flux : Il doit notifier ses changement d'état auprès du service de collecte.</li>
+ * <li>Conf : La conf est enregistré auprès du collecteur. Le collecteur doit en effet se recharger en fonction des paramettre de la conf</li>
+ * </ul>
  * @author clem
  */
 public abstract class AbstrObservableBeans extends Observable{

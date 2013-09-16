@@ -173,7 +173,7 @@
                                     <legend>Paramètres :</legend>
 
                                     <label for="active" title="L'agrégateur doit t'il collecter ce flux ?">Actif : <span class="requis"></span></label>
-                                    <input type="checkbox" id="active" name="active" <c:if test="${flux.active=='true'}">checked="true"</c:if>/>
+                                    <input type="checkbox" id="active" name="active" <c:if test="${flux.active=='true'}">checked="checked"</c:if>/>
 
                                     <br />
                                     <label for="url" title="Adresse a laquelle on trouve le XML du flux">URL du flux<span class="requis">*</span></label>

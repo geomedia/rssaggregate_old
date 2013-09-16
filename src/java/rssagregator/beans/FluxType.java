@@ -12,7 +12,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
-import rssagregator.services.ServiceSynchro;
 
 /**
  * Les types de flux sont associé aux flux. Un type de flux corresponds aux
@@ -23,7 +22,7 @@ import rssagregator.services.ServiceSynchro;
  */
 @Entity
 @Cacheable(value = true)
-public class FluxType extends AbstrObservableBeans implements Serializable {
+public class FluxType implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -70,14 +69,14 @@ public class FluxType extends AbstrObservableBeans implements Serializable {
         this.fluxLie = new ArrayList<Flux>();
     }
 
-    @Override
+//    @Override
     /**
      * *
-     * Ajoute le service JMS comme observateur au beans
+     * Ajoute le service JMS comme observateur au beans /!\ La diffusion des changement est maintenant confié aux DAO.
      */
-    public void enregistrerAupresdesService() {
-        this.addObserver(ServiceSynchro.getInstance());
-    }
+//    public void enregistrerAupresdesService() {
+//        this.addObserver(ServiceSynchro.getInstance());
+//    }
 
     @Override
     public String toString() {

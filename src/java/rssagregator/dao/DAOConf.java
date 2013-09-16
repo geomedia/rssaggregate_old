@@ -174,54 +174,28 @@ org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DaoFlux.class
         s = prop.getProperty("servurl");
         conf.setServurl(s);
         
-        //--------------Chargement de l'utilisateur root par default
-        String m = prop.getProperty("rootuser");
-        String p = prop.getProperty("rootpass");
-        UserAccount u = new UserAccount();
-        u.setMail(m);
-        u.setPass(p);
-        u.setUsername("root");
-        u.setAdminstatut(Boolean.TRUE);
-        u.setAdminMail(Boolean.FALSE);
-        
-        
-        // On cherche si cet utilisateur est bien dans la base de données
-        DAOUser daou = DAOFactory.getInstance().getDAOUser();
-        UserAccount uBdd = daou.findPrMail(m);
-        
-        // Si, on n'a pas trouvé dans la base de données
-        if(uBdd == null){
-            logger.debug("Création du compte root dans la BDD");
-            daou.creer(u);
-        }
-        //Si les deux ne sont pas egaux en conten u
-        else if(!uBdd.equals(u)){
-            logger.debug("Mise à jour du compte root dans la BDD");
-            uBdd.setMail(m);
-            uBdd.setPass(p);
-            daou.modifier(uBdd);
-        }
+      
        
         this.confCourante = conf;
     }
 
-    public static void main(String[] args) {
-
-
-
-        DAOFactory dAOFactory = DAOFactory.getInstance();
-        DAOConf dao = new DAOConf(dAOFactory);
-        try {
-            dao.charger();
-
-            dao.confCourante.setNbThreadRecup(6);
-            dao.modifierConf(dao.confCourante);
-        } catch (IOException ex) {
-            Logger.getLogger(DAOConf.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
-            Logger.getLogger(DAOConf.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
+//    public static void main(String[] args) {
+//
+//
+//
+//        DAOFactory dAOFactory = DAOFactory.getInstance();
+//        DAOConf dao = new DAOConf(dAOFactory);
+//        try {
+//            dao.charger();
+//
+//            dao.confCourante.setNbThreadRecup(6);
+//            dao.modifierConf(dao.confCourante);
+//        } catch (IOException ex) {
+//            Logger.getLogger(DAOConf.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (Exception ex) {
+//            Logger.getLogger(DAOConf.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//    }
 
     /**
      * *
@@ -348,5 +322,51 @@ org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DaoFlux.class
         
 //        PropertyLoader.save(prop, "conf.properties", "LALALA commentaire");
         System.out.println("end");
+    }
+
+    public void verifRootAccount() throws IOException, Exception {
+        String propfile = PropertyLoader.loadProperti("serv.properties", "conf");
+                Properties prop = PropertyLoader.loadFromFile(propfile);
+          //--------------Chargement de l'utilisateur root par default
+        String m = prop.getProperty("rootuser");
+        String p = prop.getProperty("rootpass");
+        UserAccount u = new UserAccount();
+        u.setMail(m);
+        u.setPass(p);
+        u.setUsername("root");
+        u.setAdminstatut(Boolean.TRUE);
+        u.setAdminMail(Boolean.FALSE);
+        
+        
+        // On cherche si cet utilisateur est bien dans la base de données
+        DAOUser daou = DAOFactory.getInstance().getDAOUser();
+        UserAccount uBdd = daou.findPrMail(m);
+        
+        // Si, on n'a pas trouvé dans la base de données
+        if(uBdd == null){
+            logger.debug("Création du compte root dans la BDD");
+            daou.creer(u);
+        }
+        //Si les deux ne sont pas egaux en conten u
+        else if(!uBdd.equals(u)){
+            logger.debug("Mise à jour du compte root dans la BDD");
+            uBdd.setMail(m);
+            uBdd.setPass(p);
+            daou.modifier(uBdd);
+        }
+        System.out.println("================================================");
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    public static void main(String[] args) {
+        DAOConf d= DAOFactory.getInstance().getDAOConf();
+    try {
+        d.verifRootAccount();
+    } catch (IOException ex) {
+        Logger.getLogger(DAOConf.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (Exception ex) {
+        Logger.getLogger(DAOConf.class.getName()).log(Level.SEVERE, null, ex);
+    }
+    
     }
 }

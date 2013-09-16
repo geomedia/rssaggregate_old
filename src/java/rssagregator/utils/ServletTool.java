@@ -244,16 +244,20 @@ public class ServletTool {
             Object o = null;
 
             AbstrForm form = FORMFactory.getInstance().getForm(beansClass);
+            form.setAddAction(true);
             request.setAttribute(formNameJSP, form);
             AbstrDao dao = DAOFactory.getInstance().getDaoFromType(beansClass);
             if (request.getMethod().equals("POST")) {
                 o = beansClass.newInstance();
                 form.bind(request, o, beansClass);
+//                Flux f = (Flux)o;
+//                System.out.println("PERIODE DANS LE SERVLT TOOL : " + f.getPeriodeCaptations().size());
                 System.out.println("News : " + o);
                 request.setAttribute(beansnameJSP, o);
             }
-            if (form.getValide()) {
+            if (form.getValide()) { 
                 System.out.println("EST VALIDE");
+                System.out.println("DAO : " + dao);
                 dao.creer(o);
                 if (notifiObserver && AbstrObservableBeans.class.isAssignableFrom(o.getClass())) {
                     AbstrObservableBeans aob = (AbstrObservableBeans) o;

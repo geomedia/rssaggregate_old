@@ -183,7 +183,26 @@ public class ServiceCollecteur extends AbstrService {
                         }
                     }
                 }
+            } else if (o.getClass().equals(TacheCalculQualiteFlux.class)) {
+                TacheCalculQualiteFlux cast = (TacheCalculQualiteFlux) o;
+                if (cast.getExeption() == null) {
+                    logger.debug("RATIO : " + cast.getIndiceCaptation());
+                    cast.getFlux().setIndiceQualiteCaptation(cast.getIndiceCaptation());
+                    cast.getFlux().setIndiceDecileNbrItemJour(cast.getDecile());
+                    cast.getFlux().setIndiceMedianeNbrItemJour(cast.getMediane());
+                    cast.getFlux().setIndiceQuartileNbrItemJour(cast.getQuartile());
+                    try {
+                        // Il faut enregistrer le résultat. 
+                        DAOFactory.getInstance().getDAOFlux().modifier(cast.getFlux());
+                    } catch (Exception ex) {
+                        Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
+                    } 
+                }
+                else{
+                    logger.error(cast.getExeption());
+                }
             }
+
             gererIncident((AbstrTacheSchedule) o);
         }
 

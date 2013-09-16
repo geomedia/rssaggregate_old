@@ -9,5 +9,9 @@ package rssagregator.beans;
  * @author clem
  */
 public interface BeanSynchronise {
-    
+    /***
+     * Methode permettant au beans d'informer le JMS si oui ou non il doit être synchronisé
+     * @return 
+     */
+    public Boolean synchroImperative();
 }

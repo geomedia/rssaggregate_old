@@ -222,7 +222,8 @@ public class DaoFlux extends AbstrDao {
             }
         }
         
-        super.modifier(fl);
+        System.out.println("PERIODE : " + fl.getPeriodeCaptations().size());
+        super.creer(fl);
 
 
 //        em.getTransaction().begin();

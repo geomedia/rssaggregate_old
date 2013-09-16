@@ -6,15 +6,15 @@ package rssagregator.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import rssagregator.services.ServiceSynchro;
-import rssagregator.services.TacheTest;
+import rssagregator.beans.Flux;
+import rssagregator.dao.DAOFactory;
+import rssagregator.services.ServiceCollecteur;
+import rssagregator.services.TacheCalculQualiteFlux;
 
 /**
  *
@@ -39,13 +39,24 @@ public class Test2 extends HttpServlet {
         PrintWriter out = response.getWriter();
         
         
-        ServiceSynchro jMS = ServiceSynchro.getInstance();
-        TacheTest tache = new TacheTest(jMS);
-        try {
-            tache.call();
-        } catch (Exception ex) {
-            Logger.getLogger(Test2.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        
+           ServiceCollecteur collecteur = ServiceCollecteur.getInstance();
+        
+        Flux f = (Flux) DAOFactory.getInstance().getDAOFlux().find(new Long(55));
+        System.out.println("FLUX  : " + f);
+        TacheCalculQualiteFlux calculQualiteFlux = new TacheCalculQualiteFlux(collecteur);
+        calculQualiteFlux.setFlux(f);
+        
+        collecteur.getExecutorService().submit(calculQualiteFlux);
+        
+        
+//        ServiceSynchro jMS = ServiceSynchro.getInstance();
+//        TacheTest tache = new TacheTest(jMS);
+//        try {
+//            tache.call();
+//        } catch (Exception ex) {
+//            Logger.getLogger(Test2.class.getName()).log(Level.SEVERE, null, ex);
+//        }
         try {
             /* TODO output your page here. You may use following sample code. */
             out.println("<!DOCTYPE html>");

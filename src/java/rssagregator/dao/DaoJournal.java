@@ -19,9 +19,6 @@ public class DaoJournal extends AbstrDao {
 
  
     
-    
-
-    
 //    public Journal find(Long id) {
 //        initEntityManager();
 //        em.getTransaction().begin();

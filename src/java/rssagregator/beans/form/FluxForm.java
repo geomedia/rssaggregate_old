@@ -4,12 +4,15 @@
  */
 package rssagregator.beans.form;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import rssagregator.dao.AbstrDao;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import rssagregator.beans.Flux;
+import rssagregator.beans.FluxPeriodeCaptation;
 
 /**
  *
@@ -28,18 +31,67 @@ public class FluxForm extends AbstrForm {
      * flux.
      */
     public Object bind(HttpServletRequest request, Object objEntre, Class type) {
-        boolean isnew = false;
-        if (objEntre == null) {
-            isnew = true;
-        }
+//        boolean isnew = false;
+//        if (objEntre == null) {
+//            isnew = true;
+//        }
 
         Flux fl = (Flux) super.bind(request, objEntre, type); //To change body of generated methods, choose Tools | Templates.
 
-        if (isnew) {
+
+        //Si le formulaire dit flux innactif
+
+
+        //==================================================================================================================
+        //....................................GESTION DES PERIODE DE CAPTATION
+        //==================================================================================================================
+        //Si c'est un nouveau flux , On ajoute une période de captation si le flux est actif
+        if (addAction) {
+            String actFlux = request.getParameter("active");
+            if (actFlux != null && !actFlux.isEmpty()) {
+                List<FluxPeriodeCaptation> l = new ArrayList<FluxPeriodeCaptation>();
+                FluxPeriodeCaptation p = new FluxPeriodeCaptation();
+                p.setDateDebut(new Date());
+                p.setFlux(fl);
+                l.add(p);
+                fl.setPeriodeCaptations(l);
+            }
+        } else { // Si c'est une action modif
+            String actFlux = request.getParameter("active");
+//Si c'est une demande d'activation du flux
+            if (actFlux != null && !actFlux.isEmpty()) {
+                // Si le flux a déja des période de captation, on récupère la dernière
+                if (!fl.getPeriodeCaptations().isEmpty()) { // Si elle a une date de fin, on ajoute une nouvelle période de captation
+                    FluxPeriodeCaptation lastperiode = fl.getPeriodeCaptations().get(fl.getPeriodeCaptations().size() - 1);
+                    if (lastperiode.getDatefin() != null) {
+                        FluxPeriodeCaptation nPeriode = new FluxPeriodeCaptation();
+                        nPeriode.setDateDebut(new Date());
+                        nPeriode.setFlux(fl);
+                        fl.getPeriodeCaptations().add(nPeriode);
+                    }
+                } else if (fl.getPeriodeCaptations().isEmpty()) {
+                    FluxPeriodeCaptation nP = new FluxPeriodeCaptation();
+                    nP.setDateDebut(new Date());
+                    nP.setFlux(fl);
+                    fl.getPeriodeCaptations().add(nP);
+                }
+            }
+            if (actFlux == null) { // Si c'est une demande de désactivation du flux
+                if (!fl.getPeriodeCaptations().isEmpty()) {
+                    FluxPeriodeCaptation lastperiode = fl.getPeriodeCaptations().get(fl.getPeriodeCaptations().size() - 1);
+                    lastperiode.setDatefin(new Date());
+                }
+            }
+
+        }
+
+
+        if (addAction) {
             fl.setCreated(new Date());
         }
 
         fl.setModified(new Date());
+        System.out.println(">>>>>>>>> PERDIODE SIZE A LA FIN DU FORM : " + fl.getPeriodeCaptations().size());
         return fl;
     }
 

@@ -20,22 +20,20 @@ import rssagregator.beans.ClemBeanUtils;
 public class AbstrForm {
 
     protected Map<String, String[]> erreurs = new HashMap<String, String[]>();
-    
-    
     protected String resultat = "";
     protected Boolean valide = false;
-//    protected AbstrDao dao;
+    protected Boolean addAction;
 
+//    protected AbstrDao dao;
     /**
-     * Rempli l'objet envoyé avec les donnée du formulaire
-     * envoyés
+     * Rempli l'objet envoyé avec les donnée du formulaire envoyés
      *
      * @param request
      * @return
      */
     public Object bind(HttpServletRequest request, Object objEntre, Class type) {
         // SI flux est null (cas d'un ajout, on crée un nouveau flux
-        
+
         if (objEntre == null) {
 
             try {
@@ -49,7 +47,7 @@ public class AbstrForm {
 
         // On hydrate/peuple le beans avec les données du formulaire
         try {
-     
+
             ClemBeanUtils.populate(objEntre, request, this);
         } catch (IllegalAccessException ex) {
             Logger.getLogger(FluxForm.class.getName()).log(Level.SEVERE, null, ex);
@@ -123,15 +121,31 @@ public class AbstrForm {
         this.valide = valide;
     }
 
-//    public AbstrDao getDao() {
-//        return dao;
-//    }
-//
-//    public void setDao(AbstrDao dao) {
-//        this.dao = dao;
-//    }
+    //    public AbstrDao getDao() {
+    //        return dao;
+    //    }
+    //
+    //    public void setDao(AbstrDao dao) {
+    //        this.dao = dao;
+    //    }
+    /**
+     * *
+     * Permet de préciser au formulaire d'un s'agit d'une création d'entité. Il
+     * devra ainsi instancier un nouvel objet du type envoyé et parfois
+     * initialiser des varibales complémentaire (exemple, date de création)
+     *
+     * @return
+     */
+    public Boolean getAddAction() {
+        return addAction;
+    }
+
+    public void setAddAction(Boolean addAction) {
+        this.addAction = addAction;
+    }
 
     public AbstrForm(/*AbstrDao dao*/) {
 //        this.dao = dao;
+        addAction = false;
     }
 }

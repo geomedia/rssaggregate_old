@@ -32,6 +32,7 @@ public abstract class AbstrDao {
     org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(AbstrDao.class);
 
     public void creer(Object obj) throws Exception {
+        logger.debug("usage de la DAO ! ===");
         //Il faut initialiser le em
 //        em = dAOFactory.getEntityManager();
         EntityTransaction tr = em.getTransaction();
@@ -123,7 +124,7 @@ public abstract class AbstrDao {
                 ServiceSynchro.getInstance().diffuser(obj, "rem");
             }
             tr.commit();
-            em.getTransaction().commit();
+//            em.getTransaction().commit();
         } catch (Exception e) {
 
             tr.rollback();

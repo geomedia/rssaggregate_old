@@ -34,10 +34,14 @@ import org.eclipse.persistence.annotations.CacheCoordinationType;
 import org.eclipse.persistence.annotations.CacheType;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.config.CacheIsolationType;
+import org.joda.time.DateTime;
+import org.joda.time.Duration;
+import rssagregator.beans.exception.DonneeInterneCoherente;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoFlux;
 import rssagregator.services.ServiceCollecteur;
 import rssagregator.services.ServiceSynchro;
+import sun.org.mozilla.javascript.ast.ForLoop;
 
 /**
  * Une des entités les plus importantes... Il s'agit d'un flux de syndication
@@ -50,6 +54,8 @@ import rssagregator.services.ServiceSynchro;
 @Cache(type = CacheType.FULL, coordinationType = CacheCoordinationType.SEND_NEW_OBJECTS_WITH_CHANGES, isolation = CacheIsolationType.SHARED)
 public class Flux extends AbstrObservableBeans implements Observer, Serializable, BeanSynchronise {
 
+    @Transient
+     protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(Flux.class);
 //    @PersistenceContext(type= PersistenceContextType.EXTENDED)
 //private EntityManager em;
     @Id
@@ -194,6 +200,20 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
      */
     @Transient
     List<DebugRecapLeveeFlux> debug;
+    @Column(name = "indiceQualiteCaptation")
+    protected Float indiceQualiteCaptation;
+    
+    
+    /***
+     * 
+     */
+    protected Integer indiceMedianeNbrItemJour;
+    protected Integer indiceDecileNbrItemJour;
+    protected Integer indiceQuartileNbrItemJour;
+    
+    
+    @OneToMany(mappedBy = "flux", cascade = CascadeType.ALL)
+    protected List<FluxPeriodeCaptation> periodeCaptations;
     /**
      * *
      * Les incident en cours sont gardée en mémoire mais pas persisté. Il faut
@@ -203,7 +223,7 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
 //    List<FluxIncident> incidentEnCours;
     /**
      * *
-     * 
+     *
      * Variable qui permet à l'utilisateur de qualifié le flux de stable. On
      * considère qu'il est stable si le flux ne subit pas trop d'anomalie et
      * qu'il renvoie un nombre d'item assez régulier. Les flux qualifié de
@@ -373,6 +393,14 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
         this.nom = nom;
     }
 
+    public List<FluxPeriodeCaptation> getPeriodeCaptations() {
+        return periodeCaptations;
+    }
+
+    public void setPeriodeCaptations(List<FluxPeriodeCaptation> periodeCaptations) {
+        this.periodeCaptations = periodeCaptations;
+    }
+
     public Flux() {
 
         this.debug = new ArrayList<DebugRecapLeveeFlux>();
@@ -382,6 +410,7 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
 
         this.mediatorFlux = MediatorCollecteAction.getDefaultCollectAction();
         this.incidentsLie = new ArrayList<CollecteIncident>();
+        this.periodeCaptations = new ArrayList<FluxPeriodeCaptation>();
 
 //        this.incidentEnCours = new ArrayList<FluxIncident>();
         this.setChanged();
@@ -481,9 +510,38 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
     public void setEstStable(Boolean estStable) {
         this.estStable = estStable;
     }
-    
-    
-    
+
+    public Float getIndiceQualiteCaptation() {
+        return indiceQualiteCaptation;
+    }
+
+    public void setIndiceQualiteCaptation(Float indiceQualiteCaptation) {
+        this.indiceQualiteCaptation = indiceQualiteCaptation;
+    }
+
+    public Integer getIndiceMedianeNbrItemJour() {
+        return indiceMedianeNbrItemJour;
+    }
+
+    public void setIndiceMedianeNbrItemJour(Integer indiceMedianeNbrItemJour) {
+        this.indiceMedianeNbrItemJour = indiceMedianeNbrItemJour;
+    }
+
+    public Integer getIndiceDecileNbrItemJour() {
+        return indiceDecileNbrItemJour;
+    }
+
+    public void setIndiceDecileNbrItemJour(Integer indiceDecileNbrItemJour) {
+        this.indiceDecileNbrItemJour = indiceDecileNbrItemJour;
+    }
+
+    public Integer getIndiceQuartileNbrItemJour() {
+        return indiceQuartileNbrItemJour;
+    }
+
+    public void setIndiceQuartileNbrItemJour(Integer indiceQuartileNbrItemJour) {
+        this.indiceQuartileNbrItemJour = indiceQuartileNbrItemJour;
+    }    
     
 
 //    public void setIncidentEnCours(List<FluxIncident> incidentEnCours) {
@@ -689,5 +747,49 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
         this.deleteObservers();
         this.addObserver(ServiceCollecteur.getInstance());
 //        this.addObserver(ServiceSynchro.getInstance());
+    }
+
+    @Override
+    public Boolean synchroImperative() {
+        return true;
+    }
+
+    /**
+     * *
+     * Retourne la durée totale de captation du flux en s'appuyant sur les
+     * entites FluxPeriodeCaptation
+     */
+    public Long returnCaptationDuration() throws DonneeInterneCoherente {
+        Long duration = new Long(0);
+
+        int nbrPeriodeouverte =0;
+        
+        for (int i = 0; i < periodeCaptations.size(); i++) {
+            FluxPeriodeCaptation periode = this.periodeCaptations.get(i);
+            if (periode.getDateDebut() != null & periode.getDatefin() != null) {
+                DateTime dtDebut = new DateTime(periode.getDateDebut());
+                DateTime dtFin = new DateTime(periode.getDatefin());
+                Duration dur = new Duration(dtDebut, dtFin);
+                duration += dur.getStandardSeconds();
+            }
+            if (periode.getDateDebut() != null && periode.getDatefin() == null) {
+                DateTime dtDebut = new DateTime(periode.getDateDebut());
+                DateTime dtFin = new DateTime(periode.getDatefin());
+                Duration dur = new Duration(dtDebut, dtFin);
+                duration += dur.getStandardSeconds();
+                nbrPeriodeouverte++;
+            }
+        }
+        if(nbrPeriodeouverte>1){
+            logger.error("Il y a deux période de captation ouverte pour le flux");
+            throw new DonneeInterneCoherente("Il y a deux période de captation ouverte pour le flux");
+        }
+        else{
+            return duration;
+        }
+
+
+//        return null;
+
     }
 }

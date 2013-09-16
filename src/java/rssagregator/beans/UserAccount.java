@@ -203,6 +203,15 @@ public class UserAccount implements Serializable, BeanSynchronise{
             return "??";
         }
     }
+
+    @Override
+    public Boolean synchroImperative() {
+        if(this.username.equals("root")){
+            return false;
+        }
+        return true;
+        
+    }
     
     
     

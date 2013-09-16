@@ -12,7 +12,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import rssagregator.services.ServiceSynchro;
 
 /**
  * Un journal : Le monde, le Figaro... Chaque journal est instancier dans un
@@ -20,7 +19,7 @@ import rssagregator.services.ServiceSynchro;
  */
 @Entity
 @Cacheable(value = true)
-public class Journal extends AbstrObservableBeans implements Serializable, BeanSynchronise {
+public class Journal implements Serializable, BeanSynchronise {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -148,11 +147,16 @@ public class Journal extends AbstrObservableBeans implements Serializable, BeanS
     
     
 
+//    @Override
+//    /***
+//     * Ajoute le service JMS comme observer du beans. 
+//     */
+//    public void enregistrerAupresdesService() {
+////        this.addObserver(ServiceSynchro.getInstance());
+//    }
+
     @Override
-    /***
-     * Ajoute le service JMS comme observer du beans. 
-     */
-    public void enregistrerAupresdesService() {
-        this.addObserver(ServiceSynchro.getInstance());
+    public Boolean synchroImperative() {
+        return true;
     }
 }

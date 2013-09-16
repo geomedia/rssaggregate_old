@@ -6,7 +6,6 @@ package rssagregator.services;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Observable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -17,7 +16,6 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import rssagregator.beans.Conf;
-import rssagregator.beans.Flux;
 import rssagregator.beans.incident.AliveIncident;
 import rssagregator.dao.DAOConf;
 import rssagregator.dao.DAOFactory;
@@ -181,14 +179,16 @@ public class ServiceServer extends AbstrService {
             serviceJMS.instancierTaches();
             serviceMail.instancierTaches();
 
-//            conf.addObserver(serviceCollecteur);
-//            conf.forceNotifyObserver();
 
-
-
-
-
-//            executorServiceAdministratif.submit(serviceJMS);
+            try {
+                daoconf.verifRootAccount();
+                
+    //            executorServiceAdministratif.submit(serviceJMS);
+            } catch (IOException ex) {
+                Logger.getLogger(ServiceServer.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (Exception ex) {
+                Logger.getLogger(ServiceServer.class.getName()).log(Level.SEVERE, null, ex);
+            }
 
 
 
