@@ -4,6 +4,8 @@
  */
 package rssagregator.servlet;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.util.Enumeration;
@@ -11,8 +13,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import org.jdom.JDOMException;
+import rssagregator.beans.Conf;
+import rssagregator.dao.DAOConf;
+import rssagregator.dao.DAOFactory;
+import rssagregator.dao.DaoFlux;
 import rssagregator.services.ServiceServer;
 import rssagregator.services.ServiceCollecteur;
+import rssagregator.utils.ServiceXMLTool;
 
 /**
  *
@@ -36,9 +44,70 @@ public class StartServlet implements ServletContextListener {
      */
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        //On lance le daemon central avec une périodicité de 5 minutes 300 000 milisecondes
-        daemonCentral = ServiceServer.getInstance();
-        daemonCentral.instancierTaches();
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        
+        DAOFactory.getInstance();
+        DAOConf daoconf = DAOFactory.getInstance().getDAOConf();
+        try {
+            daoconf.charger();
+        } catch (IOException ex) {
+            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        // On charge la conf et on l'enregistre auprès du service de 
+        Conf conf = daoconf.getConfCourante();
+        conf.enregistrerAupresdesService();
+
+        // -----------------Chargement des flux
+        DaoFlux daoflux = DAOFactory.getInstance().getDAOFlux();
+        daoflux.chargerDepuisBd();
+
+
+        try {
+            daoconf.verifRootAccount();
+
+            //            executorServiceAdministratif.submit(serviceJMS);
+        } catch (IOException ex) {
+            Logger.getLogger(ServiceServer.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(ServiceServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+
+
+
+        //============================================================================
+        //...........Instanciation des services en utilisant le fichier de conf XML
+        //============================================================================
+        try {
+            ServiceXMLTool.instancierServiceEtTache();
+        } catch (IOException ex) {
+            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (JDOMException ex) {
+            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoSuchMethodException ex) {
+            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalArgumentException ex) {
+            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvocationTargetException ex) {
+            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+//        daemonCentral = ServiceServer.getInstance();
+//        daemonCentral.instancierTaches();
 //        es = Executors.newFixedThreadPool(1);
 //        es.submit(daemonCentral);
 //        daemonCentral.instancierTaches();
@@ -137,7 +206,7 @@ public class StartServlet implements ServletContextListener {
         // On arrete les taches de collecte
         logger.debug("Fermeture de l'Application");
         daemonCentral.stopService();
-        
+
 //        es.shutdown();
 //        logger.debug("[OK] Fermeture du daemoncentral");
 

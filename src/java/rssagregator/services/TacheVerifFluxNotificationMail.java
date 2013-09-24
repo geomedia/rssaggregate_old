@@ -30,6 +30,12 @@ public class TacheVerifFluxNotificationMail extends AbstrTacheSchedule<TacheVeri
         super(s);
     }
 
+    public TacheVerifFluxNotificationMail() {
+    super();
+    }
+    
+    
+
     
     /**
      * *

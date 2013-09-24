@@ -24,6 +24,14 @@ public class TacheSynchroHebdomadaire extends AbstrTacheSchedule<TacheSynchroHeb
         super(s);
         erreur = false;
     }
+
+    public TacheSynchroHebdomadaire() {
+    super();
+    }
+    
+    
+    
+    
     /**
      * *
      * Un flag utilisé dans le call;

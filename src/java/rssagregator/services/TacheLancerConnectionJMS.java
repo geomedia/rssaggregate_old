@@ -27,6 +27,13 @@ public class TacheLancerConnectionJMS extends AbstrTacheSchedule<TacheLancerConn
         super(s);
     }
 
+    public TacheLancerConnectionJMS() {
+    super();
+    }
+
+    
+    
+    
     /**
      * *
      * Lance la tâche. Cette tâche peut être périodique regarder le statut du

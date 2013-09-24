@@ -77,15 +77,26 @@ public abstract class AbstrService implements Observer {
      */
     public void schedule(AbstrTacheSchedule tache) {
 
+        
+        // pour une tache devant être schedulé suivant un nombre fixe de seconde
         if (tache.getTimeSchedule() != null) {
             this.executorService.schedule(tache, tache.getTimeSchedule(), TimeUnit.SECONDS);
+            
+            // Pour une tache devant être schedule une fois pas semaine (jour heure et minute non null dans la tache
         } else if (tache.getHeureSchedule() != null && tache.getJourSchedule() != null && tache.getMinuteSchedule() != null) {
 
             DateTime dtCurrent = new DateTime();
             DateTime next = dtCurrent.withDayOfWeek(new Integer(tache.getJourSchedule()));
             Duration dur = new Duration(dtCurrent, next);
             this.executorService.schedule(tache, dur.getStandardSeconds(), TimeUnit.SECONDS);
-
+        }
+        //Si c'est une tache devant être schedulé tous les jours à la meme heure (jour null mais heure et minute non null
+        else if (tache.getJourSchedule()==null && tache.getHeureSchedule()!=null && tache.getMinuteSchedule()!=null){
+            DateTime dtCurrent = new DateTime();
+            DateTime next = dtCurrent.withTime(tache.getHeureSchedule(), tache.getMinuteSchedule(), 0, 0);
+            Duration dur = new Duration(dtCurrent, next);
+            this.executorService.schedule(tache, dur.getStandardSeconds(), TimeUnit.SECONDS);
+            
         }
 
     }

@@ -45,6 +45,12 @@ public class TacheCalculQualiteFlux extends AbstrTacheSchedule<TacheCalculQualit
         super(s);
     }
 
+    public TacheCalculQualiteFlux() {
+        super();
+    }
+    
+    
+
     @Override
     public TacheCalculQualiteFlux call() throws DonneeInterneCoherente, Exception {
         try {

@@ -22,6 +22,12 @@ public class TacheVerifComportementFluxGeneral extends AbstrTacheSchedule<TacheV
         super(s);
     }
 
+    public TacheVerifComportementFluxGeneral() {
+    super();
+    }
+
+    
+    
     @Override
     public TacheVerifComportementFluxGeneral call() throws Exception {
 

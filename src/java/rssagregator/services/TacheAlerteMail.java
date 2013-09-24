@@ -34,9 +34,16 @@ public class TacheAlerteMail extends AbstrTacheSchedule<TacheAlerteMail> {
 
     public TacheAlerteMail(Observer s) {
         super(s);
-        
     }
 
+    public TacheAlerteMail() {
+    super();
+    }
+
+    
+    
+    
+    
     @Override
     public TacheAlerteMail call() throws Exception {
         logger.debug("Lancement");

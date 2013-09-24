@@ -6,25 +6,57 @@ and open the template in the editor.
 
 <!DOCTYPE def [
   <!ELEMENT def (service*)>
-  <!ELEMENT service (tache)>
-  <!ELEMENT tache (schedulejourfixe| scheduleduree)>
+  <!ELEMENT service (tache*)>
+  <!ELEMENT tache (schedulejourfixe| scheduleduree|touslesjoura)>
   <!ELEMENT schedulejourfixe EMPTY>
+  <!ELEMENT touslesjoura EMPTY>
   <!ELEMENT scheduleduree EMPTY>
   
   <!ATTLIST service class CDATA #REQUIRED>
   <!ATTLIST service poolsize CDATA #REQUIRED>
   <!ATTLIST tache class CDATA #REQUIRED>
-  <!ATTLIST schedulejourfixe jour (lu|ma|me|je|ve|sa|di) #REQUIRED>
-  <!ATTLIST schedulejourfixe heure CDATA #REQUIRED> <!-- Le format de kl'heure heure:minute exemple : 01:01 02:02 ... -->
-   <!ATTLIST scheduleduree nbSeconde CDATA #REQUIRED>
+  <!ATTLIST schedulejourfixe jour (1|2|3|4|5|6|7) #REQUIRED>
+  <!ATTLIST schedulejourfixe heure (0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23) #REQUIRED> 
+  <!ATTLIST touslesjoura heure (0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23) #REQUIRED> 
+  <!ATTLIST schedulejourfixe minute (0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54|55|56|57|58|59) #REQUIRED> 
+  <!ATTLIST touslesjoura minute (0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54|55|56|57|58|59) #REQUIRED> 
+
+  <!ATTLIST scheduleduree nbSeconde CDATA #REQUIRED>
   
 ]>
 
 <def>
-    <service class="" poolsize="">
-        <tache class="truc">
-            <scheduleduree nbSeconde="1"></scheduleduree>
-            
+    
+    <service class="rssagregator.services.ServiceServer" poolsize="1">
+        <tache class="rssagregator.services.TacheStillAlive">
+            <scheduleduree nbSeconde="300"></scheduleduree>
+        </tache>
+    </service>
+    
+    <service class="rssagregator.services.ServiceCollecteur" poolsize="30">
+        <tache class="rssagregator.services.TacheVerifComportementFluxGeneral">
+            <scheduleduree nbSeconde="5000"></scheduleduree>
+        </tache>
+        <tache class="rssagregator.services.TacheCalculQualiteFlux">
+            <schedulejourfixe jour="2" heure="2" minute="1"></schedulejourfixe>
+        </tache>
+    </service>
+    
+    <service class="rssagregator.services.ServiceMailNotifier" poolsize="5">
+        <tache class="rssagregator.services.TacheVerifFluxNotificationMail">
+            <touslesjoura heure="2" minute="0"></touslesjoura>
+        </tache>
+        <tache class="rssagregator.services.TacheAlerteMail">
+            <touslesjoura heure="7" minute="0"></touslesjoura>
+        </tache>
+    </service>
+    
+    <service class="rssagregator.services.ServiceSynchro" poolsize="1">
+        <tache class="rssagregator.services.TacheLancerConnectionJMS">
+            <scheduleduree nbSeconde="30"></scheduleduree>
+        </tache>
+        <tache class="rssagregator.services.TacheSynchroHebdomadaire">
+            <schedulejourfixe jour="7" heure="1" minute="1"></schedulejourfixe>
         </tache>
     </service>
 </def>

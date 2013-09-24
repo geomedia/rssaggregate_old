@@ -42,6 +42,16 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
      */
     Integer nbrTentative;
 
+    public AbstrTacheSchedule() {
+                this.schedule = false;
+        exeption = null;
+        nbrTentative =0;
+    }
+
+    
+    
+    
+    
     /***
      * Par default le bollean schedule est à false;
      * @param executorService 

@@ -39,12 +39,20 @@ public class TacheStillAlive extends AbstrTacheSchedule<TacheStillAlive> impleme
     Date debutRupture;
     Date finRupture;
 
+    public TacheStillAlive() {
+        super();
+        rupture = false;
+        // Chargement du fichier still alive.
+        Conf c = DAOFactory.getInstance().getDAOConf().getConfCourante();
+        file = new File(c.getVarpath() + "stillalive");
+    }
+
     public TacheStillAlive(Observer s) {
         super(s);
         rupture = false;
         // Chargement du fichier still alive.
-         Conf c = DAOFactory.getInstance().getDAOConf().getConfCourante();
-         file = new File(c.getVarpath() + "stillalive");
+        Conf c = DAOFactory.getInstance().getDAOConf().getConfCourante();
+        file = new File(c.getVarpath() + "stillalive");
     }
 
 //    public TacheStillAlive(File file, Observer s) {
@@ -57,7 +65,6 @@ public class TacheStillAlive extends AbstrTacheSchedule<TacheStillAlive> impleme
 //        TacheStillAlive stillAlive = new TacheStillAlive(new File(c.getVarpath() + "stillalive"), this);
 //
 //    }
-
     @Override
     public TacheStillAlive call() throws Exception {
         logger.debug("Lancement de tache STILL ALIVE");

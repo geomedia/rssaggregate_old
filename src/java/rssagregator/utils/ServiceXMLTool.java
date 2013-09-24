@@ -67,9 +67,12 @@ public class ServiceXMLTool {
                 System.out.println("CLASS TACHE : " + attClassTache.getValue());
                 Class cTache = Class.forName(attClassTache.getValue());
                 Object tache = cTache.newInstance();
+       
                 // Paramettrage de la tache
 
                 Element elementJour = tacheElement.getChild("schedulejourfixe");
+                Element Elementscheduleduree = tacheElement.getChild("scheduleduree");
+                Element Elementtouslesjoura = tacheElement.getChild("touslesjoura");
                 if (elementJour != null) {
                     // Récupération de l'attribut jour
                     Attribute attJour = elementJour.getAttribute("jour");
@@ -85,12 +88,21 @@ public class ServiceXMLTool {
                  
                     service.schedule(castTache);
 
-                } else {
-                    Element elementDuree = tacheElement.getChild("scheduleduree");
-                    Attribute attnbSec = elementDuree.getAttribute("nbSeconde");
+                } else if(Elementscheduleduree!=null) {
+//                    Elementscheduleduree = tacheElement.getChild("scheduleduree");
+                    Attribute attnbSec = Elementscheduleduree.getAttribute("nbSeconde");
                     AbstrTacheSchedule cast = (AbstrTacheSchedule) tache;
                     cast.setTimeSchedule(new Integer(attnbSec.getValue()));
                     service.schedule(cast);
+                }
+                else if(Elementtouslesjoura!=null){
+                    Attribute attHeure = Elementtouslesjoura.getAttribute("heure");
+                    Attribute attMinute = Elementtouslesjoura.getAttribute("minute");
+                    AbstrTacheSchedule castTache = (AbstrTacheSchedule) tache;
+                    castTache.setHeureSchedule(new Integer(attHeure.getValue()));
+                    castTache.setMinuteSchedule(new Integer(attMinute.getValue()));
+                    castTache.setJourSchedule(null);
+                    castTache.setTimeSchedule(null);
                 }
             }
             // On récupère la class
