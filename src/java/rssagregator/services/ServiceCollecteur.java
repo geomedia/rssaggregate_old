@@ -6,6 +6,7 @@ package rssagregator.services;
 
 import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.ParsingFeedException;
+import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,6 +30,7 @@ import rssagregator.beans.incident.Incidable;
 import rssagregator.beans.incident.IncidentFactory;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DAOIncident;
+import rssagregator.utils.PropertyLoader;
 
 /**
  * Cette classe permet d'instancier le service de collecte du projet. Elle est
@@ -49,9 +51,18 @@ public class ServiceCollecteur extends AbstrService {
      * Constructeur du singleton
      */
     private ServiceCollecteur() {
-        super(Executors.newScheduledThreadPool(30));
-        ThreadFactoryPrioitaire factoryPrioitaire = new ThreadFactoryPrioitaire();
-        poolPrioritaire = Executors.newFixedThreadPool(30);
+        super();
+        try {
+            ThreadFactoryPrioitaire factoryPrioitaire = new ThreadFactoryPrioitaire();
+
+            // Le nombre de thread doit être relevé dans la conf. 
+
+            poolPrioritaire = Executors.newFixedThreadPool(5);
+        } catch (ArithmeticException e) {
+            logger.error("Impossible de charger le nombre de Thread pour ce service. Vérifier la conf");
+        } catch (Exception e) {
+            logger.error("Erreur lors de l'instanciation du service");
+        }
     }
 
     /**
@@ -220,35 +231,31 @@ public class ServiceCollecteur extends AbstrService {
          * ............BLOC PERMETTANT LE RECHARGEMENT COMPLET DU SERVICE.
          *///======================================================================================
         // Si l'élément Observable est la conf ou si On a donnée l'ordre reload all
-        if ((o instanceof Conf) || (o == null && arg instanceof String && arg.equals("reload all"))) {
-            logger.info("Rechargement complet du Service de Collecte");
-            // On va recharger tout le Pool Schedulé
-            Integer nbThread = DAOFactory.getInstance().getDAOConf().getConfCourante().getNbThreadRecup();
-            // On tue les tache en cours
-            List<Runnable> listFutur = this.executorService.shutdownNow();
-
-            // On recréer le Pool
-            this.executorService = Executors.newScheduledThreadPool(nbThread);
-
-            List<Flux> listFlux = DAOFactory.getInstance().getDAOFlux().findAllFlux(true);
-            System.out.println("NBR DE FLUX : " + listFlux.size());
-
-            // On inscrit les taches actives au pool schedule
-            int i;
-            for (i = 0; i < listFlux.size(); i++) {
-                if (listFlux.get(i).getActive()) {
-                    // On schedule
-                    TacheRecupCallable tmpTache = new TacheRecupCallable(listFlux.get(i), this, true, true);
-                    listFlux.get(i).setTacheRechup(tmpTache);
-                    //TODO : Scheduler en fonction du temps restant. il faut modifier de deuxieme paramettre de la commande. 
-                    this.executorService.schedule(tmpTache, listFlux.get(i).getMediatorFlux().getPeriodiciteCollecte(), TimeUnit.SECONDS);
-                }
-            }
-        }
-
-
-
-
+//        if ((o instanceof Conf) || (o == null && arg instanceof String && arg.equals("reload all"))) {
+//            logger.info("Rechargement complet du Service de Collecte");
+//            // On va recharger tout le Pool Schedulé
+//            Integer nbThread = DAOFactory.getInstance().getDAOConf().getConfCourante().getNbThreadRecup();
+//            // On tue les tache en cours
+//            List<Runnable> listFutur = this.executorService.shutdownNow();
+//
+//            // On recréer le Pool
+//            this.executorService = Executors.newScheduledThreadPool(nbThread);
+//
+//            List<Flux> listFlux = DAOFactory.getInstance().getDAOFlux().findAllFlux(true);
+//            System.out.println("NBR DE FLUX : " + listFlux.size());
+//
+//            // On inscrit les taches actives au pool schedule
+//            int i;
+//            for (i = 0; i < listFlux.size(); i++) {
+//                if (listFlux.get(i).getActive()) {
+//                    // On schedule
+//                    TacheRecupCallable tmpTache = new TacheRecupCallable(listFlux.get(i), this, true, true);
+//                    listFlux.get(i).setTacheRechup(tmpTache);
+//                    //TODO : Scheduler en fonction du temps restant. il faut modifier de deuxieme paramettre de la commande. 
+//                    this.executorService.schedule(tmpTache, listFlux.get(i).getMediatorFlux().getPeriodiciteCollecte(), TimeUnit.SECONDS);
+//                }
+//            }
+//        }
 //        if (o == null && arg instanceof String && arg.equals("reload all")) {
 //
 //            Integer nbThread = DAOFactory.getInstance().getDAOConf().getConfCourante().getNbThreadRecup();
@@ -273,7 +280,6 @@ public class ServiceCollecteur extends AbstrService {
 //
 //            logger.info("Rechargement du Service de Collecte");
 //        }
-
         // Si l'observable notifiant est la DAO FLUX. Il faut recréer le pool avec la liste des nouveau flux à suivre
 //        if (o instanceof DaoFlux || o instanceof DAOConf) {
 //
@@ -314,8 +320,6 @@ public class ServiceCollecteur extends AbstrService {
 //                poolSchedule.shutdown();
 //            }
 //        }
-
-
 //        if (o instanceof ListeFluxCollecteEtConfigConrante) {
 //
 //
@@ -443,12 +447,12 @@ public class ServiceCollecteur extends AbstrService {
         this.poolPrioritaire = poolPrioritaire;
     }
 
-    @Override
-    public void instancierTaches() {
+//    @Override
+    public void lancerCollecte() {
 
         //Il doit commencer par charger la conf 
-        Conf conf = DAOFactory.getInstance().getDAOConf().getConfCourante();
-        update(conf, null);
+//        Conf conf = DAOFactory.getInstance().getDAOConf().getConfCourante();
+//        update(conf, null);
 
         //---------------TACHES DE COLLECTE--------------
 
@@ -459,11 +463,11 @@ public class ServiceCollecteur extends AbstrService {
         }
 
         //----------------TACHE TacheVerifComportementFluxGeneral
-        TacheVerifComportementFluxGeneral comportementFluxGeneral = new TacheVerifComportementFluxGeneral(this);
-        DateTime dtCurrent = new DateTime();
-        DateTime next = dtCurrent.plusDays(1).withHourOfDay(2);// withDayOfWeek(DateTimeConstants.SUNDAY);
-        Duration dur = new Duration(dtCurrent, next);
-        this.executorService.schedule(comportementFluxGeneral, dur.getStandardSeconds(), TimeUnit.SECONDS);
+//        TacheVerifComportementFluxGeneral comportementFluxGeneral = new TacheVerifComportementFluxGeneral(this);
+//        DateTime dtCurrent = new DateTime();
+//        DateTime next = dtCurrent.plusDays(1).withHourOfDay(2);// withDayOfWeek(DateTimeConstants.SUNDAY);
+//        Duration dur = new Duration(dtCurrent, next);
+//        this.executorService.schedule(comportementFluxGeneral, dur.getStandardSeconds(), TimeUnit.SECONDS);
 
     }
 
@@ -595,8 +599,9 @@ public class ServiceCollecteur extends AbstrService {
 
     @Override
     public void stopService() throws SecurityException, RuntimeException {
-        this.poolPrioritaire.shutdownNow();
-        this.executorService.shutdownNow();
-
+        if (this.poolPrioritaire != null) {
+            this.poolPrioritaire.shutdownNow();
+        }
+        super.stopService();
     }
 }

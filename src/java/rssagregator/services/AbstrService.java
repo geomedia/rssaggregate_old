@@ -5,7 +5,6 @@
 package rssagregator.services;
 
 import java.util.Observer;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.joda.time.DateTime;
@@ -23,6 +22,11 @@ public abstract class AbstrService implements Observer {
         executorService = executorService1;
     }
 
+    public AbstrService() {
+    }
+    
+    
+
 //    public AbstrService() {
 //        ScheduledExecutorService exe = Executors.newScheduledThreadPool(1);
 //        this.executorService = exe;
@@ -31,7 +35,7 @@ public abstract class AbstrService implements Observer {
      * *
      * Lance toutes les tâches par défaut devant être gérée par le service
      */
-    public abstract void instancierTaches();
+//    public abstract void instancierTaches();
 
     //    @Override
     //    public void update(Observable o, Object arg){
@@ -107,5 +111,9 @@ public abstract class AbstrService implements Observer {
      * les service. Chacun est chargé de clore les tache lancée et détruire son
      * pool de thread
      */
-    public abstract void stopService() throws SecurityException, RuntimeException;
+    public void stopService() throws SecurityException, RuntimeException{
+        if (this.executorService != null) {
+            this.executorService.shutdownNow();
+        }
+    };
 }

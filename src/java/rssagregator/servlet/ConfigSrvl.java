@@ -110,7 +110,7 @@ public class ConfigSrvl extends HttpServlet {
                 try {
                     DAOFactory.getInstance().getDAOConf().modifierConf(confcourante);
                     // Il faut notifier le changement pour recharger le service de reception
-                    confcourante.forceNotifyObserver();
+//                    confcourante.forceNotifyObserver();
 //                DAOFactory.getInstance().getDAOConf().forceNotifyObservers();
                     ServletTool.redir(request, "config/mod", "Modification de la config effectuée", Boolean.FALSE);
 

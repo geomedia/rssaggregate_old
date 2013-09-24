@@ -20,6 +20,8 @@ import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoFlux;
 import rssagregator.services.ServiceServer;
 import rssagregator.services.ServiceCollecteur;
+import rssagregator.services.ServiceMailNotifier;
+import rssagregator.services.ServiceSynchro;
 import rssagregator.utils.ServiceXMLTool;
 
 /**
@@ -49,8 +51,8 @@ public class StartServlet implements ServletContextListener {
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        
+
+
         DAOFactory.getInstance();
         DAOConf daoconf = DAOFactory.getInstance().getDAOConf();
         try {
@@ -63,7 +65,7 @@ public class StartServlet implements ServletContextListener {
 
         // On charge la conf et on l'enregistre auprès du service de 
         Conf conf = daoconf.getConfCourante();
-        conf.enregistrerAupresdesService();
+//        conf.enregistrerAupresdesService();
 
         // -----------------Chargement des flux
         DaoFlux daoflux = DAOFactory.getInstance().getDAOFlux();
@@ -105,6 +107,9 @@ public class StartServlet implements ServletContextListener {
         } catch (InvocationTargetException ex) {
             Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
+
+        // Lancement de la collecte
+        ServiceCollecteur.getInstance().lancerCollecte();
 
 //        daemonCentral = ServiceServer.getInstance();
 //        daemonCentral.instancierTaches();
@@ -205,7 +210,11 @@ public class StartServlet implements ServletContextListener {
     public void contextDestroyed(ServletContextEvent sce) {
         // On arrete les taches de collecte
         logger.debug("Fermeture de l'Application");
-        daemonCentral.stopService();
+          // Il faut fermer chacun des services.
+        ServiceCollecteur.getInstance().stopService();
+        ServiceServer.getInstance().stopService();
+        ServiceMailNotifier.getInstance().stopService();
+        ServiceSynchro.getInstance().stopService();
 
 //        es.shutdown();
 //        logger.debug("[OK] Fermeture du daemoncentral");
@@ -216,8 +225,10 @@ public class StartServlet implements ServletContextListener {
     }
 
     public void destroyDriver() {
-        String prefix = getClass().getSimpleName() + " destroy() ";
 
+      
+
+        String prefix = getClass().getSimpleName() + " destroy() ";
 
         try {
             Enumeration<Driver> drivers = DriverManager.getDrivers();
@@ -229,9 +240,5 @@ public class StartServlet implements ServletContextListener {
             Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Exception caught while deregistering JDBC drivers");
 //        ctx.log(prefix + "Exception caught while deregistering JDBC drivers", e);
         }
-
-
-
-
     }
 }

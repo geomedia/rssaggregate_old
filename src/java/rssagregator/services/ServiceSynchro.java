@@ -77,14 +77,16 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
      * ScheduledExecutorService très basique.
      */
     private ServiceSynchro() {
-//        super();
-        this(Executors.newSingleThreadScheduledExecutor());
+        super();
+        statutConnection = false;
+//        this(Executors.newSingleThreadScheduledExecutor());
 //        this(Executors.newSingleThreadScheduledExecutor());
     }
 
     private ServiceSynchro(ScheduledExecutorService executorService1) {
-        super(executorService1);
-        statutConnection = false;
+        this();
+        this.executorService = executorService1;
+//        super(executorService1);
 
         //Le nom du serveur utilisé par JMS doit être retouvé dans la conf
 //        servname = DAOFactory.getInstance().getDAOConf().getConfCourante().getServname();
@@ -692,23 +694,23 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Override
-    public void instancierTaches() {
-        //------------Lancement des tâches
-        TacheLancerConnectionJMS connectionJMS = new TacheLancerConnectionJMS(this);
-        connectionJMS.setSchedule(true);
-        executorService.submit(connectionJMS);
-
-
-        TacheSynchroRecupItem recupItem = new TacheSynchroRecupItem(this);
-        recupItem.setSchedule(true);
-        executorService.submit(recupItem);
-    }
+//    @Override
+//    public void instancierTaches() {
+//        //------------Lancement des tâches
+//        TacheLancerConnectionJMS connectionJMS = new TacheLancerConnectionJMS(this);
+//        connectionJMS.setSchedule(true);
+//        executorService.submit(connectionJMS);
+//
+//
+//        TacheSynchroRecupItem recupItem = new TacheSynchroRecupItem(this);
+//        recupItem.setSchedule(true);
+//        executorService.submit(recupItem);
+//    }
 
     @Override
     public void stopService() throws SecurityException, RuntimeException {
 
-        executorService.shutdownNow();
+        super.stopService();
         daemmon = false;
         try {
             if (connection != null) {

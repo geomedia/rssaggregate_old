@@ -9,7 +9,7 @@ import org.joda.time.Duration;
 import rssagregator.services.ServiceCollecteur;
 
 
-public class Conf extends AbstrObservableBeans implements Serializable {
+public class Conf implements Serializable {
 
     public Conf() {
     this.active = true;
@@ -184,10 +184,10 @@ public class Conf extends AbstrObservableBeans implements Serializable {
         this.pass = pass;
     }
 
-    public void forceNotifyObserver() {
-        this.setChanged();
-        this.notifyObservers();
-    }
+//    public void forceNotifyObserver() {
+//        this.setChanged();
+//        this.notifyObservers();
+//    }
 
     public String getJourSync() {
         return jourSync;
@@ -243,10 +243,10 @@ public class Conf extends AbstrObservableBeans implements Serializable {
      * <li>Collecteur</li>
      * </ul>
      */
-    @Override
-    public void enregistrerAupresdesService() {
-        this.addObserver(ServiceCollecteur.getInstance());
-    }
+//    @Override
+//    public void enregistrerAupresdesService() {
+//        this.addObserver(ServiceCollecteur.getInstance());
+//    }
 
     
 }

@@ -9,15 +9,14 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jdom.Attribute;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeConstants;
-import org.joda.time.Duration;
 import rssagregator.services.AbstrService;
 import rssagregator.services.AbstrTacheSchedule;
 
@@ -56,6 +55,23 @@ public class ServiceXMLTool {
             Class cService = Class.forName(attributclass.getValue());
             Method serviceGetInstance = cService.getMethod("getInstance");
             AbstrService service = (AbstrService) serviceGetInstance.invoke(null, new Object[0]);
+            
+            
+            //Définition du pool si précisé
+            Element ElementPool = elementService.getChild("pool");
+            if(ElementPool!=null){
+                Attribute attNbThread = ElementPool.getAttribute("nbThread");
+                Integer nbThread = new Integer(attNbThread.getValue());
+                
+                Attribute attMethodeInstanciation = ElementPool.getAttribute("methodeInstanciation");
+                System.out.println("attMethodeInstanciation  = "+ attMethodeInstanciation.getValue());
+                Method methodFactory = Executors.class.getMethod(attMethodeInstanciation.getValue(), Integer.class);
+                
+                ScheduledExecutorService es = (ScheduledExecutorService) methodFactory.invoke(null, nbThread);
+                service.setExecutorService(es);
+            }
+            
+            
             
 
             // On instancie chaque tache

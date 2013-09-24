@@ -5,15 +5,20 @@
 package rssagregator.services;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Observer;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import rssagregator.beans.Conf;
 import rssagregator.beans.StillAlivePOJO;
 import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.AliveIncident;
 import rssagregator.beans.incident.Incidable;
 import rssagregator.dao.DAOFactory;
+import rssagregator.utils.PropertyLoader;
 
 /**
  * Cette tache écrit dans un fichier de log propre
@@ -41,10 +46,18 @@ public class TacheStillAlive extends AbstrTacheSchedule<TacheStillAlive> impleme
 
     public TacheStillAlive() {
         super();
-        rupture = false;
-        // Chargement du fichier still alive.
-        Conf c = DAOFactory.getInstance().getDAOConf().getConfCourante();
-        file = new File(c.getVarpath() + "stillalive");
+        try {
+            rupture = false;
+            // Chargement du fichier still alive.
+
+          String varPath = PropertyLoader.loadProperti("serv.properties", "varpath");
+                    
+                    
+            file = new File(varPath + "stillalive");
+        } catch (IOException ex) {
+            Logger.getLogger(TacheStillAlive.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error(ex);
+        }
     }
 
     public TacheStillAlive(Observer s) {

@@ -51,10 +51,8 @@ public class ServiceMailNotifier extends AbstrService {
      * properties du répertoire de configuration
      */
     private ServiceMailNotifier() {
-        super(Executors.newScheduledThreadPool(5));
+        super();
         try {
-
-
             //On doit charger le fichier de conf.
             //On commence par rechercher l'emplacement du fichier propertymail dans le fichier propertie du projet.
             String fileConf = PropertyLoader.loadProperti("serv.properties", "mailconf");
@@ -63,6 +61,8 @@ public class ServiceMailNotifier extends AbstrService {
             Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    
+    
 
     public static ServiceMailNotifier getInstance() {
         if (instance == null) {
@@ -267,24 +267,24 @@ public class ServiceMailNotifier extends AbstrService {
         this.propertiesMail = propertiesMail;
     }
 
-    @Override
-    public void instancierTaches() {
-
-        //--------> Lancement de la tâche d'alerte mail
-        TacheAlerteMail alerteMail = new TacheAlerteMail(this);
-        alerteMail.setSchedule(Boolean.TRUE);
-        executorService.schedule(alerteMail, 30, TimeUnit.SECONDS);
-
-
-        //---------> Lancement de la tâche de vérification journalière
-        TacheVerifFluxNotificationMail notificationMail = new TacheVerifFluxNotificationMail(this);
-        notificationMail.setSchedule(Boolean.TRUE);
-        //calcul du delay
-        DateTime dtCurrent = new DateTime();
-        DateTime next = dtCurrent.plusDays(1).withHourOfDay(8);// withDayOfWeek(DateTimeConstants.SUNDAY);
-        Duration dur = new Duration(dtCurrent, next);
-        executorService.schedule(notificationMail, dur.getStandardSeconds(), TimeUnit.SECONDS);
-    }
+//    @Override
+//    public void instancierTaches() {
+//
+//        //--------> Lancement de la tâche d'alerte mail
+//        TacheAlerteMail alerteMail = new TacheAlerteMail(this);
+//        alerteMail.setSchedule(Boolean.TRUE);
+//        executorService.schedule(alerteMail, 30, TimeUnit.SECONDS);
+//
+//
+//        //---------> Lancement de la tâche de vérification journalière
+//        TacheVerifFluxNotificationMail notificationMail = new TacheVerifFluxNotificationMail(this);
+//        notificationMail.setSchedule(Boolean.TRUE);
+//        //calcul du delay
+//        DateTime dtCurrent = new DateTime();
+//        DateTime next = dtCurrent.plusDays(1).withHourOfDay(8);// withDayOfWeek(DateTimeConstants.SUNDAY);
+//        Duration dur = new Duration(dtCurrent, next);
+//        executorService.schedule(notificationMail, dur.getStandardSeconds(), TimeUnit.SECONDS);
+//    }
 
     @Override
     protected void gererIncident(AbstrTacheSchedule tache) {
@@ -372,7 +372,7 @@ public class ServiceMailNotifier extends AbstrService {
 
     @Override
     public void stopService() throws SecurityException, RuntimeException {
-        this.executorService.shutdownNow();
+        super.stopService();
 
     }
 }

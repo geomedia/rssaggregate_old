@@ -47,12 +47,13 @@ public class ServiceServer extends AbstrService {
      */
     private Integer daemonTime;
     
-    public ServiceServer(ScheduledExecutorService executorService1) {
-        super(executorService1);
-    }
+//    public ServiceServer(ScheduledExecutorService executorService1) {
+//        super(executorService1);
+//    }
     
     private ServiceServer(Boolean isStart, Integer daemonTime) {
-        this(Executors.newSingleThreadScheduledExecutor());
+        super();
+//        this(Executors.newSingleThreadScheduledExecutor());
         this.isStart = isStart;
         this.daemonTime = daemonTime;
     }
@@ -117,8 +118,11 @@ public class ServiceServer extends AbstrService {
      * <li>...</li>
      * </ul>
      */
-    @Override
-    public void instancierTaches() {
+    
+    
+    
+//    @Override
+//    public void instancierTaches() {
 //        logger.info("Lancement des services");
 //        try {
 //            Class.forName("com.mysql.jdbc.Driver");
@@ -186,9 +190,9 @@ public class ServiceServer extends AbstrService {
 ////
 ////            //Lancement des service
 ////
-////            serviceCollecteur.instancierTaches();
-////            serviceJMS.instancierTaches();
-////            serviceMail.instancierTaches();
+////            serviceCollecteur.lancerCollecte();
+////            serviceJMS.lancerCollecte();
+////            serviceMail.lancerCollecte();
 //            
 //            
 //            try {
@@ -220,7 +224,7 @@ public class ServiceServer extends AbstrService {
 //        executorService.submit(stillAlive);
 
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+//    }
     
     @Override
     /**
@@ -297,39 +301,34 @@ public class ServiceServer extends AbstrService {
     @Override
     public void stopService() throws RuntimeException, SecurityException {
         //On ferme les services
-        logger.info("Fermeture des Service");
-        try {
-            serviceCollecteur.stopService();
-            logger.debug("[OK] Fin du Processus de collecte");
-        } catch (Exception e) {
-            logger.error("Echec de la fermeture du Service de collecte : " + e);
-        }
-        
-        try {
-            serviceJMS.stopService();
-            logger.debug("[OK] Fin du service de Synchro");
-        } catch (Exception e) {
-            logger.error("Echec lors de la fermeture du service de Synchro : " + e);
-        }
-        
-        
-        try {
-            serviceMail.stopService();
-            logger.debug("[OK] FIN de service Mail");
-        } catch (Exception e) {
-            logger.error("Echec de la fermeture du Service MAIL : " + e);
-        }
+//        logger.info("Fermeture des Service");
+//        try {
+//            serviceCollecteur.stopService();
+//            logger.debug("[OK] Fin du Processus de collecte");
+//        } catch (Exception e) {
+//            logger.error("Echec de la fermeture du Service de collecte : " + e);
+//        }
+//        
+//        try {
+//            serviceJMS.stopService();
+//            logger.debug("[OK] Fin du service de Synchro");
+//        } catch (Exception e) {
+//            logger.error("Echec lors de la fermeture du service de Synchro : " + e);
+//        }
+//        
+//        
+//        try {
+//            serviceMail.stopService();
+//            logger.debug("[OK] FIN de service Mail");
+//        } catch (Exception e) {
+//            logger.error("Echec de la fermeture du Service MAIL : " + e);
+//        }
 
 
 
         //On ferme le daemon
         this.isStart = false;
-        try {
-            executorService.shutdownNow();
-            logger.debug("[OK] Fermeture des tâches administratives");
-        } catch (Exception e) {
-            logger.error("Lors de la cloture du pool du Service Serveur");
-        }
+        super.stopService();
         
     }
 }
