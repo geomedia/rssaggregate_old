@@ -24,6 +24,14 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
      */
     Boolean schedule;
     
+    
+    Integer jourSchedule;
+    Integer heureSchedule;
+    Integer minuteSchedule;
+    
+    Integer timeSchedule;
+    
+    
     /***
      * si il y a eu une erreur lors de l'execuption de la tâche, On inclu cette erreur ici. La runnable se retourne avec son erreur auprès du service qui le gère.
      */
@@ -75,6 +83,46 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
     public void setNbrTentative(Integer nbrTentative) {
         this.nbrTentative = nbrTentative;
     }
+
+    public Integer getJourSchedule() {
+        return jourSchedule;
+    }
+
+    /***
+     * Le jour de la schedul. Suivant les constante de datetime. 1 = monday; 2 = tuesday...
+     * @param jourSchedule 
+     */
+    public void setJourSchedule(Integer jourSchedule) {
+        this.jourSchedule = jourSchedule;
+    }
+
+
     
+
+    public Integer getHeureSchedule() {
+        return heureSchedule;
+    }
+
+    public void setHeureSchedule(Integer heureSchedule) {
+        this.heureSchedule = heureSchedule;
+    }
+
+    public Integer getMinuteSchedule() {
+        return minuteSchedule;
+    }
+
+    public void setMinuteSchedule(Integer minuteSchedule) {
+        this.minuteSchedule = minuteSchedule;
+    }
+
+
+
+    public Integer getTimeSchedule() {
+        return timeSchedule;
+    }
+
+    public void setTimeSchedule(Integer timeSchedule) {
+        this.timeSchedule = timeSchedule;
+    }
     
 }

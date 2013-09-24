@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+
+<!DOCTYPE def [
+  <!ELEMENT def (service*)>
+  <!ELEMENT service (tache)>
+  <!ELEMENT tache (schedulejourfixe| scheduleduree)>
+  <!ELEMENT schedulejourfixe EMPTY>
+  <!ELEMENT scheduleduree EMPTY>
+  
+  <!ATTLIST service class CDATA #REQUIRED>
+  <!ATTLIST service poolsize CDATA #REQUIRED>
+  <!ATTLIST tache class CDATA #REQUIRED>
+  <!ATTLIST schedulejourfixe jour (lu|ma|me|je|ve|sa|di) #REQUIRED>
+  <!ATTLIST schedulejourfixe heure CDATA #REQUIRED> <!-- Le format de kl'heure heure:minute exemple : 01:01 02:02 ... -->
+   <!ATTLIST scheduleduree nbSeconde CDATA #REQUIRED>
+  
+]>
+
+<def>
+    <service class="" poolsize="">
+        <tache class="truc">
+            <scheduleduree nbSeconde="1"></scheduleduree>
+            
+        </tache>
+    </service>
+</def>
+
+<!--<!DOCTYPE TVSCHEDULE [
+
+<!ELEMENT TVSCHEDULE (CHANNEL+)>
+<!ELEMENT CHANNEL (BANNER,DAY+)>
+<!ELEMENT BANNER (#PCDATA)>
+<!ELEMENT DAY (DATE,(HOLIDAY|PROGRAMSLOT+)+)>
+<!ELEMENT HOLIDAY (#PCDATA)>
+<!ELEMENT DATE (#PCDATA)>
+<!ELEMENT PROGRAMSLOT (TIME,TITLE,DESCRIPTION?)>
+<!ELEMENT TIME (#PCDATA)>
+<!ELEMENT TITLE (#PCDATA)> 
+<!ELEMENT DESCRIPTION (#PCDATA)>
+
+<!ATTLIST TVSCHEDULE NAME CDATA #REQUIRED>
+<!ATTLIST CHANNEL CHAN CDATA #REQUIRED>
+<!ATTLIST PROGRAMSLOT VTR CDATA #IMPLIED>
+<!ATTLIST TITLE RATING CDATA #IMPLIED>
+<!ATTLIST TITLE LANGUAGE CDATA #IMPLIED>
+]>-->
+<!--<TVSCHEDULE NAME="">
+    <BANNER>
+        
+    </BANNER>
+</TVSCHEDULE>-->

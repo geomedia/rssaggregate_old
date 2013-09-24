@@ -17,6 +17,11 @@ import rssagregator.beans.UserAccount;
  */
 public class UserForm extends AbstrForm {
 
+    private String mail;
+    private String encPassword;
+    Boolean adminstatut;
+    private String username;
+    private Boolean adminMail;
     private static final String EMAIL_PATTERN =
             "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
             + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
@@ -27,91 +32,104 @@ public class UserForm extends AbstrForm {
         if (u == null) {
             u = new UserAccount();
         }
-        erreurs = new HashMap<String, String[]>();
+
 
         //================================================================================================
         //                              BIND DES PARAMETRE DE LA REQUETE
         //================================================================================================
-        String s;
 
+        u.setMail(mail);
+        try {
+            u.setEncPassword(encPassword);
+        } catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(UserForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        u.setAdminMail(adminstatut);
+        u.setUsername(username);
+        u.setAdminMail(adminMail);
+
+
+//        if (erreurs.isEmpty()) {
+//            this.valide = true;
+//        } else {
+//            this.valide = false;
+//        }
+        return u;
+    }
+
+    @Override
+    public Boolean validate(HttpServletRequest request) {
+        erreurs = new HashMap<String, String[]>();
         //-----------------------------------------MAIL---------------------------------------------------
+        String s;
         s = request.getParameter("mail");
         if (s != null && !s.isEmpty()) {
             if (s.matches(EMAIL_PATTERN)) {
-                u.setMail(s);
+                mail = s;
             } else {
                 erreurs.put("mail", new String[]{s, "l'email n'est pas correct"});
             }
-        }
-        else{
+        } else {
             erreurs.put("mail", new String[]{s, "Ce champ ne peut être vide"});
         }
 
 
         //----------------------------------------Mot de pass--------------------------------------------
-       String p1 = request.getParameter("pass1");
-       String p2 = request.getParameter("pass2");
-       if(p1 != null && p2!=null){
-           boolean err = false;
-           if(!p1.equals(p2)){
-               err = true;
-               erreurs.put("pass", new String[]{p1, "mot de pass null"});
-           }
-           if(p1.length()<3){
-               erreurs.put("pass", new String[]{p1, "trop court"});
-               err = true;
-           }
-           if(!err){
-               try {
-                   u.setEncPassword(p1);
-               } catch (NoSuchAlgorithmException ex) {
-                   Logger.getLogger(UserForm.class.getName()).log(Level.SEVERE, null, ex);
-                   erreurs.put("pass", new String[]{p1, "Erreur technique lors du chiffrement du mot de passe. Veuillez contacter un administrateur"});
-                   
-               }
-            
-           }
-       }
-       
-       //--------------------------------ADMIN STATUT---------------------------------------------------
-       s = request.getParameter("adminstatut");
-       if(s!=null && !s.isEmpty()){
-           u.setAdminstatut(true);
-       }
-       else{
-           u.setAdminstatut(false);
-       }
-       
-       
-       //------------------------------USER NAME----------------------------------
-       s= request.getParameter("username");
-       if(s != null && !s.isEmpty()){
-           if(!s.matches("[A-Za-zéèàê -]*")){
+        String p1 = request.getParameter("pass1");
+        String p2 = request.getParameter("pass2");
+        if (p1 != null && p2 != null) {
+            boolean err = false;
+            if (!p1.equals(p2)) {
+                err = true;
+                erreurs.put("pass", new String[]{p1, "mot de pass null"});
+            }
+            if (p1.length() < 3) {
+                erreurs.put("pass", new String[]{p1, "trop court"});
+                err = true;
+            }
+            if (!err) {
+                encPassword = p1;
+//                   u.setEncPassword(p1);
+            }
+        }
+
+        //--------------------------------ADMIN STATUT---------------------------------------------------
+        s = request.getParameter("adminstatut");
+        if (s != null && !s.isEmpty()) {
+            adminstatut = true;
+
+        } else {
+            adminstatut = false;
+        }
+
+
+        //------------------------------USER NAME----------------------------------
+        s = request.getParameter("username");
+        if (s != null && !s.isEmpty()) {
+            if (!s.matches("[A-Za-zéèàê -]*")) {
 //           if(!s.matches("[\\w]*")){
                 erreurs.put("username", new String[]{s, "Présence de caractères interdits, n'utilisez que des lettres de a à z des espaces et des tirrets"});
-           }
-           else{
-             u.setUsername(s);
-           }
-       }
-       else{
-           erreurs.put("username", new String[]{s, "Ce champs ne peut être nul"});
-       }
-       
-       
-       //------------------------------Mail Administration------------------------------
-       s = request.getParameter("adminMail");
-       if(s != null && !s.isEmpty()){
-           if(!u.getAdminstatut()){
-               erreurs.put("adminMail", new String[]{s, "Il est impossible de recevoir les mail sans être administrateur"});
-           }
-           else{
-               u.setAdminMail(true);
-           }
-       }
-       
-       
-       
+            } else {
+                username = s;
+            }
+        } else {
+            erreurs.put("username", new String[]{s, "Ce champs ne peut être nul"});
+        }
+
+
+        //------------------------------Mail Administration------------------------------
+        s = request.getParameter("adminMail");
+        if (s != null && !s.isEmpty()) {
+            if (adminstatut) {
+                erreurs.put("adminMail", new String[]{s, "Il est impossible de recevoir les mail sans être administrateur"});
+            } else {
+
+                adminMail = true;
+            }
+        }
+
+
+
         //================================================================================================
         //                                      VALIDATION
         //================================================================================================
@@ -123,12 +141,7 @@ public class UserForm extends AbstrForm {
             resultat = "Erreur lors de la validation des données";
             valide = false;
         }
-
-//        if (erreurs.isEmpty()) {
-//            this.valide = true;
-//        } else {
-//            this.valide = false;
-//        }
-        return u;
+        return valide;
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

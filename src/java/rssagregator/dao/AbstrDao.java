@@ -13,6 +13,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 import rssagregator.beans.BeanSynchronise;
+import rssagregator.beans.Flux;
 import rssagregator.services.ServiceSynchro;
 
 /**
@@ -56,6 +57,12 @@ public abstract class AbstrDao {
 
     public void modifier(Object obj) throws Exception {
 
+
+        if (obj instanceof Flux) {
+            Flux ff = (Flux) obj;
+            System.out.println("FLUX DEBUT Abstr DE DAO : " + ff.getUrl());
+        }
+
         // Test si le flux possède bien un id
         // On récupère l'id
         Method getter = obj.getClass().getMethod("getID");
@@ -68,7 +75,25 @@ public abstract class AbstrDao {
 //            System.out.println("ON MODIF");
             tr.begin();
 //            em.getTransaction().begin();
-            em.merge(obj);
+
+            if (obj instanceof Flux) {
+                Flux ff = (Flux) obj;
+                System.out.println("FLUX AVANT  MERGE Abstr DE DAO : " + ff.getUrl());
+            }
+
+
+            System.out.println("em.contain : "+ em.contains(obj));           
+
+            em.merge(obj); 
+            
+           
+
+            if (obj instanceof Flux) {
+                Flux ff = (Flux) obj;
+                System.out.println("FLUX MERGE Abstr DE DAO : " + ff.getUrl());
+            }
+
+
             try {
                 // Si il s'agit d'un beans devant être synchronisé On lance la diff
                 if (BeanSynchronise.class.isAssignableFrom(obj.getClass())) {
@@ -83,6 +108,11 @@ public abstract class AbstrDao {
                 tr.rollback();
                 throw e;
             }
+        }
+
+        if (obj instanceof Flux) {
+            Flux ff = (Flux) obj;
+            System.out.println("FLUX FIN DE DAO : " + ff.getUrl());
         }
     }
 

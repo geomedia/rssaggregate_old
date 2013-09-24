@@ -12,6 +12,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 /**
  * Cette entitée permet de stoquer un intervale de date permettant de renseigner
@@ -23,29 +26,25 @@ import javax.persistence.Temporal;
  * @author clem
  */
 @Entity
-public class FluxPeriodeCaptation implements Serializable{
-    
+public class FluxPeriodeCaptation implements Serializable {
+
     @ManyToOne(optional = false)
     private Flux flux;
 
-    
-        public FluxPeriodeCaptation() {
+    public FluxPeriodeCaptation() {
     }
-    
-    /***
+    /**
+     * *
      * Date de début de la période de captation du flux
      */
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     private Date dateDebut;
-    
-    
-    /***
+    /**
+     * *
      * Date de fin de la période de captation du flux
      */
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     private Date datefin;
-    
-    
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long ID;
@@ -82,7 +81,29 @@ public class FluxPeriodeCaptation implements Serializable{
         this.flux = flux;
     }
 
+    @Override
+    /**
+     * *
+     * Retourne l'intervale de date à un format lisible. "dd/MM/yyyy à
+     * dd/MM/yyyy". C'est pas très MVC. Normalement c'est le role de la vue de
+     * mettre en forme la date. Mais rien n'empeche de le faire par la suite et
+     * d'oublier cette redéclaration de toString.
+     */
+    public String toString() {
+        String retour = "";
+        DateTimeFormatter fmt = DateTimeFormat.forPattern("dd MMMM yyyy à hh'h'mm");
+        if (this.dateDebut != null) {
+            DateTime dt = new DateTime(this.getDateDebut());
+            retour = fmt.print(dt);
+        }
+        if (this.datefin != null) {
+            DateTime dt = new DateTime(this.datefin);
+            retour += " à " + fmt.print(dt);
+        } else {
+            DateTime dt = new DateTime();
+            retour += " à Maintennant (" + fmt.print(dt) + ")";
+        }
 
-    
-    
+        return retour;
+    }
 }

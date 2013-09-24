@@ -18,7 +18,7 @@ import javax.persistence.OneToMany;
  * objet. Un journal peut contenir plusieurs flux
  */
 @Entity
-@Cacheable(value = true)
+@Cacheable(value = false)
 public class Journal implements Serializable, BeanSynchronise {
 
     @Id
@@ -49,7 +49,7 @@ public class Journal implements Serializable, BeanSynchronise {
     /**
      * Un journal possède plusieurs flux.
      */
-    @OneToMany(mappedBy = "journalLie", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "journalLie", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE, CascadeType.DETACH})
     private List<Flux> fluxLie;
     
     
@@ -159,4 +159,13 @@ public class Journal implements Serializable, BeanSynchronise {
     public Boolean synchroImperative() {
         return true;
     }
+
+    @Override
+    public String toString() {
+return this.nom;
+//        return super.toString(); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    
+    
 }

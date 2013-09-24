@@ -6,6 +6,7 @@ package rssagregator.beans.form;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
@@ -13,15 +14,30 @@ import rssagregator.beans.Conf;
 import rssagregator.beans.ServeurSlave;
 
 /**
- * La class permettant de vérifier et binder les données saisie par l'utilisateur avec le beans <strong>Conf</strong
- * @author clem
+ * La class permettant de vérifier et binder les données saisie par
+ * l'utilisateur avec le beans <strong>Conf</strong @aut
+ *
+ *
+ * hor clem
  */
 public class ConfForm extends AbstrForm {
+
+    private Integer nbThreadRecup;
+    private String servname;
+    private String login;
+    private String pass;
+    private String jmsprovider;
+    private Boolean master;
+    private List<ServeurSlave> serveurSlave;
+    private String hostMaster;
+    private Integer purgeDuration;
+    private String jourSync;
+    private Integer heureSync;
 
     public ConfForm(/*AbstrDao dao*/) {
 //        super(dao);
     }
- 
+
     @Override
     public Object bind(HttpServletRequest request, Object objEntre, Class type) {
         erreurs = new HashMap<String, String[]>();
@@ -37,16 +53,49 @@ public class ConfForm extends AbstrForm {
             conf.setActive(false);
         }
 
+        if (valide) {
+            conf.setNbThreadRecup(nbThreadRecup);
+            conf.setServname(servname);
+            conf.setLogin(login);
+            conf.setPass(pass);
+            conf.setJmsprovider(jmsprovider);
+            conf.setMaster(master);
+            conf.setServeurSlave(serveurSlave);
+            conf.setHostMaster(hostMaster);
+            conf.setPurgeDuration(purgeDuration);
+            conf.setJourSync(jourSync);
+            conf.setHeureSync(heureSync);
+        }
+
 
         //=====================================================================================
         // CAPTURE DE LA SAISIE DE CHAQUE ELEMENT DANS LA REQUEST ET VÉRIFICATION DE CEUX CI
         //=====================================================================================
 
-        // ----------------------------NOMBRE DE Thread
+    
+
+        return objEntre;
+    }
+
+    public void check_nbThreadRecup(String entre) throws Exception {
+        try {
+            Integer i = Integer.parseInt(entre);
+        } catch (Exception e) {
+            throw new Exception("Ceci n'est pas un nombre entier");
+        }
+    }
+
+    @Override
+    public Boolean validate(HttpServletRequest request) {
+        
+        
+        String s;
+            // ----------------------------NOMBRE DE Thread
         s = request.getParameter("nbThreadRecup");
         try {
-            Integer val = new Integer(s);
-            conf.setNbThreadRecup(val);
+//            Integer val = new Integer(s);
+            this.nbThreadRecup = new Integer(s);
+//            conf.setNbThreadRecup(val);
         } catch (Exception e) {
             erreurs.put("nbThreadRecup", new String[]{s, "Ceci n'est pas un nombre entier"});
         }
@@ -54,39 +103,48 @@ public class ConfForm extends AbstrForm {
 
         //-----------------------------Nom de serveur
         s = request.getParameter("servname");
-        conf.setServname(s);
+        if (s != null) {
+            Pattern p = Pattern.compile("^[a-z]*$");
+            Matcher m = p.matcher(s);
+            if (!m.find()) {
+                erreurs.put("servname", new String[]{s, "doit être composé uniquement de minuscules"});
+            } else {
+                this.servname = s;
+            }
+
+        }
+//        conf.setServname(s);
+
 
         // Vérification doit être uniquement composé de caractère
-        Pattern p = Pattern.compile("^[a-z]*$");
-        Matcher m = p.matcher(s);
-        if (!m.find()) {
-            erreurs.put("servname", new String[]{s, "doit être composé uniquement de minuscules"});
-        }
 
 
-        //----------------------------Longin
+
+        //----------------------------Login
 
         s = request.getParameter("login");
-        conf.setLogin(s);
-
-        p = Pattern.compile("^[a-zA-Z0-9]*$");
-        m = p.matcher(s);
-        if (!m.find()) {
-            erreurs.put("login", new String[]{s, "doit être composé uniquement de caractères alphanumérics"});
+        if (s != null) {
+            Pattern p = Pattern.compile("^[a-zA-Z0-9]*$");
+            Matcher m = p.matcher(s);
+            if (!m.find()) {
+                erreurs.put("login", new String[]{s, "doit être composé uniquement de caractères alphanumérics"});
+            } else {
+                this.login = s;
+            }
         }
-
 
         //------------------------------Pass du serveur courant
 
         s = request.getParameter("pass1");
-        conf.setPass(s);
+//        conf.setPass(s);
 
         String m1 = request.getParameter("pass1");
         String m2 = request.getParameter("pass2");
 
         if (m1 != null && m2 != null) {
             if (m1.equals(m2) && m1.length() > 3) {
-                conf.setPass(m1);
+                this.pass = m1;
+//                conf.setPass(m1);
             } else {
                 erreurs.put("pass", new String[]{s, "mot de passe incorrect"});
             }
@@ -95,15 +153,18 @@ public class ConfForm extends AbstrForm {
         //--------------------JMS Provider
         s = request.getParameter("jmsprovider");
         if (s != null && !s.isEmpty()) {
-            conf.setJmsprovider(s);
+            this.jmsprovider = s;
+//            conf.setJmsprovider(s);
         }
 
         //-------------------Master statut
         s = request.getParameter("master");
         if (s == null) {
-            conf.setMaster(false);
+            this.master = false;
+//            conf.setMaster(false);
         } else {
-            conf.setMaster(true);
+            this.master = true;
+//            conf.setMaster(true);
         }
 
         // ------------------Serveur esaclaves lié à la config
@@ -114,7 +175,8 @@ public class ConfForm extends AbstrForm {
         int i;
 
 
-        conf.setServeurSlave(new ArrayList<ServeurSlave>());
+        this.serveurSlave = new ArrayList<ServeurSlave>();
+//        conf.setServeurSlave(new ArrayList<ServeurSlave>());
         if (tabslavehost != null && tabslavelogin != null && tabslavepass != null && tabUrlSlave != null) {
             if (tabslavehost.length == tabslavelogin.length && tabslavepass.length == tabslavehost.length && tabslavehost.length == tabUrlSlave.length) {
                 for (i = 0; i < tabslavehost.length; i++) {
@@ -123,14 +185,18 @@ public class ConfForm extends AbstrForm {
                     slave.setLogin(tabslavelogin[i]);
                     slave.setPass(tabslavepass[i]);
                     slave.setUrl(tabUrlSlave[i]);
-                    conf.getServeurSlave().add(slave);
+                    this.serveurSlave.add(slave);
+//                    conf.getServeurSlave().add(slave);
                 }
             }
         }
 
         // ------------------Host du serveur maitre
         s = request.getParameter("hostMaster");
-        conf.setHostMaster(s);
+        if (s !=null) {
+            this.hostMaster =s;
+        }
+//        conf.setHostMaster(s);
 
 
         //-------------------DureePurge
@@ -138,7 +204,8 @@ public class ConfForm extends AbstrForm {
         if (s != null) {
             try {
                 Integer val = new Integer(s);
-                conf.setPurgeDuration(val);
+//                conf.setPurgeDuration(val);
+                this.purgeDuration = val;
             } catch (Exception e) {
                 erreurs.put("purgeDuration", new String[]{s, "Il faut un nombre entier"});
             }
@@ -147,25 +214,26 @@ public class ConfForm extends AbstrForm {
         //-------------------------Jour de la synchronisation
         s = request.getParameter("jourSync");
         if (s != null && (s.equals("lu") || s.equals("ma") || s.equals("me") || s.equals("je") || s.equals("ve") || s.equals("sa") || s.equals("di"))) {
-            conf.setJourSync(s);
-            System.out.println("JOURRRR : " + s);
+//            conf.setJourSync(s);
+            this.jourSync =s;
+//            System.out.println("JOURRRR : " + s);
         }
 
         //-------------------------Heure de synchronisation
         s = request.getParameter("heureSync");
         if (s != null) {
-            Integer val=null;
+            Integer val = null;
             try {
                 val = new Integer(s);
             } catch (Exception e) {
                 erreurs.put("heureSync", new String[]{s, "Ceci n'est pas un nombre entier"});
             }
-  
-            if(val !=null && (val <0 || val >23)){
+
+            if (val != null && (val < 0 || val > 23)) {
                 erreurs.put("heureSync", new String[]{s, "Il faut un entier entre 0 et 23"});
-            }
-            else{
-                conf.setHeureSync(val);
+            } else {
+                this.heureSync = val;
+//                conf.setHeureSync(val);
             }
         }
 
@@ -185,14 +253,8 @@ public class ConfForm extends AbstrForm {
             System.out.println("" + erreurs.toString());
         }
 
-        return objEntre;
-    }
-
-    public void check_nbThreadRecup(String entre) throws Exception {
-        try {
-            Integer i = Integer.parseInt(entre);
-        } catch (Exception e) {
-            throw new Exception("Ceci n'est pas un nombre entier");
-        }
+        
+        return this.valide;
+        
     }
 }

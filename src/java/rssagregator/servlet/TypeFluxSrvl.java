@@ -43,7 +43,7 @@ public class TypeFluxSrvl extends HttpServlet {
 
     public static final String VUE = "/WEB-INF/typefluxjsp.jsp";
     public static final String ATT_FORM_JSP = "form";
-    public static final String ATT_BEAN_JSP = "obj";
+    public static final String ATT_BEAN_JSP = "bean";
     public static final String ATT_LIST_OBJ = "list";
     public static final String ATT_SRVLT_NAME = "TypeFluxSrvl";
 

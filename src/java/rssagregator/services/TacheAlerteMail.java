@@ -47,12 +47,15 @@ public class TacheAlerteMail extends AbstrTacheSchedule<TacheAlerteMail> {
         try {
             dao.setNullLastNotification(true);
             incidents = dao.findCriteria(AbstrIncident.class);
-//            template.setListIncident(list);
-//            this.corps = template.getCorpsMail();
-//            for (int i = 0; i < list.size(); i++) {
-//                AbstrIncident abstrIncident = list.get(i);
-//                System.out.println("Incid non notifié : " + abstrIncident);
-//            }
+            
+           // On effectue une seconde requete pour trouver les incidents dont la notification est impérative
+            dao = (DAOIncident<AbstrIncident>) DAOFactory.getInstance().getDaoFromType(AbstrIncident.class);
+           List<AbstrIncident> otherIncid = dao.findCriteria(AbstrIncident.class);
+            for (int i = 0; i < otherIncid.size(); i++) {
+                AbstrIncident abstrIncident = otherIncid.get(i);
+                incidents.add(abstrIncident);
+            }
+            
 
             // Construction de la liste des destinataire.
             List<UserAccount> listuser = DAOFactory.getInstance().getDAOUser().findUserANotifier();

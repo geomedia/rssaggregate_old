@@ -18,7 +18,7 @@
 
 </div>
 <div id="sidebar">
-    <p><a href="${rootpath}TypeFluxSrvl/add">Ajouter</a></p>
+    <c:if test="${admin=='true'}"><p><a href="${rootpath}TypeFluxSrvl/add">Ajouter</a></p></c:if>
     <p><a href="${rootpath}TypeFluxSrvl/recherche">Liste</a></p>
 </div>
 
@@ -44,19 +44,32 @@
                     <c:when test="${action=='mod' or action=='add'}">
                         <div>
                             <ul>
-                                <li><a href="${rootpath}TypeFluxSrvl/rem?id=${obj.ID}">Supprimer ce type</a></li>
+                                <c:if test="${admin=='true'}"> <li><a href="${rootpath}TypeFluxSrvl/rem?id=${bean.ID}">Supprimer ce type</a></li></c:if>
                             </ul>
                         </div>
 
-                        <form method="POST" action="${rootpath}TypeFluxSrvl/${action}?id=${obj.ID}">
+                        <form method="POST" action="${rootpath}TypeFluxSrvl/${action}?id=${bean.ID}">
                             <label for="denomination">Dénomination : </label>
-                            <input name="denomination" value="${obj.denomination}"/>
+                            <input name="denomination" id="denomination" value="${bean.denomination}"/><br />
+                            
+                            <label for="description">Description :</label><br>
+                            
+                            <textarea name="description" id="description" cols="60" rows="15">${bean.description}</textarea>
+                            <br />
+                            
                             <input type="submit"/>
                         </form>
                     </c:when>
                     <c:when test="${action=='read'}">
-                        <p><a href="${rootpath}${srlvtname}/mod?id=${obj.ID}">EDITER</a></p>
-                        <p><strong>Dénomination : </strong>${obj.denomination}</p>
+                        <c:import url="/WEB-INF/inc/editionBean.jsp" />
+                        <p><strong>Dénomination : </strong>${bean.denomination}</p>
+                        <p><strong>Description : </strong>${bean.description}</p>
+                        <p>Flux Appartenant à cet type : </p>
+                        <ul>
+                        <c:forEach items="${bean.fluxLie}" var="fl">
+                            <li><a href="${rootpath}flux/read?id=${fl.ID}">${fl}</li>
+                        </c:forEach>
+                        </ul>
                     </c:when>
                 </c:choose>
             </c:when>

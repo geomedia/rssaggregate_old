@@ -37,7 +37,7 @@ import rssagregator.utils.ServletTool;
 public class FluxSrvl extends HttpServlet {
 
     public static final String ATT_FORM = "form";
-    public static final String ATT_OBJ = "flux";
+    public static final String ATT_OBJ = "bean";
     public static final String ATT_ACTION = "action";
     public static final String ATT_LISTOBJ = "listflux";
     public static final String ATT_SERV_NAME = "flux";
@@ -55,8 +55,10 @@ public class FluxSrvl extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+        response.setCharacterEncoding("UTF-8");
+        request.setCharacterEncoding("UTF-8");
 
         //Liste des clause servant à criteria, ces variables seront envoyé dans la dao par la suite
         Journal journalLie = null;
@@ -67,7 +69,7 @@ public class FluxSrvl extends HttpServlet {
         redirmap = null;
 
         // Un simple attribut pour que le menu brille sur la navigation courante
-        request.setAttribute("navmenu", ATT_OBJ);
+        request.setAttribute("navmenu", "flux");
 
         // récupération de l'action (list, mod del ...). Si aucune action n'est précisée, alors on recherche qui correpond à la page d'acceuil de la recherhc des flux.
         String action = ServletTool.configAction(request, "recherche");
@@ -103,10 +105,10 @@ public class FluxSrvl extends HttpServlet {
             request.setAttribute("listtypeflux", dAOGenerique.findall());
             request.setAttribute("listcomportement", DAOFactory.getInstance().getDAOComportementCollecte().findall());
             // GESTION DU BIND ET DE L'enregistremnet
-                ServletTool.actionADD(request, ATT_OBJ, ATT_FORM, Flux.class, true);
-            
+            ServletTool.actionADD(request, ATT_OBJ, ATT_FORM, Flux.class, true);
+
             //----------------------------------------------------ACTION : MODIFICATION----------------------------------------------------
-        } else if (action.equals("mod")) {
+        } else if (action.equals("mod")) { 
             DAOGenerique dAOGenerique = DAOFactory.getInstance().getDAOGenerique();
             dAOGenerique.setClassAssocie(FluxType.class);
             request.setAttribute("listtypeflux", dAOGenerique.findall());
@@ -114,6 +116,8 @@ public class FluxSrvl extends HttpServlet {
             // GESTION DU BIND ET DE L'enregistremnet
 
             ServletTool.actionMOD(request, ATT_OBJ, ATT_FORM, Flux.class, true);
+            
+            
 
             //------------------------------------------------ACTION MAJ MANUELLE--------------------------------------------------------
         } else if (action.equals("maj")) {
@@ -129,8 +133,8 @@ public class FluxSrvl extends HttpServlet {
             } catch (NoResultException e) {
                 ServletTool.redir(request, "flux/maj", "Flux Inconnu", true);
             } catch (Exception e) {
-                AbstrIncident incid = ServiceGestionIncident.getInstance().gererIncident(e, flux);
-                ServletTool.redir(request, "flux/maj", "ERREUR LORS DE La récup DU FLUX. : " + e.toString(), true);
+//                AbstrIncident incid = ServiceGestionIncident.getInstance().gererIncident(e, flux);
+//                ServletTool.redir(request, "flux/maj", "ERREUR LORS DE La récup DU FLUX. : " + e.toString(), true);
             }
 
         } // Si l'action est liste, on récupère la liste des flux

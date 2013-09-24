@@ -8,12 +8,8 @@ import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoJournal;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -68,11 +64,11 @@ public class JournauxSrvl extends HttpServlet {
         // récupération de l'action
         String action = ServletTool.configAction(request, "recherche");
         request.setAttribute("srlvtname", ATT_SERV_NAME);
-
+        System.out.println("--->"+action);
 
 
         DaoJournal daoJournal = DAOFactory.getInstance().getDaoJournal();
-        JournalForm journalForm = new JournalForm(/*daoJournal*/);
+        JournalForm journalForm = new JournalForm();
         Journal journal = null;
 
         request.setAttribute(ATT_FORM, journalForm);

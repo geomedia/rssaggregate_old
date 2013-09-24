@@ -17,6 +17,8 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import rssagregator.beans.Conf;
 import rssagregator.beans.incident.AliveIncident;
+import rssagregator.beans.incident.IncidentFactory;
+import rssagregator.beans.incident.ServerIncident;
 import rssagregator.dao.DAOConf;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoFlux;
@@ -51,27 +53,23 @@ public class ServiceServer extends AbstrService {
      * Durée d'attente dans la boucle du daemon en milisecodnes
      */
     private Integer daemonTime;
-
+    
     public ServiceServer(ScheduledExecutorService executorService1) {
         super(executorService1);
     }
-
-    
     
     private ServiceServer(Boolean isStart, Integer daemonTime) {
         this(Executors.newSingleThreadScheduledExecutor());
         this.isStart = isStart;
         this.daemonTime = daemonTime;
     }
-
+    
     public static ServiceServer getInstance() {
         if (instance == null) {
             instance = new ServiceServer(true, 10000);
         }
         return instance;
     }
-
-
 
     /**
      * Démarre le service. Commence par charger la conf et des informations dans
@@ -178,42 +176,42 @@ public class ServiceServer extends AbstrService {
             serviceCollecteur.instancierTaches();
             serviceJMS.instancierTaches();
             serviceMail.instancierTaches();
-
-
+            
+            
             try {
                 daoconf.verifRootAccount();
-                
-    //            executorServiceAdministratif.submit(serviceJMS);
+
+                //            executorServiceAdministratif.submit(serviceJMS);
             } catch (IOException ex) {
                 Logger.getLogger(ServiceServer.class.getName()).log(Level.SEVERE, null, ex);
             } catch (Exception ex) {
                 Logger.getLogger(ServiceServer.class.getName()).log(Level.SEVERE, null, ex);
             }
-
-
-
-
-
-
+            
+            
+            
+            
+            
+            
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
-
-
-
-        Conf c = DAOFactory.getInstance().getDAOConf().getConfCourante();
-        System.out.println("=======================================");
-        System.out.println("VAR PATH : " + c.getVarpath());
-        System.out.println("=======================================");
-
-
-        TacheStillAlive stillAlive = new TacheStillAlive(new File(c.getVarpath() + "stillalive"), this);
+        
+        
+        
+//        Conf c = DAOFactory.getInstance().getDAOConf().getConfCourante();
+//        System.out.println("=======================================");
+//        System.out.println("VAR PATH : " + c.getVarpath());
+//        System.out.println("=======================================");
+        
+        
+        TacheStillAlive stillAlive = new TacheStillAlive(this);
         stillAlive.setSchedule(true);
         executorService.submit(stillAlive);
 
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
+    
     @Override
     /**
      * *
@@ -223,18 +221,14 @@ public class ServiceServer extends AbstrService {
      * </ul>
      */
     public void update(Observable o, Object arg) {
-
-
         if (o instanceof AbstrTacheSchedule) {
-
-
             if (o.getClass().equals(TacheStillAlive.class)) {
                 TacheStillAlive cast = (TacheStillAlive) o;
                 if (cast.getRupture()) {
                     AliveIncident incident = new AliveIncident();
                     DateTimeFormatter fmt = DateTimeFormat.forPattern("dd MMMM yyyy à hh'h'mm");
                     incident.setMessageEreur("Il semble que l'application n'était pas ouverte entre : " + fmt.print(new DateTime(cast.getDebutRupture())) + " et : " + fmt.print(new DateTime(cast.getFinRupture())));
-
+                    
                 }
                 if (cast.getSchedule()) {
                     executorService.schedule(cast, 15, TimeUnit.SECONDS);
@@ -242,15 +236,54 @@ public class ServiceServer extends AbstrService {
             }
             gererIncident((AbstrTacheSchedule) o);
         }
-
+        
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
+    
     @Override
     protected void gererIncident(AbstrTacheSchedule tache) {
+
+        //================================================================================================
+        //                      INSTANCIATION OU RECUPERATION D'INCIDENT
+        //================================================================================================
+        ServerIncident si = null;
+        
+        if (tache.getClass().equals(TacheStillAlive.class)) {
+            TacheStillAlive cast = (TacheStillAlive) tache;
+            if (cast.getRupture()) {
+                IncidentFactory<AliveIncident> factory = new IncidentFactory<AliveIncident>();
+                try {
+                    si = factory.createIncidentFromTask(tache, "erreur");
+                } catch (InstantiationException ex) {
+                    Logger.getLogger(ServiceServer.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IllegalAccessException ex) {
+                    Logger.getLogger(ServiceServer.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+
+        //=================================================================================================
+        // ..................... GESTION DES INCIDENTS
+        //=================================================================================================
+        if (si != null) {
+            if (tache.getClass().equals(TacheStillAlive.class)) {
+                TacheStillAlive cast = (TacheStillAlive) tache;
+                si.setDateDebut(cast.getDebutRupture());
+                si.setDateFin(cast.getFinRupture());
+                si.setMessageEreur("Il semble que le serveur ait arrété de fonctionner durant la période");
+                si.setNotificationImperative(true);
+            }
+        }
+                        //=================================================================================================
+                //...............................Enregistrment de l'incident
+                //=================================================================================================
+        
+        
+        
+        
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
+    
     @Override
     public void stopService() throws RuntimeException, SecurityException {
         //On ferme les services
@@ -261,15 +294,15 @@ public class ServiceServer extends AbstrService {
         } catch (Exception e) {
             logger.error("Echec de la fermeture du Service de collecte : " + e);
         }
-
+        
         try {
             serviceJMS.stopService();
             logger.debug("[OK] Fin du service de Synchro");
         } catch (Exception e) {
             logger.error("Echec lors de la fermeture du service de Synchro : " + e);
         }
-
-
+        
+        
         try {
             serviceMail.stopService();
             logger.debug("[OK] FIN de service Mail");
@@ -287,6 +320,6 @@ public class ServiceServer extends AbstrService {
         } catch (Exception e) {
             logger.error("Lors de la cloture du pool du Service Serveur");
         }
-
+        
     }
 }

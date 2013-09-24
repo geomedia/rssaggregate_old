@@ -27,7 +27,8 @@
 </div>
 
 <div id="sidebar">
-    <p><a href="${rootpath}flux/add">Ajouter</a></p>
+    <c:if test="${admin=='true'}"><p><a href="${rootpath}flux/add">Ajouter</a></p></c:if>
+    
     <p><a href="${rootpath}flux/recherche">Recherche</a></p>
 </div>
 
@@ -152,13 +153,13 @@
                         </script>
                     </c:when>
                     <c:when test="${action=='read-item' or action=='mod' or action=='read-incident'}">
-                        <h1>Administration du flux : ${flux.url}</h1>
+                        <h1>Administration du flux : ${bean.url}</h1>
                         <ul>
-                            <li><a href="${rootpath}item?id-flux=${flux.ID}">Parcourir les items du flux</a></li>
-                            <li><a href="${rootpath}flux/mod?id=${flux.ID}">Configurer le flux</a></li>
-                            <li><a href="${rootpath}flux/maj?id=${flux.ID}">Mettre à jour manuellement</a></li>
-                            <li><a href="${rootpath}flux/rem?id=${flux.ID}">Supprimer le flux</a></li>
-                            <li><a href="${rootpath}flux/read-incident&id=${flux.ID}">Parcourir les incidents</a></li>
+                            <li><a href="${rootpath}item?id-flux=${bean.ID}">Parcourir les items du flux</a></li>
+                            <li><a href="${rootpath}flux/mod?id=${bean.ID}">Configurer le flux</a></li>
+                            <li><a href="${rootpath}flux/maj?id=${bean.ID}">Mettre à jour manuellement</a></li>
+                            <li><a href="${rootpath}flux/rem?id=${bean.ID}">Supprimer le flux</a></li>
+                            <li><a href="${rootpath}flux/read-incident&id=${bean.ID}">Parcourir les incidents</a></li>
                         </ul>
                     </c:when> 
                 </c:choose>
@@ -173,30 +174,30 @@
                                     <legend>Paramètres :</legend>
 
                                     <label for="active" title="L'agrégateur doit t'il collecter ce flux ?">Actif : <span class="requis"></span></label>
-                                    <input type="checkbox" id="active" name="active" <c:if test="${flux.active=='true'}">checked="checked"</c:if>/>
+                                    <input type="checkbox" id="active" name="active" <c:if test="${bean.active=='true'}">checked="checked"</c:if>/>
 
                                     <br />
                                     <label for="url" title="Adresse a laquelle on trouve le XML du flux">URL du flux<span class="requis">*</span></label>
-                                    <input type="text" id="url" name="url" value="<c:out value="${form.erreurs['url'][0]}" default="${flux.url}" />" size="20" maxlength="60" />
+                                    <input type="text" id="url" name="url" value="<c:out value="${form.erreurs['url'][0]}" default="${bean.url}" />" size="20" maxlength="60" />
                                 <span class="erreur"> ${form.erreurs['url'][1]}</span><br />
 
                                 <label title="Indiquez la page html de la rubrique capturée">Page html</label>
-                                <input name="htmlUrl" type="text" value="<c:out value="${form.erreurs['htmlUrl'][0]}" default="${flux.htmlUrl}" />"/>
+                                <input name="htmlUrl" type="text" value="<c:out value="${form.erreurs['htmlUrl'][0]}" default="${bean.htmlUrl}" />"/>
                                 <span class="erreur"> ${form.erreurs['htmlUrl'][1]}</span>
                                 <br />
 
                                 <label>Comportement de collecte : </label>
                                 <select name="mediatorFlux">
                                     <c:forEach items="${listcomportement}" var="compo">
-                                        <option value="${compo.ID}" <c:if test="${flux.mediatorFlux.ID==compo.ID}"> selected="true"</c:if> >${compo}</option>
+                                        <option value="${compo.ID}" <c:if test="${bean.mediatorFlux.ID==compo.ID}"> selected="true"</c:if> >${compo}</option>
                                     </c:forEach>
                                 </select><br />
 
                                 <label for="journalLie" title="Un journal comprends plusieurs flux... Si vous ne trouvez pas le journal concerné, allez dans Journal-> ajouter">Journal :</label>
                                 <select name="journalLie" id="journalLie">
-                                    <option value="null">Aucun</option>
+                                    <option value="-1">Aucun</option>
                                     <c:forEach items="${listjournaux}" var="journal">
-                                        <option<c:if test="${journal.nom==flux.journalLie.nom}"> selected="true"</c:if> value="${journal.ID}">${journal.nom}</option>
+                                        <option<c:if test="${journal.ID==bean.journalLie.ID}"> selected="selected"</c:if> value="${journal.ID}">${journal.nom}</option>
                                     </c:forEach>
                                 </select>
 
@@ -204,14 +205,15 @@
                                 <br />
                                 <label title="La rubrique du journal concernée : international, A la Une ... Pour ajouter des types de flux allez dans la configuration générale">Type de flux</label>
                                 <select name="typeFlux">
+                                    <option value="-1">Aucun</option>
                                     <c:forEach items="${listtypeflux}" var="typeflux">
-                                        <option<c:if test="${flux.typeFlux.denomination==typeflux.denomination}"> selected="true" </c:if> value="${typeflux.ID}">${typeflux.denomination}</option>
+                                        <option<c:if test="${bean.typeFlux.denomination==typeflux.denomination}"> selected="true" </c:if> value="${typeflux.ID}">${typeflux.denomination}</option>
                                     </c:forEach>
                                 </select>
                                 <br />
 
                                 <label for="nom" title="Paramettre facultatif : Par défaut le flux sera nommé en fonction du journal et du type de flux sélectionné. Ce paramettre permet de forcer un nom">Nom du flux : </label>
-                                <input type="text" name="nom" value="${flux.nom}" />
+                                <input type="text" name="nom" value="${bean.nom}" />
 
                                 <br />
 
@@ -219,7 +221,7 @@
                                 <label for="parentFlux" title="Certain flux sont des sous classement d'autres. Exemple le flux Europe est un sous flux de International">Sous flux de : </label>
                                 <select name="parentFlux" id="parentFlux">
                                     <option>NULL</option>
-                                    <c:forEach items="${flux.journalLie.fluxLie}" var="fluxJournal">
+                                    <c:forEach items="${bean.journalLie.fluxLie}" var="fluxJournal">
                                         <option <c:if test="${fluxJournal.ID==flux.parentFlux.ID}"> selected="true"</c:if>>${fluxJournal}</option>
                                     </c:forEach>
                                 </select>
@@ -228,10 +230,10 @@
                                 <br />
                                 <label for="infoCollecte">Information :</label><br />
 
-                                <p>Flux créé le : <fmt:formatDate value="${flux.created}" pattern="dd/MM/yyyy hh:mm"/> </p>
-                                <textarea id="infoCollecte" name="infoCollecte" rows="20" cols="80">${flux.infoCollecte}</textarea>
+                                <p>Flux créé le : <fmt:formatDate value="${bean.created}" pattern="dd/MM/yyyy hh:mm"/> </p>
+                                <textarea id="infoCollecte" name="infoCollecte" rows="20" cols="80">${bean.infoCollecte}</textarea>
 
-                                <input type="hidden" name="id" value="${flux.ID}">
+                                <input type="hidden" name="id" value="${bean.ID}">
                                 <br />
                                 <input type="submit" value="Enregitrer" class="sansLabel" />
                                 <br />
@@ -240,7 +242,7 @@
 
                         <p>Debug : Recap des levée</p>
                         <ul>
-                            <c:forEach items="${flux.debug}" var="deb">
+                            <c:forEach items="${bean.debug}" var="deb">
                                 <li>${deb.date}    Nombre item : ${deb.nbrRecup} </li>
                             </c:forEach>
                         </ul>
@@ -251,7 +253,7 @@
 
                     <c:when test="${action=='read-incident'}">
                         <h2>Liste des incidets du flux</h2>
-                        <c:forEach items="${flux.incidentsLie}" var="incid">
+                        <c:forEach items="${bean.incidentsLie}" var="incid">
 
                             <li class="item">
                                 <h3><a href="incidents?action=mod&id=${incid.ID}">${incid}</a></h3>
@@ -299,15 +301,115 @@
                     </c:when>
                             
                     <c:when test="${action=='read'}">
-                        <p><a href="${rootpath}flux/mod?id=${flux.ID}">Editer</a></p>
+                        <c:import url="/WEB-INF/inc/editionBean.jsp" />
+                        
                        
-                        <p><strong>Url : </strong> ${flux.url}</p>
-                        <p><strong>Nom du flux :</strong> ${flux.nom}</p>
-                        <p><strong>Page HTML :</strong> ${flux.htmlUrl}</p>
-                        <p><strong>Comportement de collecte :</strong> ${flux.mediatorFlux}</p>
-                        <p><strong>Journal : </strong>${flux.journalLie}</p>
-                        <p><strong>Type de flux :</strong> ${flux.typeFlux}</p>
-                        <p><strong>Ajouté le :</strong> ${flux.created}</p>
+                        <p><strong>Url : </strong> ${bean.url}</p>
+                        <p><strong>Nom du flux :</strong> ${bean.nom}</p>
+                        <p><strong>Page HTML :</strong> ${bean.htmlUrl}</p>
+                        <p><strong>Comportement de collecte :</strong><a href="${rootpath}ComportementCollecte/read?id=${bean.mediatorFlux.ID}"> ${bean.mediatorFlux}</a></p>
+                        <p><strong>Journal : </strong><a href="${rootpath}journaux/read?id=${bean.journalLie.ID}">${bean.journalLie}</a></p>
+                        <p><strong>Type de flux :</strong><a href="${rootpath}TypeFluxSrvl/read?id=${bean.typeFlux.ID}"> ${bean.typeFlux}</a></p>
+                        <p><strong>Ajouté le :</strong> ${bean.created}</p>
+                        <p><strong>Période de captation : </strong><ul>
+                            <c:forEach items="${bean.periodeCaptations}" var="periode">
+                                <li>${periode}</li>   
+                                
+                            </c:forEach>
+                        </ul>
+                        
+                        </p>
+                        <hr />
+                        <p><strong title="Blabla Explicatif">Indice captation : </strong>${bean.indiceQualiteCaptation}</p>
+                        <p><strong>Mediane : </strong>${bean.indiceMedianeNbrItemJour}</p>
+                        <p><strong>Décile :</strong>${bean.indiceDecileNbrItemJour}</p>
+                        <p><strong>Quartile : </strong>${bean.indiceQuartileNbrItemJour}</p>
+                        <p><strong>Maximum : </strong>${bean.indiceMaximumNbrItemJour}</p>
+                        <p><strong>Minimum : </strong>${bean.indiceMinimumNbrItemJour}</p>
+                        
+                        
+                        <script src="http://code.highcharts.com/highcharts.js"></script>
+<script src="http://code.highcharts.com/highcharts-more.js"></script>
+<script src="http://code.highcharts.com/modules/exporting.js"></script>
+${bean.indiceQuartileNbrItemJour}ddd
+<script>
+    
+    $(function () {
+    $('#container').highcharts({
+
+	    chart: {
+	        type: 'boxplot'
+	    },
+	    
+	    title: {
+	        text: 'Highcharts Box Plot Example'
+	    },
+	    
+	    legend: {
+	        enabled: false
+	    },
+	
+	    xAxis: {
+	        categories: ['1', '2', '3', '4', '5'],
+	        title: {
+	            text: 'Experiment No.'
+	        }
+	    },
+	    
+	    yAxis: {
+	        title: {
+	            text: 'Observations'
+	        },
+	        plotLines: [{
+	            value: 932,
+	            color: 'red',
+	            width: 1,
+	            label: {
+	                text: 'Theoretical mean: 932',
+	                align: 'center',
+	                style: {
+	                    color: 'gray'
+	                }
+	            }
+	        }]  
+	    },
+	
+	    series: [{
+	        name: 'Observations',
+	        data: [
+	            [${bean.indiceMinimumNbrItemJour}, ${bean.indiceQuartileNbrItemJour}, ${bean.indiceMedianeNbrItemJour}, ${bean.indiceDecileNbrItemJour}, ${bean.indiceMaximumNbrItemJour}]
+	        ],
+	        tooltip: {
+	            headerFormat: '<em>Experiment No {point.key}</em><br/>'
+	        }
+	    }, {
+	        name: 'Outlier',
+	        color: Highcharts.getOptions().colors[0],
+	        type: 'scatter',
+	        data: [ // x, y positions where 0 is the first category
+	            [0, 644],
+	            [4, 718],
+	            [4, 951],
+	            [4, 969]
+	        ],
+	        marker: {
+	            fillColor: 'white',
+	            lineWidth: 1,
+	            lineColor: Highcharts.getOptions().colors[0]
+	        },
+	        tooltip: {
+	            pointFormat: 'Observation: {point.y}'
+	        }
+	    }]
+	});
+});
+    
+</script>
+
+
+<div id="container" style="height: 400px; margin: auto; min-width: 310px; max-width: 600px"></div>
+
+
 
                     </c:when>
                 </c:choose>

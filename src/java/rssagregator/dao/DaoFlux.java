@@ -264,6 +264,8 @@ public class DaoFlux extends AbstrDao {
     public synchronized void modifier(Object obj) throws Exception {
 
         Flux flux = (Flux) obj;
+        System.out.println("LE FLUX DS DAO  : " + flux.getUrl());
+        System.out.println("LE FLUX DS DAO  : " + flux.getID());
         super.modifier(flux);
 
 //        try {
@@ -271,7 +273,7 @@ public class DaoFlux extends AbstrDao {
 ////                em = dAOFactory.getEntityManager();
 //                em.getTransaction().begin();
 //                em.merge(flux);
-//                em.getTransaction().commit();
+//                em.getTransaction().commit(); 
 //                flux.forceChangeStatut();
 //            }
 //

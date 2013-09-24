@@ -44,6 +44,7 @@ public class FORMFactory {
             return new FluxForm();
         }
         else if(beansClass.equals(Journal.class)){
+            System.out.println("--> FORM JOURNAL");
             return new JournalForm();
         }
         else if(beansClass.equals(MediatorCollecteAction.class)){

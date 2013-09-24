@@ -39,10 +39,15 @@
                    if(u!=null){
                        out.println(u.getMail());
                        %><a href="${rootpath}ident/logout">Deconnection</a><%
+                       if(u.getAdminstatut()){
+                           request.setAttribute("admin", true);
+                       }
                    }
                    else{
                        out.print("deco");
                    }
+                   
+                   
       
                     %>
                     

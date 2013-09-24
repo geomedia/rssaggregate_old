@@ -21,14 +21,27 @@ import org.eclipse.persistence.annotations.CascadeOnDelete;
  * observable qui a pour observer le service JMS
  */
 @Entity
-@Cacheable(value = true)
+@Cacheable(value = false)
 public class FluxType implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long ID;
+    
+    /***
+     * Le nom du type de flux. Exemple international, à la une...
+     */
     @Column(name = "denomination")
     private String denomination;
+    
+     
+    /***
+     * Une description informative de ce qu'est ce type de flux
+     */
+    @Column(name = "description")
+    private String description;
+    
+    
     /**
      * Le type du flux (international, a la une etc...). Les types de flux sont
      * des beans. ils sont persisté dans la base de données
@@ -38,7 +51,7 @@ public class FluxType implements Serializable {
 //    @OneToMany(mappedBy = "typeFlux", cascade = {CascadeType.MERGE})
 //    @Transient
     @CascadeOnDelete
-    @OneToMany(mappedBy = "typeFlux", cascade = {CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
+    @OneToMany(mappedBy = "typeFlux", cascade = {CascadeType.DETACH, CascadeType.REFRESH})
     private List<Flux> fluxLie;
 
     public Long getID() {
@@ -64,6 +77,17 @@ public class FluxType implements Serializable {
     public void setFluxLie(List<Flux> fluxLie) {
         this.fluxLie = fluxLie;
     }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    
+    
+    
 
     public FluxType() {
         this.fluxLie = new ArrayList<Flux>();

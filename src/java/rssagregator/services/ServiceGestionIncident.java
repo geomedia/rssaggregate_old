@@ -205,6 +205,7 @@ public class ServiceGestionIncident {
      * @param objEnErreur Le beens pour lequel l'exemption a été généré (un flux
      * un serveur ...
      */
+    @Deprecated
     public AbstrIncident gererIncident(Throwable exception, Object objEnErreur) {
 
         //=====================================

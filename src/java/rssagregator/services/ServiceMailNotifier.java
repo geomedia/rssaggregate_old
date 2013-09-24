@@ -53,7 +53,7 @@ public class ServiceMailNotifier extends AbstrService {
     private ServiceMailNotifier() {
         super(Executors.newScheduledThreadPool(5));
         try {
-        
+
 
             //On doit charger le fichier de conf.
             //On commence par rechercher l'emplacement du fichier propertymail dans le fichier propertie du projet.
@@ -274,7 +274,7 @@ public class ServiceMailNotifier extends AbstrService {
         TacheAlerteMail alerteMail = new TacheAlerteMail(this);
         alerteMail.setSchedule(Boolean.TRUE);
         executorService.schedule(alerteMail, 30, TimeUnit.SECONDS);
-        
+
 
         //---------> Lancement de la tâche de vérification journalière
         TacheVerifFluxNotificationMail notificationMail = new TacheVerifFluxNotificationMail(this);
@@ -332,7 +332,7 @@ public class ServiceMailNotifier extends AbstrService {
 
                 DAOIncident dao = (DAOIncident) DAOFactory.getInstance().getDAOFromTask(tache);
                 try {
-                    dao.creer(dao);
+                    dao.creer(si);
                 } catch (Exception ex) {
                     logger.error("Erreur lors de la création : " + ex);
                     Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
@@ -343,7 +343,18 @@ public class ServiceMailNotifier extends AbstrService {
             //=================================================================================================
             //.........................Terminaison correct des TACHE et FERMETURE DE L'INCIDENT
             //=================================================================================================
+            DAOIncident dao = (DAOIncident) DAOFactory.getInstance().getDAOFromTask(tache);
+            try {
+                if (si.getID() == null) {
+                    dao.creer(si);
 
+                } else {
+                    dao.modifier(si);
+                }
+            } catch (Exception ex) {
+                logger.error("Erreur lors de la création : " + ex);
+                Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
 
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -360,8 +371,8 @@ public class ServiceMailNotifier extends AbstrService {
     }
 
     @Override
-    public void stopService() throws SecurityException, RuntimeException{
+    public void stopService() throws SecurityException, RuntimeException {
         this.executorService.shutdownNow();
- 
+
     }
 }

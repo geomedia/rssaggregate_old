@@ -12,7 +12,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
-import javax.persistence.MappedSuperclass;
 import javax.persistence.Temporal;
 import javax.persistence.Transient;
 import org.eclipse.persistence.annotations.Cache;
@@ -24,7 +23,6 @@ import org.joda.time.Duration;
 import rssagregator.beans.Conf;
 import rssagregator.dao.DAOFactory;
 import rssagregator.services.ServiceMailNotifier;
-import rssagregator.utils.PropertyLoader;
 
 /**
  * *
@@ -81,6 +79,12 @@ public class AbstrIncident extends Observable implements Serializable {
     protected Date dateDebut;
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     protected Date dateFin;
+
+    /***
+     * Permet de forcer un incident à être notifié, même si il est déjà clos.
+     */
+    @Transient
+    protected Boolean notificationImperative;
 //    @Transient
 //    protected String duree;
     /**
@@ -162,9 +166,18 @@ public class AbstrIncident extends Observable implements Serializable {
         return gravite;
     }
 
+    public Boolean getNotificationImperative() {
+        return notificationImperative;
+    }
+
+    public void setNotificationImperative(Boolean notificationImperative) {
+        this.notificationImperative = notificationImperative;
+    }
+    
     public void setGravite(Integer gravite) {
         this.gravite = gravite;
     }
+    
     
     /***
      * Retourne l'url permettant d'accéder à l'interface administrative de cette entitée

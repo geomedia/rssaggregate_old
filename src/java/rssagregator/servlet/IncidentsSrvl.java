@@ -37,7 +37,7 @@ public class IncidentsSrvl extends HttpServlet {
 
     public static final String ATT_LIST = "listobj";
     public static final String ATT_FORM = "form";
-    public static final String ATT_OBJ = "incident";
+    public static final String ATT_OBJ = "bean";
     public String VUE = "/WEB-INF/incidentHTML.jsp";
     public static final String ATT_SERV_NAME = "incidents";
 
@@ -110,12 +110,8 @@ public class IncidentsSrvl extends HttpServlet {
         //----------------------------------ACTION : RECHERCHE
         if (action.equals("list")) {
             //Récupération du type 
-
             Class c = null;
              DAOIncident dao = null;
-
-
-
             try {
                 System.out.println("AAA");
                 c = Class.forName("rssagregator.beans.incident." + request.getParameter("type"));
@@ -130,11 +126,8 @@ public class IncidentsSrvl extends HttpServlet {
 
             System.out.println("DAO : " + dao);
             System.out.println("CLASS : " + c);
-
            
             String type = request.getParameter("type");
-
-
 
 
 //            if (type.equals("FluxIncident")) {
@@ -149,7 +142,6 @@ public class IncidentsSrvl extends HttpServlet {
 //                dao = (DAOIncident) DAOFactory.getInstance().getDaoFromType(SynchroIncident.class);
 //                c = SynchroIncident.class;
 //            }
-
 
             try {
                 firstResult = new Integer(request.getParameter("firstResult"));
@@ -184,9 +176,24 @@ public class IncidentsSrvl extends HttpServlet {
             List<Object> listAll = dao.findCriteria(c);
             System.out.println("TAILLE LISTE : " + listAll.size());
             request.setAttribute(ATT_LIST, listAll);
+            //--------------------------------------------ACTION : MOD-------------------------------------
         } else if (action.equals("mod")) {
+            
+              try {
+                Class c = Class.forName("rssagregator.beans.incident." + request.getParameter("type"));
+                ServletTool.actionMOD(request, ATT_OBJ, ATT_FORM, c, false);
+                if (!AbstrIncident.class.isAssignableFrom(c)) {
+                    throw new Exception("non");
+                }
+              }
+              catch (ClassNotFoundException ex) {
+                redir(request, ATT_SERV_NAME + "/read?id=" + request.getParameter("id"), "L'entité demandée n'existe pas !", Boolean.TRUE);
+            } catch (Exception ex) {
+                redir(request, ATT_SERV_NAME + "/read?id=" + request.getParameter("id"), "L'entité demandée n'existe pas !", Boolean.TRUE);
+            }
+                
 
-            ServletTool.actionMOD(request, ATT_OBJ, ATT_FORM, CollecteIncident.class, false);
+            
             //---------------------------------------ACTION : READ-------------------------------------
         } else if (action.equals("read")) {
 

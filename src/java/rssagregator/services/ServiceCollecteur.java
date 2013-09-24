@@ -4,23 +4,31 @@
  */
 package rssagregator.services;
 
+import com.sun.syndication.io.FeedException;
+import com.sun.syndication.io.ParsingFeedException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Observable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.xml.ws.http.HTTPException;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import rssagregator.beans.Conf;
 import rssagregator.beans.Flux;
-import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.AnomalieCollecte;
+import rssagregator.beans.incident.CollecteIncident;
+import rssagregator.beans.incident.Incidable;
+import rssagregator.beans.incident.IncidentFactory;
 import rssagregator.dao.DAOFactory;
+import rssagregator.dao.DAOIncident;
 
 /**
  * Cette classe permet d'instancier le service de collecte du projet. Elle est
@@ -153,10 +161,10 @@ public class ServiceCollecteur extends AbstrService {
                 if (tache.getTacheSchedule() && !tache.annulerTache) {
                     executorService.schedule(tache, tache.getFlux().getMediatorFlux().getPeriodiciteCollecte(), TimeUnit.SECONDS);
                 }
-                //Si il y a eu une exeption lors de l'execution de la tache. On fait fait gérer l'incident
+                //Si il y a eu une exeption lors de l'execution de la tache. On fait fait gérer l'incident. >> c'est maintenant dans la methode gestionIncident du service
                 if (tache.getExeption() != null) {
-                    AbstrIncident incident = ServiceGestionIncident.getInstance().gererIncident(tache.getExeption(), tache.getFlux());
-                    tache.setIncident(incident);
+//                    AbstrIncident incident = ServiceGestionIncident.getInstance().gererIncident(tache.getExeption(), tache.getFlux());
+//                    tache.setIncident(incident);
                 }
             } //---------------------------Tache générale de vérification de la capture
             else if (o.getClass().equals(TacheVerifComportementFluxGeneral.class)) {
@@ -191,14 +199,15 @@ public class ServiceCollecteur extends AbstrService {
                     cast.getFlux().setIndiceDecileNbrItemJour(cast.getDecile());
                     cast.getFlux().setIndiceMedianeNbrItemJour(cast.getMediane());
                     cast.getFlux().setIndiceQuartileNbrItemJour(cast.getQuartile());
+                    cast.getFlux().setIndiceMinimumNbrItemJour(cast.getMinimum());
+                    cast.getFlux().setIndiceMaximumNbrItemJour(cast.getMaximum());
                     try {
                         // Il faut enregistrer le résultat. 
                         DAOFactory.getInstance().getDAOFlux().modifier(cast.getFlux());
                     } catch (Exception ex) {
                         Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
-                    } 
-                }
-                else{
+                    }
+                } else {
                     logger.error(cast.getExeption());
                 }
             }
@@ -460,7 +469,128 @@ public class ServiceCollecteur extends AbstrService {
 
     @Override
     protected void gererIncident(AbstrTacheSchedule tache) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+
+        logger.debug("------Gestion d'un incident");
+
+        // Si la tâche est incidable et si il y a une exeption
+        if (tache.exeption != null && Incidable.class.isAssignableFrom(tache.getClass())) {
+
+            CollecteIncident si = null;
+            Flux fluxConcerne = null; // On cherche si il y a déjà un incident ouvert pour le flux.
+            Throwable exception = tache.getExeption();
+
+            if (exception instanceof ExecutionException) {
+                ExecutionException cast = (ExecutionException) exception;
+                if (cast.getCause() != null && Exception.class.isAssignableFrom(cast.getCause().getClass())) {
+                    exception = (Exception) cast.getCause();
+                }
+            }
+
+            //================================================================================================
+            //                      INSTANCIATION OU RECUPERATION D'INCIDENT
+            //================================================================================================
+
+
+            if (tache.getClass().equals(TacheRecupCallable.class)) {
+                TacheRecupCallable castTache = (TacheRecupCallable) tache;
+                fluxConcerne = castTache.getFlux();
+                si = fluxConcerne.getIncidentOuverType(CollecteIncident.class);
+                logger.debug("recup des incid . Si : " + si);
+            }
+
+            if (si == null) {
+                IncidentFactory factory = new IncidentFactory();
+                try {
+                    si = (CollecteIncident) factory.createIncidentFromTask(tache, "blabla");
+                } catch (InstantiationException ex) {
+                    Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IllegalAccessException ex) {
+                    Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+
+            //=================================================================================================
+            // ..................... GESTION DES INCIDENTS
+            //=================================================================================================
+            if (si != null) {
+                if (tache.getClass().equals(TacheRecupCallable.class)) {
+                    TacheRecupCallable cast = (TacheRecupCallable) tache;
+                    logger.error("Erreur lors de la récupération du flux  : " + cast.getFlux() + ". Erreur : " + cast.getExeption());
+                    si.setFluxLie(cast.getFlux());
+
+                    if (si.getDateDebut() == null) {
+                        si.setDateDebut(new Date());
+                    }
+
+                    Integer nbr = si.getNombreTentativeEnEchec();
+                    logger.debug("NBR TENTATIVE : " + nbr);
+                    nbr++;
+                    si.setNombreTentativeEnEchec(nbr);
+                    logger.debug("Avant enregistrement");
+                    si.setLogErreur(exception.toString());
+
+                    if (exception instanceof HTTPException) {
+                        HTTPException ex = (HTTPException) exception;
+                        si.setMessageEreur("HTTPException : Erreur sur le flux " + fluxConcerne + ". Le serveur est joingnable mais retour d'un code erreur : " + ex.getStatusCode());
+                    } else if (exception instanceof UnknownHostException) {
+                        si.setMessageEreur("UnknownHostException : Il est impossible de joindre l'host du flux");
+                    } else if (exception.getClass().equals(ParsingFeedException.class)) {
+                        si.setMessageEreur("ParsingFeedException : Impossible de parser le flux XML.");
+                    } else if (exception instanceof FeedException) {
+                        si.setMessageEreur("FeedException : Impossible de parser le flux XML.");
+                    } else if (exception instanceof Exception) {
+                        si.setMessageEreur("ERREUR inconnue : " + exception.toString());
+                    }
+                    cast.setIncident(si);
+                }
+
+                //=================================================================================================
+                //...............................Enregistrment de l'incident
+                //=================================================================================================
+
+                DAOIncident dao = (DAOIncident) DAOFactory.getInstance().getDAOFromTask(tache);
+                try {
+                    logger.debug("avant enregistrement");
+                    if (si.getID() == null) {
+                        logger.debug("CREATE");
+                        dao.creer(si);
+                        fluxConcerne.getIncidentsLie().add(si);
+                    } else {
+                        logger.debug("maj");
+                        dao.modifier(si);
+                    }
+                    logger.debug("OK DAO");
+                } catch (Exception ex) {
+                    logger.error("Erreur lors de la création : " + ex);
+                    Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+
+        //=================================================================================================
+        //.........................Terminaison correct des TACHE et FERMETURE DE L'INCIDENT
+        //=================================================================================================
+        //Si la tâche s'est déroulée correctement. Il est peut être nécessaire de fermer des incident
+        if (tache.exeption == null) {
+            logger.debug(">--- fermuture des incident ---<");
+            if (tache.getClass().equals(TacheRecupCallable.class)) {
+                TacheRecupCallable cast = (TacheRecupCallable) tache;
+
+                Flux f = cast.getFlux();
+                List<CollecteIncident> listIncid = f.getIncidentEnCours();
+                for (int i = 0; i < listIncid.size(); i++) {
+                    CollecteIncident collecteIncident = listIncid.get(i);
+                    collecteIncident.setDateFin(new Date());
+                    DAOIncident<CollecteIncident> dao = (DAOIncident<CollecteIncident>) DAOFactory.getInstance().getDAOFromTask(tache);
+                    try {
+                        dao.modifier(dao);
+                    } catch (Exception ex) {
+                        Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                }
+            }
+        }
     }
 
     @Override

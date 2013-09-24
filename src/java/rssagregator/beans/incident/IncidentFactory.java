@@ -76,6 +76,7 @@ public class IncidentFactory<T extends AbstrIncident> {
             Object o = c.newInstance();
             incid = (AbstrIncident) o;
             incid.setMessageEreur(message);
+            incid.setNombreTentativeEnEchec(1);
             return (T) o;
             
         }

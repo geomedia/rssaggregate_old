@@ -25,16 +25,13 @@ public class DAOIncident<T> extends AbstrDao {
     Integer fistResult;
     Integer maxResult;
     Boolean nullLastNotification;
-    
+    Boolean criteriaNotificationImperative;
     private static final String REQ_FIND_ALL_AC_LIMIT = "SELECT i FROM incidentflux i LEFT JOIN i.fluxLie flux ORDER BY i.dateFin DESC";
 
     //        private static final String REQ_FIND = "SELECT i FROM incidentflux i LEFT JOIN i.fluxLie flux WHERE id=:id";
     public DAOIncident() {
     }
 
-    
-    
-    
 //JOIN item.listFlux flux
     protected DAOIncident(DAOFactory dAOFactory) {
         this.classAssocie = CollecteIncident.class;
@@ -44,7 +41,6 @@ public class DAOIncident<T> extends AbstrDao {
         clos = false;
     }
 
-    
     @Deprecated
     public List<T> findAllLimit(Long premier, Long nombre) {
         em = dAOFactory.getEntityManager();
@@ -59,7 +55,7 @@ public class DAOIncident<T> extends AbstrDao {
     }
 
     public List<T> findCriteria(Class<T> T) {
-      
+
         CriteriaBuilder cb = em.getCriteriaBuilder();
 
         CriteriaQuery<T> cq = cb.createQuery(T);
@@ -72,13 +68,19 @@ public class DAOIncident<T> extends AbstrDao {
         } else {
             listWhere.add(cb.isNull(root.get("dateFin")));
         }
-        
-        if(nullLastNotification){
+
+        if (nullLastNotification) {
             listWhere.add(cb.isNull(root.get("lastNotification")));
         }
 
+        if (criteriaNotificationImperative) {
+            listWhere.add(cb.and(cb.equal(root.get("notificationImperative"), true)));
+//            listWhere.add(cb.and(cb.equal(root.get("estStable"), true)));
+//            cq.where(cb.equal(root.get("estStable"), true));
+        }
 
- 
+
+
         // On applique les wheres
         int i;
         if (listWhere.size() == 1) {
@@ -97,12 +99,12 @@ public class DAOIncident<T> extends AbstrDao {
             tq.setFirstResult(fistResult);
         }
 
-        
-List l = tq.getResultList();
+
+        List l = tq.getResultList();
         for (int j = 0; j < l.size(); j++) {
             Object object = l.get(j);
             System.out.println(object);
-            
+
         }
 
         return l;
@@ -122,17 +124,19 @@ List l = tq.getResultList();
         query.setParameter("idflux", fluxId);
         return query.getResultList();
     }
-    
 
-    /***
-     * Ne prend pas en compte la généricité. Ne permet que de trouver des incident de flux
-     * @return 
+    /**
+     * *
+     * Ne prend pas en compte la généricité. Ne permet que de trouver des
+     * incident de flux
+     *
+     * @return
      */
-    public List<T> findAllOpenIncident(){
+    public List<T> findAllOpenIncident() {
         String req = "SELECT i FROM incidentflux i WHERE i.dateFin IS NULL";
 //        String req = "SELECT i FROM incidentflux i";
         Query query = em.createQuery(req);
-        
+
         List<T> l = query.getResultList();
         for (int i = 0; i < l.size(); i++) {
             T fluxIncident = l.get(i);
@@ -141,8 +145,9 @@ List l = tq.getResultList();
         System.out.println("FIN");
         return l;
     }
+
     public static void main(String[] args) {
-        
+
         //Test de la methode flux incident
 //        DAOIncident dao = DAOFactory.getInstance().getDAOIncident();
 //        List<FluxIncident> list =  dao.findAllOpenIncident();
@@ -150,8 +155,8 @@ List l = tq.getResultList();
 //            CollecteIncident fluxIncident = list.get(i);
 //            System.out.println(""+fluxIncident);
 //        }
-        
-        
+
+
         // Test de la méthode findIncidentOuvert
 //         DAOIncident dao = DAOFactory.getInstance().getDAOIncident();
 //         List<CollecteIncident> list =  dao.findIncidentOuvert(new Long(355));
@@ -159,19 +164,18 @@ List l = tq.getResultList();
 //            CollecteIncident fluxIncident = list.get(i);
 //             System.out.println(fluxIncident);
 //        }
-        
+
         DAOIncident<JMSPerteConnectionIncident> dao = new DAOIncident<JMSPerteConnectionIncident>(DAOFactory.getInstance());
         dao.setClos(false);
         List l = dao.findCriteria(JMSPerteConnectionIncident.class);
         System.out.println("LIST SIZE : " + l.size());
         for (int i = 0; i < l.size(); i++) {
             Object object = l.get(i);
-            System.out.println(""+object);
+            System.out.println("" + object);
         }
-        
-        
+
+
     }
-    
 
 //        @Override
 //    public CollecteIncident find(Long id) {
@@ -183,8 +187,8 @@ List l = tq.getResultList();
 //    
 //    
     public Integer findnbMax(Class<T> T) {
-        
-            CriteriaBuilder cb = em.getCriteriaBuilder();
+
+        CriteriaBuilder cb = em.getCriteriaBuilder();
 
         CriteriaQuery cq = cb.createQuery(T);
         Root<CollecteIncident> root = cq.from(T);
@@ -210,17 +214,17 @@ List l = tq.getResultList();
             }
             cq.where(pr);
         }
-        
-        
+
+
 
 
 
 //        return tq.getResultList();
-        
-        
-        
-        
-        
+
+
+
+
+
 //        
 //        CriteriaBuilder cb = em.getCriteriaBuilder();
 //
@@ -232,7 +236,7 @@ List l = tq.getResultList();
 //            Join join = root.join("journalLie");
 //            cq.where(cb.equal(join.get("ID"), j.getID()));
 //        }
-                 
+
 
         cq.select(cb.count(root));
 
@@ -279,6 +283,15 @@ List l = tq.getResultList();
     public void setNullLastNotification(Boolean nullLastNotification) {
         this.nullLastNotification = nullLastNotification;
     }
+
+    public Boolean getCriteriaNotificationImperative() {
+        return criteriaNotificationImperative;
+    }
+
+    public void setCriteriaNotificationImperative(Boolean criteriaNotificationImperative) {
+        this.criteriaNotificationImperative = criteriaNotificationImperative;
+    }
+    
     
     
 }

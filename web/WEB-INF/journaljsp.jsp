@@ -18,7 +18,7 @@
 
 </div>
 <div id="sidebar">
-    <p><a href="${rootpath}journaux/add">Ajouter</a></p>
+    <c:if test="${admin=='true'}"><p><a href="${rootpath}journaux/add">Ajouter</a></p></c:if>
     <p><a href="${rootpath}journaux/recherche">Liste</a></p>
 </div>
 
@@ -107,7 +107,7 @@
                         </form>
                     </c:when>
                         <c:when test="${action=='read'}">
-                            <p><a href="${rootpath}${srlvtname}/mod?id=${bean.ID}">EDITER</a></p>
+                            <c:import url="/WEB-INF/inc/editionBean.jsp" />
                             <p><strong>Titre :</strong> ${bean.nom}</p>
                             <p><strong>Page accueil : </strong>${bean.urlAccueil}</p>
                             <p><strong>Page HTML recaptulatif des flux : </strong>${bean.urlHtmlRecapFlux}</p>
@@ -115,6 +115,13 @@
                             <p><strong>Pays : </strong>${bean.pays}</p>
                             <p><strong>Fuseau Horraire : </strong>${bean.fuseauHorraire}</p>
                             <p><strong>Information : </strong>${bean.information}</p>
+                            <p><strong>Flux liés : </strong></p>
+                            <ul>
+                                <c:forEach items="${bean.fluxLie}" var="fl"> 
+                                    <li><a href="${rootpath}flux/read?id=${fl.ID}">${fl}</a></li>
+                                    
+                                </c:forEach>
+                            </ul>
                         </c:when>
                 </c:choose>
 

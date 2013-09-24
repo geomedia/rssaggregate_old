@@ -37,6 +37,8 @@ public class TacheCalculQualiteFlux extends AbstrTacheSchedule<TacheCalculQualit
     Integer mediane;
     Integer decile;
     Integer quartile;
+    Integer maximum;
+    Integer minimum;
     
 
     public TacheCalculQualiteFlux(Observer s) {
@@ -170,6 +172,9 @@ public class TacheCalculQualiteFlux extends AbstrTacheSchedule<TacheCalculQualit
             this.quartile = (int) Math.round(listou.get(quartileId.intValue()));
             this.decile = (int) Math.round(listou.get(decileId.intValue()));
             this.mediane = listou.get(medianeId);
+            this.maximum = listou.get(listou.size()-1);
+            this.minimum = listou.get(0);
+            
 
 
 
@@ -226,6 +231,22 @@ public class TacheCalculQualiteFlux extends AbstrTacheSchedule<TacheCalculQualit
 
     public void setQuartile(Integer quartile) {
         this.quartile = quartile;
+    }
+
+    public Integer getMaximum() {
+        return maximum;
+    }
+
+    public void setMaximum(Integer maximum) {
+        this.maximum = maximum;
+    }
+
+    public Integer getMinimum() {
+        return minimum;
+    }
+
+    public void setMinimum(Integer minimum) {
+        this.minimum = minimum;
     }
     
     

@@ -40,8 +40,6 @@ import rssagregator.beans.exception.DonneeInterneCoherente;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoFlux;
 import rssagregator.services.ServiceCollecteur;
-import rssagregator.services.ServiceSynchro;
-import sun.org.mozilla.javascript.ast.ForLoop;
 
 /**
  * Une des entités les plus importantes... Il s'agit d'un flux de syndication
@@ -54,8 +52,8 @@ import sun.org.mozilla.javascript.ast.ForLoop;
 @Cache(type = CacheType.FULL, coordinationType = CacheCoordinationType.SEND_NEW_OBJECTS_WITH_CHANGES, isolation = CacheIsolationType.SHARED)
 public class Flux extends AbstrObservableBeans implements Observer, Serializable, BeanSynchronise {
 
-    @Transient
-     protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(Flux.class);
+//    @Transient
+//    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(Flux.class);
 //    @PersistenceContext(type= PersistenceContextType.EXTENDED)
 //private EntityManager em;
     @Id
@@ -71,19 +69,25 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
      * Permet de déterminer si le flux doit être collecté ou non
      */
     @Column(name = "active")
-    private Boolean active;
+    /**
+     * Permet de déterminer si le flux doit être collecté ou non
+     */
+    protected Boolean active;
+    
+    
+    
     /**
      * L'url de la rubrique du flux, il s'agit de la page HTML d'entrée de la
      * rubrique. Cette adresse peut être utilisé pour faire de l'auto discovery.
      */
     @Column(name = "htmlUrl", length = 2000, nullable = true)
     private String htmlUrl;
+    @Transient
     /**
      * Les dernières empruntes md5 des items du flux. On les garde en mémoire
      * pour faire du dédoublonage sans effectuer de requetes dans la base de
      * données. On ne persiste pas dans la base de donnée (TRANSISIENT NORMAL)
      */
-    @Transient
     private List<String> lastEmpruntes;
     /**
      * L'objet Callable qui permet d'être lancé pour effectuer la récupération
@@ -149,7 +153,7 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
      * flux
      */
 // On veut que le flux ne puisse pas créer de journaux mais simplment se lier. Ce n'est pas à la dao du flux de de créer des journaux.
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private Journal journalLie;
     /**
      * Le mediator flux permet d'assigner un flux un comportement de collecte.
@@ -202,16 +206,15 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
     List<DebugRecapLeveeFlux> debug;
     @Column(name = "indiceQualiteCaptation")
     protected Float indiceQualiteCaptation;
-    
-    
-    /***
-     * 
+    /**
+     * *
+     *
      */
     protected Integer indiceMedianeNbrItemJour;
     protected Integer indiceDecileNbrItemJour;
     protected Integer indiceQuartileNbrItemJour;
-    
-    
+    protected Integer indiceMaximumNbrItemJour;
+    protected Integer indiceMinimumNbrItemJour;
     @OneToMany(mappedBy = "flux", cascade = CascadeType.ALL)
     protected List<FluxPeriodeCaptation> periodeCaptations;
     /**
@@ -541,8 +544,23 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
 
     public void setIndiceQuartileNbrItemJour(Integer indiceQuartileNbrItemJour) {
         this.indiceQuartileNbrItemJour = indiceQuartileNbrItemJour;
-    }    
-    
+    }
+
+    public Integer getIndiceMaximumNbrItemJour() {
+        return indiceMaximumNbrItemJour;
+    }
+
+    public void setIndiceMaximumNbrItemJour(Integer indiceMaximumNbrItemJour) {
+        this.indiceMaximumNbrItemJour = indiceMaximumNbrItemJour;
+    }
+
+    public Integer getIndiceMinimumNbrItemJour() {
+        return indiceMinimumNbrItemJour;
+    }
+
+    public void setIndiceMinimumNbrItemJour(Integer indiceMinimumNbrItemJour) {
+        this.indiceMinimumNbrItemJour = indiceMinimumNbrItemJour;
+    }
 
 //    public void setIncidentEnCours(List<FluxIncident> incidentEnCours) {
 //        this.incidentEnCours = incidentEnCours;
@@ -609,6 +627,7 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
      * d'un evenuel incident ouvert. Cette méthode est éxecuté pour chaque flux
      * losque la levée s'est déroulé avec succes
      */
+    @Deprecated
     public void fermerLesIncidentOuvert() {
         int i;
         List<CollecteIncident> incidentOuvert = this.getIncidentEnCours();
@@ -750,8 +769,18 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
     }
 
     @Override
+    /**
+     * *
+     * Ce beans ne doit être synchronisé que si le booleen haschange (du partern
+     * observer/observable) est à true. On évite ainsi de synchroniser après
+     * calcul des médiane décile et quartile qui ne change pas la nature du bean
+     */
     public Boolean synchroImperative() {
-        return true;
+
+        if (hasChanged()) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -762,8 +791,8 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
     public Long returnCaptationDuration() throws DonneeInterneCoherente {
         Long duration = new Long(0);
 
-        int nbrPeriodeouverte =0;
-        
+        int nbrPeriodeouverte = 0;
+
         for (int i = 0; i < periodeCaptations.size(); i++) {
             FluxPeriodeCaptation periode = this.periodeCaptations.get(i);
             if (periode.getDateDebut() != null & periode.getDatefin() != null) {
@@ -780,11 +809,10 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
                 nbrPeriodeouverte++;
             }
         }
-        if(nbrPeriodeouverte>1){
-            logger.error("Il y a deux période de captation ouverte pour le flux");
+        if (nbrPeriodeouverte > 1) {
+//            logger.error("Il y a deux période de captation ouverte pour le flux");
             throw new DonneeInterneCoherente("Il y a deux période de captation ouverte pour le flux");
-        }
-        else{
+        } else {
             return duration;
         }
 

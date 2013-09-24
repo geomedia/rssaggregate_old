@@ -29,7 +29,7 @@
 
 
 <div id="sidebar">
-    <p><a href="${rootpath}ComportementCollecte/add">Ajouter</a></p>
+    <c:if test="${admin=='true'}"><p><a href="${rootpath}ComportementCollecte/add">Ajouter</a></p></c:if>
     <p><a href="${rootpath}ComportementCollecte/recherche">Liste</a></p>
 </div>
 
@@ -132,14 +132,13 @@
                     <c:when test="${action=='recherche'}">
 
                         <c:forEach items="${list}" var="compo">
-
                             <li><a href="${rootpath}ComportementCollecte/read?id=${compo.ID}">${compo}</a></li>
-
                         </c:forEach>
 
                     </c:when>
                     <c:when test="${action=='read'}">
-                        <p><a href="${rootpath}ComportementCollecte/mod?id=${bean.ID}">Editer</a></p>
+                        
+                        <c:import url="/WEB-INF/inc/editionBean.jsp" />
                         <p><strong>Nom : </strong>${bean.nom}</p>
                         <p><strong>Description : </strong> ${bean.description}</p>
                         <p><strong>Periodicité de collecte : </strong>${bean.periodiciteCollecte}</p>

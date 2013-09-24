@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import rssagregator.beans.AbstrObservableBeans;
 import rssagregator.beans.Conf;
 import rssagregator.beans.Flux;
+import rssagregator.beans.Journal;
 import rssagregator.beans.form.AbstrForm;
 import rssagregator.beans.form.FORMFactory;
 import rssagregator.dao.AbstrDao;
@@ -164,6 +165,10 @@ public class ServletTool {
 
         try {
             Object bean = dao.find(new Long(id));
+
+
+//
+
             if (bean == null) {
                 throw new NoResultException();
             }
@@ -204,29 +209,46 @@ public class ServletTool {
                 throw new NoResultException();
             }
             //On bind
-
             //On crée un formulaire 
             AbstrForm f = FORMFactory.getInstance().getForm(bean.getClass());
+            f.setAction("mod");
+            request.setAttribute("form", f);
 //            AbstrForm form = (AbstrForm) request.getAttribute("form");
             if (request.getMethod().equals("POST")) {
-                f.bind(request, bean, bean.getClass());
+                //On tente de binder dans un objet nouveau
+//                Object oTest = beansClass.newInstance();
+                f.validate(request);
 
+                // Si le bind a fonctionné, on bind pour de vrai.
                 if (f.getValide()) {
+                    bean = f.bind(request, bean, bean.getClass());
+
+
+                    if (bean instanceof Flux) {
+                        Flux ff = (Flux) bean;
+                        System.out.println("FLUX URL2 : " + ff.getUrl());
+                    }
+
                     dao.modifier(bean);
+                    System.out.println("--->> MODIF DAO");
+
+                    if (bean instanceof Flux) {
+                        Flux ff = (Flux) bean;
+                        System.out.println("FLUX URL3 : " + ff.getUrl());
+                    } 
+
 
                     if (notifiObserver && AbstrObservableBeans.class.isAssignableFrom(bean.getClass())) {
                         AbstrObservableBeans b = (AbstrObservableBeans) bean;
                         b.enregistrerAupresdesService();
                         b.forceChangeStatut();
                         b.notifyObservers();
-
-                        System.out.println("NOTIFICATION AUPRES DES OBS");
                     }
                     redir(request, srlvtname + "/mod?id=" + id, "Traitement Effectué : ", Boolean.FALSE);
+
                 }
             }
             //Si le formulaire est valide, on effectue les modifications
-
 
         } catch (NumberFormatException e) {
             redir(request, srlvtname + "/mod?id=" + id, "L'entité demandée n'existe pas !", Boolean.TRUE);
@@ -238,35 +260,35 @@ public class ServletTool {
     }
 
     public static void actionADD(HttpServletRequest request, String beansnameJSP, String formNameJSP, Class beansClass, Boolean notifiObserver) {
-         String srlvtname = (String) request.getAttribute("srlvtname");
+        String srlvtname = (String) request.getAttribute("srlvtname");
+        System.out.println("--->>>>>> ADD ");
         try {
             String id = request.getParameter("id");
             Object o = null;
 
             AbstrForm form = FORMFactory.getInstance().getForm(beansClass);
-            form.setAddAction(true);
+            form.setAction("add");
+//            form.setAddAction(true);
             request.setAttribute(formNameJSP, form);
             AbstrDao dao = DAOFactory.getInstance().getDaoFromType(beansClass);
             if (request.getMethod().equals("POST")) {
-                o = beansClass.newInstance();
-                form.bind(request, o, beansClass);
-//                Flux f = (Flux)o;
-//                System.out.println("PERIODE DANS LE SERVLT TOOL : " + f.getPeriodeCaptations().size());
-                System.out.println("News : " + o);
+                form.validate(request);
                 request.setAttribute(beansnameJSP, o);
-            }
-            if (form.getValide()) { 
-                System.out.println("EST VALIDE");
-                System.out.println("DAO : " + dao);
-                dao.creer(o);
-                if (notifiObserver && AbstrObservableBeans.class.isAssignableFrom(o.getClass())) {
-                    AbstrObservableBeans aob = (AbstrObservableBeans) o;
-                    aob.enregistrerAupresdesService();
-                    aob.forceChangeStatut();
-                    aob.notifyObservers("add");
+
+                if (form.getValide()) {
+                    o = form.bind(request, o, beansClass);
+                    dao.creer(o);
+                    System.out.println("3");
+                    if (notifiObserver && AbstrObservableBeans.class.isAssignableFrom(o.getClass())) {
+                        AbstrObservableBeans aob = (AbstrObservableBeans) o;
+                        aob.enregistrerAupresdesService();
+                        aob.forceChangeStatut();
+                        aob.notifyObservers("add");
+                    }
+                    redir(request, srlvtname + "/recherche", "AJOUT effectué : ", Boolean.FALSE);
                 }
-                redir(request, srlvtname + "/recherche", "AJOUT effectué : ", Boolean.FALSE);
             }
+
         } catch (Exception e) {
             redir(request, srlvtname + "/add", "ERREUR lors du traitement : " + e, Boolean.TRUE);
         }
@@ -288,7 +310,7 @@ public class ServletTool {
                 aob.enregistrerAupresdesService();
                 aob.forceChangeStatut();
                 aob.notifyObservers("rem");
-                
+
             }
             redir(request, srlvtname + "/recherche", "Suppression éffectué ! : ", Boolean.FALSE);
 

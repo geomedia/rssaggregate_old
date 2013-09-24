@@ -7,6 +7,9 @@ package rssagregator.services;
 import java.util.Observer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import org.joda.time.DateTime;
+import org.joda.time.Duration;
 
 /**
  *
@@ -24,7 +27,6 @@ public abstract class AbstrService implements Observer {
 //        ScheduledExecutorService exe = Executors.newScheduledThreadPool(1);
 //        this.executorService = exe;
 //    }
-
     /**
      * *
      * Lance toutes les tâches par défaut devant être gérée par le service
@@ -64,10 +66,35 @@ public abstract class AbstrService implements Observer {
      * @param tache
      */
     protected abstract void gererIncident(AbstrTacheSchedule tache);
-    
-    
-    /***
-     * Permet de stoper le service. Cette méthode doit être redéfini par tous les service. Chacun est chargé de clore les tache lancée et détruire son pool de thread
+
+    /**
+     * *
+     * permet de scheduler une tache suivant les paramettre définit dans la
+     * tache. soit par timeScjedule qui définit un nombre de seconde soit grace
+     * aux variable jour heure minute qui définissent la prochaine execution.
+     *
+     * @param tache
+     */
+    public void schedule(AbstrTacheSchedule tache) {
+
+        if (tache.getTimeSchedule() != null) {
+            this.executorService.schedule(tache, tache.getTimeSchedule(), TimeUnit.SECONDS);
+        } else if (tache.getHeureSchedule() != null && tache.getJourSchedule() != null && tache.getMinuteSchedule() != null) {
+
+            DateTime dtCurrent = new DateTime();
+            DateTime next = dtCurrent.withDayOfWeek(new Integer(tache.getJourSchedule()));
+            Duration dur = new Duration(dtCurrent, next);
+            this.executorService.schedule(tache, dur.getStandardSeconds(), TimeUnit.SECONDS);
+
+        }
+
+    }
+
+    /**
+     * *
+     * Permet de stoper le service. Cette méthode doit être redéfini par tous
+     * les service. Chacun est chargé de clore les tache lancée et détruire son
+     * pool de thread
      */
     public abstract void stopService() throws SecurityException, RuntimeException;
 }
