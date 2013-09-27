@@ -46,6 +46,7 @@ public class ItemSrvl extends HttpServlet {
 
     public String VUE = null;
     public static final String ATT_ITEM = "item";
+    public static final String ATT_SERV_NAME = "item";
 
     /**
      * Processes requests for both HTTP
@@ -83,6 +84,7 @@ public class ItemSrvl extends HttpServlet {
 
 
         request.setAttribute("navmenu", "item");
+        request.setAttribute("srlvtname", ATT_SERV_NAME);
         /**
          * **=================================================================================
          * ...................................ACTION READ

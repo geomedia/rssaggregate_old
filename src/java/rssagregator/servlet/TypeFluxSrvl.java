@@ -61,7 +61,7 @@ public class TypeFluxSrvl extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
-        request.setAttribute("navmenu", "config");
+        request.setAttribute("navmenu", "typeflux");
         String action = ServletTool.configAction(request, "recherche");      // récupération de l'action
 
         DAOGenerique dao = DAOFactory.getInstance().getDAOGenerique();

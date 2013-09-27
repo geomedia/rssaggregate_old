@@ -1,0 +1,47 @@
+<!doctype html>
+ 
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>jQuery UI Tooltip - Custom animation demo</title>
+  <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+  <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+  <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+  <link rel="stylesheet" href="/resources/demos/style.css" />
+  <script>
+  $(function() {
+    $( "#show-option" ).tooltip({
+      show: {
+        effect: "slideDown",
+        delay: 250
+      }
+    });
+    $( "#hide-option" ).tooltip({
+      hide: {
+        effect: "explode",
+        delay: 250
+      }
+    });
+    $( "#open-event" ).tooltip({
+      show: null,
+      position: {
+        my: "left top",
+        at: "left bottom"
+      },
+      open: function( event, ui ) {
+        ui.tooltip.animate({ top: ui.tooltip.position().top + 10 }, "fast" );
+      }
+    });
+  });
+  </script>
+</head>
+<body>
+ 
+<p>There are various ways to customize the animation of a tooltip.</p>
+<p>You can use the <a id="show-option" href="http://jqueryui.com/demos/tooltip/#option-show" title="slide down on show">show</a> and
+<a id="hide-option" href="http://jqueryui.com/demos/tooltip/#option-hide" title="explode on hide">hide</a> options.</p>
+<p>You can also use the <a id="open-event" href="http://jqueryui.com/demos/tooltip/#event-open" title="move down on show">open event</a>.</p>
+ 
+ 
+</body>
+</html>

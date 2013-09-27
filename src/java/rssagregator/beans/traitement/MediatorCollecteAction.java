@@ -229,11 +229,21 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
             DAOFactory.getInstance().getEntityManager().detach(listItem.get(i));
         }
         
-        
 
         this.requesteur.disconnect();
         return listItem;
     }
+    
+    
+    /***
+     * Méthode assez semblable à executeAction. Au lieu d'aller chercher le contenu dans un flux. C'est le fichier CSV
+     * @return 
+     */
+    public List<Flux> importFromCsv(){
+        throw new UnsupportedOperationException("pas implémenté");
+    }
+    
+    
 
     /**
      * Test le résultat du médiator sur le flux envoyé. On utilise maintenant

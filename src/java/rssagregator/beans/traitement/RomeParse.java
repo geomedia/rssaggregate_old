@@ -10,16 +10,12 @@ import com.sun.syndication.io.SyndFeedInput;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import rssagregator.beans.Item;
 import com.sun.syndication.io.XmlReader;
 import java.util.Date;
-import java.util.concurrent.Callable;
 import javax.persistence.Entity;
 import javax.persistence.Transient;
 

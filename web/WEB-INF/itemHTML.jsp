@@ -13,7 +13,9 @@
 <div id="header-wrapper">
     <div id="header">
         <div id="logo">
-            <h1>Administration des <span>Item</span></h1></div></div>
+             <c:import url="/WEB-INF/inc/titre.jsp" />
+        
+        </div></div>
 
 </div>
 <!--<script src="simplePagination/jquery-1.7.2.min.js"></script>-->

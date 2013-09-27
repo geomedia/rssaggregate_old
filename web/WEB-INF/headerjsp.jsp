@@ -13,84 +13,240 @@
         <title>JSP Page</title>
 
         <link href="/RSSAgregate/ress/style.css" type="text/css" rel="stylesheet" media="all"/>
+
+        <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+        <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+
+        <!--<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>-->
+        <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+        <link rel="stylesheet" href="/resources/demos/style.css" />
+
+
+
+        <!--Paramètre de la toolbox info du jquery IU-->
+        <script>
+            $(function() {
+            $( document ).tooltip({
+
+            show: {
+            effect: false,
+            delay: 30
+            }
+            });
+            $( "#hide-option" ).tooltip({
+            hide: {
+            effect: false,
+            delay: 70
+            }
+            });
+            $( "#open-event" ).tooltip({
+            show: null,
+            position: {
+            my: "left top",
+            at: "left bottom"
+            },
+            open: function( event, ui ) {
+            ui.tooltip.animate({ top: ui.tooltip.position().top + 10 }, "fast" );
+            }
+            })
+            ;
+            });
+        </script>
+
+       
+
+
+
     </head>
     <body>
-        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+
+
+
+
+
+
+
         <c:set var="rootpath" value="/RSSAgregate/" scope="request"></c:set>
 
 
-            <div id="banner">
-                <a href ="/RSSAgregate/index">
+
+            <header style="width: 1200px; height: 116px">
+
+
+
+                <div style="float: left">
+
+                    <a href ="/RSSAgregate/index" style="display: block;">
+                    <%
+                        if (DAOFactory.getInstance().getDAOConf().getConfCourante().getMaster()) {
+                            out.println("<img src=\"/RSSAgregate/ress/img/logo_mastervert.png\"/>");
+                            request.setAttribute("master", true);
+                        } else {
+                            out.println("<img src=\"/RSSAgregate/ress/img/logo_masterrouge.png\"/>");
+                            request.setAttribute("master", false);
+                        }
+                    %>
+                </a>
+            </div>
+
+
+            <div style="float: right">
+
                 <%
-                    if (DAOFactory.getInstance().getDAOConf().getConfCourante().getMaster()) {
-                        out.println("<img src=\"/RSSAgregate/ress/img/logo_mastervert.png\"/>");
-                        request.setAttribute("master", true);
+                    UserAccount u = (UserAccount) session.getAttribute("authuser");
+                    if (u != null) {
+                        out.println(u.getMail());
+                %><a href="${rootpath}ident/logout">Deconnection</a><%
+                        if (u.getAdminstatut()) {
+                            request.setAttribute("admin", true);
+                        }
                     } else {
-                        out.println("<img src=\"/RSSAgregate/ress/img/logo_masterrouge.png\"/>");
-                        request.setAttribute("master", false);
+                        out.print("deco");
                     }
+
+
 
                 %>
 
-            </a>
-                                <div>
-                    <%
-                   UserAccount u =  (UserAccount)session.getAttribute("authuser");
-                   if(u!=null){
-                       out.println(u.getMail());
-                       %><a href="${rootpath}ident/logout">Deconnection</a><%
-                       if(u.getAdminstatut()){
-                           request.setAttribute("admin", true);
-                       }
-                   }
-                   else{
-                       out.print("deco");
-                   }
-                   
-                   
-      
-                    %>
-                    
-                </div>
-                <div id="JMS">Statut JMS <span id="JMSstat"><%
-                if ( ServiceSynchro.getInstance().getStatutConnection()) {
-                    out.println("OK");
-                } else {
-                    out.println("Erreur");
+
+                Statut JMS <span id="JMSstat"><%
+                    if (ServiceSynchro.getInstance().getStatutConnection()) {
+                        out.println("OK");
+                    } else {
+                        out.println("Erreur");
                     %></span>
                 <button type="button" id="jmsrecoBT">Reconnection</button>
                 <span id="pinfoJMS"></span>
-                <script src="JMSReconnection.js"></script>
+
+
             </div>
-                
-               
 
 
-    
-            
+
+
+
+
+
+
+
+
+
             <%
                 }
             %>
-        </div>
+
+        </header>
+        <div style="clear: both"></div>
+
+
+
+        <!--        <div id="menu-wrapper">
+                    <div id="menu">
+                        <ul class="menu">
+        
+                            <li<c:if test="${navmenu=='item'}"> class="current_page_item"</c:if>><a href="${rootpath}item">Items</a></li>
+                            <li<c:if test="${navmenu=='flux'}"> class="current_page_item"</c:if>><a href="${rootpath}flux">Flux</a></li>
+                            <li<c:if test="${navmenu=='journaux'}"> class="current_page_item"</c:if>><a href="${rootpath}journaux">Jounaux</a></li>
+                            <li<c:if test="${navmenu=='recap'}"> class="current_page_item"</c:if>><a href="${rootpath}recapActiviteGenerale">Récapitulatif de l'activité</a></li>
+                            <li<c:if test="${navmenu=='incident'}"> class="current_page_item"</c:if>><a href="${rootpath}incidents">Incidents</a></li>
+                            <li<c:if test="${navmenu=='config'}"> class="current_page_item"</c:if>><a href="${rootpath}config">Configuration générale</a></li>
+                            </ul>
+                        </div>
+                    </div>-->
+            <nav id="topNav">  
+                <ul>  
+                    <li <c:if test="${navmenu=='item'}"> class="current_page_item"</c:if>><a href="${rootpath}item">Items</a></li>  
+                <li <c:if test="${navmenu=='flux'}"> class="current_page_item"</c:if>>  
+                    <a href="${rootpath}flux">Flux</a>
+                    <ul>    
+                        <li><a href="${rootpath}flux/recherche">Rechercher</a></li>  
+                        <li><a href="${rootpath}flux/add">Ajouter</a></li>  
+                        <li><a href="${rootpath}recapActiviteGenerale">Récapitulatif de l'activité</a></li>
+                    </ul>                  
+                </li>  
+                <li <c:if test="${navmenu=='journaux'}"> class="current_page_item"</c:if>><a href="${rootpath}journaux">Journaux</a>
+                        <ul>
+                            <li><a href="${rootpath}journaux/recherche">Recherche</a></li>
+                        <li><a href="${rootpath}journaux/add">Ajout</a></li>
+
+                    </ul> 
+                </li>  
+
+                <li <c:if test="${navmenu=='incident'}"> class="current_page_item"</c:if>><a href="${rootpath}incidents">Incidents</a></li>  
+
+
+                    <li <c:if test="${navmenu=='user'}"> class="current_page_item"</c:if>><a href="${rootpath}user/recherche">Utilisateurs</a>
+
+                        <ul>
+                            <li><a href="${rootpath}user/recherche">Recherche</a></li>
+                        <li><a href="${rootpath}user/add">Ajouter</a></li>
+                    </ul>
+
+                </li>
+                <li <c:if test="${navmenu=='typeflux'}"> class="current_page_item"</c:if>><a href="${rootpath}TypeFluxSrvl/recherche">Types de flux</a>
+                        <ul>
+                            <li ><a href="${rootpath}TypeFluxSrvl/add">Ajouter</a></li>
+                        <li><a href="${rootpath}TypeFluxSrvl/recherche">Rechercher</a></li>
+                    </ul>
+
+                </li>
+                <li <c:if test="${navmenu=='slave'}"> class="current_page_item"</c:if>><a href="${rootpath}slave/recherche">Serveurs esclaves</a>
+                        <ul>
+                            <li><a href="${rootpath}slave/recherche">Recherche</a></li>
+                        <li><a href="${rootpath}slave/add">Ajouter</a></li>
+                        <li><a href="${rootpath}slave/importitem">Synch Manuelle</a></li>
+                    </ul>
+                </li>
+                <li <c:if test="${navmenu=='config'}"> class="current_page_item"</c:if>><a href="${rootpath}config">Configuration</a></li>
+                    <li><a href="#">Aide</a></li>  
+                </ul>  
+            </nav> 
+            <script>
+                var el = document.getElementsByTagName("body")[0];
+                el.className = "";
+            </script>
+
+
+            <script>
+                (function($){
+
+                //cache nav
+                var nav = $("#topNav");
+
+                //add indicators and hovers to submenu parents
+                nav.find("li").each(function() {
+                if ($(this).find("ul").length > 0) {
+
+                $("<span>").text("^").appendTo($(this).children(":first"));
+
+                //show subnav on hover
+                $(this).mouseenter(function() {
+                $(this).find("ul").stop(true, true).slideDown();
+                });
+
+                //hide submenus on exit
+                $(this).mouseleave(function() {
+                $(this).find("ul").stop(true, true).slideUp();
+                });
+                }
+                });
+                })(jQuery);
+            </script>
 
 
 
 
-        <div id="menu-wrapper">
-            <div id="menu">
-                <ul class="menu">
 
-                    <li<c:if test="${navmenu=='item'}"> class="current_page_item"</c:if>><a href="${rootpath}item">Items</a></li>
-                    <li<c:if test="${navmenu=='flux'}"> class="current_page_item"</c:if>><a href="${rootpath}flux">Flux</a></li>
-                    <li<c:if test="${navmenu=='journaux'}"> class="current_page_item"</c:if>><a href="${rootpath}journaux">Jounaux</a></li>
-                    <li<c:if test="${navmenu=='recap'}"> class="current_page_item"</c:if>><a href="${rootpath}recapActiviteGenerale">Récapitulatif de l'activité</a></li>
-                    <li<c:if test="${navmenu=='incident'}"> class="current_page_item"</c:if>><a href="${rootpath}incidents">Incidents</a></li>
-                    <li<c:if test="${navmenu=='config'}"> class="current_page_item"</c:if>><a href="${rootpath}config">Configuration générale</a></li>
-                </ul>
-            </div>
-        </div>
+
+            <script src="${rootpath}JMSReconnection.js"></script>
+        <script src="${rootpath}modernizr.custom.36191.js"></script>
+
+
+
 
         <div id="wrapper">
             <div id="page">
                 <div id="page-bgtop">
                     <div id="page-bgbtm">
+
+

@@ -53,7 +53,7 @@ public class ServeurSlaveSrlvt extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
         request.setCharacterEncoding("UTF-8");
 
-        request.setAttribute("navmenu", "config");
+        request.setAttribute("navmenu", "slave");
         request.setAttribute("srlvtname", ATT_SERV_NAME);
         
         Map<String, String> redirmap = null;

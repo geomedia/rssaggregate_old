@@ -4,6 +4,10 @@
  */
 package rssagregator.servlet;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoFlux;
 import rssagregator.dao.DaoJournal;
@@ -16,6 +20,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.NoResultException;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -24,16 +29,16 @@ import rssagregator.beans.Flux;
 import rssagregator.beans.FluxType;
 import rssagregator.beans.Journal;
 import rssagregator.dao.DAOGenerique;
-import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.services.ServiceCollecteur;
-import rssagregator.services.ServiceGestionIncident;
 import rssagregator.utils.ServletTool;
+import javax.servlet.http.Part;
 
 /**
  *
  * @author clem
  */
 @WebServlet(name = "Flux", urlPatterns = {"/flux/*"})
+@MultipartConfig(location = "/home/clem", maxFileSize = 10485760, maxRequestSize = 52428800, fileSizeThreshold = 1048576) // Nécessaire pour l'envoie de fichier CSV
 public class FluxSrvl extends HttpServlet {
 
     public static final String ATT_FORM = "form";
@@ -41,6 +46,7 @@ public class FluxSrvl extends HttpServlet {
     public static final String ATT_ACTION = "action";
     public static final String ATT_LISTOBJ = "listflux";
     public static final String ATT_SERV_NAME = "flux";
+    public static final int TAILLE_TAMPON = 10240; // 10 ko
     public String VUE = "/WEB-INF/fluxJsp.jsp";
     Map redirmap = new HashMap<String, String>(); // La redirmap est envoyée à la jsp, il s'agit d'une hash map pouvant contenir les couple clé valeur (url : l'adresse de redirection) ( msg : le message a faire parvenir à l'utilisateur)
     protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(FluxSrvl.class);
@@ -67,7 +73,7 @@ public class FluxSrvl extends HttpServlet {
         Integer firstResult = null;
         Integer itPrPage = null;
         redirmap = null;
-        
+
         SecurityManager manager = System.getSecurityManager();
         System.out.println("SECUMANAGER : " + manager);
 
@@ -111,7 +117,7 @@ public class FluxSrvl extends HttpServlet {
             ServletTool.actionADD(request, ATT_OBJ, ATT_FORM, Flux.class, true);
 
             //----------------------------------------------------ACTION : MODIFICATION----------------------------------------------------
-        } else if (action.equals("mod")) { 
+        } else if (action.equals("mod")) {
             DAOGenerique dAOGenerique = DAOFactory.getInstance().getDAOGenerique();
             dAOGenerique.setClassAssocie(FluxType.class);
             request.setAttribute("listtypeflux", dAOGenerique.findall());
@@ -119,8 +125,8 @@ public class FluxSrvl extends HttpServlet {
             // GESTION DU BIND ET DE L'enregistremnet
 
             ServletTool.actionMOD(request, ATT_OBJ, ATT_FORM, Flux.class, true);
-            
-            
+
+
 
             //------------------------------------------------ACTION MAJ MANUELLE--------------------------------------------------------
         } else if (action.equals("maj")) {
@@ -201,6 +207,31 @@ public class FluxSrvl extends HttpServlet {
         } //---------------------------------------------------ACTION READ--------------------------------------------------
         else if (action.equals("read")) {
             ServletTool.actionREAD(request, Flux.class, ATT_OBJ);
+        } //-----------------------------------------------------ACTION IMPORT CSV
+        else if (action.equals("importcsv")) {
+
+            if (request.getMethod().equals("POST")) {
+                Part part = request.getPart("csvfile");
+                String nomFichier = getNomFichier(part);
+
+
+                if (nomFichier != null && !nomFichier.isEmpty()) {
+                    String nomChamp = part.getName();
+                    request.setAttribute(nomChamp, nomFichier);
+
+                    System.out.println("Le nom de fichier : " + nomFichier);
+                }
+
+
+                System.out.println("Ya du fichier");
+
+                // écriture du fichier sur le disque
+                ecrireFichier(part, "youpi.txt", "/var/lib/RSSAgregate/");
+            }
+
+
+
+
         }
 
         //------------------------------------------------------------------------
@@ -227,6 +258,50 @@ public class FluxSrvl extends HttpServlet {
             VUE = "/WEB-INF/fluxHTML.jsp";
         }
         this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
+    }
+
+    private static String getNomFichier(Part part) {
+        /* Boucle sur chacun des paramètres de l'en-tête "content-disposition". */
+        for (String contentDisposition : part.getHeader("content-disposition").split(";")) {
+            /* Recherche de l'éventuelle présence du paramètre "filename". */
+            if (contentDisposition.trim().startsWith("filename")) {
+                /* Si "filename" est présent, alors renvoi de sa valeur, c'est-à-dire du nom de fichier. */
+                return contentDisposition.substring(contentDisposition.indexOf('=') + 1);
+            }
+        }
+        /* Et pour terminer, si rien n'a été trouvé... */
+        return null;
+    }
+
+    private void ecrireFichier(Part part, String nomFichier, String chemin) throws IOException {
+        /* Prépare les flux. */
+        BufferedInputStream entree = null;
+        BufferedOutputStream sortie = null;
+        try {
+            /* Ouvre les flux. */
+            entree = new BufferedInputStream(part.getInputStream(), TAILLE_TAMPON);
+            sortie = new BufferedOutputStream(new FileOutputStream(new File(chemin + nomFichier)),
+                    TAILLE_TAMPON);
+
+            /*
+             * Lit le fichier reçu et écrit son contenu dans un fichier sur le
+             * disque.
+             */
+            byte[] tampon = new byte[TAILLE_TAMPON];
+            int longueur;
+            while ((longueur = entree.read(tampon)) > 0) {
+                sortie.write(tampon, 0, longueur);
+            }
+        } finally {
+            try {
+                sortie.close();
+            } catch (IOException ignore) {
+            }
+            try {
+                entree.close();
+            } catch (IOException ignore) {
+            }
+        }
     }
 
 // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

@@ -64,6 +64,7 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long ID;
+    
     /**
      * URL du flux rss sous la forme http://url/rep.
      */

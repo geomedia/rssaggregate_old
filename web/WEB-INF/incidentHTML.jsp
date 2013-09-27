@@ -16,7 +16,9 @@
 <div id="header-wrapper">
     <div id="header">
         <div id="logo">
-            <h1>Administration des <span>Incidents</span></h1></div></div>
+             <c:import url="/WEB-INF/inc/titre.jsp" />
+        
+        </div></div>
 
 
 </div>

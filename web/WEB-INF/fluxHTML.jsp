@@ -21,7 +21,8 @@
 <div id="header-wrapper">
     <div id="header">
         <div id="logo">
-            <h1>Administration des <span>Flux</span></h1></div></div>
+        <c:import url="/WEB-INF/inc/titre.jsp" />
+        </div></div>
 
 
 </div>
@@ -181,12 +182,12 @@
                                     <input type="text" id="url" name="url" value="<c:out value="${form.erreurs['url'][0]}" default="${bean.url}" />" size="20" maxlength="60" />
                                 <span class="erreur"> ${form.erreurs['url'][1]}</span><br />
 
-                                <label title="Indiquez la page html de la rubrique capturée">Page html</label>
+                                <label title="Indiquez la page html de la rubrique capturée. Exemple, la page international du monde http://www.lemonde.fr/international/">Page html</label>
                                 <input name="htmlUrl" type="text" value="<c:out value="${form.erreurs['htmlUrl'][0]}" default="${bean.htmlUrl}" />"/>
                                 <span class="erreur"> ${form.erreurs['htmlUrl'][1]}</span>
                                 <br />
 
-                                <label>Comportement de collecte : </label>
+                                <label title="Ensemble de paramettres régulant la collecte du flux. CE PARAMETTRE EST PRIMORDIALE">Comportement de collecte : </label>
                                 <select name="mediatorFlux">
                                     <c:forEach items="${listcomportement}" var="compo">
                                         <option value="${compo.ID}" <c:if test="${bean.mediatorFlux.ID==compo.ID}"> selected="true"</c:if> >${compo}</option>
@@ -230,14 +231,14 @@
 
 
 
-                                <label>Flux créé le : <fmt:formatDate value="${bean.created}" pattern="dd/MM/yyyy hh:mm"/></label> <br />
+                                <label title="Cette variable est complété automatiquement à l'ajout d'un nouveau flux">Flux créé le : <fmt:formatDate value="${bean.created}" pattern="dd/MM/yyyy hh:mm"/></label> <br />
 
 
                                 <label title="L'administrateur doit qualifier si un flux est stable ou non afin de ne pas recevoir de notifications abusives. Un flux est qualifié de stable si il emmet un nombre conséquent d'items avec régularité et si il ne subit pas de pannes récurentes">Flux stable : </label>
                                 <input name="estStable" id="estStable" type="checkbox" <c:if test="${bean.estStable == 'true'}">checked="checked" </c:if> /><br />
 
 
-                                    <label for="infoCollecte">Information :</label><br />
+                                <label for="infoCollecte" title="Les administrateurs peuvent consigner des informations sur les flux dans ce champs de libre saisie">Information :</label><br />
                                     <textarea id="infoCollecte" name="infoCollecte" rows="20" cols="80">${bean.infoCollecte}</textarea>
                                 <input type="hidden" name="id" value="${bean.ID}">
                                 <br />
@@ -246,12 +247,8 @@
                             </fieldset>
                         </form>
 
-                        <p>Debug : Recap des levée</p>
-                        <ul>
-                            <c:forEach items="${bean.debug}" var="deb">
-                                <li>${deb.date}    Nombre item : ${deb.nbrRecup} </li>
-                                </c:forEach>
-                        </ul>
+           
+          
                         <script src="${rootpath}test.js"></script>
                     </c:when>
 
@@ -413,6 +410,19 @@
 
 
                     </c:when>
+                        
+                        
+                        <c:when test="${action == 'importcsv'}">
+                            CSV
+                            <form method="POST"  enctype="multipart/form-data">
+                                <label>Votre fichier CSV : </label>
+                                <input type="file" name="csvfile" />
+
+                                <input type="submit">
+                            </form>
+                            
+                            
+                        </c:when>
                 </c:choose>
             </c:when>
         </c:choose>

@@ -49,7 +49,7 @@ public class UserSrlvt extends HttpServlet {
         String action = ServletTool.configAction(request, "recherche");
 
         request.setAttribute("srlvtname", ATT_SRVLT_NAME);
-         request.setAttribute("navmenu", "config");
+         request.setAttribute("navmenu", "user");
 
         //========================================================================================
         //................................GESTION DES ACTION 
