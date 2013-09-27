@@ -205,15 +205,15 @@ public class TacheSynchroRecupItem extends AbstrTacheSchedule<TacheSynchroRecupI
         this.serveurSlave = serveurSlave;
     }
 
-    @Override
-    public void fermerLesIncidentOuvert() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public AbstrIncident getIncidenOuvert() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+//    @Override
+//    public void fermerLesIncidentOuvert() {
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//    }
+//
+//    @Override
+//    public AbstrIncident getIncidenOuvert() {
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//    }
 
     @Override
     public Class getTypeIncident() {

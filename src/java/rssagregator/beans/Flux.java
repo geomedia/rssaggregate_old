@@ -40,11 +40,20 @@ import rssagregator.beans.exception.DonneeInterneCoherente;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoFlux;
 import rssagregator.services.ServiceCollecteur;
+import rssagregator.services.TacheCalculQualiteFlux;
+import rssagregator.services.TacheVerifComportementFLux;
 
 /**
  * Une des entités les plus importantes... Il s'agit d'un flux de syndication
- * (RSS ATOM...). Un flux appartient à un journal. Un journal peut posséder
- * plusieurs flux. Un flux possède plusieurs items
+ * (RSS ATOM...). Un flux appartient est lié aux entitées suivante : <ul>
+ * <li>{@link Journal} : Un flux peut appartenir à 0 à 1 journal</li>
+ * <li>{@link FluxType} : Un flux peut appartenir à 0 à 1 type de flux
+ * (international, à la une ...)</li>
+ * <li>{@link MediatorCollecteAction} : Une flux possède un comportement de
+ * collecte permettant de collecter les {@link Item}</li>
+ * <li>{@link Item} : Un flux possède 0 à N item. </li>
+ * <li>{@link CollecteIncident} : un flux peut posséder 0 à N incidents de Collecte.</li>
+ * </ul>
  */
 @Entity
 @Table(name = "flux")
@@ -52,16 +61,11 @@ import rssagregator.services.ServiceCollecteur;
 @Cache(type = CacheType.FULL, coordinationType = CacheCoordinationType.SEND_NEW_OBJECTS_WITH_CHANGES, isolation = CacheIsolationType.SHARED)
 public class Flux extends AbstrObservableBeans implements Observer, Serializable, BeanSynchronise {
 
-//    @Transient
-//    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(Flux.class);
-//    @PersistenceContext(type= PersistenceContextType.EXTENDED)
-//private EntityManager em;
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long ID;
     /**
-     * URL du flux rss. inclure si possible le protocole (http://). Mais, lors
-     * de l'ajout une regexp vérifie si l'url est correcte et la modifie
+     * URL du flux rss sous la forme http://url/rep.
      */
     @Column(name = "url", length = 2000, nullable = false, unique = true)
     private String url;
@@ -73,9 +77,6 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
      * Permet de déterminer si le flux doit être collecté ou non
      */
     protected Boolean active;
-    
-    
-    
     /**
      * L'url de la rubrique du flux, il s'agit de la page HTML d'entrée de la
      * rubrique. Cette adresse peut être utilisé pour faire de l'auto discovery.
@@ -129,6 +130,9 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
 //    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true,fetch = FetchType.LAZY)
     @OneToMany(mappedBy = "fluxLie", cascade = {CascadeType.ALL}, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<CollecteIncident> incidentsLie;
+ 
+    
+    
     /**
      *
      * @element-type InfoCollecte
@@ -138,22 +142,29 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
 //    @Deprecated // Idée abandonnée. Il est déjà possible de commenter les incident qui sont daté; Le commentaire sur le flux sera finalement un simple champ texte
 //    @Transient
 //    private List<InfoCollecte> infoCollecteFlux;
+    
+    /***
+     * Un champs informatif dans lequel les administrateurs peuvent saisir des commentaires sur le flux.
+     */
     @Column(name = "infoCollecte", columnDefinition = "text")
     private String infoCollecte;
+    
+    
+    
     /**
      * Le type du flux (international, a la une etc...). Les types de flux sont
      * des beans. ils sont persisté dans la base de données
      */
 //    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.DETACH})
     @CascadeOnDelete
-    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST}, fetch = FetchType.LAZY)
+    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST}, fetch = FetchType.EAGER)
     private FluxType typeFlux;
     /**
      * Un flux peut appratenir à un journal. Un journal peut contenir plusieurs
      * flux
      */
 // On veut que le flux ne puisse pas créer de journaux mais simplment se lier. Ce n'est pas à la dao du flux de de créer des journaux.
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private Journal journalLie;
     /**
      * Le mediator flux permet d'assigner un flux un comportement de collecte.
@@ -204,17 +215,52 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
      */
     @Transient
     List<DebugRecapLeveeFlux> debug;
+    /**
+     * *
+     * Un indice de 0.0 à 100.0 permettant de mesurer la disponibilité du flux
+     * durant la captation. Cet indice est calculé par la tâche
+     * {@link TacheCalculQualiteFlux} qui observe la durée de la période de
+     * calpation et le cumul de la durée des incidents.
+     */
     @Column(name = "indiceQualiteCaptation")
     protected Float indiceQualiteCaptation;
     /**
      * *
-     *
+     * Médiane du nombre d'item jour capturé pour le flux. Cet indice est
+     * calculé par la tâche {@link TacheCalculQualiteFlux}
      */
     protected Integer indiceMedianeNbrItemJour;
+    /**
+     * *
+     * Décile du nombre d'item jour capturé pour le flux. Cet indice est calculé
+     * par la tâche {@link TacheCalculQualiteFlux}
+     */
     protected Integer indiceDecileNbrItemJour;
+    /**
+     * *
+     * Quartile du nombre d'item jour capturé pour le flux. Cet indice est
+     * calculé par la tâche {@link TacheCalculQualiteFlux}
+     */
     protected Integer indiceQuartileNbrItemJour;
+    /**
+     * *
+     * Maximum du nombre d'item jour capturé pour le flux. Cet indice est
+     * calculé par la tâche {@link TacheCalculQualiteFlux}
+     */
     protected Integer indiceMaximumNbrItemJour;
+    /**
+     * *
+     * Minimum du nombre d'item jour capturé pour le flux. Cet indice est
+     * calculé par la tâche {@link TacheCalculQualiteFlux}
+     */
     protected Integer indiceMinimumNbrItemJour;
+    /**
+     * *
+     * Liste des périodes durant lesquel un flux à été capturé (boolean active à
+     * true). Les période de captation sont des entitées persisté dans la base
+     * de données possédant deux dates. Durant sa période de captation, un flux
+     * peut être en échec (posséder des incident {@link CollecteIncident}
+     */
     @OneToMany(mappedBy = "flux", cascade = CascadeType.ALL)
     protected List<FluxPeriodeCaptation> periodeCaptations;
     /**
@@ -231,7 +277,7 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
      * considère qu'il est stable si le flux ne subit pas trop d'anomalie et
      * qu'il renvoie un nombre d'item assez régulier. Les flux qualifié de
      * stable son sujet a être vérifier par les tache de verification de
-     * comportement. On peut qualifier un flux de non stable pour eviter les
+     * comportement ({@link TacheVerifComportementFLux). On peut qualifier un flux de non stable pour éviter les
      * notification abusive. Un flux non stable continu tout de même à être
      * revevé
      */
@@ -348,13 +394,13 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
         this.item = items;
     }
 
-    public String getInfoCollecte() {
-        return infoCollecte;
-    }
-
-    public void setInfoCollecte(String infoCollecte) {
-        this.infoCollecte = infoCollecte;
-    }
+//    public String getInfoCollecte() {
+//        return infoCollecte;
+//    }
+//
+//    public void setInfoCollecte(String infoCollecte) {
+//        this.infoCollecte = infoCollecte;
+//    }
 
     public FluxType getTypeFlux() {
         return typeFlux;
@@ -399,6 +445,17 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
     public List<FluxPeriodeCaptation> getPeriodeCaptations() {
         return periodeCaptations;
     }
+
+    public String getInfoCollecte() {
+        return infoCollecte;
+    }
+
+    public void setInfoCollecte(String infoCollecte) {
+        this.infoCollecte = infoCollecte;
+    }
+    
+    
+    
 
     public void setPeriodeCaptations(List<FluxPeriodeCaptation> periodeCaptations) {
         this.periodeCaptations = periodeCaptations;
@@ -819,5 +876,8 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
 
 //        return null;
 
+    }
+
+    public static void main(String[] args) {
     }
 }

@@ -4,14 +4,13 @@
  */
 package rssagregator.beans.form;
 
+import rssagregator.dao.DAOGenerique;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import rssagregator.dao.AbstrDao;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
@@ -26,11 +25,13 @@ import rssagregator.dao.DaoFlux;
 import rssagregator.dao.DaoJournal;
 
 /**
+ * Formulaire permettant de valider et binder des données envoyée par l'utilisateur dans un beans de type Flux
  *
  * @author clem
  */
 public class FluxForm extends AbstrForm {
-//----------------Liste des variables a nourrir à partir de la requête
+    //------------------------------------------------------
+    //Liste des variables a nourrir à partir de la requête
 
     String url = null;
     MediatorCollecteAction mediatorFlux = null;
@@ -41,24 +42,14 @@ public class FluxForm extends AbstrForm {
     String nom = null;
     Flux parentFlux = null;
     String infoCollecte = null;
+    Boolean estStable = null;
+    //---------------------------------------------------
 
-    public FluxForm(/*AbstrDao dao*/) {
-//        super(dao);
+    public FluxForm() {
     }
 
     @Override
-    /**
-     * *
-     * Le bind est redéclarer pour gérer les date d'ajout et de modification du
-     * flux.
-     */
     public Object bind(HttpServletRequest request, Object objEntre, Class type) {
-//        boolean isnew = false;
-//        if (objEntre == null) {
-//            isnew = true;
-//        }
-
-
         if (this.action.equals("add")) {
             try {
                 objEntre = type.newInstance();
@@ -70,21 +61,22 @@ public class FluxForm extends AbstrForm {
         }
         Flux flux = (Flux) objEntre;
 
-
-
         //================================================================================================
         //............................BIND DES DONNES SI AUCUNE ERREUR 
         //================================================================================================
         if (valide) {
-            System.out.println("ENREGISTREMENT ");
             this.valide = true;
             flux.setActive(active);
             flux.setUrl(url);
             flux.setHtmlUrl(htmlUrl);
             flux.setMediatorFlux(mediatorFlux);
             flux.setJournalLie(journalLie);
-  
-            
+            flux.setNom(nom);
+            flux.setParentFlux(parentFlux);
+            flux.setInfoCollecte(infoCollecte);
+            flux.setEstStable(estStable);
+
+            //Depuis que l'on a retirer journaux et type flux du cache cette opération n'est pas utile
 //            if (journalLie != null) {
 //                journalLie.getFluxLie().add(flux);
 //            }
@@ -92,20 +84,16 @@ public class FluxForm extends AbstrForm {
 //                flux.getJournalLie().getFluxLie().remove(flux);
 ////                journalLie.getFluxLie().remove(flux);
 //            }
-            
-            
-            flux.setTypeFlux(typeFlux);
-            if (typeFlux != null) {
-                typeFlux.getFluxLie().add(flux);
-            } 
 
-            flux.setNom(nom); 
-            flux.setParentFlux(parentFlux);
-            flux.setInfoCollecte(infoCollecte);
+//            flux.setTypeFlux(typeFlux);
+//            if (typeFlux != null) {
+//                typeFlux.getFluxLie().add(flux);
+//            } 
 
             //================================================================================================
             //.................AJOUT DE DONNES NE PROVENANT PAS DE LA REQUETE
             //================================================================================================
+            //Il faut ajouter la date de création du flux ainsi que gérer les période de collecte en fonction de l'activation ou non du flux
 
             if (action.equals("add")) {
                 String actFlux = request.getParameter("active");
@@ -146,27 +134,29 @@ public class FluxForm extends AbstrForm {
 
             }
 
-
+            //-------> Gestion de la date de création du flux
             if (action.equals("add")) {
                 flux.setCreated(new Date());
             }
 
+            //------> Dernière date de modification du flux
             flux.setModified(new Date());
 
 
-
-        } else {
-            for (Map.Entry<String, String[]> entry : erreurs.entrySet()) {
-                String string = entry.getKey();
-                String[] strings = entry.getValue();
-                System.out.println("" + string + " - " + strings[0] + " - " + strings[1]);
-            }
         }
-//        Flux fl = (Flux) super.bind(request, objEntre, type); //To change body of generated methods, choose Tools | Templates.
-        System.out.println("FLUX URL 11 : " + flux.getUrl());
         return objEntre;
     }
 
+    /**
+     * *
+     * Ces méthode ne sont plus utilisée. La vérification doit maintenant être éffectuée directement dans le corps de la
+     * méthode validate
+     *
+     * @param url
+     * @throws Exception
+     * @deprecated
+     */
+    @Deprecated
     public void check_url(String url) throws Exception {
         System.out.println("---> CHECK URL");
         if (url == null || url.equals("")) {
@@ -180,6 +170,15 @@ public class FluxForm extends AbstrForm {
         }
     }
 
+    /**
+     * *
+     * Ces méthode ne sont plus utilisée. La vérification doit maintenant être éffectuée directement dans le corps de la
+     * méthode validate
+     *
+     * @param url
+     * @throws Exception
+     */
+    @Deprecated
     public void check_htmlUrl(String url) throws Exception {
 //        if (url == null || url.equals("")) {
 //            throw new Exception("L'url est vide");
@@ -208,7 +207,7 @@ public class FluxForm extends AbstrForm {
             active = false;
         }
 
-        //-------------------Verification de l'url
+        //------------->Verification de l'url
         s = request.getParameter("url");
         if (s != null && !s.isEmpty() && s.matches("[hH][tT]{2}[pP][:][//].*")) {
             url = s;
@@ -217,14 +216,13 @@ public class FluxForm extends AbstrForm {
         }
 
 
-        //--Verif de Page HTML
+        //-------------->Verif de Page HTML
         s = request.getParameter("htmlUrl");
         if (s != null && !s.isEmpty()) {
             htmlUrl = s;
         }
 
-
-        //----------------Comportement de collecte
+        //-------------> COMPORTEMENT DE COLLECTE
         s = request.getParameter("mediatorFlux");
         if (s != null && !s.isEmpty()) {
             //On va chercher le comportement dans la base de données
@@ -237,25 +235,23 @@ public class FluxForm extends AbstrForm {
         } else {
             erreurs.put("mediatorFlux", new String[]{"Incorrect", "Incorrect"});
         }
- 
 
-        //-----------JOURNAL
+
+        //----------->JOURNAL LIE 
         s = request.getParameter("journalLie");
         if (s != null && !s.isEmpty()) {
             try {
-
                 DaoJournal daoj = DAOFactory.getInstance().getDaoJournal();
                 Long id = new Long(s);
                 if (id > 0) {
                     journalLie = (Journal) daoj.find(id);
                 }
-
             } catch (Exception e) {
                 erreurs.put("journalLie", new String[]{"Incorrect", "Incorrect"});
             }
         }
 
-        // -------Type de flux
+        // ---------> TYPE DE FLUX
         s = request.getParameter("typeFlux");
         if (s != null && !s.isEmpty()) {
             try {
@@ -267,19 +263,16 @@ public class FluxForm extends AbstrForm {
             }
         }
 
-        // Nom du flux 
-
+        //----------> NOM DU FLUX
         s = request.getParameter("nom");
         if (s != null) {
             if (s.isEmpty()) {
-//                erreurs.put("nom", new String[]{"Incorrect", "Incorrect"});
             } else {
                 nom = s;
             }
         }
 
-
-        // Sous type flux de : 
+        //-----------> FLUX PARENT
         s = request.getParameter("parentFlux");
         if (s != null) {
             try {
@@ -289,13 +282,19 @@ public class FluxForm extends AbstrForm {
             }
         }
 
-        // infoCollecte
+        //------> INFORMATION DE COLLECTE
         s = request.getParameter("infoCollecte");
         if (s != null) {
             infoCollecte = s;
         }
-        
-        System.out.println("<-->FIN DE VAZLIDATION--<");
+
+
+        //------> EST STABLE
+        s = request.getParameter("estStable");
+        estStable = false;
+        if (s != null) {
+            this.estStable = true;
+        }
 
         if (erreurs.isEmpty()) {
             this.valide = true;
@@ -304,56 +303,4 @@ public class FluxForm extends AbstrForm {
         }
         return this.valide;
     }
-    //        public Flux bind(HttpServletRequest request, Flux flux) throws IllegalAccessException, InvocationTargetException {
-//               if (flux == null) {
-//                flux = new Flux();
-//            }
-//    
-//            
-//            return flux;
-//        }
-    /**
-     * sauvegarde le flux dans la base de donnée en utilisant les paramettres
-     * envoyés
-     *
-     * @param request
-     * @return
-     */
-//    public Flux bind(HttpServletRequest request, Flux flux) {
-//        // SI flux est null (cas d'un ajout, on crée un nouveau flux
-//        if (flux == null) {
-//            flux = new Flux();
-//        }
-//
-//        // On hydrate/peuple le beans avec les données du formulaire
-//        try {
-//            ClemBeanUtils.populate(flux, request);
-//        } catch (IllegalAccessException ex) {
-//            Logger.getLogger(FluxForm.class.getName()).log(Level.SEVERE, null, ex);
-//        } catch (IllegalArgumentException ex) {
-//            Logger.getLogger(FluxForm.class.getName()).log(Level.SEVERE, null, ex);
-//        } catch (InvocationTargetException ex) {
-//            Logger.getLogger(FluxForm.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//        try {
-//            // On lance les vérifaication
-//            erreurs = ClemBeanUtils.check(this, flux);
-//
-//        } catch (SecurityException ex) {
-//            Logger.getLogger(FluxForm.class.getName()).log(Level.SEVERE, null, ex);
-//        } catch (NoSuchMethodException ex) {
-//            Logger.getLogger(FluxForm.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//
-//
-//        if (erreurs.isEmpty()) {
-//            resultat = "Traitement effectué";
-//            valide = true;
-//
-//        } else {
-//            resultat = "Erreur lors de la validation des données";
-//            valide = false;
-//        }
-//        return flux;
-//    }
 }

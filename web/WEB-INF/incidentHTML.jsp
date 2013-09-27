@@ -88,15 +88,21 @@
                         <p>Log JAVA de l'erreur : ${bean.logErreur}</p>
 
                         <form method="POST" action="${rootpath}incidents/mod?id=${bean.ID}">
-                            <label>Clore l'incident : </label><input type="checkbox" name="dateFin"/><br />
-
+                            <c:if test="${empty bean.dateFin}">
+                            <label>Clore l'incident : </label><input type="checkbox" name="dateFin" /><br />
+                            </c:if>
+                            
+                            
+                            <input type="hidden" name="type" value="${bean['class'].simpleName}"/>
                             <textarea name="noteIndicent" id="noteIndicent" cols="80" rows="30">${bean.noteIndicent}</textarea><br />
                             <input type="submit">
                         </form>
                     </c:when>
                     <c:when test="${action=='read'}">
 
-                        <p><a href="${rootpath}incidents/mod?id=${bean.ID}">EDITER</a></p>
+                        <p><a href="${rootpath}incidents/mod?id=${bean.ID}&type=${bean['class'].simpleName}">EDITER</a></p>
+                        
+                        
 
                         <c:if test="${bean['class'].simpleName=='FluxIncident'}">
                             <p><strong>Flux impacté : </strong>${bean.fluxLie}</p>

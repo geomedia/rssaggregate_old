@@ -10,12 +10,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 
 /**
+ * <strong>Cette entitée n'est plus utilisé. On a ajouté un champ text pour le commentaire dans l'entité flux ainsi qu'une nouvelle entité {@link FluxPeriodeCaptation}</strong>
  * Les objet de type info collecte permette de stoquer les dates d'entrée et
  * d'arrêt de captation d'un flux. Ces information n'ont pas pu être stocké dans
  * la table Flux. En effet, la captation peut être interrompu (manuellement)
  * puis reprise. On comprends que dans ce cas un flux peut avoir plusieurs objet
  * de type InfoCollecte
+ * 
  */
+@Deprecated
 @Entity
 public class InfoCollecte implements Serializable {
 

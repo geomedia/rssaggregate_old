@@ -5,29 +5,33 @@
 package rssagregator.beans.form;
 
 import java.util.Date;
-import java.util.HashMap;
 import javax.servlet.http.HttpServletRequest;
 import rssagregator.beans.incident.CollecteIncident;
 
 /**
+ * Le formulaire permettant de valider et binder des donnée tirées de la requête
+ * dans un beans <strong> Incident</strong>. Il y a de nombreux type d'incident
+ * (par généricité). Mais les seules paramètre modifiable sont tous dans la
+ * class AbstrIncident ce sont: <ul>
+ * <li>note d'incident </li>
+ * <li>date fin : pour clore manuellement un incident</li>
+ * </ul>
  *
  * @author clem
  */
 public class IncidentForm extends AbstrForm {
 
+    //----------------------------------------
     private String noteIndicent;
     private Date dateFin;
+    //----------------------------------------
 
     @Override
     public Object bind(HttpServletRequest request, Object objEntre, Class type) {
-//        this.erreurs = new HashMap<String, String[]>();
-        //TODO : Le bind ne fonctionne pas pour les chams hérité, exeptionnellement on va faire ca à la main
-
         if (valide) {
             CollecteIncident incident = (CollecteIncident) objEntre;
             incident.setNoteIndicent(noteIndicent);
             incident.setDateFin(dateFin);
-
             return incident;
         }
         return null;

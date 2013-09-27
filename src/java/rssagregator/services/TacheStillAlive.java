@@ -87,10 +87,12 @@ public class TacheStillAlive extends AbstrTacheSchedule<TacheStillAlive> impleme
             if (alivePOJO == null) {
                 alivePOJO = new StillAlivePOJO();
             }
-            rupture = alivePOJO.check();
+            rupture = alivePOJO.check(this.timeSchedule + 30);
+            
 
             // SI il y a rupture on cherche les deux dates correspondat à l'interval d'innactivité
             if (rupture) {
+                logger.debug("RUPTURE");
                 List<Date[]> dates = alivePOJO.getAlive();
 
                 logger.debug("size du alive : " + dates.size());
@@ -100,6 +102,9 @@ public class TacheStillAlive extends AbstrTacheSchedule<TacheStillAlive> impleme
                 debutRupture = d1[1];
                 finRupture = d2[0];
 
+            }
+            else{
+                logger.debug("PAS DE RUPTURE");
             }
 
             alivePOJO.write(file);
@@ -146,15 +151,15 @@ public class TacheStillAlive extends AbstrTacheSchedule<TacheStillAlive> impleme
         this.finRupture = finRupture;
     }
 
-    @Override
-    public void fermerLesIncidentOuvert() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public AbstrIncident getIncidenOuvert() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+//    @Override
+//    public void fermerLesIncidentOuvert() {
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//    }
+//
+//    @Override
+//    public AbstrIncident getIncidenOuvert() {
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//    }
 
     @Override
     public Class getTypeIncident() {

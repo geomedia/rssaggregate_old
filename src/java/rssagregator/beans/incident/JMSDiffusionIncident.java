@@ -4,31 +4,39 @@
  */
 package rssagregator.beans.incident;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import rssagregator.services.ServiceSynchro;
+import rssagregator.services.TacheDiffuserMessageJMS;
 
 /**
+ * <p>Incident générée par le service
  *
+ * @{@link ServiceSynchro} lorsque la tache {@link TacheDiffuserMessageJMS}</p>
  * @author clem
  */
 @Entity(name = "i_jmsdiffusionincident")
-public class JMSDiffusionIncident extends SynchroIncident{
-    
-    /***
-     * L'action qui n' pu être diffusée
+public class JMSDiffusionIncident extends SynchroIncident {
+
+    /**
+     * *
+     * Le corps du message JMS qui n'a pu être envoyé. On y trouve du contenu XML
      */
-    protected String action;
-    
-    /***
-     * Le corps du message JMS qui n'a pu être envoyé
-     */
+    @Column(name = "msgSerialise", columnDefinition = "text")
     protected String msgSerialise;
+    /**
+     * *
+     * L'actionDiffusion qui n'a pu être diffusée.
+     */
+    @Column(name = "actionDiffusion", length = 10)
+    protected String actionDiffusion;
 
     public String getAction() {
-        return action;
+        return actionDiffusion;
     }
 
     public void setAction(String action) {
-        this.action = action;
+        this.actionDiffusion = action;
     }
 
     public String getMsgSerialise() {
@@ -38,6 +46,4 @@ public class JMSDiffusionIncident extends SynchroIncident{
     public void setMsgSerialise(String msgSerialise) {
         this.msgSerialise = msgSerialise;
     }
-    
-    
 }

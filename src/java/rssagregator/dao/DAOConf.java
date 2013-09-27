@@ -14,23 +14,43 @@ import rssagregator.beans.UserAccount;
 import rssagregator.utils.PropertyLoader;
 
 /**
+ * La DAO permettant l'intéraction entre un bean de type {@link Conf}. Contrairement aux autres beans, la {@link Conf}
+ * n'est pas persisté dans la base de données SQL mais dans un fichier : conf.properties
  *
  * @author clem
  */
 public class DAOConf extends AbstrDao {
-org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DaoFlux.class);
+
+    org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DAOConf.class);
+    /**
+     * *
+     * La conf est un objet singleton car l'aggrégateur n'en possède qu'un : la conf courante. Cette variable permet de
+     * concerver l'instance du singleton.
+     */
     private Conf confCourante;
 
-    public DAOConf(DAOFactory dAOFactory) {
+    protected DAOConf(DAOFactory dAOFactory) {
         em = dAOFactory.getEntityManager();
         this.dAOFactory = dAOFactory;
         this.classAssocie = Conf.class;
     }
 
+    /**
+     * *
+     * Permet de récupérer la confcourante, c'est à dire, celle chargé au démarrage de l'application
+     *
+     * @return
+     */
     public Conf getConfCourante() {
         return confCourante;
     }
 
+    /**
+     * *
+     * Définition de la conf courante.
+     *
+     * @param confCourante
+     */
     public void setConfCourante(Conf confCourante) {
         this.confCourante = confCourante;
     }
@@ -45,7 +65,8 @@ org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DaoFlux.class
 //    }
     /**
      * *
-     * Charge la configuration du serveur à partir du fichier conf.properties
+     * Charge la configuration du serveur à partir du fichier conf.properties. L'objet conf instancié est placée dans la
+     * variable confCourante.
      *
      * @throws IOException
      * @throws Exception
@@ -65,13 +86,10 @@ org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DaoFlux.class
         } else {
             throw new Exception("Impossible de lire la valeur de active");
         }
-        
-        
+
         //Chargement du varpath (Ou sont normalement les fichier log et properties)
         String varpath = PropertyLoader.loadProperti("serv.properties", "varpath");
         conf.setVarpath(varpath);
-        
-        
 
         //Chargement du nom du serveur
         String servname = prop.getProperty("servname");
@@ -80,16 +98,6 @@ org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DaoFlux.class
         //Chargement du jmsprovider
         String jmsprovider = prop.getProperty("jmsprovider");
         conf.setJmsprovider(jmsprovider);
-
-
-        //chargement du login d'administration
-        String login = prop.getProperty("login");
-        conf.setLogin(login);
-
-
-        // chargement du pass
-        String pass = prop.getProperty("pass");
-        conf.setPass(pass);
 
 
         // Chargement du statut (master ou slave)
@@ -102,36 +110,21 @@ org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DaoFlux.class
             throw new Exception("Impossible de charger la valeur master dans le fichier properties");
         }
 
-
         // Chargement de la liste des serveur esclave si le serveur est maitre
         if (conf.getMaster()) {
-            String slaveserver = prop.getProperty("slaveserver"); //PropertyLoader.loadProperti("conf.properties", "slaveserver");
-            String[] slavetab = slaveserver.split("; ");
-            for (int i = 0; i < slavetab.length; i++) {
-                String string = slavetab[i];
-                String split[] = string.split(" ");
-                ServeurSlave serveurSlave = new ServeurSlave();
-                serveurSlave.setHost(split[0]);
-                serveurSlave.setLogin(split[1]);
-                serveurSlave.setPass(split[2]);
-                serveurSlave.setUrl(split[3]);
-                conf.getServeurSlave().add(serveurSlave);
-            }
-
-            // Chargement du jour de synchronisation
-            String jourSync = prop.getProperty("jourSync");//PropertyLoader.loadProperti("conf.properties", "jourSync");
-            conf.setJourSync(jourSync);
-            System.out.println("JOUR SYNC : " + jourSync);
-
-            //Chargement de l'heure de synchronisation
-            String heureSync = prop.getProperty("heureSync");// PropertyLoader.loadProperti("conf.properties", "heureSync");
-            try {
-                conf.setHeureSync(new Integer(heureSync));
-                System.out.println("HEURE SYNC CHARGE : " + heureSync);
-
-            } catch (Exception e) {
-                throw new Exception("Impossible de charger la valeur heure sync dans le fichier properties");
-            }
+            // ----> Les serveur Slave sont retournés dans la base de données
+//            String slaveserver = prop.getProperty("slaveserver"); //PropertyLoader.loadProperti("conf.properties", "slaveserver");
+//            String[] slavetab = slaveserver.split("; ");
+//            for (int i = 0; i < slavetab.length; i++) {
+//                String string = slavetab[i];
+//                String split[] = string.split(" ");
+//                ServeurSlave serveurSlave = new ServeurSlave();
+//                serveurSlave.setServHost(split[0]);
+//                serveurSlave.setLogin(split[1]);
+//                serveurSlave.setPass(split[2]);
+//                serveurSlave.setUrl(split[3]);
+//                conf.getServeurSlave().add(serveurSlave);
+//            }
 
         } else { // Si c'est un serveur esclave
             String purgeDuration = prop.getProperty("purgeDuration");
@@ -147,15 +140,6 @@ org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DaoFlux.class
             conf.setHostMaster(hostMaster);
         }
 
-        //-----Chargement du nombre de Thread actives sur le serveur
-        String nbThreadRecup = prop.getProperty("nbThreadRecup");
-        try {
-            Integer nbThreadInteger = new Integer(nbThreadRecup);
-            conf.setNbThreadRecup(nbThreadInteger);
-        } catch (Exception e) {
-            throw new Exception("impossible de charger le nombre de thread dans le fichier properties");
-        }
-
         //----------Récupération de la durée avant purge
         String s = prop.getProperty("purgeDuration");
         try {
@@ -168,14 +152,12 @@ org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DaoFlux.class
         //--------------Chargement du host maitre
         s = prop.getProperty("hostMaster");
         conf.setHostMaster(s);
-        
-        
+
+
         //-----------Chargement de l'adresse http du server
         s = prop.getProperty("servurl");
         conf.setServurl(s);
-        
-      
-       
+
         this.confCourante = conf;
     }
 
@@ -196,11 +178,10 @@ org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DaoFlux.class
 //            Logger.getLogger(DAOConf.class.getName()).log(Level.SEVERE, null, ex);
 //        }
 //    }
-
     /**
      * *
-     * Charge la config courante depuis la BDD. Cette méthode doit être lancée
-     * au démarrage de l'application (servlet start)
+     * Charge la config courante depuis la BDD. Cette méthode doit être lancée au démarrage de l'application (servlet
+     * start)
      */
 //    public void chargerDepuisBd() {
 //
@@ -225,7 +206,7 @@ org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DaoFlux.class
 //    }
     /**
      * *
-     * Enregistre la conf dans le fichier properties du serveur
+     * Enregistre la conf dans le fichier properties du serveur.
      *
      * @param conf
      * @throws Exception
@@ -236,22 +217,11 @@ org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DaoFlux.class
         String propfile = PropertyLoader.loadProperti("serv.properties", "conf");
 //        Properties prop = PropertyLoader.loadFromFile(propfile);
         Properties prop = new Properties();
-        
+
         //-----------------NOM DU SERVER
-        if(conf.getServname()!=null && !conf.getServname().isEmpty()){
+        if (conf.getServname() != null && !conf.getServname().isEmpty()) {
             prop.setProperty("servname", conf.getServname());
         }
-        
-        //---------------Login
-        if(conf.getLogin()!=null && !conf.getLogin().isEmpty()){
-            prop.setProperty("login", conf.getLogin());
-        }
-        
-        //----------------Mot de passe 
-        if(conf.getPass() != null && !conf.getPass().isEmpty()){
-            prop.setProperty("pass", conf.getPass());
-        }
-
 
         //--------------- Enregistrement du statut actif//innactif
         if (conf.getActive()) {
@@ -259,11 +229,6 @@ org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DaoFlux.class
         } else {
             prop.setProperty("active", "0");
         }
-
-        //--------------Nombre de Thread pour la récup des flux
-        prop.setProperty("nbThreadRecup", conf.getNbThreadRecup().toString());
-
-
 
         //-------------JMX Provider
         prop.setProperty("jmsprovider", conf.getJmsprovider());
@@ -277,57 +242,56 @@ org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DaoFlux.class
 
         //------------------Serveur slave
         int i;
-        String chaine = "";
-        for (i = 0; i < conf.getServeurSlave().size(); i++) {
-            ServeurSlave slave = conf.getServeurSlave().get(i);
-            // On construit la chaine de caractères dans le fichier host;
-            chaine += slave.getHost() + " " + slave.getLogin() + " " + slave.getPass() + " " + slave.getUrl() + ";";
-        }
-        if (chaine.length() > 0) {
-            chaine = chaine.substring(0, chaine.length() - 1);
-        }
-
-        prop.setProperty("slaveserver", chaine);
-
+        String chaine = ""; // --------> LES SERVEUR SLAVE SONT RETOURNE DANS LA BASE DE DONNÉES
+//        for (i = 0; i < conf.getServeurSlave().size(); i++) {
+//            ServeurSlave slave = conf.getServeurSlave().get(i);
+//            // On construit la chaine de caractères dans le fichier host;
+//            chaine += slave.getServHost() + " " + slave.getLogin() + " " + slave.getPass() + " " + slave.getUrl() + ";";
+//        }
+//        
+//        
+//        if (chaine.length() > 0) {
+//            chaine = chaine.substring(0, chaine.length() - 1);
+//        }
+//
+//        prop.setProperty("slaveserver", chaine);
 
         //-------------Durée de purge
         if (conf.getPurgeDuration() != null) {
             prop.setProperty("purgeDuration", conf.getPurgeDuration().toString());
         }
 
-
         //-------------------Host du serveur maitre
         if (conf.getHostMaster() != null) {
             prop.setProperty("hostMaster", conf.getHostMaster());
         }
 
-        //---------------JOUR de synchronisation
-        if (conf.getJourSync() != null) {
-            prop.setProperty("jourSync", conf.getJourSync());
-        }
-
-        //----------------HEURE de synchronisation
-        if (conf.getHeureSync() != null) {
-            prop.setProperty("heureSync", conf.getHeureSync().toString());
-        }
-        
         //-------------adresse HTTP du Serveur
-        if(conf.getServurl()!= null){
+        if (conf.getServurl() != null) {
             prop.setProperty("servurl", conf.getServurl());
         }
- 
 
 //        PropertyLoader.save(prop, propfile, "les commentaire ont disparu reportez vous à la doc du projet dsl !");
         PropertyLoader.saveToFile(prop, propfile, "les commentaire ont disparu reportez vous à la doc du projet dsl !");
-        
+
 //        PropertyLoader.save(prop, "conf.properties", "LALALA commentaire");
-        System.out.println("end");
     }
 
+    /**
+     * *
+     * Le compte root est définit dans le fichier conf.properties. Au démarrage de l'application, cette méthode est
+     * déclancer pour vérifier qu'un compte root comprenant les paramettres présent dans le fichier conf.properties
+     * existe bien dans la base de données. Si il n'existe pas, ce compte root est crée avec les paramètre récupéré dans
+     * le fichier conf.properties. SI les paramettres trouvé dans la base de données diffère de ceux trouvé dans le
+     * fichier il sont modifié en prennant pour base ce qui est inscrit dans le fichier.
+     *
+     * @throws IOException : Si on ne trouve pas les fichier properties nécessaire, cette exception est levée.
+     * @throws Exception
+     */
     public void verifRootAccount() throws IOException, Exception {
         String propfile = PropertyLoader.loadProperti("serv.properties", "conf");
-                Properties prop = PropertyLoader.loadFromFile(propfile);
-          //--------------Chargement de l'utilisateur root par default
+        Properties prop = PropertyLoader.loadFromFile(propfile);
+        //--------------Chargement de l'utilisateur root par default
         String m = prop.getProperty("rootuser");
         String p = prop.getProperty("rootpass");
         UserAccount u = new UserAccount();
@@ -336,19 +300,19 @@ org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DaoFlux.class
         u.setUsername("root");
         u.setAdminstatut(Boolean.TRUE);
         u.setAdminMail(Boolean.FALSE);
-        
-        
+        u.setRootAccount(Boolean.TRUE);
+
+
         // On cherche si cet utilisateur est bien dans la base de données
         DAOUser daou = DAOFactory.getInstance().getDAOUser();
         UserAccount uBdd = daou.findPrMail(m);
-        
+
         // Si, on n'a pas trouvé dans la base de données
-        if(uBdd == null){
+        if (uBdd == null) {
             logger.debug("Création du compte root dans la BDD");
             daou.creer(u);
-        }
-        //Si les deux ne sont pas egaux en conten u
-        else if(!uBdd.equals(u)){
+        } //Si les deux ne sont pas egaux en conten u
+        else if (!uBdd.equals(u)) {
             logger.debug("Mise à jour du compte root dans la BDD");
             uBdd.setMail(m);
             uBdd.setPass(p);
@@ -357,16 +321,20 @@ org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DaoFlux.class
         System.out.println("================================================");
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
+    /***
+     * Un main de test
+     * @param args 
+     */
     public static void main(String[] args) {
-        DAOConf d= DAOFactory.getInstance().getDAOConf();
-    try {
-        d.verifRootAccount();
-    } catch (IOException ex) {
-        Logger.getLogger(DAOConf.class.getName()).log(Level.SEVERE, null, ex);
-    } catch (Exception ex) {
-        Logger.getLogger(DAOConf.class.getName()).log(Level.SEVERE, null, ex);
-    }
-    
+        DAOConf d = DAOFactory.getInstance().getDAOConf();
+        try {
+            d.verifRootAccount();
+        } catch (IOException ex) {
+            Logger.getLogger(DAOConf.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(DAOConf.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 }

@@ -38,6 +38,7 @@ public class DAOIncident<T> extends AbstrDao {
         this.dAOFactory = dAOFactory;
         em = dAOFactory.getEntityManager();
         nullLastNotification = false;
+        criteriaNotificationImperative = false;
         clos = false;
     }
 
@@ -62,19 +63,22 @@ public class DAOIncident<T> extends AbstrDao {
         Root<T> root = cq.from(T);
         List<Predicate> listWhere = new ArrayList<Predicate>();
 
-
-        if (clos) {
-            listWhere.add(cb.isNotNull(root.get("dateFin")));
-        } else {
-            listWhere.add(cb.isNull(root.get("dateFin")));
+        if (clos != null) {
+            if (clos) {
+                listWhere.add(cb.isNotNull(root.get("dateFin")));
+            } else {
+                listWhere.add(cb.isNull(root.get("dateFin")));
+            }
         }
 
-        if (nullLastNotification) {
+
+        if (nullLastNotification != null && nullLastNotification) {
             listWhere.add(cb.isNull(root.get("lastNotification")));
         }
 
-        if (criteriaNotificationImperative) {
+        if (criteriaNotificationImperative != null && criteriaNotificationImperative) {
             listWhere.add(cb.and(cb.equal(root.get("notificationImperative"), true)));
+            logger.debug("DAO Notification imperative");
 //            listWhere.add(cb.and(cb.equal(root.get("estStable"), true)));
 //            cq.where(cb.equal(root.get("estStable"), true));
         }
@@ -291,7 +295,4 @@ public class DAOIncident<T> extends AbstrDao {
     public void setCriteriaNotificationImperative(Boolean criteriaNotificationImperative) {
         this.criteriaNotificationImperative = criteriaNotificationImperative;
     }
-    
-    
-    
 }

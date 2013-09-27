@@ -3,6 +3,11 @@ package rssagregator.beans;
 import java.util.Date;
 // TODO : La liste des champs n'est pas complete. On a supprimer l'héritage entre Item et ItemRaffine
 
+/***
+ * <strong>N'EST PLUS UTILISÉ</strong> Le raffinage des items a été sorti de l'aggrégateur.
+ * @author clem
+ */
+@Deprecated
 public class ItemRafine {
 /***
  * Titre de l'item. Element persisté dans la base de données

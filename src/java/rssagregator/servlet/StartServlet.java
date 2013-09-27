@@ -25,7 +25,7 @@ import rssagregator.services.ServiceSynchro;
 import rssagregator.utils.ServiceXMLTool;
 
 /**
- *
+ * Servlet utilisé au démarrage de l'application pour lancer les service. Elle est aussi chargé de les clore à la fermeture de l'application.
  * @author clem
  */
 public class StartServlet implements ServletContextListener {

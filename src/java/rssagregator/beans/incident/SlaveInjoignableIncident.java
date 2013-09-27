@@ -5,11 +5,10 @@
 package rssagregator.beans.incident;
 
 import javax.persistence.Entity;
-import javax.persistence.OneToOne;
 import rssagregator.beans.ServeurSlave;
 
 /**
- *  Lorsqu'on ne parvient pas à récupérer les items d'un serveur esclaves (tache hebdomadaire), un élément de ce type est crée.
+ *  Lorsqu'on ne parvient pas à récupérer les items d'un serveur esclaves (tache hebdomadaire), un élément de ce type est crée. 
  * @author clem
  */
 @Entity(name = "i_slaveinjoignableincident")

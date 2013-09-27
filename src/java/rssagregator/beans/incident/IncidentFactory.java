@@ -7,13 +7,11 @@ package rssagregator.beans.incident;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import rssagregator.beans.exception.UnIncidableException;
 import rssagregator.services.AbstrTacheSchedule;
-import rssagregator.services.ServiceSynchro;
-import rssagregator.services.TacheSynchroRecupItem;
 
 /**
- *
- *
+ *  Permet de créer un incident
  * @author clem
  */
 public class IncidentFactory<T extends AbstrIncident> {
@@ -25,8 +23,8 @@ public class IncidentFactory<T extends AbstrIncident> {
      * message et log sont complétés.
      *
      * @param typeRetourne : la class de l'incident
-     * @param message
-     * @param tw
+     * @param message : le message à destination des administrateurs
+     * @param tw : l'exeption levée par la tâche
      * @return
      */
     public T getIncident(Class<T> typeRetourne, String message, Throwable tw) {
@@ -62,8 +60,7 @@ public class IncidentFactory<T extends AbstrIncident> {
      * @param tache : 
      * @param message
      */
-    public T createIncidentFromTask(AbstrTacheSchedule tache, String message) throws InstantiationException, IllegalAccessException {
-
+    public T createIncidentFromTask(AbstrTacheSchedule tache, String message) throws InstantiationException, IllegalAccessException, UnIncidableException {
         AbstrIncident incid = null;
         
         // On vérifie que la tache est incidable;
@@ -77,17 +74,11 @@ public class IncidentFactory<T extends AbstrIncident> {
             incid = (AbstrIncident) o;
             incid.setMessageEreur(message);
             incid.setNombreTentativeEnEchec(1);
+            incid.setDateDebut(new Date());
             return (T) o;
-            
         }
-//        if (tache.getClass().equals(TacheSynchroRecupItem.class)) {
-//            incid = new SynroRecupItemIncident();
-//        }
-//
-//        if (incid != null) {
-//            return (T) incid;
-//        }
-
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        else{
+            throw new UnIncidableException("La tache envoyée en paramettre n'implémente pas l'interface incidable.");
+        }
     }
 }

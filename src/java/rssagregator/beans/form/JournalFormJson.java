@@ -8,9 +8,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- *
+ *  CETTE CLASS N'EST PLUS UTILISÉE.
  * @author clem
  */
+@Deprecated
 public class JournalFormJson {
     protected Boolean valide; // La statut de la validation
      protected String resultat = ""; // Permet de stocker un message générale sur le formulaire ("toute les modification on été effectuées ; erreur lors de la validation du formulaire ..."
@@ -21,16 +22,11 @@ public class JournalFormJson {
     valide = false;
     }
 
-    
-    
 
 public Object bind(String json, Object bean){
     System.out.println("Le json : " + json);
         return null;
-    
 }
-    
-    
 
     public void check_nom(String nom) throws Exception {
         if (nom == null || nom.length() == 0) {
@@ -67,9 +63,4 @@ public Object bind(String json, Object bean){
     public void setErreurs(Map<String, String[]> erreurs) {
         this.erreurs = erreurs;
     }
-    
-    
-    
-    
-    
 }

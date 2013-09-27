@@ -16,6 +16,7 @@ import rssagregator.beans.incident.JMSPerteConnectionIncident;
  * @author clem
  */
 public class TacheLancerConnectionJMS extends AbstrTacheSchedule<TacheLancerConnectionJMS> implements Incidable{
+protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheLancerConnectionJMS.class);
 
     /**
      * *
@@ -49,30 +50,29 @@ public class TacheLancerConnectionJMS extends AbstrTacheSchedule<TacheLancerConn
         this.exeption = null;
         ServiceSynchro serviceJMS = ServiceSynchro.getInstance();
         try {
-            
+            logger.debug("Vérification connectionJMS");
             if (!serviceJMS.statutConnection) {
                 serviceJMS.openConnection();
             }
-            return this;
         } catch (Exception e) {
             this.exeption = e;
-            return this;
         } finally {
             // A la fin de son execution, la tâche se notifie auprès de son ou ses observer
             this.setChanged();
             this.notifyObservers();
+            return this;
         }
     }
 
-    @Override
-    public void fermerLesIncidentOuvert() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public AbstrIncident getIncidenOuvert() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+//    @Override
+//    public void fermerLesIncidentOuvert() {
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//    }
+//
+//    @Override
+//    public AbstrIncident getIncidenOuvert() {
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//    }
 
     @Override
     public Class getTypeIncident() {

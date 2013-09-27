@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import rssagregator.beans.Flux;
 import rssagregator.beans.FluxType;
 import rssagregator.beans.Journal;
-import rssagregator.beans.form.DAOGenerique;
+import rssagregator.dao.DAOGenerique;
 import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.services.ServiceCollecteur;
 import rssagregator.services.ServiceGestionIncident;
@@ -67,6 +67,9 @@ public class FluxSrvl extends HttpServlet {
         Integer firstResult = null;
         Integer itPrPage = null;
         redirmap = null;
+        
+        SecurityManager manager = System.getSecurityManager();
+        System.out.println("SECUMANAGER : " + manager);
 
         // Un simple attribut pour que le menu brille sur la navigation courante
         request.setAttribute("navmenu", "flux");

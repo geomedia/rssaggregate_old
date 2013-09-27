@@ -11,49 +11,52 @@ import javax.servlet.http.HttpServletRequest;
 import rssagregator.beans.FluxType;
 
 /**
+ * Objet formulaire permettant de valider les données saisies par l'utilisateur
+ * pour le beans <strong>FluxType</strong>
  *
  * @author clem
  */
 public class FluxTypeForm extends AbstrForm {
 
+    //---------------------------------------
+    //Les variables devant être récupérée dans la requête
     private String denomination;
     private String description;
+    //---------------------------------------
 
     @Override
     public Boolean validate(HttpServletRequest request) {
-
         String s;
         erreurs = new HashMap<String, String[]>();
-
+        //-----------------------------------------------------------
+        //-----------> DENOMINATION 
         s = request.getParameter("denomination");
         if (s != null) {
             denomination = s;
         }
 
-
+        //-----------> DESCRIPTION 
         s = request.getParameter("description");
         if (s != null) {
             description = s;
         }
 
+        //-----------------------------------------------------------
         if (erreurs.isEmpty()) {
             this.valide = true;
         } else {
             this.valide = false;
         }
-
         return this.valide;
-
     }
 
     @Override
     public Object bind(HttpServletRequest request, Object objEntre, Class type) {
+
         if (this.valide) {
-            System.out.println("----> VaLiDe");
-//            FluxType fluxType = new FluxType();
-            
             FluxType fluxType = (FluxType) objEntre;
-            if(fluxType==null){
+            // Instanciation du type de flux si l'objet envoyé est null
+            if (fluxType == null) {
                 try {
                     fluxType = (FluxType) type.newInstance();
                 } catch (InstantiationException ex) {
@@ -62,8 +65,7 @@ public class FluxTypeForm extends AbstrForm {
                     Logger.getLogger(FluxTypeForm.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-            
-            
+            // Bind des valeurs
             fluxType.setDenomination(denomination);
             fluxType.setDescription(description);
             return fluxType;

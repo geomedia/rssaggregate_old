@@ -9,14 +9,43 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 /**
+ * Tout les formulaires doivent implémenter cette classe abstraite. Ces objets
+ * formulaires permettent de valider les données envoyées par les utilisateurs
+ * et ensuite de nourrir les java beans. Les servlets doivent ainsi utiliser les
+ * formulaires en commencant par valider la donnée. les données envoyée par
+ * l'utilisateur sont alors vérifiée et stockée dans l'objet form. Le
+ * déclanchement de la méthode bind permet d'inscrire les données stockées dans
+ * le formulaire dans le bean envoyé en argument (uniquement si le formulaire
+ * est valide).
+ * <p></p>
  *
  * @author clem
  */
 public abstract class AbstrForm {
 
+    /**
+     * *
+     * Ce hash map d'erreur permet de stocker des messages d'erreurs lorsque
+     * l'utilisateur cherche à inscrire une donnée invalide.
+     */
     protected Map<String, String[]> erreurs = new HashMap<String, String[]>();
+    /**
+     * *
+     * Un message générique pour informer l'utilisateur à la fin du traitement
+     * exemple : "Erreur de saisie" ou "Donnée valider"...
+     */
     protected String resultat = "";
+    /**
+     * *
+     * Permet de stocker le résultat de la validation. True si les données
+     * envoyées par l'utilisateur sont conformes sinon false...
+     */
     protected Boolean valide = false;
+    /**
+     * *
+     * Préciser le type d'action (add ou mod). La gestion du bind peut en effet
+     * être différencier pour certain traitement.
+     */
     protected String action;
 
     /**
@@ -28,12 +57,15 @@ public abstract class AbstrForm {
     /**
      * Rempli l'objet envoyé avec les donnée du formulaire envoyés
      *
-     * @param request
-     * @return
+     * @param request la requete ou l'on va chercher les paramettres envoyés en
+     * POST par les utilisateurs
+     * @return Le bean complété. Null si on a cherché à binder un formulaire non
+     * valide
      */
-    public abstract Object bind(HttpServletRequest request, Object objEntre, Class type); 
+    public abstract Object bind(HttpServletRequest request, Object objEntre, Class type);
+    //Pendant longtemps, nous avons utilisé une méthode générique reposant sur la réflexivité pour binder et valider les formulaire. Cette démarche s'est avéré être source de bug. Chaque formulaire doit maintenant redéclarer la méthode qui est devenue abstraite
 //    {
-        // SI flux est null (cas d'un ajout, on crée un nouveau flux
+    // SI flux est null (cas d'un ajout, on crée un nouveau flux
 //
 //        if (objEntre == null) {
 //
@@ -82,34 +114,15 @@ public abstract class AbstrForm {
     /**
      * *
      * Permet de valider le formulaire. Cette méthode est à redéclarer dans
-     * chacun des formulaire. Pour chacun les paramettres de la requête doivent
-     * être récupéré et vérifié. Si il sont bon le formulaire les garde dans des
-     * variable qui lui sont propre. Elles seront réutilisé lors pour peupler le
+     * chacun des formulaires. Chacun les paramettres de la requête sont
+     * récupérés et vérifiés. Si ils sont bon le formulaire les garde dans des
+     * variable qui lui sont propre. Elles seront réutilisées pour peupler le
      * bean lors de l'usage de la méthode bind. Si il y a erreur la méthode
      * validate doit ajouter un enregitrement à la map erreur
      *
      * @return
      */
     public abstract Boolean validate(HttpServletRequest request);
-
-    /**
-     * *
-     * N'est surement plus utilisé
-     *
-     * @param request
-     * @param nomChamp
-     * @return
-     * @deprecated
-     */
-    @Deprecated
-    private static String getValeurChamp(HttpServletRequest request, String nomChamp) {
-        String valeur = request.getParameter(nomChamp);
-        if (valeur == null || valeur.trim().length() == 0) {
-            return null;
-        } else {
-            return valeur.trim();
-        }
-    }
 
     public Map<String, String[]> getErreurs() {
         return erreurs;
@@ -135,31 +148,7 @@ public abstract class AbstrForm {
         this.valide = valide;
     }
 
-    //    public AbstrDao getDao() {
-    //        return dao;
-    //    }
-    //
-    //    public void setDao(AbstrDao dao) {
-    //        this.dao = dao;
-    //    }
-    /**
-     * *
-     * Permet de préciser au formulaire d'un s'agit d'une création d'entité. Il
-     * devra ainsi instancier un nouvel objet du type envoyé et parfois
-     * initialiser des varibales complémentaire (exemple, date de création)
-     *
-     * @return
-     */
-//    public Boolean getAddAction() {
-//        return addAction;
-//    }
-//
-//    public void setAddAction(Boolean addAction) {
-//        this.addAction = addAction;
-//    }
-    public AbstrForm(/*AbstrDao dao*/) {
-//        this.dao = dao;
-//        addAction = false;
+    public AbstrForm() {
     }
 
     /**

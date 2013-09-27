@@ -5,7 +5,6 @@
 package rssagregator.beans;
 
 import rssagregator.dao.DAOFactory;
-import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -17,15 +16,19 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
-import javax.persistence.Persistence;
 import javax.servlet.http.HttpServletRequest;
-import org.apache.catalina.tribes.util.Arrays;
 import rssagregator.beans.form.AbstrForm;
 
 /**
+ * <p>CETTE CLASSE N'EST PLUS UTILISÉE</p>
+ * <p>Auparavant la méthode populate permettait par réflexivité de nourrir les
+ * beans depuis la requête envoyée par l'utilisateur. Mais cette pratique
+ * générique a vite montré des limites. Le bind des données est maintenant
+ * effectuée avec une pratique plus rustique mais fiable</p>
  *
  * @author clem
  */
+@Deprecated
 public class ClemBeanUtils {
 
     protected static String PERSISTENCE_UNIT_NAME = "RSSAgregatePU2";
@@ -42,6 +45,7 @@ public class ClemBeanUtils {
      * @throws IllegalArgumentException
      * @throws InvocationTargetException
      */
+    @Deprecated
     public static void populate(Object bean, HttpServletRequest request, AbstrForm form) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         System.out.println("EXE");
 
@@ -204,6 +208,7 @@ public class ClemBeanUtils {
 //
 //        return erreurs;
 //    }
+    @Deprecated
     public static void check(AbstrForm objetFormulaire, Object beans) throws SecurityException, NoSuchMethodException {
 //        Map<String, String> erreurs = new HashMap<String, String>();
         // On parcours chaque champs du beans
@@ -247,6 +252,4 @@ public class ClemBeanUtils {
 
 //        return erreurs;
     }
-
-
 }

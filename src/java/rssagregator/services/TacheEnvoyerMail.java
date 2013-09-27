@@ -113,15 +113,15 @@ public class TacheEnvoyerMail extends AbstrTacheSchedule<TacheEnvoyerMail> imple
         this.content = content;
     }
 
-    @Override
-    public void fermerLesIncidentOuvert() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public AbstrIncident getIncidenOuvert() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+//    @Override
+//    public void fermerLesIncidentOuvert() {
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//    }
+//
+//    @Override
+//    public AbstrIncident getIncidenOuvert() {
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//    }
 
     @Override
     public Class getTypeIncident() {

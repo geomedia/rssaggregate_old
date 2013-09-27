@@ -12,10 +12,12 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import org.apache.poi.util.Beta;
 
 /**
- * Un journal : Le monde, le Figaro... Chaque journal est instancier dans un
- * objet. Un journal peut contenir plusieurs flux
+ * Un journal : Le monde, le Figaro... Chaque journal est instancier dans un objet. Un journal peut contenir plusieurs
+ * {@link Flux}. Les journaux sont synchronisé du serveur maitre vers les serveur esclave d'ou l'implémentation de
+ * l'interface {@link BeanSynchronise}
  */
 @Entity
 @Cacheable(value = false)
@@ -25,46 +27,54 @@ public class Journal implements Serializable, BeanSynchronise {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long ID;
     /**
-     * Le nom du journal : Le monde par exemple
+     * Le nom du journal. Par exemple : "Le monde", "Libération"
      */
     @Column(name = "nom", unique = true)
     private String nom;
     /**
-     * Le fuseaeu horraire. Cette information est importante pour effectuer des
-     * calculs de date. Dans la table item, on enregistre la date de reception.
-     * En connaissant le fuseau horraire du journal on peut calculer une
-     * nouvelle date afin d'approcher d'estimer la date d'émission. Cette
-     * information sur la date doit être comparée à la date d'émission trouvé
-     * dans les balises XML
+     * <p><strong>/!\ L'implémentation de cette variable est encore aléatoire.<strong> Elle n'est pour l'instant
+     * qu'informative et aucun calcul de date n'est effectué depuis celle ci.</p>
+     * <p>Le fuseaeu horraire. Cette information est importante pour effectuer des calculs de date. Dans la table item,
+     * on enregistre la date de reception. En connaissant le fuseau horraire du journal on peut calculer une nouvelle
+     * date afin d'approcher d'estimer la date d'émission. Cette information sur la date doit être comparée à la date
+     * d'émission trouvé dans les balises XML.</p>
      */
+    @Beta
     @Column(name = "fuseauHorraire")
     private String fuseauHorraire;
     /**
-     * La langue d'écriture du journal
+     * La langue d'écriture du journal. C'est une chaine de caractère de quatre lettre correspondant aux code iso des
+     * langues.
      */
     @Column(name = "langue", length = 4)
     private String langue;
+    /**
+     * *
+     * Le pays du journal. Ici aussi, on utilise le code iso
+     */
     @Column(name = "pays", length = 60)
     private String pays;
     /**
-     * Un journal possède plusieurs flux.
+     * Un journal possède plusieurs flux. La suppression du journal entraine la suppression des flux par cascade.
      */
     @OneToMany(mappedBy = "journalLie", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE, CascadeType.DETACH})
     private List<Flux> fluxLie;
-    
-    
-    /***
-     * La page d'accueil du journal 
+    /**
+     * La page d'accueil du journal. Cette variable est informative. Exemple http://www.lemonde.fr
      */
     @Column(name = "urlAccueil", length = 2000)
     private String urlAccueil;
-    
-    /***
-     * Il s'agit de la page html permettant de trouver tous les flux RSS. Pour de nombreux journaux, on a une page de ce type. 
+    /**
+     * Il s'agit de la page html permettant de trouver tous les flux RSS. Pour de nombreux journaux, on a une page de ce
+     * type.
      */
     @Column(name = "urlHtmlRecapFlux", length = 2000)
     private String urlHtmlRecapFlux;
-    
+    /**
+     * *
+     * Un champs texte permettant aux administrateurs de saisir des informations sur le journal. Ce champs texte permet
+     * par exemple de donner un historique du journal ou de rendre compte de son point de vue éditoriale
+     */
     @Column(name = "information", columnDefinition = "text")
     private String information;
 
@@ -144,8 +154,6 @@ public class Journal implements Serializable, BeanSynchronise {
     public void setUrlAccueil(String urlAccueil) {
         this.urlAccueil = urlAccueil;
     }
-    
-    
 
 //    @Override
 //    /***
@@ -154,18 +162,32 @@ public class Journal implements Serializable, BeanSynchronise {
 //    public void enregistrerAupresdesService() {
 ////        this.addObserver(ServiceSynchro.getInstance());
 //    }
-
+    /**
+     * *
+     * La redéfinition de cette méthode renvoie toujour true pour un {@link Journal}. Les journaux doivent ainsi
+     * systématiquement être synchronisé du serveur maitre vers les serveur esclaves.
+     *
+     * @return
+     */
     @Override
     public Boolean synchroImperative() {
         return true;
     }
 
+    /**
+     * Renvoie le nom du journal.
+     *
+     * @return Le nom du journal. Si il n'existe pas, une chaine de caractère "journal sans nom" avec l'ID du journal si
+     * elle existe.
+     */
     @Override
     public String toString() {
-return this.nom;
-//        return super.toString(); //To change body of generated methods, choose Tools | Templates.
+        if (this.nom != null && !this.nom.isEmpty()) {
+            return this.nom;
+        } else if (this.ID != null) {
+            return "ID : " + this.ID + "journal sans nom";
+        } else {
+            return "journal sans nom";
+        }
     }
-    
-    
-    
 }

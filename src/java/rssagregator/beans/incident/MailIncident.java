@@ -6,30 +6,29 @@ package rssagregator.beans.incident;
 
 import java.io.Serializable;
 import javax.persistence.Entity;
+import rssagregator.services.ServiceMailNotifier;
+import rssagregator.services.TacheEnvoyerMail;
 
 /**
- * Cette entitée permet de stocker des informations sur les pannes serveur mail. 
+ * <p>Incident généré par le service {@link ServiceMailNotifier}, lorsqu'un mail
+ * n'a pu être envoyé par la tâche {@link TacheEnvoyerMail}</p>
+ * <p>Le corps du message et l'objet sont concervé dans cet incident</p>
+ *
  * @author clem
  */
 @Entity(name = "i_mailincident")
-public class MailIncident extends AbstrIncident implements Serializable{
+public class MailIncident extends AbstrIncident implements Serializable {
 
-    
-    public MailIncident() {
-    }
-    
-    
-    /***
+    /**
+     * *
      * Le corps du message qui n'a pu être envoyé
      */
     protected String Message;
-    /***
+    /**
+     * *
      * L'objet du message qui n'a pu être envoyé
      */
     protected String Objet;
-    
-    
-
 
     //    @OneToOne
     //    private Flux fluxLie;
@@ -45,11 +44,6 @@ public class MailIncident extends AbstrIncident implements Serializable{
     //    public void setFluxLie(Flux fluxLie) {
     //        this.fluxLie = fluxLie;
     //    }
-
-
-
-
-
     @Override
     public int hashCode() {
         int hash = 7;
@@ -65,28 +59,23 @@ public class MailIncident extends AbstrIncident implements Serializable{
             return false;
         }
         final MailIncident other = (MailIncident) obj;
-        
-        if(!super.equals(obj)){
+
+        if (!super.equals(obj)) {
             return false;
         }
         return true;
     }
 
-
-    
-
-
     public static void main(String[] args) {
-        
+
         MailIncident s = new MailIncident();
         MailIncident s2 = new MailIncident();
-        
+
 //        s2.setLogErreur("dd");
-        
-        if(s.equals(s2)){
+
+        if (s.equals(s2)) {
             System.out.println("EQUAL");
-        }
-        else{
+        } else {
             System.out.println("INNEQUAL");
         }
     }
@@ -106,7 +95,15 @@ public class MailIncident extends AbstrIncident implements Serializable{
     public void setObjet(String Objet) {
         this.Objet = Objet;
     }
-    
-    
 
+    /***
+     * Retourne toujours false. Une erreur d'envoie de mail ne doit jamais être envoyé par mail...
+     * @return 
+     */
+    @Override
+    public Boolean doitEtreNotifieParMail() {
+        return false;
+    }
+    
+    
 }

@@ -6,24 +6,21 @@ package rssagregator.beans.incident;
 
 import java.io.Serializable;
 import javax.persistence.Entity;
-import javax.persistence.MappedSuperclass;
+import rssagregator.services.ServiceSynchro;
 
 /**
- * Cette entitée permet de stocker les erreurs de synchonisation entre le serveur maitre et les serveur esclaves. Ce type d'entitée possède les sous entitées suivante : <ul>
- * <li>JMSDiffusionIncident</li>
- * <li>JMSPerteConnectionIncident</li>
+ * <p>Tous les incidents des tâches gérée par le service {@link ServiceSynchro}
+ * héritent de cette classe à savoir : <ul>
+ * <li>{@link JMSDiffusionIncident }</li>
+ * <li>{@link JMSPerteConnectionIncident}</li>
  * </ul>
- * .... Serveur slave injoignable - pas de temporalité
- * .... Perte connection JMS - temporalité
- * .... Impossible d'envoyer un message JMS - pas de temporalité
+ * </p>
+ *
  * @author clem
  */
 //@Entity(name = "synchroincident")
 @Entity(name = "i_synchro")
 //@MappedSuperclass
 //@Inheritance(strategy = InheritanceType.JOINED)
-public class SynchroIncident extends AbstrIncident implements Serializable{
-
-    public SynchroIncident() {
-    }
+public class SynchroIncident extends AbstrIncident implements Serializable {
 }

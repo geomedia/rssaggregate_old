@@ -23,6 +23,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.xml.ws.http.HTTPException;
+import org.apache.poi.util.Beta;
 import rssagregator.beans.BeanSynchronise;
 import rssagregator.beans.DebugRecapLeveeFlux;
 import rssagregator.beans.Flux;
@@ -68,10 +69,12 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
     private String description;
     /**
      * *
+     * <p>Cette variable n'est pas encore correctement implémenté et va peut être être abandonnée.</p>
      * Parmis toute les entités, une est considérée comme le comportement de
      * collecte par defaut, ce boolean permet de déterminer ce comportement par
      * défaut.
      */
+    @Beta
     @Column(name = "defaut")
     protected Boolean defaut;
     /**

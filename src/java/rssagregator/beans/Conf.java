@@ -6,9 +6,16 @@ import java.util.List;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.Duration;
-import rssagregator.services.ServiceCollecteur;
 
-
+/***
+ * Bean permettant de stoquer la configuration du serveur. La configuration n'est pas faite dans la base de donnée. Les données proviennent des sources suivante :<ul>
+ * <li>conf.properties : fichier de config </li>
+ * <li>Base de donnée : les entitées de type {@link ServeurSlave} sont dans la base de données</li>
+ * 
+ * </ul>
+ * 
+ * @author clem
+ */
 public class Conf implements Serializable {
 
     public Conf() {
@@ -20,7 +27,7 @@ public class Conf implements Serializable {
 //
 //    @Id
 //    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long ID;
+//    private Long ID;
     
     /***
      * Le nom du serveur. Permet la configuration dans le serveur JMS
@@ -28,14 +35,11 @@ public class Conf implements Serializable {
     String servname;
     
     /***
-     * L'host du provider JMS pour la synchronisation
+     * L'host du provider JMS pour la synchronisation.
      */
     String jmsprovider;
     
-    /**
-     * Nombre de thread de récupération
-     */
-    private Integer nbThreadRecup;
+
     /**
      * Delai au bout duquel les données doivent être stoquées supprimée de la
      * base de données. Si 0 pas de durée. Ce int est un nombre de jours
@@ -61,16 +65,6 @@ public class Conf implements Serializable {
     private List<ServeurSlave> serveurSlave;
 
     /***
-     * Le jour pour lequel la synchro doit être effectuée. Cette variable prend les valeures; lu, ma, me, je,ve, sa ,di
-     */
-    private String jourSync;
-    
-    /***
-     * L'heure de la synchro . de 00 à 23
-     */
-    private Integer heureSync;
-    
-    /***
      * L'adresse http du server exemple http://ip/RSSAgregade
      */
     private String servurl;
@@ -79,27 +73,21 @@ public class Conf implements Serializable {
     /***
      * Spécifie si le serveur est actif ou non, c'est à dire, si il collecte ou non l'information. 
      */
-//    @Column(name = "active")
     private Boolean active;
-    
-    private String login;
-    private String pass;
     
     
     /***
-     * Il s'agit de la path contenant les fichiers de conf du serveur
+     * Il s'agit de la path contenant les fichiers de conf du serveur. Exemple /var/lib/RSSAgregate
      */
     private String varpath;
 
+    /***
+     * Pour vérifier la cohérence de la configuration
+     * @deprecated
+     */
+    @Deprecated
     public void verifConf() {
-    }
-
-    public Integer getNbThreadRecup() {
-        return nbThreadRecup;
-    }
-
-    public void setNbThreadRecup(Integer nbThreadRecup) {
-        this.nbThreadRecup = nbThreadRecup;
+        throw new UnsupportedOperationException("Non Implémenté");
     }
 
     public Integer getPurgeDuration() {
@@ -109,8 +97,6 @@ public class Conf implements Serializable {
     public void setPurgeDuration(Integer purgeDuration) {
         this.purgeDuration = purgeDuration;
     }
-
-
 
     public String getHostMaster() {
         return hostMaster;
@@ -128,13 +114,13 @@ public class Conf implements Serializable {
         this.serveurSlave = ServeurSlave;
     }
 
-    public Long getID() {
-        return ID;
-    }
-
-    public void setID(Long ID) {
-        this.ID = ID;
-    }
+//    public Long getID() {
+//        return ID;
+//    }
+//
+//    public void setID(Long ID) {
+//        this.ID = ID;
+//    }
 
     public Boolean getActive() {
         return active;
@@ -168,43 +154,6 @@ public class Conf implements Serializable {
         this.master = master;
     }
 
-    public String getLogin() {
-        return login;
-    }
-
-    public void setLogin(String login) {
-        this.login = login;
-    }
-
-    public String getPass() {
-        return pass;
-    }
-
-    public void setPass(String pass) {
-        this.pass = pass;
-    }
-
-//    public void forceNotifyObserver() {
-//        this.setChanged();
-//        this.notifyObservers();
-//    }
-
-    public String getJourSync() {
-        return jourSync;
-    }
-
-    public void setJourSync(String jourSync) {
-        this.jourSync = jourSync;
-    }
-
-    public Integer getHeureSync() {
-        return heureSync;
-    }
-
-    public void setHeureSync(Integer heureSync) {
-        this.heureSync = heureSync;
-    }
-
     public String getServurl() {
         return servurl;
     }
@@ -222,19 +171,17 @@ public class Conf implements Serializable {
     }
     
     
-    
-    
-    
     /***
+     * <p><strong>N'est plus utilisé. C'est maintenant chaque tâche qui contient les information sur sa schedulation</strong></p>
      * Retourne le nombre de seconde avant la prochaine synchronisation du serveur maitre 
      * @return 
      */
+    @Deprecated
     public Long getDurationSync(){
         DateTime dtCurrent = new DateTime();
         DateTime next = dtCurrent.withDayOfWeek(DateTimeConstants.SUNDAY);
         Duration dur = new Duration(dtCurrent, next);
         return dur.getStandardSeconds();
-        
     }
 
     

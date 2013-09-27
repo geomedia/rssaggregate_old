@@ -59,7 +59,7 @@ public class TemplateRecapFluxEchec {
             
             DateTime dt = new DateTime(fluxIncident.getDateDebut());
 
-            corps += "<p>Depuis : " + fmt.print(dt)+ ". Durée de l'incident : " + fluxIncident.getDuree()+"</p>";
+            corps += "<p>Depuis : " + fmt.print(dt)+ ". Durée de l'incident : " + fluxIncident.getDureeHumanReadable()+"</p>";
             corps += "<p>Desciption de l'erreur : " + fluxIncident.getMessageEreur()+"</p>";
             corps+="<p>Log JAVA"+fluxIncident.getLogErreur()+"</p>";
             corps += "</li>";

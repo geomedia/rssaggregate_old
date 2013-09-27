@@ -36,8 +36,10 @@ import rssagregator.beans.Conf;
 import rssagregator.beans.Flux;
 import rssagregator.beans.FluxType;
 import rssagregator.beans.Journal;
-import rssagregator.beans.form.DAOGenerique;
+import rssagregator.beans.exception.UnIncidableException;
+import rssagregator.dao.DAOGenerique;
 import rssagregator.beans.incident.IncidentFactory;
+import rssagregator.beans.incident.JMSDiffusionIncident;
 import rssagregator.beans.incident.JMSPerteConnectionIncident;
 import rssagregator.beans.incident.SynchroIncident;
 import rssagregator.beans.traitement.MediatorCollecteAction;
@@ -47,11 +49,9 @@ import rssagregator.dao.DaoJournal;
 import rssagregator.utils.XMLTool;
 
 /**
- * Cette classe utilise le client activeMq en vue de synchroniser les beans
- * (flux, comportement de collecte) entre serveurs du projet GEOMEDIA. La
- * méthode run doit être lancée au démarrage du projet afin de lancer un daemon
- * cherchant à relancer la connection toutes les 30 secondes si le booleen
- * statutConnection est à f
+ * Cette classe utilise le client activeMq en vue de synchroniser les beans (flux, comportement de collecte) entre
+ * serveurs du projet GEOMEDIA. La méthode run doit être lancée au démarrage du projet afin de lancer un daemon
+ * cherchant à relancer la connection toutes les 30 secondes si le booleen statutConnection est à f
  *
  * @author clem
  */
@@ -73,12 +73,16 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
 
     /**
      * *
-     * Constructeur permettant de créer le service en s'appuyant sur un
-     * ScheduledExecutorService très basique.
+     * Constructeur permettant de créer le service en s'appuyant sur un ScheduledExecutorService très basique.
      */
     private ServiceSynchro() {
         super();
         statutConnection = false;
+
+        // On récupère le servname 
+        this.servname = DAOFactory.getInstance().getDAOConf().getConfCourante().getServname();
+
+
 //        this(Executors.newSingleThreadScheduledExecutor());
 //        this(Executors.newSingleThreadScheduledExecutor());
     }
@@ -109,8 +113,8 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
 //    @Override
     /**
      * *
-     * Démarre un daemon cherchant à activer la connection si besoin est. La
-     * vérification est effectuée toutes les 30 secondes
+     * Démarre un daemon cherchant à activer la connection si besoin est. La vérification est effectuée toutes les 30
+     * secondes
      */
 //    public void run() {
 //
@@ -169,13 +173,12 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
 //    }
     /**
      * *
-     * Ouvre la connection ActiveMq et crée le TOPIC permettant aux esclave de
-     * recevoir les instructions du maitre (topic de Sync)
+     * Ouvre la connection ActiveMq et crée le TOPIC permettant aux esclave de recevoir les instructions du maitre
+     * (topic de Sync)
      *
      * @throws IOException
      */
     public void openConnection() throws IOException, NamingException, JMSException {
-        logger.debug("Tentative de démarrage du Service JMS");
 
         InitialContext initCtx = new InitialContext();
         Context envContext = (Context) initCtx.lookup("java:comp/env");
@@ -221,38 +224,48 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
      */
     public void diffuser(Object bean, String action) throws JMSException, IOException {
         if (diffusionNecessaire(bean, action)) {
-            logger.debug("Diffussion d'un Beans par JMS");
-            if (connection != null) {
-                Session sessionDiff = connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
-                MessageProducer producer = sessionDiff.createProducer(topic);
-
-                producer.setDeliveryMode(DeliveryMode.PERSISTENT);
-                MapMessage mapMessage = sessionDiff.createMapMessage();
-                String beanSerialise = XMLTool.serialise(bean);
-
-//                System.out.println("" + beanSerialise);
-
-                mapMessage.setStringProperty("bean", beanSerialise);
-                mapMessage.setStringProperty("action", action);
-                mapMessage.setStringProperty("sender", servname);
-                mapMessage.setJMSCorrelationID(servname);
-
-                producer.send(mapMessage);
-                mapMessage.acknowledge();
-                sessionDiff.close();
-                logger.debug("Diffusion du Beans effectuée");
-            } else {
-                throw new JMSException("La connection au service JMS est innactive.");
-            }
+            TacheDiffuserMessageJMS tacheDiffuserMessageJMS = new TacheDiffuserMessageJMS(this);
+            tacheDiffuserMessageJMS.setAction(action);
+            tacheDiffuserMessageJMS.setBean(bean);
+            tacheDiffuserMessageJMS.setConnection(connection);
+            tacheDiffuserMessageJMS.setTopic(topic);
+            tacheDiffuserMessageJMS.setSchedule(false);
+            executorService.submit(tacheDiffuserMessageJMS);
         }
+
+
+//        if (diffusionNecessaire(bean, action)) {
+//            logger.debug("Diffussion d'un Beans par JMS");
+//            if (connection != null) {
+//                Session sessionDiff = connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
+//                MessageProducer producer = sessionDiff.createProducer(topic);
+//
+//                producer.setDeliveryMode(DeliveryMode.PERSISTENT);
+//                MapMessage mapMessage = sessionDiff.createMapMessage();
+//                String beanSerialise = XMLTool.serialise(bean);
+//
+////                System.out.println("" + beanSerialise);
+//
+//                mapMessage.setStringProperty("bean", beanSerialise);
+//                mapMessage.setStringProperty("action", action);
+//                mapMessage.setStringProperty("sender", servname);
+//                mapMessage.setJMSCorrelationID(servname);
+//
+//                producer.send(mapMessage);
+//                mapMessage.acknowledge();
+//                sessionDiff.close();
+//                logger.debug("Diffusion du Beans effectuée");
+//            } else {
+//                throw new JMSException("La connection au service JMS est innactive.");
+//            }
+//        }
         //TODO : La diffusion d'un message JMS = une thread ?
 
     }
 
     /**
-     * Méthode déclanché à la réception d'un message JMS par le serveur. Elle
-     * est notamment utilisée pour sédérialisé les beans envoyés par le serveur
-     * maitre et les recréer sur les serveur esclaves
+     * Méthode déclanché à la réception d'un message JMS par le serveur. Elle est notamment utilisée pour sédérialisé
+     * les beans envoyés par le serveur maitre et les recréer sur les serveur esclaves
      *
      * @param msg Le message reçut
      */
@@ -311,8 +324,7 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
 
                                 /**
                                  * *
-                                 * CE BLOCK A ETE ABANDONNÉ AU PROFIT DUN
-                                 * CHANGEMENT DE LA CASCADE DU FLUX ET DE
+                                 * CE BLOCK A ETE ABANDONNÉ AU PROFIT DUN CHANGEMENT DE LA CASCADE DU FLUX ET DE
                                  * MODIFICATION DANS LA DAO
                                  */
                                 // Il faut veiller à vérifier l'existence de tous les objet lié au flux. Si on n'a pas par exemple l'objet de traitement adhéquat, on va alors le créer
@@ -493,8 +505,7 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
 
     /**
      * *
-     * Le statut de de la liaison avec le serveur JMS configurée pour le serveur
-     * **
+     * Le statut de de la liaison avec le serveur JMS configurée pour le serveur **
      */
     public void setStatutConnection(Boolean statutConnection) {
         this.statutConnection = statutConnection;
@@ -502,8 +513,7 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
 
     /**
      * *
-     * Les beans se notifient lorsqu'ils changens auprès du service JMS. Celui
-     * ci lance alors la diffusion
+     * Les beans se notifient lorsqu'ils changens auprès du service JMS. Celui ci lance alors la diffusion
      *
      * @param o
      * @param arg
@@ -538,7 +548,8 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
                 TacheLancerConnectionJMS t = (TacheLancerConnectionJMS) o;
 
                 if (t.schedule) {
-                    executorService.schedule(t, 30, TimeUnit.SECONDS);
+                    schedule(t);
+//                    executorService.schedule(t, 30, TimeUnit.SECONDS);
                 }
                 //Si la tache s'est termée correctement 
 
@@ -547,8 +558,10 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
             else if (o.getClass().equals(TacheSynchroHebdomadaire.class)) {
                 logger.debug("Notification d'une tache de récup esclave");
                 TacheSynchroHebdomadaire t = (TacheSynchroHebdomadaire) o;
+
                 if (t.getSchedule()) {
-                    executorService.schedule(t, conf.getDurationSync(), TimeUnit.SECONDS);
+//                    executorService.schedule(t, conf.getDurationSync(), TimeUnit.SECONDS);
+                    schedule(t);
                 }
 //                if (t.getExeption() != null) {
 //                    logger.debug("exeption durant la synchro");
@@ -563,22 +576,23 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
 //                }
             }
 
+            logger.debug("--------------");
             gererIncident((AbstrTacheSchedule) o);
         }
     }
 
     /**
      * *
-     * Méthode permettant de tranformer les exceptions survenues lors de la
-     * récupération de taches de synchronisation en incident (des beans
-     * persistés dans la base de données)
+     * Méthode permettant de tranformer les exceptions survenues lors de la récupération de taches de synchronisation en
+     * incident (des beans persistés dans la base de données)
      *
      * @param tache
      */
     @Override
     protected void gererIncident(AbstrTacheSchedule tache) {
-        DAOIncident dao = (DAOIncident) DAOFactory.getInstance().getDAOFromTask(tache);
 
+        DAOIncident dao = (DAOIncident) DAOFactory.getInstance().getDAOFromTask(tache);
+        logger.debug("Gestion");
         //SI il y a eu des exception lors du traitement de la tache
         if (tache.getExeption() != null) {
 
@@ -616,9 +630,9 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
                     Logger.getLogger(ServiceSynchro.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (IllegalAccessException ex) {
                     Logger.getLogger(ServiceSynchro.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (UnIncidableException ex) {
+                    Logger.getLogger(ServiceSynchro.class.getName()).log(Level.SEVERE, null, ex);
                 }
-
-
             }
 
 
@@ -635,6 +649,15 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
             } else if (tache.getClass().equals(TacheLancerConnectionJMS.class)) {
 //            TacheLancerConnectionJMS cast = (TacheLancerConnectionJMS)tache;
                 si.setMessageEreur("Erreur de connection au serveur JMS");
+            } //-----------> ERREUR DE DIFFUSION DE MESSAGE JMS
+            else if (tache.getClass().equals(TacheDiffuserMessageJMS.class)) {
+                JMSDiffusionIncident cast = (JMSDiffusionIncident) si;
+                TacheDiffuserMessageJMS castTache = (TacheDiffuserMessageJMS) tache;
+
+                si.setMessageEreur("Erreur lors de l'envoie du message JMS");
+                cast.setAction(castTache.getAction());
+                cast.setMsgSerialise(castTache.getBeanSerialise());
+
             }
 
 
@@ -706,7 +729,6 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
 //        recupItem.setSchedule(true);
 //        executorService.submit(recupItem);
 //    }
-
     @Override
     public void stopService() throws SecurityException, RuntimeException {
 
@@ -723,15 +745,17 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
 
     /**
      * *
-     * Methode permettant de savoir si d'après la config, un beans crée modifie
-     * ou supprimé doit être diffusé. Il doit être diffusé si le serveur est
-     * maitre et qu'il possède des esclaves. La méthode synchroImperative des beans synchronisable est employé pour faire dire au beans si il doit ou non être synchronisé. On sait par exemple que le compte root est un bean Useraccount ne devant pas être  synchronisé.
+     * Methode permettant de savoir si d'après la config, un beans crée modifie ou supprimé doit être diffusé. Il doit
+     * être diffusé si le serveur est maitre et qu'il possède des esclaves. La méthode synchroImperative des beans
+     * synchronisable est employé pour faire dire au beans si il doit ou non être synchronisé. On sait par exemple que
+     * le compte root est un bean Useraccount ne devant pas être synchronisé.
      *
      * @return
      */
     public Boolean diffusionNecessaire(Object bean, String action) {
         Conf c = DAOFactory.getInstance().getDAOConf().getConfCourante();
         System.out.println("C : " + c);
+
         // Le contexte demande t'il la synchronisation (Serveur maitre en possession d'esclave)
         if (c.getMaster() && c.getServeurSlave().size() > 0) {
             if (BeanSynchronise.class.isAssignableFrom(bean.getClass())) {

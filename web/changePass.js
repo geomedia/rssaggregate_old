@@ -6,7 +6,7 @@
 
 function changepass() {
     if ($('#btchgpass').val() === '0') {
-        $('#chgpass').append('<label>Mot de pass</label><input name="pass1" id="pass1"/> <br /> <label>Retaper : </label><input name="pass2" id="pass2"/>');
+        $('#chgpass').append('<label>Mot de pass</label><input name="pass1" type="password" id="pass1"/> <br /> <label>Retaper : </label><input name="pass2" type="password" id="pass2"/>');
         $('#btchgpass').text('Annuler le changement de mot de passe');
         $('#btchgpass').val('1')
     }

@@ -9,71 +9,77 @@ import java.util.Observer;
 import java.util.concurrent.Callable;
 
 /**
- *  Toutes les tâche schedule de l'application doivent hériter de cette classe abstraite
+ * Toutes les tâche schedule de l'application doivent hériter de cette classe
+ * abstraite
+ *
  * @author clem
  */
-public abstract class AbstrTacheSchedule<T> extends Observable implements Callable<T>{
+public abstract class AbstrTacheSchedule<T> extends Observable implements Callable<T> {
 
 //    ScheduledExecutorService executorService;
-    
-    
 //    AbstrService service;
-    
-    /***
-     * Détermine si l'instance de la tache doit avoir ou non un comportment périodique
+    /**
+     * *
+     * Détermine si l'instance de la tache doit avoir ou non un comportment
+     * périodique
      */
     Boolean schedule;
-    
-    
     Integer jourSchedule;
     Integer heureSchedule;
     Integer minuteSchedule;
-    
     Integer timeSchedule;
-    
-    
-    /***
-     * si il y a eu une erreur lors de l'execuption de la tâche, On inclu cette erreur ici. La runnable se retourne avec son erreur auprès du service qui le gère.
+    /**
+     * *
+     * si il y a eu une erreur lors de l'execuption de la tâche, On inclu cette
+     * erreur ici. La runnable se retourne avec son erreur auprès du service qui
+     * le gère.
      */
     Throwable exeption;
-    
-    /***
-     * Une tache peut être en erreur. Les services utilise ce Integer pour savoir combien de fois cette tache a été en erreur. Il peuvent relancer la tâche ou alors créer un incident. La gestion des erreur est propre à chaque tâche et chaque service
+    /**
+     * *
+     * Une tache peut être en erreur. Les services utilise ce Integer pour
+     * savoir combien de fois cette tache a été en erreur. Il peuvent relancer
+     * la tâche ou alors créer un incident. La gestion des erreur est propre à
+     * chaque tâche et chaque service
      */
     Integer nbrTentative;
 
     public AbstrTacheSchedule() {
-                this.schedule = false;
+        this.schedule = false;
         exeption = null;
-        nbrTentative =0;
+        nbrTentative = 0;
     }
 
-    
-    
-    
-    
-    /***
+    /**
+     * *
      * Par default le bollean schedule est à false;
-     * @param executorService 
+     *
+     * @param executorService
      */
     public AbstrTacheSchedule(Observer s) {
         this.addObserver(s);
         this.schedule = false;
         exeption = null;
-        nbrTentative =0;
+        nbrTentative = 0;
     }
 
-    /***
-     * Détermine si l'instance de la tache doit avoir ou non un comportment périodique
-     * @return 
+    /**
+     * *
+     * Détermine si l'instance de la tache doit avoir ou non un comportment
+     * périodique
+     *
+     * @return
      */
     public Boolean getSchedule() {
         return schedule;
     }
-/**
- * Détermine si l'instance de la tache doit avoir ou non un comportment périodique
- * @param schedule 
- */
+
+    /**
+     * Détermine si l'instance de la tache doit avoir ou non un comportment
+     * périodique
+     *
+     * @param schedule
+     */
     public void setSchedule(Boolean schedule) {
         this.schedule = schedule;
     }
@@ -98,16 +104,16 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
         return jourSchedule;
     }
 
-    /***
-     * Le jour de la schedul. Suivant les constante de datetime. 1 = monday; 2 = tuesday...
-     * @param jourSchedule 
+    /**
+     * *
+     * Le jour de la schedul. Suivant les constante de datetime. 1 = monday; 2 =
+     * tuesday...
+     *
+     * @param jourSchedule
      */
     public void setJourSchedule(Integer jourSchedule) {
         this.jourSchedule = jourSchedule;
     }
-
-
-    
 
     public Integer getHeureSchedule() {
         return heureSchedule;
@@ -125,8 +131,6 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
         this.minuteSchedule = minuteSchedule;
     }
 
-
-
     public Integer getTimeSchedule() {
         return timeSchedule;
     }
@@ -134,5 +138,4 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
     public void setTimeSchedule(Integer timeSchedule) {
         this.timeSchedule = timeSchedule;
     }
-    
 }

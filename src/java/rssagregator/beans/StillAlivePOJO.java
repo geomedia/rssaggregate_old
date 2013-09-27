@@ -61,7 +61,12 @@ public class StillAlivePOJO {
 
     }
 
-    public Boolean check() {
+    /***
+     * 
+     * @param maxNbrSeconde : Le nombre de seconde maximum qui est considéré comme normal entre la dernière date de check et la date actuelle
+     * @return True si le la durée entre la date actuelle et la dernière vérification est inférieur au maxNbrSeconde; false sinon
+     */
+    public Boolean check(Integer maxNbrSeconde) {
         Boolean retour = true;
         // On récupère le dernier still alive
         
@@ -70,7 +75,7 @@ public class StillAlivePOJO {
             DateTime dt = new DateTime(lastDate[1]);
             DateTime dtCurrent = new DateTime();
             //Si la date courante moins 6 minutes est bien avant la derniere date constaté dans le still alive
-            if (dtCurrent.minusMinutes(6).isBefore(dt)) {
+            if (dtCurrent.minusSeconds(maxNbrSeconde).isBefore(dt)) {
                 //On remplace la deuxieme date par la date courante
                 lastDate[1] = new Date();
                 retour = false;
@@ -102,15 +107,15 @@ public class StillAlivePOJO {
 
 
 
-    public static void main(String[] args) throws IOException {
-//        StillAlivePOJO alivePOJO = new StillAlivePOJO();
-//        alivePOJO.getAlive().add(new Date[]{new Date(), new Date()});
-        File fi = new File("/home/clem/pojo");
-//        alivePOJO.write(fi);
-
-        StillAlivePOJO alivePOJO2 =StillAlivePOJO.load(fi);
-        alivePOJO2.check();
-        alivePOJO2.write(fi);
-
-    }
+//    public static void main(String[] args) throws IOException {
+////        StillAlivePOJO alivePOJO = new StillAlivePOJO();
+////        alivePOJO.getAlive().add(new Date[]{new Date(), new Date()});
+//        File fi = new File("/home/clem/pojo");
+////        alivePOJO.write(fi);
+//
+//        StillAlivePOJO alivePOJO2 =StillAlivePOJO.load(fi);
+//        alivePOJO2.check();
+//        alivePOJO2.write(fi);
+//
+//    }
 }

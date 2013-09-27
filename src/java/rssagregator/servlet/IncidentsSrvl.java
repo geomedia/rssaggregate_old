@@ -111,7 +111,7 @@ public class IncidentsSrvl extends HttpServlet {
         if (action.equals("list")) {
             //Récupération du type 
             Class c = null;
-             DAOIncident dao = null;
+            DAOIncident dao = null;
             try {
                 System.out.println("AAA");
                 c = Class.forName("rssagregator.beans.incident." + request.getParameter("type"));
@@ -126,7 +126,7 @@ public class IncidentsSrvl extends HttpServlet {
 
             System.out.println("DAO : " + dao);
             System.out.println("CLASS : " + c);
-           
+
             String type = request.getParameter("type");
 
 
@@ -178,22 +178,21 @@ public class IncidentsSrvl extends HttpServlet {
             request.setAttribute(ATT_LIST, listAll);
             //--------------------------------------------ACTION : MOD-------------------------------------
         } else if (action.equals("mod")) {
-            
-              try {
+
+            try {
                 Class c = Class.forName("rssagregator.beans.incident." + request.getParameter("type"));
                 ServletTool.actionMOD(request, ATT_OBJ, ATT_FORM, c, false);
                 if (!AbstrIncident.class.isAssignableFrom(c)) {
                     throw new Exception("non");
                 }
-              }
-              catch (ClassNotFoundException ex) {
+            } catch (ClassNotFoundException ex) {
                 redir(request, ATT_SERV_NAME + "/read?id=" + request.getParameter("id"), "L'entité demandée n'existe pas !", Boolean.TRUE);
             } catch (Exception ex) {
                 redir(request, ATT_SERV_NAME + "/read?id=" + request.getParameter("id"), "L'entité demandée n'existe pas !", Boolean.TRUE);
             }
-                
 
-            
+
+
             //---------------------------------------ACTION : READ-------------------------------------
         } else if (action.equals("read")) {
 

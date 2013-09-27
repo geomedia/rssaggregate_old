@@ -2,15 +2,12 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package rssagregator.beans.form;
-
-import rssagregator.dao.AbstrDao;
-import rssagregator.dao.DAOFactory;
+package rssagregator.dao;
 
 /**
  * *
- * Cette DEO permet un simple crud. Elle hérite simplement de la classe
- * abstraite
+ * Cette DAO implément AbstrDAO sans redéfinir aucune méthode. Elle permet de
+ * gérer des entitée simples.
  *
  * @author clem
  */

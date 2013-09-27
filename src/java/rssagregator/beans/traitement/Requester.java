@@ -14,16 +14,13 @@ import javax.xml.ws.http.HTTPException;
  */
 @Entity
 public class Requester extends AbstrRequesteur {
-    
+
     @Transient
     org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(Requester.class);
-    
     private static String description = "Requester par défault";
-
 //    private InputStream httpInputStream;
     @Transient
     private HttpURLConnection conn;
-
 
     public Requester() {
     }
@@ -35,20 +32,20 @@ public class Requester extends AbstrRequesteur {
     @Override
     public void requete(String urlArg) throws MalformedURLException, HTTPException, IOException, TimeLimitExceededException, Exception {
         URL url = new URL(urlArg);
-        
-        
+
+
         conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
-        
-        
+
+
         if (timeOut != null) {
-            conn.setConnectTimeout(timeOut * 1000);            
+            conn.setConnectTimeout(timeOut * 1000);
         } else {
             conn.setConnectTimeout(12000);
         }
-        
+
         int i;
-        
+
         if (requestProperty != null) {
             for (i = 0; i < requestProperty.length; i = i + 2) {
                 conn.setRequestProperty(this.requestProperty[i][0], this.requestProperty[i][1]);
@@ -60,8 +57,8 @@ public class Requester extends AbstrRequesteur {
 //        }
         conn.setInstanceFollowRedirects(true);
         conn.connect();
-       
-        
+
+
         this.httpStatut = conn.getResponseCode();
         System.out.println("HTTP STATUT : " + this.httpStatut.toString());
 //        System.out.println("CODE : " + httpStatut);
@@ -77,28 +74,31 @@ public class Requester extends AbstrRequesteur {
      * Retourne un connecteur générique
      */
     public static AbstrRequesteur getDefaulfInstance() {
-        
+
         Requester r = new Requester();
         r.requestProperty = new String[1][2];
         r.requestProperty[0][0] = "User-Agent";
         r.requestProperty[0][1] = "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:16.0) Gecko/20100101 Firefox/16.0";
 
         r.timeOut = 12;
-        
+
         return r;
     }
-    
+
     @Override
     public void disconnect() {
         conn.disconnect();
     }
-    
+
     @Override
     protected void finalize() throws Throwable {
         try {
-            conn.getInputStream().close();
-            conn.disconnect();
-            logger.debug("fermetude du requesteur par Finalise");
+            if (conn != null) {
+                if (conn.getInputStream() != null) {
+                    conn.getInputStream().close();
+                }
+                conn.disconnect();
+            }
         } finally {
             super.finalize();
         }

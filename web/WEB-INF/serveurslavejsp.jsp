@@ -21,48 +21,49 @@ CETTE JSP N'EST PLUS UTILISE LA GESTION DES SERVEUR ESCLAVE SE FAIT MAINTENANT D
 </div>
 <div id="sidebar">
     <p><a href="${rootpath}slave/add">Ajouter</a></p>
-    <p><a href="${rootpath}slave/list">Liste</a></p>
+    <p><a href="${rootpath}slave/recherche">Liste</a></p>
 </div>
 
 <div id="content">
     <div class="post">
         <c:choose >
             <c:when test="${not empty redirmap}">
-                <p>${form.resultat}
-                </p>
-                <p>${redirmap['msg']}. </p>
-                <c:if test="${err!='true'}">
-                    Vous serez redirigé dans 3 secondes à l'adresse : <a href="${redirmap['url']}">${redirmap['url']}</a>
-                    <script type="text/JavaScript">
-                        <!--
-                        setTimeout("location.href = '${redirmap['url']}';",3000);
-                        -->
-                    </script>
-                </c:if> 
+                <c:import url="/WEB-INF/redirJspJavascriptPart.jsp" />
             </c:when>
             <c:when test="${empty redirmap}">
                 <c:choose>
                     <c:when test="${action=='add' or action=='mod'}">
-                        <c:if test="${action=='mod'}"><p><a href="${rootpath}slave/rem&id=${obj.id}">Supprimer</a></p></c:if>
-                        <form method="POST">
-                            <label>Host :</label>
-                            <input type="text" name="servHost" value="${obj.servHost}"/><br/>
+                        <c:if test="${action=='mod'}"><p><a href="${rootpath}slave/rem?id=${bean.ID}">Supprimer</a></p></c:if>
+                            <form method="POST">
+                                <label>Host :</label>
+                                <input type="text" name="servHost" value="${bean.servHost}"/><br/>
 
                             <label>Login : </label>
-                            <input type="text" name="login"/><br />
+                            <input type="text" name="login" value="${bean.login}" /><br />
 
                             <label>Pass : </label>
-                            <input type="text" name="pass"/>
+                            <input type="text" name="pass" value="${bean.pass}" /><br />
+
+                            <label for="url">Url de l'application : </label>
+                            <input type="text" name="url" id="url" value="${bean.url}"/><br />
                             <input type="submit" />
                         </form>
                     </c:when>
-                    
-                    <c:when test="${action=='list'}">
+
+                    <c:when test="${action=='recherche'}">
                         <ul>
-                        <c:forEach items="${list}" var="serv">
-                            <li><a href="slave?action=mod&id=${serv.id}">${serv.servHost}</a></li>
-                        </c:forEach>
+                            <c:forEach items="${list}" var="serv">
+                                <li><a href="${rootpath}slave/read?id=${serv.ID}">${serv.servHost}</a></li>
+                                </c:forEach>
                         </ul>
+                    </c:when>
+                        
+                    <c:when test="${action=='read'}">
+                        <c:import url="/WEB-INF/inc/editionBean.jsp" />
+                        <p><strong>Host :</strong> ${bean.servHost}</p>
+                        <p><strong>Login : </strong>${bean.login}</p>
+                        <p><strong>URL application :</strong> ${bean.url}</p>
+                        <p></p>
                     </c:when>
                 </c:choose>
             </c:when>

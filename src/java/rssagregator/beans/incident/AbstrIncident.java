@@ -14,6 +14,7 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.Temporal;
 import javax.persistence.Transient;
+import org.eclipse.jdt.internal.compiler.ast.ThisReference;
 import org.eclipse.persistence.annotations.Cache;
 import org.eclipse.persistence.annotations.CacheCoordinationType;
 import org.eclipse.persistence.annotations.CacheType;
@@ -23,9 +24,12 @@ import org.joda.time.Duration;
 import rssagregator.beans.Conf;
 import rssagregator.dao.DAOFactory;
 import rssagregator.services.ServiceMailNotifier;
+import rssagregator.services.TacheAlerteMail;
 
 /**
  * *
+ * Tout incident doit implémenter cette classe. Elle permet de définir les paramètres communs ID, messageErreur,
+ * dateDebut, dateFin...
  *
  * @author clem
  */
@@ -35,22 +39,24 @@ import rssagregator.services.ServiceMailNotifier;
 //@MappedSuperclass()
 @Cache(size = 100, type = CacheType.CACHE, isolation = CacheIsolationType.SHARED, coordinationType = CacheCoordinationType.SEND_NEW_OBJECTS_WITH_CHANGES)
 @Inheritance(strategy = InheritanceType.JOINED) // Peu de champs supplémentaires dans les autres entités, on va conserver la stratégie la plus simple
-public class AbstrIncident extends Observable implements Serializable {
+public class AbstrIncident implements Serializable {
 
+    /**
+     * *
+     * Constructeur par défaut d'un incident. La variable notificationImperative est définie à false
+     */
+    public AbstrIncident() {
+        this.notificationImperative = false;
+    }
     @Transient
     protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(AbstrIncident.class);
-    
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long ID;
 
-    public void AbstrIncident() {
-    }
-
     /**
-     * Lorsque l'incident est constaté (création ou incrémentation du compteur
-     * nombreTentativeEnEchec), cette méthode est lancée. En cas d'erreur http,
-     * il est par exemple souhaitable de relancer une fois la récupération.
+     * Lorsque l'incident est constaté (création ou incrémentation du compteur nombreTentativeEnEchec), cette méthode
+     * est lancée. En cas d'erreur http, il est par exemple souhaitable de relancer une fois la récupération.
      */
     public void action() {
     }
@@ -62,39 +68,77 @@ public class AbstrIncident extends Observable implements Serializable {
     public void setID(Long ID) {
         this.ID = ID;
     }
+    /**
+     * *
+     * Message destiné aux administrateurs afin d'expliquer l'erreur. Il ne s'agit pas d'un log mais d'une explication
+     * en français pouvant être comprise par un non-informatien
+     */
     @Column(name = "messageEreur")
     protected String messageEreur;
+    /**
+     * *
+     * Un espace de note permettant aux administrateurs de commenter l'erreur depuis l'interface web.
+     */
     @Column(name = "noteIndicent", length = 3000)
     protected String noteIndicent;
+    /**
+     * *
+     * Log de l'erreur java. Il s'agit du message pouvant être récupéré depuis l'exception à l'origine de l'incident.
+     */
     @Column(name = "logErreur", columnDefinition = "text")
     protected String logErreur;
+    /**
+     * *
+     * N'EST PLUS UTILISÉ !
+     *
+     * @deprecated
+     */
+    @Deprecated
     @Column(name = "bloquant")
     protected Boolean bloquant;
+    /**
+     * *
+     * Nombre de répétition de l'incident. A chaque échec la tâche concerné va incrémenter ce compteur tant qu'elle
+     * n'est pas parvenu a retrouver un comportement normal (qui alors clos l'incident en ajoutant une dateFin).
+     */
     @Column(name = "nombreTentativeEnEchec")
     protected Integer nombreTentativeEnEchec;
+    /**
+     * *
+     * Un timestamp permettant de stoquer la dernière date de notification. Permet d'éviter le lancement d'allerte
+     * redondante par la tache {@link TacheAlerteMail}
+     */
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     protected Date lastNotification;
+    /**
+     * *
+     * Date de début de l'incident.
+     */
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     @Column(name = "dateDebut", nullable = false)
     protected Date dateDebut;
+    /**
+     * *
+     * Date de fin de l'incident. Cette variable est complété lorsqu'une tâche parvient à retrouver un comportement
+     * normal
+     */
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     protected Date dateFin;
-
-    /***
+    /**
+     * *
      * Permet de forcer un incident à être notifié, même si il est déjà clos.
      */
-    @Transient
+    @Column(name = "notificationImperative")
     protected Boolean notificationImperative;
 //    @Transient
 //    protected String duree;
     /**
-     * nombre de 1 à 5 . 0 = normal : On ne notifie l'erreur qu'une fois par
-     * jour. ( test currenttime > lastnotification + 24h) 1 = grave. On notifie
-     * toute les 12h 2 = très grave. Le notifieur doit envoyer un mail à chaque
-     * fois qu'il rencontre l'erreur. Incident.action peut aussi tester ce
-     * champs afin de forcer le lancement du notifieur pour que la notification
-     * parte instantanément.
+     * /!\ N'EST PLUS UTILISÉ nombre de 1 à 5 . 0 = normal : On ne notifie l'erreur qu'une fois par jour. ( test
+     * currenttime > lastnotification + 24h) 1 = grave. On notifie toute les 12h 2 = très grave. Le notifieur doit
+     * envoyer un mail à chaque fois qu'il rencontre l'erreur. Incident.action peut aussi tester ce champs afin de
+     * forcer le lancement du notifieur pour que la notification parte instantanément.
      */
+    @Deprecated
     private Integer gravite;
 
     public String getMessageEreur() {
@@ -173,50 +217,41 @@ public class AbstrIncident extends Observable implements Serializable {
     public void setNotificationImperative(Boolean notificationImperative) {
         this.notificationImperative = notificationImperative;
     }
-    
+
     public void setGravite(Integer gravite) {
         this.gravite = gravite;
     }
-    
-    
-    /***
-     * Retourne l'url permettant d'accéder à l'interface administrative de cette entitée
+
+    /**
+     * *
+     * Retourne l'url permettant d'accéder à l'interface administrative de cette entitée (exemple
+     * http://host/RSSagragate/incident?id=1
+     *
      * @return
-     * @throws IOException Emmet une exeption si la variable servurl n'a pu être chargée depuis le fichier serv.properties
+     * @throws IOException Emmet une exeption si la variable servurl n'a pu être chargée depuis le fichier
+     * serv.properties
      */
-    public String getUrlAdmin() throws IOException{
+    public String getUrlAdmin() throws IOException {
         Conf c = DAOFactory.getInstance().getDAOConf().getConfCourante();
-        
-        
-//        String url = PropertyLoader.loadProperti("serv.properties", "servurl");
         String url = c.getServurl();
-        
-        
-        System.out.println("URL : " + url);
         //On rajoute un / a la fin de l'url si besoin est
-        System.out.println("URL LENGHT : " + url.length());
-        System.out.println("LAST CHAR : " + url.charAt(url.length()-1));
-        if(url!=null && url.length()>1){
-            Character ch = url.charAt(url.length()-1);
-            if(!ch.equals(new Character('/'))){
-            url+="/";    
+        if (url != null && url.length() > 1) {
+            Character ch = url.charAt(url.length() - 1);
+            if (!ch.equals(new Character('/'))) {
+                url += "/";
             }
         }
-        String retour = url+"incidents/read?id="+ID.toString(); 
-        
-        System.out.println("RETOUR : " + url);
-        System.out.println("FIN URL ADMIN");
+        String retour = url + "incidents/read?id=" + ID.toString() + "&type=" + this.getClass().getSimpleName();
         return retour;
     }
 
     /**
      * *
-     * Une méthode qui renvoir la durée sous forme d'une chaine de caractère. la
-     * chaine de caractère comprend l'unité
+     * Une méthode qui renvoir la durée sous forme d'une chaine de caractère. la chaine de caractère comprend l'unité
      *
      * @return "6 minute" , "3 heures" ou encore "4 jours"
      */
-    public String getDuree() {
+    public String getDureeHumanReadable() {
 
         Date datefin = dateFin;
         if (datefin == null);
@@ -244,20 +279,28 @@ public class AbstrIncident extends Observable implements Serializable {
         }
         return null;
     }
-    
-    
-    /***
-     * Un incident doit être enregistré auprès des service : <ul>
-     * <li>Mail : car lors de la création d'un inscident le service mail doit réagir en envoyant une premiere alerte d'urgence</li>
-     * </ul>
-     */
-    public void EnregistrerAupresdesService(){
-        this.addObserver(ServiceMailNotifier.getInstance());
-    }
-    public void forceChangeStatut(){
-        this.setChanged();
-    }
 
+//    /**
+//     * *<strong>/!\ N'EST PLUS UTILISÉ. LES INCIDENTS NE SONT PLUS DES OBSERVABLES</strong>
+//     * Un incident doit être enregistré auprès des service : <ul>
+//     * <li>Mail : car lors de la création d'un inscident le service mail doit
+//     * réagir en envoyant une premiere alerte d'urgence</li>
+//     * </ul>
+//     */
+//    @Deprecated
+//    public void EnregistrerAupresdesService() {
+//        //TODO : Les incident ne sont plus des observables non ?
+//        this.addObserver(ServiceMailNotifier.getInstance());
+//    }
+//
+//    /***
+//     * <strong>/!\ N'EST PLUS UTILISÉ. LES INCIDENTS NE SONT PLUS DES OBSERVABLES</strong>
+//     * Force le changeStatut utilisé par le patern Observer
+//     */
+//    @Deprecated
+//    public void forceChangeStatut() {
+//        this.setChanged();
+//    }
     @Override
     public int hashCode() {
         int hash = 7;
@@ -282,13 +325,25 @@ public class AbstrIncident extends Observable implements Serializable {
         if ((this.logErreur == null) ? (other.logErreur != null) : !this.logErreur.equals(other.logErreur)) {
             return false;
         }
-        if (this.bloquant != other.bloquant && (this.bloquant == null || !this.bloquant.equals(other.bloquant))) {
-            return false;
-        }
+//        if (this.bloquant != other.bloquant && (this.bloquant == null || !this.bloquant.equals(other.bloquant))) {
+//            return false;
+//        }
         if (this.dateDebut != other.dateDebut && (this.dateDebut == null || !this.dateDebut.equals(other.dateDebut))) {
             return false;
         }
         return true;
     }
-    
+
+    /**
+     * *
+     *</p> Methode pourvant être redéclarer dans les incident afin d'empécher la notification de l'indident par
+     * la tache {@link TacheAlerteMail}. La méthode redéclarée peut observer la dateDebut de l'incident ou le nombre de
+     * répétition pour déterminer si il faut ou non notifier par mail.</p>
+     * <p>Si elle n'est pas redéclarée, cette méthode renvoie true</p>
+     *
+     * @return true si pas de redéclaration de la méthode par les classe filles.
+     */
+    public Boolean doitEtreNotifieParMail() {
+        return true;
+    }
 }

@@ -7,7 +7,7 @@ package rssagregator.beans;
 import java.util.Date;
 
 /**
- *
+ * Une classe qui sera retiré du serveur en production.
  * @author clem
  */
 public class DebugRecapLeveeFlux {

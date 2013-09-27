@@ -6,14 +6,19 @@ package rssagregator.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.jms.JMSException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import rssagregator.beans.Flux;
+import rssagregator.beans.Journal;
 import rssagregator.dao.DAOFactory;
 import rssagregator.services.ServiceCollecteur;
+import rssagregator.services.ServiceSynchro;
 import rssagregator.services.TacheCalculQualiteFlux;
 
 /**
@@ -38,16 +43,29 @@ public class Test2 extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
         
+        Journal j = new Journal();
+        j.setNom("Le Syncro Journal");
+        try {
+            ServiceSynchro.getInstance().diffuser(j, "add");
+        } catch (JMSException ex) {
+            Logger.getLogger(Test2.class.getName()).log(Level.SEVERE, null, ex);
+        }
         
         
-           ServiceCollecteur collecteur = ServiceCollecteur.getInstance();
         
-        Flux f = (Flux) DAOFactory.getInstance().getDAOFlux().find(new Long(55));
-        System.out.println("FLUX  : " + f);
-        TacheCalculQualiteFlux calculQualiteFlux = new TacheCalculQualiteFlux(collecteur);
-        calculQualiteFlux.setFlux(f);
-        
-        collecteur.getExecutorService().submit(calculQualiteFlux);
+//           ServiceCollecteur collecteur = ServiceCollecteur.getInstance();
+//        
+//        Flux f = (Flux) DAOFactory.getInstance().getDAOFlux().find(new Long(55));
+//        
+//        
+//        
+//        
+//        
+//        System.out.println("FLUX  : " + f);
+//        TacheCalculQualiteFlux calculQualiteFlux = new TacheCalculQualiteFlux(collecteur);
+//        calculQualiteFlux.setFlux(f);
+//        
+//        collecteur.getExecutorService().submit(calculQualiteFlux);
         
         
 //        ServiceSynchro jMS = ServiceSynchro.getInstance();

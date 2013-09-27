@@ -12,49 +12,56 @@ import javax.servlet.http.HttpServletRequest;
 import rssagregator.beans.UserAccount;
 
 /**
+ * Class permettant de valider et binder les données issues de requêtes dans un
+ * bean <strong>UserAccount</strong>
  *
  * @author clem
  */
 public class UserForm extends AbstrForm {
 
+    //-----------------------------
+    // Les variables devant être observées
     private String mail;
     private String encPassword;
     Boolean adminstatut;
     private String username;
     private Boolean adminMail;
+    //-----------------------------
+    // Expression régulière permettant de valider un email.
     private static final String EMAIL_PATTERN =
             "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
             + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+    org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(UserForm.class);
 
     @Override
     public Object bind(HttpServletRequest request, Object objEntre, Class type) {
         UserAccount u = (UserAccount) objEntre;
+        // Instanciation d'un utilisateur si les donnée envoyée en argument sont null
         if (u == null) {
             u = new UserAccount();
         }
-
-
         //================================================================================================
         //                              BIND DES PARAMETRE DE LA REQUETE
         //================================================================================================
+        if (valide) {
+            u.setMail(mail);
 
-        u.setMail(mail);
-        try {
-            u.setEncPassword(encPassword);
-        } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(UserForm.class.getName()).log(Level.SEVERE, null, ex);
+            //PASSWORD : Il est nécessaire de le crypter avant de l'enregistrer
+            try {
+                u.setEncPassword(encPassword);
+            } catch (NoSuchAlgorithmException ex) {
+                logger.error("Erreur lors du chiffrement du mot de pass.");
+                Logger.getLogger(UserForm.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            u.setAdminstatut(adminstatut);
+            u.setUsername(username);
+            u.setAdminMail(adminMail);
+
+            return u;
+        } else {
+            return null;
         }
-        u.setAdminMail(adminstatut);
-        u.setUsername(username);
-        u.setAdminMail(adminMail);
-
-
-//        if (erreurs.isEmpty()) {
-//            this.valide = true;
-//        } else {
-//            this.valide = false;
-//        }
-        return u;
     }
 
     @Override
@@ -73,7 +80,6 @@ public class UserForm extends AbstrForm {
             erreurs.put("mail", new String[]{s, "Ce champ ne peut être vide"});
         }
 
-
         //----------------------------------------Mot de pass--------------------------------------------
         String p1 = request.getParameter("pass1");
         String p2 = request.getParameter("pass2");
@@ -89,7 +95,6 @@ public class UserForm extends AbstrForm {
             }
             if (!err) {
                 encPassword = p1;
-//                   u.setEncPassword(p1);
             }
         }
 
@@ -97,11 +102,9 @@ public class UserForm extends AbstrForm {
         s = request.getParameter("adminstatut");
         if (s != null && !s.isEmpty()) {
             adminstatut = true;
-
         } else {
             adminstatut = false;
         }
-
 
         //------------------------------USER NAME----------------------------------
         s = request.getParameter("username");
@@ -120,15 +123,12 @@ public class UserForm extends AbstrForm {
         //------------------------------Mail Administration------------------------------
         s = request.getParameter("adminMail");
         if (s != null && !s.isEmpty()) {
-            if (adminstatut) {
+            if (!adminstatut) {
                 erreurs.put("adminMail", new String[]{s, "Il est impossible de recevoir les mail sans être administrateur"});
             } else {
-
                 adminMail = true;
             }
         }
-
-
 
         //================================================================================================
         //                                      VALIDATION
@@ -136,12 +136,10 @@ public class UserForm extends AbstrForm {
         if (erreurs.isEmpty()) {
             resultat = "Traitement effectué";
             valide = true;
-
         } else {
             resultat = "Erreur lors de la validation des données";
             valide = false;
         }
         return valide;
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

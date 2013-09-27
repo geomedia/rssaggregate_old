@@ -14,6 +14,4 @@ public class DonneeInterneCoherente extends Exception{
         super(message);
     }
     
-    
-    
 }

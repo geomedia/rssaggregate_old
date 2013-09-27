@@ -12,20 +12,22 @@ import javax.persistence.Persistence;
 import rssagregator.beans.Flux;
 import rssagregator.beans.FluxType;
 import rssagregator.beans.Journal;
+import rssagregator.beans.ServeurSlave;
 import rssagregator.beans.UserAccount;
-import rssagregator.beans.form.DAOGenerique;
+import rssagregator.beans.exception.UnIncidableException;
 import rssagregator.beans.incident.AbstrIncident;
+import rssagregator.beans.incident.AliveIncident;
 import rssagregator.beans.incident.AnomalieCollecte;
 import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.beans.incident.Incidable;
 import rssagregator.beans.incident.IncidentFactory;
+import rssagregator.beans.incident.JMSDiffusionIncident;
 import rssagregator.beans.incident.JMSPerteConnectionIncident;
 import rssagregator.beans.incident.MailIncident;
+import rssagregator.beans.incident.ServerIncident;
 import rssagregator.beans.incident.SynchroIncident;
 import rssagregator.beans.traitement.MediatorCollecteAction;
 import rssagregator.services.AbstrTacheSchedule;
-import rssagregator.services.TacheLancerConnectionJMS;
-import rssagregator.services.TacheSynchroRecupItem;
 
 /**
  *
@@ -95,6 +97,10 @@ public class DAOFactory<T extends AbstrDao> {
         return daoItem;
     }
 
+    public DAOServeurSlave getDAOServeurSlave() {
+        return new DAOServeurSlave(this);
+    }
+
     public DAOGenerique getDAOGenerique() {
         return new DAOGenerique(this);
     }
@@ -144,14 +150,12 @@ public class DAOFactory<T extends AbstrDao> {
 
     /**
      * *
-     * Instancie et retourne une dao a partir du type de beans envoyé en
-     * argument. Si on envoie un flux, on obtient une daoFLUX
+     * Instancie et retourne une dao a partir du type de beans envoyé en argument. Si on envoie un flux, on obtient une
+     * daoFLUX
      *
      * @param beansClass : La class du beans devant être géré par la dao
-     * @throws UnsupportedOperationException : Si aucune dao n'a été trouvé,
-     * emission d'une exception
-     * @return : La dao permettant de gérer le type de beans correspondant à la
-     * class envoyée en argument
+     * @throws UnsupportedOperationException : Si aucune dao n'a été trouvé, emission d'une exception
+     * @return : La dao permettant de gérer le type de beans correspondant à la class envoyée en argument
      */
     public T getDaoFromType(Class beansClass) throws UnsupportedOperationException {
 
@@ -187,6 +191,20 @@ public class DAOFactory<T extends AbstrDao> {
         } else if (beansClass.equals(AnomalieCollecte.class)) {
             dao = (T) new DAOIncident<AnomalieCollecte>(this);
             dao.setClassAssocie(beansClass);
+        } else if (beansClass.equals(AliveIncident.class)) {
+            dao = (T) new DAOIncident<AliveIncident>(this);
+            dao.setClassAssocie(beansClass);
+        } else if (beansClass.equals(ServerIncident.class)) {
+            dao = (T) new DAOIncident<ServerIncident>(this);
+            dao.setClassAssocie(beansClass);
+        } else if (beansClass.equals(ServeurSlave.class)) {
+            dao = (T) new DAOServeurSlave(this);
+//)            dao = (T) new DAOGenerique(this);
+            dao.setClassAssocie(beansClass);
+        }
+        else if (beansClass.equals(JMSDiffusionIncident.class)){
+            dao = (T) new DAOIncident<JMSDiffusionIncident>(this);
+            dao.setClassAssocie(beansClass);
         }
 
         if (dao != null) {
@@ -198,34 +216,33 @@ public class DAOFactory<T extends AbstrDao> {
 
     /**
      * *
-     * Pour obtenir une permettant de gérer des incidents en rapport avec la
-     * tâche envoyé en argument. Exemple si on envoie une
-     * TacheLancerConnectionJMS, on obtient une
-     * DAOIncident<JMSPerteConnectionIncident>
+     * Pour obtenir une permettant de gérer des incidents en rapport avec la tâche envoyé en argument. Exemple si on
+     * envoie une TacheLancerConnectionJMS, on obtient une DAOIncident<JMSPerteConnectionIncident>
      *
      * @param tache
      * @return retourne la dao
-     * @throws UnsupportedOperationException  : si la tache envoyé n'inplémenta pas incidable ou si la factory n'est pas capable de générer une tao pour la tâche
+     * @throws UnsupportedOperationException : si la tache envoyé n'inplémenta pas incidable ou si la factory n'est pas
+     * capable de générer une tao pour la tâche
      */
-    /***
-     * 
+    /**
+     * *
+     *
      * @param tache
      * @return
-     * @throws TypeNotPresentException 
+     * @throws TypeNotPresentException
      */
-    public T getDAOFromTask(AbstrTacheSchedule tache)throws TypeNotPresentException{
+    public T getDAOFromTask(AbstrTacheSchedule tache) {
 
         IncidentFactory s = new IncidentFactory();
 
         if (Incidable.class.isAssignableFrom(tache.getClass())) {
-            logger.debug("incidable");
             Incidable cast = (Incidable) tache;
 
             Class incidClass = cast.getTypeIncident();
+            System.out.println("--> Tout va bien");
             return (T) getDaoFromType(incidClass);
-        }
-        else{
-                    throw new UnsupportedOperationException("La tâche envoyée n'est pas incidable."); //To change body of generated methods, choose Tools | Templates.
+        } else {
+            throw new UnsupportedOperationException("La tâche envoyée n'est pas incidable."); //To change body of generated methods, choose Tools | Templates.
         }
 
 

@@ -8,13 +8,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
-import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.traitement.Dedoubloneur;
 import rssagregator.beans.traitement.MediatorCollecteAction;
 import rssagregator.beans.traitement.Requester;
 import rssagregator.beans.traitement.RomeParse;
 
 /**
+ * Le formulaire permettant de valider et binder un beans MediatorCollecteAction
  *
  * @author clem
  */
@@ -45,7 +45,6 @@ public class ComportementCollecteForm extends AbstrForm {
             if (collecte.getDedoubloneur() == null) {
                 collecte.setDedoubloneur(new Dedoubloneur());
             }
-
             if (collecte.getParseur() == null) {
                 collecte.setParseur(new RomeParse());
             }
@@ -77,25 +76,26 @@ public class ComportementCollecteForm extends AbstrForm {
 
     @Override
     public Boolean validate(HttpServletRequest request) {
-        // recup du time out
         String s;
-                erreurs = new HashMap<String, String[]>();
+        erreurs = new HashMap<String, String[]>();
 
+        //-----------------------------------------------------------------------------
+        //...................RECUPERATION ET VALIDATION DES DONNEES
+        //-----------------------------------------------------------------------------
+
+        //-----------> TIME OUT
         s = request.getParameter("requester_time_out");
-//            collecte.getRequesteur().setTimeOut(PARAM_timeout);
         try {
             requester_time_out = new Integer(s);
         } catch (Exception e) {
         }
 
-
-        // Récup de la périodicité de collecte
+        //-----------> PERIODICITE DE COLLECTE 
         try {
             s = request.getParameter("periodiciteCollecte");
             periodiciteCollecte = new Integer(s);
         } catch (Exception e) {
         }
-
 
         String[] cle = request.getParameterValues("requestPropertyCle");
         String[] valeur = request.getParameterValues("requestPropertyValue");
@@ -108,92 +108,73 @@ public class ComportementCollecteForm extends AbstrForm {
                 }
             }
         }
-//        //Gestion du request properti
-//        s = request.getParameter("requestProperty");
-//        request.getpa
-//        collecte.getRequesteur().set
 
-
-
-        // dedoub_titre
+        //----------> DEDOUBLONNAGE TITE
         String dedoub_titre = request.getParameter("dedoub_titre");
         if (dedoub_titre == null || dedoub_titre.isEmpty()) {
             DeboubTitle = false;
-//            collecte.getDedoubloneur().setDeboubTitle(false);
         } else {
             DeboubTitle = true;
-//            collecte.getDedoubloneur().setDeboubTitle(true);
         }
 
-
-
-        // dedoub sur la description
+        //---------> DEDOUBLONNAGE DESCRIPTION
         s = request.getParameter("dedoub_description");
         if (s == null || s.isEmpty()) {
             DeboudDesc = false;
-//            collecte.getDedoubloneur().setDeboudDesc(false);ss
         } else {
             DeboudDesc = true;
-//            collecte.getDedoubloneur().setDeboudDesc(true);
         }
 
-
-        // dedoub sur le guid
+        //----------> DEDOUBLONNAGE GUUID
         s = request.getParameter("dedouGUID");
         if (s == null || s.isEmpty()) {
             dedouGUID = false;
-
         } else {
             dedouGUID = true;
-//            collecte.getDedoubloneur().setDedouGUID(true);
         }
 
-
+        //-------> DEDOUBLONNAGE LINK
         s = request.getParameter("dedoubLink");
         if (s == null || s.isEmpty()) {
             dedoubLink = false;
-//            collecte.getDedoubloneur().setDedoubLink(false);
         } else {
             dedoubLink = true;
-
         }
 
+        //-------> DEDOUBLONNAGE DATE PUBLICATION
+        //Rappel : on ne permet pas le dédoublonnage sur la date de récup car cette date varie par définition a chaque récupération...
         s = request.getParameter("dedoubDatePub");
         if (s == null || s.isEmpty()) {
             dedoubDatePub = false;
-//            collecte.getDedoubloneur().setDedoubDatePub(false);
         } else {
             dedoubDatePub = true;
-
         }
 
+        //-------> DEDOUBLONNAGE CATEGORIE
         s = request.getParameter("dedoubCategory");
         if (s == null || s.isEmpty()) {
             dedoubCategory = false;
-
         } else {
             dedoubCategory = true;
         }
 
-
         // Les paramettre propre au mediateur Comportement collect
-
+        //------------> NOM DU COMPORTEMENT
         s = request.getParameter("comportement_nom");
         if (s != null) {
             comportement_nom = s;
         }
 
+        //----------> DESCRIPTION DU COMPORTEMENT
         s = request.getParameter("comportement_desc");
         if (s != null) {
             comportement_desc = s;
             System.out.println("comportement_desc = " + comportement_desc);
-        }
-        else{
+        } else {
             System.out.println("comportement_desc = " + comportement_desc);
         }
 
-
-        // comportement par défaut
+        //----------> COMPORTEMNENT PAR DEFAUT
         s = request.getParameter("defaut");
         if (s == null || s.isEmpty()) {
             defaut = false;
@@ -201,13 +182,14 @@ public class ComportementCollecteForm extends AbstrForm {
             defaut = true;
         }
 
+        
+        //---------------------------------------------------------------
+        //---------------------------------------------------------------
         if (erreurs.isEmpty()) {
             this.setValide(true);
         } else {
             this.setValide(false);
         }
-        System.out.println("=====================================");
         return valide;
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

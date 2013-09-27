@@ -10,11 +10,16 @@ import javax.persistence.Entity;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import rssagregator.services.ServiceCollecteur;
 import rssagregator.services.TacheVerifComportementFLux;
 
 /**
- * Ce n'est pas à proprement parlé un incident. Lorsque le collecteur repère une
- * modification du comportement du flux il créer ce type d'incident.
+ * <p>Ce n'est pas à proprement parlé un incident. Lorsque le collecteur repère
+ * une modification du comportement du flux il créer ce type d'incident. Cette
+ * anomalie consiste en une hausse ou baisse journalière importante du nombre de
+ * capture.</p>
+ * <p>Cet incident est générer par le service : {@link ServiceCollecteur} en
+ * fonction des résultats de la tâche {@link TacheVerifComportementFLux}</p>
  *
  * @author clem
  */
@@ -22,38 +27,44 @@ import rssagregator.services.TacheVerifComportementFLux;
 public class AnomalieCollecte extends CollecteIncident {
 
 //    Map<Date, Integer> compteflux;
-    
-    /***
-     * A portériori, les administrateurs ont à déterminer si cette anomalie de collecte est normale ou si il s'agit d'une erreur technique du site.
+    /**
+     * *
+     * A portériori, les administrateurs ont à déterminer si l'anolalie détecté
+     * pour un flux est due à une erreur technique du site.
      */
     Boolean causeTechniqueSiteJournal;
-    
-    Boolean causeChangementLigneEditoriale;
-    
-
     /***
-     * Permet de construire le message de l'incident à partir de la tache. Le message est au format html
-     * @param task 
+     * A portériori, les administrateurs ont à déterminer si l'anolalie détecté
+     * pour un flux est due à un changement de ligne éditoriale du site.
      */
-    public void feedWithTask(TacheVerifComportementFLux task) {
+    Boolean causeChangementLigneEditoriale;
+
+    /**
+     * *
+     * Permet de construire le message de l'incident à partir de la tache. Le
+     * message est au format html
+     *
+     * @param task
+     */
+    public void feedMessageFromTask(TacheVerifComportementFLux task) {
 
         if (task != null && task.getResult() != null) {
             this.messageEreur = "<ul>";
-             DateTimeFormatter fmt = DateTimeFormat.forPattern("dd/MM/yyyy");
+            DateTimeFormatter fmt = DateTimeFormat.forPattern("dd/MM/yyyy");
             for (Map.Entry<Date, Integer> entry : task.getResult().entrySet()) {
                 Date date = entry.getKey();
                 DateTime dateDt = new DateTime(date);
                 Integer val = entry.getValue();
-                
-                if(date!=null && val != null){
-                    messageEreur+= fmt.print(dateDt)+". Nombre d'item : " + val.toString();
+
+                if (date != null && val != null) {
+                    messageEreur += fmt.print(dateDt) + ". Nombre d'item : " + val.toString();
                 }
             }
-            messageEreur+="</ul>";
-            messageEreur="<p>Moyenne attendu : "+task.getMoy()+"</p>";
-            messageEreur="<p>Seuil min attendu : "+task.getSeuilMax()+"</p>";
-            messageEreur="<p>Seuil max attendu : "+task.getSeuilMax()+"</p>";
-            
+            messageEreur += "</ul>";
+            messageEreur = "<p>Moyenne attendu : " + task.getMoy() + "</p>";
+            messageEreur = "<p>Seuil min attendu : " + task.getSeuilMax() + "</p>";
+            messageEreur = "<p>Seuil max attendu : " + task.getSeuilMax() + "</p>";
+
         }
     }
 
@@ -72,7 +83,4 @@ public class AnomalieCollecte extends CollecteIncident {
     public void setCauseChangementLigneEditoriale(Boolean causeChangementLigneEditoriale) {
         this.causeChangementLigneEditoriale = causeChangementLigneEditoriale;
     }
-    
-    
-    
 }

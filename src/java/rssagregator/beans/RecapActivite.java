@@ -6,22 +6,26 @@ package rssagregator.beans;
 
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoItem;
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import org.apache.poi.util.Beta;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.Period;
 import org.json.simple.JSONArray;
 
 /**
+ * <strong>Implémentation beta des correctif à effectuer</strong>
  * permet de stocker des donnée de issues du formulaire recapactivité. Cette
  * entitée n'est pas persistable dans la base de donnée
  *
  * @author clem
  */
+
+//TODO : Revoir le méchanisme de recap de l'activité avec affichage javascript. N'est pas un objectif prioritaire.
+@Beta
 public class RecapActivite {
 
     private List<Flux> listFlux;

@@ -6,6 +6,7 @@ package rssagregator.beans;
 
 import java.io.Serializable;
 import java.util.Date;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -28,26 +29,42 @@ import org.joda.time.format.DateTimeFormatter;
 @Entity
 public class FluxPeriodeCaptation implements Serializable {
 
-    @ManyToOne(optional = false)
-    private Flux flux;
-
-    public FluxPeriodeCaptation() {
-    }
-    /**
-     * *
-     * Date de début de la période de captation du flux
-     */
-    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
-    private Date dateDebut;
-    /**
-     * *
-     * Date de fin de la période de captation du flux
-     */
-    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
-    private Date datefin;
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long ID;
+    
+    
+    
+    /***
+     * Le flux concerné par cette période de captation
+     */
+    @ManyToOne(optional = false)
+    private Flux flux;
+
+    
+    /***
+     * Constructeur par défault.
+     */
+    public FluxPeriodeCaptation() {
+    }
+    
+    
+    /**
+     * *
+     * Date de début de la période de captation du flux. Ce champs ne peut être null
+     */
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    @Column(name = "dateDebut" , nullable = false)
+    private Date dateDebut;
+    /**
+     * *
+     * Date de fin de la période de captation du flux. Peut être null si la période est encore ouverte
+     */
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    private Date datefin;
+    
+    
+    
 
     public Long getID() {
         return ID;

@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import rssagregator.beans.FluxType;
-import rssagregator.beans.form.DAOGenerique;
+import rssagregator.dao.DAOGenerique;
 import rssagregator.beans.form.FluxTypeForm;
 import static rssagregator.servlet.ComportementCollecteSrvlt.ATT_SERV_NAME;
 import rssagregator.utils.ServletTool;

@@ -5,16 +5,42 @@
 package rssagregator.beans.incident;
 
 import javax.persistence.Entity;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
+import org.joda.time.DateTime;
+import org.joda.time.Duration;
+import rssagregator.services.TacheLancerConnectionJMS;
 
 /**
- * Incident créer lorsque la connection au service JMS est perdue. Tant que ce
- * la connection n'est pas retrouvé cet incident n'est pas clos et à chaque
- * nouvel échec on incremente le compteur nbrRepetition.
+ * <p>Incident générée par le service {@link ServerIncident} lorsque la tâche
+ * {@link TacheLancerConnectionJMS} ne parvient pas à étéblir la connection
+ * JMS</p>
+ * <p>L'incident est créé lorsque la connection au service JMS est perdue. Tant
+ * que ce la connection n'est pas retrouvé cet incident n'est pas clos et à
+ * chaque nouvel échec on incremente le compteur nbrRepetition.<p>
  *
  * @author clem
  */
 @Entity(name = "i_jmsperteconnectionincident")
 public class JMSPerteConnectionIncident extends SynchroIncident {
+
+    
+    /***
+     * Une perte de connection JMS ne doit être notifié par mail que si elle dure depuis 20 minutes
+     * @return 
+     */
+    @Override
+    public Boolean doitEtreNotifieParMail() {
+        DateTime dtCurrent = new DateTime();
+        DateTime dtDebut = new DateTime(this.dateDebut);
+        Duration dur = new Duration(dtDebut, dtCurrent);
+        if(dur.getStandardMinutes()>20){
+            return true;
+        }
+        else{
+            return false;
+        }
+        
+//        return super.doitEtreNotifieParMail(); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    
 }

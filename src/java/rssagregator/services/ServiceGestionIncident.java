@@ -26,11 +26,13 @@ import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.dao.DAOIncident;
 
 /**
+ * <strong>N'EST PLUS UTILISÉ LA GESTION DES INCIDENTS EST MAINTENANT INCLUE DANS LES SERVICES</strong>
  * Cette classe permet d'interpréter les exeptions renvoyées et de générer des
  * incidents qui seront persistés dans la base de données.
  *
  * @author clem
  */
+@Deprecated
 public class ServiceGestionIncident {
 
     protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(ServiceGestionIncident.class);
@@ -109,10 +111,10 @@ public class ServiceGestionIncident {
                 DAOFactory.getInstance().getDAOIncident().creer(incident);
 //                flux.getIncidentEnCours().add(incident);
                 flux.getIncidentsLie().add(incident);
-                            incident.EnregistrerAupresdesService();
-            incident.forceChangeStatut();
-     
-            incident.notifyObservers();
+//                            incident.EnregistrerAupresdesService();
+//            incident.forceChangeStatut();
+//     
+//            incident.notifyObservers();
                 
                 
             } catch (Exception ex1) {

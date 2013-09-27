@@ -25,19 +25,11 @@
 <div id="content">
     <div class="post">
 
-        <p>
-
-        </p>
-
         <c:choose>
             <c:when test="${not empty redirmap}">
                 <c:import url="/WEB-INF/redirJspJavascriptPart.jsp" />
             </c:when>
-
             <c:when test="${empty redirmap}">
-
-
-
                 <c:choose>
                     <c:when test="${action=='recherche'}">
                         <ul>
@@ -127,10 +119,6 @@
 
             </c:when>
         </c:choose>
-
-
-
-
 
     </div>
 </div>

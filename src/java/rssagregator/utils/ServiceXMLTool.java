@@ -55,24 +55,20 @@ public class ServiceXMLTool {
             Class cService = Class.forName(attributclass.getValue());
             Method serviceGetInstance = cService.getMethod("getInstance");
             AbstrService service = (AbstrService) serviceGetInstance.invoke(null, new Object[0]);
-            
-            
+
+
             //Définition du pool si précisé
             Element ElementPool = elementService.getChild("pool");
-            if(ElementPool!=null){
+            if (ElementPool != null) {
                 Attribute attNbThread = ElementPool.getAttribute("nbThread");
                 Integer nbThread = new Integer(attNbThread.getValue());
-                
+
                 Attribute attMethodeInstanciation = ElementPool.getAttribute("methodeInstanciation");
-                System.out.println("attMethodeInstanciation  = "+ attMethodeInstanciation.getValue());
-                Method methodFactory = Executors.class.getMethod(attMethodeInstanciation.getValue(), Integer.class);
-                
+                System.out.println("attMethodeInstanciation  = " + attMethodeInstanciation.getValue());
+                Method methodFactory = Executors.class.getMethod(attMethodeInstanciation.getValue(), int.class);
                 ScheduledExecutorService es = (ScheduledExecutorService) methodFactory.invoke(null, nbThread);
                 service.setExecutorService(es);
             }
-            
-            
-            
 
             // On instancie chaque tache
             List listTache = elementService.getChildren("tache");
@@ -82,9 +78,25 @@ public class ServiceXMLTool {
                 Attribute attClassTache = tacheElement.getAttribute("class");
                 System.out.println("CLASS TACHE : " + attClassTache.getValue());
                 Class cTache = Class.forName(attClassTache.getValue());
-                Object tache = cTache.newInstance();
-       
+                AbstrTacheSchedule castTache = (AbstrTacheSchedule) cTache.newInstance();
+                castTache.addObserver(service);
+//                AbstrTacheSchedule castTache = (AbstrTacheSchedule) tache;
+
                 // Paramettrage de la tache
+
+                // récupération du paramettre schedule. Si on ne le trouve pas la tache est considérée comme schedulé
+                Attribute attSchedule = tacheElement.getAttribute("scheduled");
+                if (attSchedule != null) {
+                    if (attSchedule.getValue().equals("true")) { 
+                        castTache.setSchedule(Boolean.TRUE);
+                    } else {
+                        castTache.setSchedule(Boolean.FALSE);
+                    }
+                } else {
+                    castTache.setSchedule(Boolean.TRUE);
+                }
+                
+                //Envoie de la tâche au service
 
                 Element elementJour = tacheElement.getChild("schedulejourfixe");
                 Element Elementscheduleduree = tacheElement.getChild("scheduleduree");
@@ -95,31 +107,28 @@ public class ServiceXMLTool {
                     Attribute attheure = elementJour.getAttribute("heure");
                     Attribute attminute = elementJour.getAttribute("minute");
 
-                    AbstrTacheSchedule castTache = (AbstrTacheSchedule) tache;
                     castTache.setJourSchedule(new Integer(attJour.getValue()));
                     castTache.setHeureSchedule(new Integer(attheure.getValue()));
                     castTache.setMinuteSchedule(new Integer(attminute.getValue()));
                     //On ajoute la tache au service. 
 
-                 
                     service.schedule(castTache);
 
-                } else if(Elementscheduleduree!=null) {
+                } else if (Elementscheduleduree != null) {
 //                    Elementscheduleduree = tacheElement.getChild("scheduleduree");
                     Attribute attnbSec = Elementscheduleduree.getAttribute("nbSeconde");
-                    AbstrTacheSchedule cast = (AbstrTacheSchedule) tache;
-                    cast.setTimeSchedule(new Integer(attnbSec.getValue()));
-                    service.schedule(cast);
-                }
-                else if(Elementtouslesjoura!=null){
+                    castTache.setTimeSchedule(new Integer(attnbSec.getValue()));
+                    service.schedule(castTache);
+                } else if (Elementtouslesjoura != null) {
                     Attribute attHeure = Elementtouslesjoura.getAttribute("heure");
                     Attribute attMinute = Elementtouslesjoura.getAttribute("minute");
-                    AbstrTacheSchedule castTache = (AbstrTacheSchedule) tache;
                     castTache.setHeureSchedule(new Integer(attHeure.getValue()));
                     castTache.setMinuteSchedule(new Integer(attMinute.getValue()));
                     castTache.setJourSchedule(null);
                     castTache.setTimeSchedule(null);
+                    service.schedule(castTache);
                 }
+
             }
             // On récupère la class
         }

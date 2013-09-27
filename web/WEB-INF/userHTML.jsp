@@ -32,9 +32,16 @@
             <c:when test="${empty redirmap}">
                 <c:choose>
                     <c:when test="${action=='add' or action=='mod'}">
-                        <c:if test="${action=='mod'}"><a href="${rootpath}user/rem?id=${bean.ID}">Supprimer l'utilisateur</a></c:if>
+                       
 
-                            <form id="form" method="POST">
+                        
+                        <c:choose>
+                            <c:when test="${action=='mod' and bean.rootAccount=='true'}">
+                                <p>Vous ne pouvez modifier le compte root depuis l'interface web. Veuillez modifier le fichier de configuration approprié</p>
+                            </c:when>
+                            <c:when test="${action=='add' or action=='mod' and bean.rootAccount=='false'}">
+                                 <c:if test="${action=='mod'}"><a href="${rootpath}user/rem?id=${bean.ID}">Supprimer l'utilisateur</a></c:if>
+                                      <form id="form" method="POST">
 
                                 <label title="Champ utilisé à titre informatif">Nom de l'utilisateur : </label>
                                 <input type="text" name="username" value="${bean.username}" />
@@ -45,7 +52,6 @@
 
                             <label>Administrateur : </label>
                             <input type="checkbox" name="adminstatut"<c:if test="${bean.adminstatut=='true'}"> checked="checked"</c:if> /><br />
-                            
                             <label>Reçoit les mails d'alerte :</label>
                             <input type="checkbox" name="adminMail" <c:if test="${bean.adminMail=='true'}">checked="checked"</c:if>/> 
                             <span class="erreur">${form.erreurs['adminMail'][1]}</span><br />
@@ -62,6 +68,10 @@
                         </form>          
                         <!--script permettant la gestion du changement de mot de pass-->
                         <script src="${rootpath}changePass.js"></script> 
+                            </c:when>
+                            
+                        </c:choose>
+                      
 
                     </c:when>
                     <c:when test="${action=='recherche'}">
@@ -73,9 +83,11 @@
                     </c:when>
                     <c:when test="${action=='read'}">
                         <div><a href="${rootpath}user/mod?id=${bean.ID}">EDITER</a></div>
+                        
+                        <p><strong>Nom : </strong> ${bean.username}</p>
                         <p><strong>Email : </strong> ${bean.mail}</p>
-
                         <p><strong>Administrateur : </strong> <c:if test="${bean.adminstatut=='true'}">OUI</c:if><c:if test="${bean.adminstatut=='false'}">NON</c:if></p>
+                        <p><strong>Compte root : </strong> <c:if test="${bean.rootAccount=='true'}">OUI</c:if><c:if test="${bean.rootAccount=='false'}">NON</c:if></p>
                     </c:when>
                     <c:when test="${action=='ident'}">
                         <form method="POST">

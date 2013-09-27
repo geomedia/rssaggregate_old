@@ -10,7 +10,6 @@ import java.lang.reflect.Method;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.Id;
-import rssagregator.beans.form.AbstrForm;
 
 /**
  *      Cette classe n'est plus utilisé. Elle était pensée comme une classe mère à tous les beans. Mais comme certain beans doivent implémenter Observable On a préféré s'en passer

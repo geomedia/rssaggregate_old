@@ -20,6 +20,7 @@ import javax.mail.internet.InternetAddress;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import rssagregator.beans.UserAccount;
+import rssagregator.beans.exception.UnIncidableException;
 import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.Incidable;
 import rssagregator.beans.incident.IncidentFactory;
@@ -151,6 +152,7 @@ public class ServiceMailNotifier extends AbstrService {
                             // Pour chacun de ces incident il faut modifier la date de last update
                             synchronized (abstrIncident) {
                                 abstrIncident.setLastNotification(new Date());
+                                abstrIncident.setNotificationImperative(false);
                                 DAOIncident<AbstrIncident> dao = (DAOIncident<AbstrIncident>) DAOFactory.getInstance().getDaoFromType(AbstrIncident.class);
                                 try {
                                     dao.modifier(abstrIncident);
@@ -304,6 +306,8 @@ public class ServiceMailNotifier extends AbstrService {
             } catch (InstantiationException ex) {
                 Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IllegalAccessException ex) {
+                Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
+            }  catch (UnIncidableException ex) {
                 Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
             }
 

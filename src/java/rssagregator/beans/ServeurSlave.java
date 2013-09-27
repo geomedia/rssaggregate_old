@@ -1,25 +1,56 @@
 package rssagregator.beans;
 
 import java.io.Serializable;
-import java.util.Date;
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Temporal;
-//@Entity
-public class ServeurSlave implements Serializable{
+
+/**
+ * *
+ * Entité permettant de stocker les informations relatives aux serveurs esclaves associées au serveur maitre. Cette
+ * entité est persisté dans le fichier conf.properties <strong>(PAS DANS LA BASE DE DONNEES)</strong>.
+ *
+ * @author clem
+ */
+@Entity
+public class ServeurSlave implements Serializable {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
-    @Column
-    private String host;
+    private Long ID;
     
-    private String url;
+    /***
+     * Host du serveur esclave un DNS ou une adresse IP
+     */
+    @Column(name = "servHost")
+    protected String servHost;
     
-    private String login;
-    private String pass;
+    /***
+     * URL de l'appligation Agregate sur le serveur esclave. Exemple : http://ip/RSSAgregate. 
+     */
+    @Column(name = "url")
+    protected String url;
+    
+    /***
+     * login root sur le serveur esclave
+     */
+    @Column(name = "login")
+    protected String login;
+    
+    /***
+     * Mot de passe à utiliser pour se connecter au serveur esclave et effectuer la synchronisation.
+     */
+    @Column(name = "pass")
+    protected String pass;
+    
+    
+    /***
+     * Un champ informatif permettant aux administrateur de décrire le serveur.
+     */
+    @Column(name = "description")
+    protected String description;
 
     public String getLogin() {
         return login;
@@ -36,29 +67,51 @@ public class ServeurSlave implements Serializable{
     public void setPass(String pass) {
         this.pass = pass;
     }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
     
     
-    /***
-     * La date pour laquelle il faut faire la synchronisation ntre le serveur maitre et esclave
+    
+    
+    /**
+     * *
+     * La date pour laquelle il faut faire la synchronisation ntre le serveur maitre et esclave ---> Maintenant c'est la configuration de la tache qui permet de définir cela
      */
-    @Temporal(javax.persistence.TemporalType.DATE)
-    private Date dateRecup;
-
-    public Long getId() {
-        return id;
+    //    @Temporal(javax.persistence.TemporalType.DATE)
+    //    private Date dateRecup;
+    public Long getID() {
+        return ID;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setID(Long ID) {
+        this.ID = ID;
     }
 
-    public String getHost() {
-        return host;
+
+    
+    
+
+    //    public String getHost() {
+    //        return host;
+    //    }
+    //
+    //    public void setHost(String host) {
+    //        this.host = host;
+    //    }
+    public String getServHost() {
+        return servHost;
     }
 
-    public void setHost(String host) {
-        this.host = host;
+    public void setServHost(String servHost) {
+        this.servHost = servHost;
     }
+    
 
     public String getUrl() {
         return url;
@@ -68,24 +121,17 @@ public class ServeurSlave implements Serializable{
         this.url = url;
     }
 
-
-
-    public Date getDateRecup() {
-        return dateRecup;
-    }
-
-    public void setDateRecup(Date dateRecup) {
-        this.dateRecup = dateRecup;
-    }
-
-
+//    public Date getDateRecup() {
+//        return dateRecup;
+//    }
+//
+//    public void setDateRecup(Date dateRecup) {
+//        this.dateRecup = dateRecup;
+//    }
 
     @Override
     public String toString() {
-        
-        return login+":"+pass+"@"+host+ "  "+ url;
+
+        return login + ":" + pass + "@" + servHost + "  " + url;
     }
-    
-    
-    
 }

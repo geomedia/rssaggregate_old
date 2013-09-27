@@ -24,6 +24,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import rssagregator.beans.Conf;
 import rssagregator.beans.Flux;
+import rssagregator.beans.exception.UnIncidableException;
 import rssagregator.beans.incident.AnomalieCollecte;
 import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.beans.incident.Incidable;
@@ -194,7 +195,7 @@ public class ServiceCollecteur extends AbstrService {
                         AnomalieCollecte anomalie = new AnomalieCollecte();
                         anomalie.setDateDebut(new Date());
                         anomalie.setFluxLie(cast.getFlux());
-                        anomalie.feedWithTask(cast);
+                        anomalie.feedMessageFromTask(cast);
                         try {
                             DAOFactory.getInstance().getDaoFromType(AnomalieCollecte.class).creer(anomalie);
                         } catch (Exception ex) {
@@ -510,6 +511,8 @@ public class ServiceCollecteur extends AbstrService {
                     Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (IllegalAccessException ex) {
                     Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (UnIncidableException ex) {
+                    Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
 

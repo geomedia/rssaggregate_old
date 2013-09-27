@@ -20,7 +20,7 @@ import org.apache.tomcat.util.buf.HexUtils;
  * @author clem
  */
 @Entity
-public class UserAccount implements Serializable, BeanSynchronise{
+public class UserAccount implements Serializable, BeanSynchronise {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -35,17 +35,31 @@ public class UserAccount implements Serializable, BeanSynchronise{
     private String pass;
     @Column(name = "adminstatut")
     private Boolean adminstatut;
-    
-    
+    /**
+     * *
+     * Le nom d'utilisateur. Il est purement informatif, c'est le mail qui est
+     * utilisé pour l'identification des utilisateurs
+     */
+    @Column(name = "username")
     private String username;
-    /***
-     * Boolean qui permet de déterminer si ce compte doit recevoir les mails d'alerte du système.
+    /**
+     * *
+     * Le root account ne peut être modifié depuis l'interface utilisateur. Pour
+     * changer son mot de pass ou un quelconque parametre, il faut passer par le
+     * fichier conf.properties. Le compte root account est celui utilisé pour la
+     * récupération des données lors de la synchronisation interserveur.
+     */
+    private Boolean rootAccount;
+    /**
+     * *
+     * Boolean qui permet de déterminer si ce compte doit recevoir les mails
+     * d'alerte du système.
      */
     private Boolean adminMail;
-    
 
     public UserAccount() {
         adminstatut = Boolean.FALSE;
+        rootAccount = Boolean.FALSE;
     }
 
     public Long getID() {
@@ -95,7 +109,14 @@ public class UserAccount implements Serializable, BeanSynchronise{
     public void setAdminMail(Boolean adminMail) {
         this.adminMail = adminMail;
     }
-    
+
+    public Boolean getRootAccount() {
+        return rootAccount;
+    }
+
+    public void setRootAccount(Boolean rootAccount) {
+        this.rootAccount = rootAccount;
+    }
     
     
     
@@ -190,30 +211,24 @@ public class UserAccount implements Serializable, BeanSynchronise{
 
     @Override
     public String toString() {
-        if(username != null && !username.isEmpty()){
+        if (username != null && !username.isEmpty()) {
             return username;
-        }
-//        if((mail==null || mail.isEmpty()) || (username!=null && username.isEmpty())){
-//            return username;
-//        }
-        else if(mail!=null && !mail.isEmpty()){
+        } //        if((mail==null || mail.isEmpty()) || (username!=null && username.isEmpty())){
+        //            return username;
+        //        }
+        else if (mail != null && !mail.isEmpty()) {
             return mail;
-        }
-        else {
+        } else {
             return "??";
         }
     }
 
     @Override
     public Boolean synchroImperative() {
-        if(this.username.equals("root")){
+        if (this.username.equals("root")) {
             return false;
         }
         return true;
-        
+
     }
-    
-    
-    
-    
 }

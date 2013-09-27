@@ -14,15 +14,15 @@ import javax.persistence.OneToMany;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
 
 /**
- * Les types de flux sont associé aux flux. Un type de flux corresponds aux
+ * <p>Les types de flux sont associé aux flux. Un type de flux corresponds aux
  * catégorie génériques des journaux : internationnal, politique, a la une,
- * environnement... Les type de flux doivent être enregistré auprès du service
- * JMS. Pour cela un utilise le pattern observer. Le beans est ainsi un
- * observable qui a pour observer le service JMS
+ * environnement... </p>
+ * <p>Les types flux implémentents l'interface {@link BeanSynchronise} car leur changement d'état doivent être répercuté sur les serveur esclave.</p>
  */
+
 @Entity
 @Cacheable(value = false)
-public class FluxType implements Serializable {
+public class FluxType implements Serializable, BeanSynchronise {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -41,15 +41,10 @@ public class FluxType implements Serializable {
     @Column(name = "description")
     private String description;
     
-    
-    /**
-     * Le type du flux (international, a la une etc...). Les types de flux sont
-     * des beans. ils sont persisté dans la base de données
-     *
-     * @element-type Flux
+        
+    /***
+     * Les flux liés au TypeFlux
      */
-//    @OneToMany(mappedBy = "typeFlux", cascade = {CascadeType.MERGE})
-//    @Transient
     @CascadeOnDelete
     @OneToMany(mappedBy = "typeFlux", cascade = {CascadeType.DETACH, CascadeType.REFRESH})
     private List<Flux> fluxLie;
@@ -89,6 +84,9 @@ public class FluxType implements Serializable {
     
     
 
+    /***
+     * Constructeur par défault. Initialise les arrayList
+     */
     public FluxType() {
         this.fluxLie = new ArrayList<Flux>();
     }
@@ -102,6 +100,10 @@ public class FluxType implements Serializable {
 //        this.addObserver(ServiceSynchro.getInstance());
 //    }
 
+    /***
+     * Retourne la dénomination du flux ou "??" si cette dénomination n'existe pas.
+     * @return chaine de caractère
+     */
     @Override
     public String toString() {
         if (this.denomination != null && !this.denomination.isEmpty()) {
@@ -110,5 +112,14 @@ public class FluxType implements Serializable {
         else{
             return "??";
         }
+    }
+
+    /***
+     * Retourne true car toute modification d'un {@link FluxType} doit systématiquement être répercuté sur les serveur esclaves.
+     * @return 
+     */
+    @Override
+    public Boolean synchroImperative() {
+        return true;
     }
 }

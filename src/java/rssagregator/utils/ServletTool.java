@@ -235,7 +235,7 @@ public class ServletTool {
                     if (bean instanceof Flux) {
                         Flux ff = (Flux) bean;
                         System.out.println("FLUX URL3 : " + ff.getUrl());
-                    } 
+                    }
 
 
                     if (notifiObserver && AbstrObservableBeans.class.isAssignableFrom(bean.getClass())) {
@@ -244,7 +244,14 @@ public class ServletTool {
                         b.forceChangeStatut();
                         b.notifyObservers();
                     }
-                    redir(request, srlvtname + "/mod?id=" + id, "Traitement Effectué : ", Boolean.FALSE);
+                    //Si un type est précisé
+                    String type = request.getParameter("type");
+                    if (type == null) {
+                        redir(request, srlvtname + "/mod?id=" + id, "Traitement Effectué : ", Boolean.FALSE);
+                    }
+                    else{
+                        redir(request, srlvtname + "/mod?id=" + id+"&type="+type, "Traitement Effectué : ", Boolean.FALSE);
+                    }
 
                 }
             }
@@ -263,7 +270,6 @@ public class ServletTool {
         String srlvtname = (String) request.getAttribute("srlvtname");
         System.out.println("--->>>>>> ADD ");
         try {
-            String id = request.getParameter("id");
             Object o = null;
 
             AbstrForm form = FORMFactory.getInstance().getForm(beansClass);

@@ -18,11 +18,11 @@ import rssagregator.beans.Flux;
 import rssagregator.beans.RecapActivite;
 
 /**
- *
+ * L'affichage du récapitulatif de l'activité est a refaire. Cette class va surement subir des modifications
  * @author clem
  */
 public class RecapActiviteForm extends AbstrForm {
-
+//TODO : Refaire la visualisation de l'activité. Le formulaire sera surement à modifier.
     protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DaoItem.class);
     private Date date1;
     private Date date2;
