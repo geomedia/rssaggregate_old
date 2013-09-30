@@ -1,6 +1,7 @@
 package rssagregator.beans.traitement;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import javax.persistence.Entity;
 import org.apache.log4j.Logger;
@@ -35,7 +36,21 @@ public class Dedoubloneur extends AbstrDedoublonneur {
         listRetour.addAll(listItemCapture);
         compteCapture[0]= listItemCapture.size();
 
-        // dédoublonnage basé sur les hash en mémoire.
+        // dédoublonnage basé sur les hash en mémoire.       
+        
+//        List<String> listLastEmprunte = flux.getLastEmpruntes();
+//        for (Iterator<String> it = listLastEmprunte.iterator(); it.hasNext();) {
+//            String string = it.next();
+//            // On parcours toutes les items capturée.
+//            for (Iterator<Item> it1 = listItemCapture.iterator(); it1.hasNext();) {
+//                Item item = it1.next();
+//                if(item.getHashContenu().equals(string)){
+//                    it1.remove();
+//                }
+//            }
+//        }
+        
+        
         for (i = 0; i < flux.getLastEmpruntes().size(); i++) {
             String umprunteItemDsFlux = flux.getLastEmpruntes().get(i);
 

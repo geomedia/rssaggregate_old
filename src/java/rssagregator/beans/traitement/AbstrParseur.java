@@ -35,7 +35,7 @@ public class AbstrParseur implements Serializable, Cloneable,  Callable<List<Ite
     private Long ID;
     
         @Transient
-    InputStream xmlIS;
+    InputStream inputStream;
 
 
 
@@ -56,13 +56,15 @@ public class AbstrParseur implements Serializable, Cloneable,  Callable<List<Ite
         this.ID = ID;
     }
 
-    public InputStream getXmlIS() {
-        return xmlIS;
+    public InputStream getInputStream() {
+        return inputStream;
     }
 
-    public void setXmlIS(InputStream xmlIS) {
-        this.xmlIS = xmlIS;
+    public void setInputStream(InputStream inputStream) {
+        this.inputStream = inputStream;
     }
+
+
     
     
 
@@ -73,7 +75,7 @@ public class AbstrParseur implements Serializable, Cloneable,  Callable<List<Ite
 
     @Override
     public List<Item> call() throws Exception {
-       return execute(xmlIS);
+       return execute(inputStream);
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
  

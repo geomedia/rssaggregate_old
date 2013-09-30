@@ -5,7 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -25,23 +26,19 @@ import javax.persistence.Transient;
 import javax.xml.ws.http.HTTPException;
 import org.apache.poi.util.Beta;
 import rssagregator.beans.BeanSynchronise;
-import rssagregator.beans.DebugRecapLeveeFlux;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoItem;
 
 /**
- * Cette classe gère les relations entre un ou plusieurs flux et les differents
- * objets de traitement(parseurs, raffinneurs...). Il est ainsi possible de
- * créer plusieurs comportement de collecte et de les concerver (ces
- * comportements sont persistés dans la base de données). Un flux n'est associé
- * qu'à un comportement de collecte. Il est possible d'obtenir le comportement
- * par defaut, celui ci est écrit en dur dans le code. La méthode static
- * getDefaultCollectAction retourne une instance de ce mediateur par défault.
- * Celui ci doit permettre de collecter sans préciser de configuration la
- * majorité des flux. Si aucun médiator n'est associé à un flux c'est par le
- * biais de cette méthode qu'on va obtenir le comportement par défault
+ * Cette classe gère les relations entre un ou plusieurs flux et les differents objets de traitement(parseurs,
+ * raffinneurs...). Il est ainsi possible de créer plusieurs comportement de collecte et de les concerver (ces
+ * comportements sont persistés dans la base de données). Un flux n'est associé qu'à un comportement de collecte. Il est
+ * possible d'obtenir le comportement par defaut, celui ci est écrit en dur dans le code. La méthode static
+ * getDefaultCollectAction retourne une instance de ce mediateur par défault. Celui ci doit permettre de collecter sans
+ * préciser de configuration la majorité des flux. Si aucun médiator n'est associé à un flux c'est par le biais de cette
+ * méthode qu'on va obtenir le comportement par défault
  */
 @Entity
 @Table(name = "tr_mediatocollecteaction")
@@ -55,24 +52,21 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
     @Transient
     Boolean persister;
     /**
-     * Le nom du comportement. Il est préférable de nommer les médiators afin de
-     * les réutiliszzer par la suite. Exemple : "captation des flux devant être
-     * parser par X" ou "flux contenant des renvoie génant"
+     * Le nom du comportement. Il est préférable de nommer les médiators afin de les réutiliszzer par la suite. Exemple
+     * : "captation des flux devant être parser par X" ou "flux contenant des renvoie génant"
      */
     @Column(name = "nom")
     private String nom;
     /**
-     * On laisse la possibilité de décrire plus longuement le comportement de
-     * capture
+     * On laisse la possibilité de décrire plus longuement le comportement de capture
      */
     @Column(name = "description", columnDefinition = "text")
     private String description;
     /**
      * *
      * <p>Cette variable n'est pas encore correctement implémenté et va peut être être abandonnée.</p>
-     * Parmis toute les entités, une est considérée comme le comportement de
-     * collecte par defaut, ce boolean permet de déterminer ce comportement par
-     * défaut.
+     * Parmis toute les entités, une est considérée comme le comportement de collecte par defaut, ce boolean permet de
+     * déterminer ce comportement par défaut.
      */
     @Beta
     @Column(name = "defaut")
@@ -84,14 +78,13 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
     @OneToOne(cascade = CascadeType.ALL)
     private AbstrParseur parseur;
     /**
-     * Le requesteur propre au médiateur. C'est l'objet qui permet de formuler
-     * des requêtes http
+     * Le requesteur propre au médiateur. C'est l'objet qui permet de formuler des requêtes http
      */
     @OneToOne(cascade = CascadeType.ALL)
     private AbstrRequesteur requesteur;
     /**
-     * Le mediator flux permet d'assigner un flux un comportement de collecte.
-     * Un médiator est une configuration de parseur Raffineur etc.
+     * Le mediator flux permet d'assigner un flux un comportement de collecte. Un médiator est une configuration de
+     * parseur Raffineur etc.
      *
      * @element-type Flux
      */
@@ -101,9 +94,8 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
 //    public List<Flux> listeFlux;
     /**
      * *
-     * Les médiateur raffineurs associées au médiateur de collecte. les
-     * raffineurs vont être très souvent réutilisé d'ou l'emploi d'un médiateur
-     * pour les manier
+     * Les médiateur raffineurs associées au médiateur de collecte. les raffineurs vont être très souvent réutilisé d'ou
+     * l'emploi d'un médiateur pour les manier
      */
 //    @Transient    LE RAFFINAGE NEST PLUS CONSIDÉRÉ COMME UN TRAITEMENT DE COLECTE; IL N'EST DESTINEE QUA FAIRE DES EXPORT EN CSV
 //    private List<MediatorTraitementRafinage> rafineurHTML;
@@ -121,141 +113,189 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
     protected AbstrDedoublonneur dedoubloneur;
     @Transient
     private Integer nbrItemCollecte;
-    
-        /**
+    /**
      * Nombre de secondes séparant deux moissonage du flux
      */
     @Column(name = "periodiciteCollecte")
     private Integer periodiciteCollecte;
-    
-    
+    /**
+     * *
+     * Une liste des items capturé par le comportement de collecte
+     */
+    @Transient
+    protected List<Item> listItem;
 
     /**
-     * Le médiator utilise tout les objets de service pour effectuer l'action
-     * sur le flux. Le traitement va produire les Items rafinées pour toutes les
-     * items du flux Le boolleen permet de préciser si il faut persister ou non
-     * les traitements effectués. le fait de ne pas persister permet de tester
-     * l'action d'un médiateur. Rien n'est persisté dans la base de données. La
-     * liste des hash n'est pas mise à jour. Seul la listDernierItemCollecte est
-     * mis à jours afin que coté JEE on puisse présenter des résultats.
+     * Le médiator récolte les item les parse et les dédoublonne.
      */
     public List<Item> executeActions(Flux flux) throws MalformedURLException, IOException, HTTPException, FeedException, HTTPException, Exception {
 // On vérifie si le collecteur est actif. Pour lancer la collecte
         // On commence par récupérer le flux
+        InputStream retourInputStream = null;
+        ExecutorService executor = null;
+        try {
+            //-----------------------
+            // REQUESTEUR
+            //-----------------------
 
-        //-----------------------
-        // REQUESTEUR
-        //-----------------------
-        System.out.println("Execute Ici OK");
-        if (requesteur.timeOut == null) {
-            requesteur.timeOut = 15;
-            System.out.println("");
-        }
-        this.requesteur.requete(flux.getUrl());
-        InputStream retourInputStream = this.requesteur.getHttpInputStream();
-        
+            if (requesteur != null) {
+                if (requesteur.timeOut == null) {
+                    requesteur.timeOut = 15;
+                }
+                this.requesteur.requete(flux.getUrl());
+                retourInputStream = this.requesteur.getHttpInputStream();
+                if (parseur != null) {
+                    parseur.setInputStream(retourInputStream);
+                }
+            }
+            //-----------------------------
+            //  Parseur
+            //-----------------------------
+            // On parse le retour du serveur. Le parseur doit se comporter comme une thread car il faut limiter le temps d'execution. Très facile avec un runnable.
+            executor = Executors.newFixedThreadPool(1);
+            listItem = new ArrayList<Item>();
+            Future<List<Item>> futurs;
 
-        //-----------------------------
-        //  Parseur
-        //-----------------------------
-        // On parse le retour du serveur. Le parseur doit se comporter comme une thread car il faut limiter le temps d'execution. Très facile avec un runnable.
-        parseur.setXmlIS(retourInputStream);
-
-        ExecutorService executor = Executors.newFixedThreadPool(1);
-        Future<List<Item>> futurs = executor.submit(parseur);
-        logger.debug("3 - OKI JUSQUE la");
-        
-        
-        List<Item> listItem = futurs.get(requesteur.getTimeOut(), TimeUnit.SECONDS);
-        executor.shutdownNow();
-        this.nbrItemCollecte = listItem.size();
-
-        //-----------------------------
-        //  Dedoublonneur
-        //-----------------------------
-
-        // calcul des Md5
-        this.dedoubloneur.calculHash(listItem);
-        listItem = this.dedoubloneur.dedoublonne(listItem, flux);
-
-
-        //----------------------------------------------
-        //   Enregistrement des résultats
-        //----------------------------------------------
-
-        // On enregistre ces nouvelles items
-        int i;
-        DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
-        for (i = 0; i < listItem.size(); i++) {
-            System.out.println("ITEMM");
-            //On précise à la nouvelle item qu'elle appartient au flux collecté
-            listItem.get(i).getListFlux().add(flux);
-//                if (persit) {
-            try {
-                daoItem.enregistrement(listItem.get(i), flux);
-            } catch (Exception e) {
-                logger.error("Catch d'une errreur dans l'enregistrement d'un item");
+            futurs = executor.submit(parseur);
+            if (requesteur == null) {
+                listItem = futurs.get(12, TimeUnit.SECONDS);
+            } else {
+                listItem = futurs.get(requesteur.getTimeOut(), TimeUnit.SECONDS);
             }
 
-//                    this.flux.getLastEmpruntes().add(0, nouvellesItems.get(i).getHashContenu());
-//                }
-        }
+            System.out.println("SIZE 1 : " + this.listItem.size());
+            this.nbrItemCollecte = listItem.size();
 
 
-        // On supprime des hash pour éviter l'accumulation. On en laisse 10 en plus du nombre d'item contenues dans le flux.
-        Integer nbr = flux.getMediatorFluxAction().getDedoubloneur().getCompteCapture()[0] + 10;
-        if (nbr > 0 && nbr < flux.getLastEmpruntes().size()) {
-            for (i = nbr; i < flux.getLastEmpruntes().size(); i++) {
-                flux.getLastEmpruntes().remove(i);
+            //-----------------------------
+            //  Dedoublonneur
+            //-----------------------------
+
+            // calcul des Md5
+            if (dedoubloneur != null) {
+                this.dedoubloneur.calculHash(listItem);
+                listItem = this.dedoubloneur.dedoublonne(listItem, flux);
+            }
+
+        } catch (Exception e) {
+            logger.info("erreur lors de lu traitement : " + e);
+            throw e; // On remonte l'erreur. Elle sera traité par le service en passant par la tâche
+        } finally {
+            // Quoi qu'il arrive, il faut fermer la connection. et détruire le pool du parseur. 
+            if (requesteur != null) {
+                this.requesteur.disconnect();
+            }
+            if (executor != null) {
+                executor.shutdownNow();
             }
         }
 
-        //Devra être supprimé à la fin
-        DebugRecapLeveeFlux debug = new DebugRecapLeveeFlux();
-        debug.setDate(new Date());
-        debug.setNbrRecup(listItem.size());
-        flux.getDebug().add(debug);
 
 
-//        // TODO le fait de réajouté la tache doit aussi être géré par le service de gestion des incidents
-//        // Si il s'agit d'une tache schedule, il faut la réajouter au scheduler
-//        if (flux.getActive()) {
-//            ServiceCollecteur.getInstance().addScheduledCallable(this);
-//            ServiceCollecteur.getInstance().addScheduledCallable(null);
+
+
+//        //----------------------------------------------
+//        //   Enregistrement des résultats  >> C'est maintenant une tâche séparée
+//        //----------------------------------------------
+//
+//        // On enregistre ces nouvelles items
+//        int i;
+//        DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
+//        for (i = 0; i < listItem.size(); i++) {
+//            System.out.println("ITEMM");
+//            //On précise à la nouvelle item qu'elle appartient au flux collecté
+//            listItem.get(i).getListFlux().add(flux);
+////                if (persit) {
+//            try {
+//                daoItem.enregistrement(listItem.get(i), flux);
+//            } catch (Exception e) {
+//                logger.error("Catch d'une errreur dans l'enregistrement d'un item");
+//            }
+//
+////                    this.flux.getLastEmpruntes().add(0, nouvellesItems.get(i).getHashContenu());
+////                }
+//        }
+//
+//
+//        // On supprime des hash pour éviter l'accumulation. On en laisse 10 en plus du nombre d'item contenues dans le flux.
+//        Integer nbr = flux.getMediatorFluxAction().getDedoubloneur().getCompteCapture()[0] + 10;
+//        if (nbr > 0 && nbr < flux.getLastEmpruntes().size()) {
+//            for (i = nbr; i < flux.getLastEmpruntes().size(); i++) {
+//                flux.getLastEmpruntes().remove(i);
+//            }
+//        }
+//
+//
+//
+////        // TODO le fait de réajouté la tache doit aussi être géré par le service de gestion des incidents
+////        // Si il s'agit d'une tache schedule, il faut la réajouter au scheduler
+////        if (flux.getActive()) {
+////            ServiceCollecteur.getInstance().addScheduledCallable(this);
+////            ServiceCollecteur.getInstance().addScheduledCallable(null);
+////        }
+//
+//        // On supprimer les items capturée du cache de l'ORM pour éviter l'encombrement
+//        for (i = 0; i < listItem.size(); i++) {
+//            DAOFactory.getInstance().getEntityManager().detach(listItem.get(i));
 //        }
 
-        // On supprimer les items capturée du cache de l'ORM pour éviter l'encombrement
-        for (i = 0; i < listItem.size(); i++) {
-            DAOFactory.getInstance().getEntityManager().detach(listItem.get(i));
-        }
-        
-
-        this.requesteur.disconnect();
         return listItem;
     }
-    
-    
-    /***
-     * Méthode assez semblable à executeAction. Au lieu d'aller chercher le contenu dans un flux. C'est le fichier CSV
-     * @return 
-     */
-    public List<Flux> importFromCsv(){
-        throw new UnsupportedOperationException("pas implémenté");
-    }
-    
-    
 
     /**
-     * Test le résultat du médiator sur le flux envoyé. On utilise maintenant
-     * executeAction avec false en persistance
+     * *
+     * Enregistre la liste des items relevées dans la base de données
+     *
+     * @param flux : le flux pour lequel la liste des items doit être enregistrée
+     */
+    public void persiter(Flux flux) {
+
+        if (listItem.size() > 0) {
+            int i;
+            DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
+            for (i = 0; i < listItem.size(); i++) {
+                System.out.println("ITEMM");
+                //On précise à la nouvelle item qu'elle appartient au flux collecté
+                listItem.get(i).getListFlux().add(flux);
+//                if (persit) {
+                try {
+                    daoItem.enregistrement(listItem.get(i), flux);
+                } catch (Exception e) {
+                    logger.error("Catch d'une errreur dans l'enregistrement d'un item");
+                }
+//                    this.flux.getLastEmpruntes().add(0, nouvellesItems.get(i).getHashContenu());
+//                }
+            }
+
+
+            // On supprime des hash pour éviter l'accumulation. On en laisse 10 en plus du nombre d'item contenues dans le flux.
+//        Integer nbr = flux.getMediatorFluxAction().getDedoubloneur().getCompteCapture()[0] + 10;
+            Integer nbr = this.dedoubloneur.getCompteCapture()[0] + 10;
+            if (nbr > 0 && nbr < flux.getLastEmpruntes().size()) {
+                Iterator<String> iterator = flux.getLastEmpruntes().iterator();
+                for (Iterator<Item> it = listItem.iterator(); it.hasNext();) {
+                    Item item = it.next();
+                    it.remove();
+                }
+            }
+
+
+            // On supprimer les items capturée du cache de l'ORM pour éviter l'encombrement
+            for (i = 0; i < listItem.size(); i++) {
+                DAOFactory.getInstance().getEntityManager().detach(listItem.get(i));
+            }
+        }
+    }
+
+    /**
+     * Test le résultat du médiator sur le flux envoyé. On utilise maintenant executeAction avec false en persistance
      */
     public void Obsolete_test(Flux flux) {
     }
 
     /**
-     * Retourne un objet mediator par default. Il permet de répondre à 95% des
-     * flux en se basant sur le parse par defaut de l'API Rome, le connecteur
-     * standart....
+     * Retourne un objet mediator par default. Il permet de répondre à 95% des flux en se basant sur le parse par defaut
+     * de l'API Rome, le connecteur standart....
      */
     public static MediatorCollecteAction getDefaultCollectAction() {
         MediatorCollecteAction collecteAction = new MediatorCollecteAction();
@@ -279,9 +319,8 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
 
     /**
      * *
-     * Retourne le nom du médiateur, c'est l'utilisateur qui doit nommer le
-     * médiator qu'il a créé. Ce champs est ainsi modifiable depuis l'espace
-     * d'administration de l'aggrégateur.
+     * Retourne le nom du médiateur, c'est l'utilisateur qui doit nommer le médiator qu'il a créé. Ce champs est ainsi
+     * modifiable depuis l'espace d'administration de l'aggrégateur.
      *
      * @return
      */
@@ -295,9 +334,8 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
 
     /**
      * *
-     * Retourne la description du médiateur, c'est l'utilisateur qui doit
-     * décrire chacun des médiator qu'il crée. Ce champs est ainsi modificable
-     * depuis l'espace d'administration
+     * Retourne la description du médiateur, c'est l'utilisateur qui doit décrire chacun des médiator qu'il crée. Ce
+     * champs est ainsi modificable depuis l'espace d'administration
      *
      * @return
      */
@@ -325,7 +363,8 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
         this.ID = ID;
     }
 
-    /***
+    /**
+     * *
      * Constructeur par défault. Des objets de traitement basique sont crée pour le Comportement.
      */
     public MediatorCollecteAction() {
@@ -358,7 +397,6 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
     //    public void setDedoubloneur(Dedoubloneur dedoubloneur) {
     //        this.dedoubloneur = dedoubloneur;
     //    }
-    
     public AbstrDedoublonneur getDedoubloneur() {
         return dedoubloneur;
     }
@@ -367,8 +405,6 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
         this.dedoubloneur = dedoubloneur;
     }
 
-    
-    
     public Integer getNbrItemCollecte() {
         return nbrItemCollecte;
     }
@@ -391,6 +427,14 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
 
     public void setPeriodiciteCollecte(Integer periodiciteCollecte) {
         this.periodiciteCollecte = periodiciteCollecte;
+    }
+
+    public List<Item> getListItem() {
+        return listItem;
+    }
+
+    public void setListItem(List<Item> listItem) {
+        this.listItem = listItem;
     }
 
     @Override
@@ -447,8 +491,6 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
         }
     }
 
-
-
 //    @Override
 //    /***
 //     * Enregistre le Comportement de collecte auprès du service JMS pour assurer sa diffussion sur les serveurs esclaves (la synchronisation)
@@ -456,7 +498,6 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
 //    public void enregistrerAupresdesService() {
 //        this.addObserver(ServiceSynchro.getInstance());
 //    }
-
     @Override
     public Boolean synchroImperative() {
         return true;

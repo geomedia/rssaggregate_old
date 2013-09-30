@@ -12,9 +12,10 @@ import rssagregator.beans.Item;
 import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.beans.incident.Incidable;
+import rssagregator.beans.traitement.MediatorCollecteAction;
 
 /**
- *
+ * La tâche permettant au {@link Flux} d'être collecté périodiquement. Elle est gérée par le service {@link ServiceCollecteur}
  * @author clem
  */
 public class TacheRecupCallable extends AbstrTacheSchedule<TacheRecupCallable> implements Incidable{
@@ -99,9 +100,15 @@ public class TacheRecupCallable extends AbstrTacheSchedule<TacheRecupCallable> i
                     flux.setTacheRechup(this);
                     //On crée une copie du mediator devant être employé. C'est notre façon d'être thread safe
 //                    try {
-                    this.flux.setMediatorFluxAction(this.flux.getMediatorFlux().genererClone());
+                    MediatorCollecteAction cloneComportement = this.flux.getMediatorFlux().genererClone();
+                    
+                    this.flux.setMediatorFluxAction(cloneComportement);
 
-                    nouvellesItems = this.flux.getMediatorFluxAction().executeActions(this.flux);
+                    nouvellesItems = cloneComportement.executeActions(this.flux);
+                    
+                    //On sauvegarde les résultats
+                    
+                   this.flux.getMediatorFluxAction().persiter(flux);
 
                     // Tout s'est bien déroulé on va donc fermer les incidents du flux et renvoyé true
                     ServiceGestionIncident.fermerLesIncidentsDuFlux(flux);

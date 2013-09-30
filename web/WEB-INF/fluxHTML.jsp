@@ -8,6 +8,7 @@
 <%@page import="rssagregator.servlet.FluxSrvl"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>  
 
 <%@taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>  <!--Il faut bien utiliser la vesion 1.1 d ela jstl l'autre ne permet pas d'utiliser les EL-->
 <%--<%@taglib uri="http://java.sun.com/jstl/fmt" prefix="fmt" %>--%>
@@ -21,7 +22,7 @@
 <div id="header-wrapper">
     <div id="header">
         <div id="logo">
-        <c:import url="/WEB-INF/inc/titre.jsp" />
+            <c:import url="/WEB-INF/inc/titre.jsp" />
         </div></div>
 
 
@@ -97,15 +98,15 @@
                                 <script>
 
                                     function subExport() {
-                                        if ($('#vue').val() == 'opml') {
+                                    if ($('#vue').val() == 'opml') {
 
-                                            $('#pagina').attr('target', '_blank');
-                                            $('#pagina').submit();
-                                            $('#pagina').attr('target', '');
-                                            $('#vue').val('html');
+                                    $('#pagina').attr('target', '_blank');
+                                    $('#pagina').submit();
+                                    $('#pagina').attr('target', '');
+                                    $('#vue').val('html');
 
 
-                                        }
+                                    }
                                     }
                                 </script>
                                 <button type="submit"  formaction="flux" formtarget="_blank" value="vue">Exporter</button>
@@ -126,30 +127,30 @@
                             </select>
 
                             <script>
-                                    $('#bts').click(function() {
+                                $('#bts').click(function() {
 
-                                        if (this.value === '1') {
-                                            this.textContent = 'Déselectionner tout';
-                                            this.value = '0';
-                                            $("#resudiv").find(':checkbox').prop('checked', false);
-                                        }
-                                        else if (this.value === '0') {
-                                            this.textContent = 'Tout sélectionner';
-                                            this.value = '1';
-                                            $("#resudiv").find(':checkbox').prop('checked', true);
-                                        }
-                                    });
+                                if (this.value === '1') {
+                                this.textContent = 'Déselectionner tout';
+                                this.value = '0';
+                                $("#resudiv").find(':checkbox').prop('checked', false);
+                                }
+                                else if (this.value === '0') {
+                                this.textContent = 'Tout sélectionner';
+                                this.value = '1';
+                                $("#resudiv").find(':checkbox').prop('checked', true);
+                                }
+                                });
                             </script>
                             <button type="button" onclick="actionsub()"> OK</button>
                         </form>
                         <script>
-                                    //Petite fonction pour la soumission du formulaire permettant la mise à jour et la suppression en nombre
-                                    function actionsub() {
-                                        action = $('#act').val();
+                            //Petite fonction pour la soumission du formulaire permettant la mise à jour et la suppression en nombre
+                            function actionsub() {
+                            action = $('#act').val();
 
-                                        $('#formaction2').attr('action', '${rootpath}flux/' + action);
-                                        $('#formaction2').submit();
-                                    }
+                            $('#formaction2').attr('action', '${rootpath}flux/' + action);
+                            $('#formaction2').submit();
+                            }
 
                         </script>
                     </c:when>
@@ -161,6 +162,7 @@
                             <li><a href="${rootpath}flux/maj?id=${bean.ID}">Mettre à jour manuellement</a></li>
                             <li><a href="${rootpath}flux/rem?id=${bean.ID}">Supprimer le flux</a></li>
                             <li><a href="${rootpath}flux/read-incident&id=${bean.ID}">Parcourir les incidents</a></li>
+                            <li><a href="${rootpath}flux/importcsv?id=${bean.ID}">Importer des items</a></li>
                         </ul>
                     </c:when> 
                 </c:choose>
@@ -238,7 +240,7 @@
                                 <input name="estStable" id="estStable" type="checkbox" <c:if test="${bean.estStable == 'true'}">checked="checked" </c:if> /><br />
 
 
-                                <label for="infoCollecte" title="Les administrateurs peuvent consigner des informations sur les flux dans ce champs de libre saisie">Information :</label><br />
+                                    <label for="infoCollecte" title="Les administrateurs peuvent consigner des informations sur les flux dans ce champs de libre saisie">Information :</label><br />
                                     <textarea id="infoCollecte" name="infoCollecte" rows="20" cols="80">${bean.infoCollecte}</textarea>
                                 <input type="hidden" name="id" value="${bean.ID}">
                                 <br />
@@ -247,8 +249,8 @@
                             </fieldset>
                         </form>
 
-           
-          
+
+
                         <script src="${rootpath}test.js"></script>
                     </c:when>
 
@@ -315,7 +317,7 @@
                         <p><strong>Type de flux :</strong><a href="${rootpath}TypeFluxSrvl/read?id=${bean.typeFlux.ID}"> ${bean.typeFlux}</a></p>
                         <p><strong>Ajouté le :</strong> ${bean.created}</p>
                         <p><strong title="Un flux est considéré comme stable si il retourne tous les jours un nombre important et régulier d'items ">Flux stable : </strong><c:if test="${bean.estStable == 'true'}">OUI</c:if><c:if test="${bean.estStable == 'false'}">NON</c:if></p>
-                        <p><strong>Période de captation : </strong><ul>
+                            <p><strong>Période de captation : </strong><ul>
                             <c:forEach items="${bean.periodeCaptations}" var="periode">
                                 <li>${periode}</li>   
 
@@ -338,69 +340,69 @@
                         ${bean.indiceQuartileNbrItemJour}ddd
                         <script>
 
-                                    $(function() {
-                                        $('#container').highcharts({
-                                            chart: {
-                                                type: 'boxplot'
-                                            },
-                                            title: {
-                                                text: 'Highcharts Box Plot Example'
-                                            },
-                                            legend: {
-                                                enabled: false
-                                            },
-                                            xAxis: {
-                                                categories: ['1', '2', '3', '4', '5'],
-                                                title: {
-                                                    text: 'Experiment No.'
-                                                }
-                                            },
-                                            yAxis: {
-                                                title: {
-                                                    text: 'Observations'
-                                                },
-                                                plotLines: [{
-                                                        value: 932,
-                                                        color: 'red',
-                                                        width: 1,
-                                                        label: {
-                                                            text: 'Theoretical mean: 932',
-                                                            align: 'center',
-                                                            style: {
-                                                                color: 'gray'
-                                                            }
-                                                        }
-                                                    }]
-                                            },
-                                            series: [{
-                                                    name: 'Observations',
-                                                    data: [
-                                                        [${bean.indiceMinimumNbrItemJour}, ${bean.indiceQuartileNbrItemJour}, ${bean.indiceMedianeNbrItemJour}, ${bean.indiceDecileNbrItemJour}, ${bean.indiceMaximumNbrItemJour}]
-                                                    ],
-                                                    tooltip: {
-                                                        headerFormat: '<em>Experiment No {point.key}</em><br/>'
-                                                    }
-                                                }, {
-                                                    name: 'Outlier',
-                                                    color: Highcharts.getOptions().colors[0],
-                                                    type: 'scatter',
-                                                    data: [// x, y positions where 0 is the first category
-                                                        [0, 644],
-                                                        [4, 718],
-                                                        [4, 951],
-                                                        [4, 969]
-                                                    ],
-                                                    marker: {
-                                                        fillColor: 'white',
-                                                        lineWidth: 1,
-                                                        lineColor: Highcharts.getOptions().colors[0]
-                                                    },
-                                                    tooltip: {
-                                                        pointFormat: 'Observation: {point.y}'
-                                                    }
-                                                }]
-                                        });
-                                    });
+                            $(function() {
+                            $('#container').highcharts({
+                            chart: {
+                            type: 'boxplot'
+                            },
+                            title: {
+                            text: 'Highcharts Box Plot Example'
+                            },
+                            legend: {
+                            enabled: false
+                            },
+                            xAxis: {
+                            categories: ['1', '2', '3', '4', '5'],
+                            title: {
+                            text: 'Experiment No.'
+                            }
+                            },
+                            yAxis: {
+                            title: {
+                            text: 'Observations'
+                            },
+                            plotLines: [{
+                            value: 932,
+                            color: 'red',
+                            width: 1,
+                            label: {
+                            text: 'Theoretical mean: 932',
+                            align: 'center',
+                            style: {
+                            color: 'gray'
+                            }
+                            }
+                            }]
+                            },
+                            series: [{
+                            name: 'Observations',
+                            data: [
+                            [${bean.indiceMinimumNbrItemJour}, ${bean.indiceQuartileNbrItemJour}, ${bean.indiceMedianeNbrItemJour}, ${bean.indiceDecileNbrItemJour}, ${bean.indiceMaximumNbrItemJour}]
+                            ],
+                            tooltip: {
+                            headerFormat: '<em>Experiment No {point.key}</em><br/>'
+                            }
+                            }, {
+                            name: 'Outlier',
+                            color: Highcharts.getOptions().colors[0],
+                            type: 'scatter',
+                            data: [// x, y positions where 0 is the first category
+                            [0, 644],
+                            [4, 718],
+                            [4, 951],
+                            [4, 969]
+                            ],
+                            marker: {
+                            fillColor: 'white',
+                            lineWidth: 1,
+                            lineColor: Highcharts.getOptions().colors[0]
+                            },
+                            tooltip: {
+                            pointFormat: 'Observation: {point.y}'
+                            }
+                            }]
+                            });
+                            });
 
                         </script>
 
@@ -410,19 +412,71 @@
 
 
                     </c:when>
-                        
-                        
-                        <c:when test="${action == 'importcsv'}">
-                            CSV
-                            <form method="POST"  enctype="multipart/form-data">
-                                <label>Votre fichier CSV : </label>
-                                <input type="file" name="csvfile" />
 
-                                <input type="submit">
+
+                    <c:when test="${action == 'importcsv'}">
+                        CSV
+                        <form method="POST"  enctype="multipart/form-data">
+                            <input type="hidden" name="phase" value="upload" />
+                            <label>Votre fichier CSV : </label>
+                            <input type="file" name="csvfile" />
+                            <fieldset>
+                                <legend>Paramettre de Parsing</legend>
+                                <label title="the delimiter to use for separating entries quotechar">Separator : </label><input name="separator" type="text" value="<c:out value="\t"></c:out>" /><br />
+                                <label title="the character to use for quoted elements escape">Quotechar :</label><input name="quotechar" type="text"  value="<c:out value="\""></c:out>" /><br />
+                                <label title="the character to use for escaping a separator or quote line">Escape  :</label><input name="escape" type="text" value="<c:out value="\\"></c:out>" /><br />
+                                    <label title="the line number to skip for start reading strictQuotes">Line : </label><input name="line" type="text" value="0" /><br />
+                                    <label title="sets if characters outside the quotes are ignored">StrictQuotes : </label><input name="strictQuotes" type="checkbox"/><br/>
+                                    <label title="it true, parser should ignore white space before a quote in a field">IgnoreLeadingWhiteSpace : </label><input name="ignoreLeadingWhiteSpace" type="checkbox"/><br />
+                                </fieldset>
+                                <input type="submit" value="Parser">
                             </form>
-                            
-                            
-                        </c:when>
+
+                                 ICI ${sessionScope.imporComportement} FIN   
+                                    
+                        <c:if test="${!empty sessionScope.imporComportement}">
+                            <h2>Appercut des items parsée</h2>
+                            <p><strong>Nombre d'item :</strong> ${fn:length(sessionScope.imporComportement.listItem)}
+                            </p>
+
+                            <h3> 5 Premières items : </h3>
+                            <ul>
+                                <c:forEach begin="0" end="5" items="${sessionScope.imporComportement.listItem}" var="itDebut">
+                                    <li>
+                                        <p>Titre ${itDebut.titre}</p>
+                                        <p>Description : ${itDebut.description}</p>
+                                        <p>Date publication : <fmt:formatDate value="${itDebut.datePub}" pattern="dd/MM/yyyy hh:mm"/></p>
+                                        <p>Date Reception : <fmt:formatDate value="${itDebut.dateRecup}" pattern="dd/MM/yyyy hh:mm"/></p>
+                                    </li>
+                                </c:forEach>
+                            </ul>
+
+
+                            <c:if test="${fn:length(sessionScope.imporComportement.listItem)-5 > 0}">
+                                <h2>Dernières items parsée</h2>
+
+
+                                <ul>
+                                    <c:forEach begin="${fn:length(sessionScope.imporComportement.listItem)-5}" end="${fn:length(sessionScope.imporComportement.listItem)}" items="${sessionScope.imporComportement.listItem}" var="itDebut">
+                                        <li>
+                                            <p>Titre ${itDebut.titre}</p>
+                                            <p>Description : ${itDebut.description}</p>
+                                            <p>Date publication : <fmt:formatDate value="${itDebut.datePub}" pattern="dd/MM/yyyy hh:mm"/></p>
+                                            <p>Date Reception : <fmt:formatDate value="${itDebut.dateRecup}" pattern="dd/MM/yyyy hh:mm"/></p>
+                                        </li>
+                                    </c:forEach>
+                                </ul>
+                            </c:if>
+                                
+                                <form method="POST">
+                                    <input type="hidden" name="phase" value="saveItem" />
+                                    <input type="submit" value="Enregistrer les items dans la base de donneés"/>
+                                </form>
+
+                        </c:if>
+
+
+                    </c:when>
                 </c:choose>
             </c:when>
         </c:choose>

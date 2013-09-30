@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.EntityExistsException;
+import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 import javax.persistence.RollbackException;
 import javax.persistence.TypedQuery;
@@ -24,6 +25,7 @@ import rssagregator.beans.Item;
 
 /**
  * La DAO permettabt d'échanger des items avec la base de données SQL.
+ *
  * @author clem
  *
  */
@@ -85,8 +87,8 @@ public class DaoItem extends AbstrDao {
 
     /**
      * *
-     * Lance la requete criteria. Ili faut veiller auparavant à configurer les
-     * critères propre à la dao (where_clauseflux; orderby; hash...)
+     * Lance la requete criteria. Ili faut veiller auparavant à configurer les critères propre à la dao
+     * (where_clauseflux; orderby; hash...)
      *
      * @return
      */
@@ -182,9 +184,8 @@ public class DaoItem extends AbstrDao {
 
     /**
      * *
-     * Retourne le nombre total d'item dans la base de données. Si une jointure
-     * est demandé (voir les where clause criteria de cette dao), le count sera
-     * restreint aux items joins au flux
+     * Retourne le nombre total d'item dans la base de données. Si une jointure est demandé (voir les where clause
+     * criteria de cette dao), le count sera restreint aux items joins au flux
      *
      * @return
      */
@@ -246,14 +247,12 @@ public class DaoItem extends AbstrDao {
 
     /**
      * *
-     * Trouve les items possédant un hash présent dans la liste de hash envoyé
-     * en paramètre tout en étant lié au flux précisé en paramètre
+     * Trouve les items possédant un hash présent dans la liste de hash envoyé en paramètre tout en étant lié au flux
+     * précisé en paramètre
      *
-     * @param hashContenu : List des items. On va utiliser leur hash pou
-     * effectuer la recerche.
+     * @param hashContenu : List des items. On va utiliser leur hash pou effectuer la recerche.
      * @param flux : Flux devant être lié aux items
-     * @return List de flux possédant un hash dans la liste et étant lié au flux
-     * sélectioné.
+     * @return List de flux possédant un hash dans la liste et étant lié au flux sélectioné.
      */
     public synchronized List<Item> findHashFlux(List<Item> hashContenu, Flux flux) {
 //        em = dAOFactory.getEntityManager();
@@ -297,8 +296,7 @@ public class DaoItem extends AbstrDao {
 
     /**
      * *
-     * Cette méthode est utilisée au démarrage de l'application pour précharger
-     * les derniers hash des flux.
+     * Cette méthode est utilisée au démarrage de l'application pour précharger les derniers hash des flux.
      *
      * @param fl
      * @param i
@@ -390,11 +388,9 @@ public class DaoItem extends AbstrDao {
 
     /**
      * *
-     * Enregistre l'item pour le flux. Cette méthode doit être employé en
-     * priorité (et non la méthode crée() car elle bloque synchronise la dao
-     * afin d'éviter les conflit d'écriture. Si l'item précisé est déjà
-     * enregistré dans la base de données, la dao retrouve cette item dans la
-     * base et lié au flux envoyé en argument
+     * Enregistre l'item pour le flux. Cette méthode doit être employé en priorité (et non la méthode crée() car elle
+     * bloque synchronise la dao afin d'éviter les conflit d'écriture. Si l'item précisé est déjà enregistré dans la
+     * base de données, la dao retrouve cette item dans la base et lié au flux envoyé en argument
      *
      * @param item : item devant être enregistré
      * @param flux : flux devant être associé à l'item
@@ -407,13 +403,17 @@ public class DaoItem extends AbstrDao {
             err = true;
         }
 
-        
+
         if (!err) {
             try {
-                em.getTransaction().begin();
+                EntityTransaction tr = em.getTransaction();
+                tr.begin();
                 em.persist(item);
-                em.getTransaction().commit();
+
+                tr.commit();
+                // Si le commit s'est bien déroulé, on ajoute l'emprunte au lastEmprunte qui permet le dédoublonnage du Flux 
                 flux.getLastEmpruntes().add(0, item.getHashContenu());
+
             } catch (EntityExistsException existexeption) { // En cas d'erreur, on se rend compte qu'une item possédant le hash existe déjà
                 err = true;
             } catch (RollbackException e) {
@@ -460,8 +460,8 @@ public class DaoItem extends AbstrDao {
 
     /**
      * *
-     * Met les paramettre de critère à null, utile car la daoItem est singleton,
-     * cette commande permet donc de réinitialiser les paramettres de recherche.
+     * Met les paramettre de critère à null, utile car la daoItem est singleton, cette commande permet donc de
+     * réinitialiser les paramettres de recherche.
      */
     public void initcriteria() {
 //        where_clause_flux = null;

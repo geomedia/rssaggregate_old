@@ -165,7 +165,7 @@ public class RomeParse extends AbstrParseur implements Cloneable {
     @Override
     public  List<Item> call() throws ParsingFeedException, Exception {
         try {
-            return execute(xmlIS);
+            return execute(inputStream);
         } catch (Exception e) {
             logger.debug("Exeption : " + e.getClass());
             throw e;

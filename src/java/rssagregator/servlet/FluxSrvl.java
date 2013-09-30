@@ -4,14 +4,17 @@
  */
 package rssagregator.servlet;
 
+import com.sun.syndication.io.FeedException;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoFlux;
 import rssagregator.dao.DaoJournal;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +28,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import rssagregator.beans.Flux;
 import rssagregator.beans.FluxType;
 import rssagregator.beans.Journal;
@@ -32,6 +36,11 @@ import rssagregator.dao.DAOGenerique;
 import rssagregator.services.ServiceCollecteur;
 import rssagregator.utils.ServletTool;
 import javax.servlet.http.Part;
+import javax.xml.ws.http.HTTPException;
+import rssagregator.beans.Item;
+import rssagregator.beans.form.ParseCsvForm;
+import rssagregator.beans.traitement.CSVParse;
+import rssagregator.beans.traitement.MediatorCollecteAction;
 
 /**
  *
@@ -211,27 +220,107 @@ public class FluxSrvl extends HttpServlet {
         else if (action.equals("importcsv")) {
 
             if (request.getMethod().equals("POST")) {
-                Part part = request.getPart("csvfile");
-                String nomFichier = getNomFichier(part);
+
+                // On récupère le flux
 
 
-                if (nomFichier != null && !nomFichier.isEmpty()) {
-                    String nomChamp = part.getName();
-                    request.setAttribute(nomChamp, nomFichier);
+                String phase = request.getParameter("phase");
+                if (phase != null && phase.equals("upload")) {
+                    Part part = request.getPart("csvfile");
+                    String nomFichier = getNomFichier(part);
 
-                    System.out.println("Le nom de fichier : " + nomFichier);
+//Traitement du fichier envoyé
+                    if (nomFichier != null && !nomFichier.isEmpty()) {
+                        String nomChamp = part.getName();
+                        request.setAttribute(nomChamp, nomFichier);
+                        System.out.println("Le nom de fichier : " + nomFichier);
+
+
+                        System.out.println("Y a du fichier");
+                        // écriture du fichier sur le disque
+                        ecrireFichier(part, "youpi.txt", "/var/lib/RSSAgregate/");
+
+                        ParseCsvForm form = new ParseCsvForm();
+                        form.validate(request);
+                        CSVParse parse = (CSVParse) form.bind(request, null, CSVParse.class);
+                        parse.setInputStream(new FileInputStream("/var/lib/RSSAgregate/youpi.txt"));
+
+
+                        Flux fl = (Flux) DAOFactory.getInstance().getDAOFlux().find(new Long(request.getParameter("id")));
+                        try {
+                            MediatorCollecteAction clonemediator = fl.getMediatorFlux().genererClone();
+                            clonemediator.setRequesteur(null); // On retire le requesteur
+                            clonemediator.setParseur(parse);
+                            
+
+
+                            clonemediator.executeActions(fl);
+
+//                            request.setAttribute("itemParsees", itemParse);
+                            HttpSession session = request.getSession();
+                            System.out.println("-----> IMPORT");
+                            session.setAttribute("imporComportement", clonemediator);
+                            System.out.println("FINN ----- ");
+                            
+
+
+
+
+
+                        } catch (CloneNotSupportedException ex) {
+                            Logger.getLogger(FluxSrvl.class.getName()).log(Level.SEVERE, null, ex);
+                        } catch (MalformedURLException ex) {
+                            Logger.getLogger(FluxSrvl.class.getName()).log(Level.SEVERE, null, ex);
+                        } catch (HTTPException ex) {
+                            Logger.getLogger(FluxSrvl.class.getName()).log(Level.SEVERE, null, ex);
+                        } catch (FeedException ex) {
+                            Logger.getLogger(FluxSrvl.class.getName()).log(Level.SEVERE, null, ex);
+                        } catch (Exception ex) {
+                            Logger.getLogger(FluxSrvl.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+
+//                        try {
+//                            
+//                            List<Item> itemParse = parse.execute(null);
+//                          
+//
+//                        } catch (IllegalArgumentException ex) {
+//                            Logger.getLogger(FluxSrvl.class.getName()).log(Level.SEVERE, null, ex);
+//                        } catch (FeedException ex) {
+//                            Logger.getLogger(FluxSrvl.class.getName()).log(Level.SEVERE, null, ex);
+//                        }
+                    }
+
+                } else if (phase != null && phase.equals("saveItem")) {
+
+
+                    //On récupère les items précédemment checké dans la requête
+                    HttpSession session = request.getSession();
+                    MediatorCollecteAction collecteAction = (MediatorCollecteAction) session.getAttribute("imporComportement");
+                    //Récupération du flux
+                    
+                    Flux fl = (Flux) DAOFactory.getInstance().getDAOFlux().find(new Long(request.getParameter("id")));
+                    collecteAction.persiter(fl);
+//                    request.setAttribute("itemImport", itemImport);
+
+
                 }
 
 
-                System.out.println("Ya du fichier");
+                //Enregistement des items en fonction de la demande utilisateur
 
-                // écriture du fichier sur le disque
-                ecrireFichier(part, "youpi.txt", "/var/lib/RSSAgregate/");
+
+
+
+
+
+
+
+
+
+
+
             }
-
-
-
-
         }
 
         //------------------------------------------------------------------------
