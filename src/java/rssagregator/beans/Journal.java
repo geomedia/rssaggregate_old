@@ -7,12 +7,19 @@ import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.Version;
 import org.apache.poi.util.Beta;
+import org.eclipse.persistence.annotations.Customizer;
+import org.eclipse.persistence.config.DescriptorCustomizer;
+import org.eclipse.persistence.descriptors.ClassDescriptor;
+import org.eclipse.persistence.history.HistoryPolicy;
+
 
 /**
  * Un journal : Le monde, le Figaro... Chaque journal est instancier dans un objet. Un journal peut contenir plusieurs
@@ -20,12 +27,15 @@ import org.apache.poi.util.Beta;
  * l'interface {@link BeanSynchronise}
  */
 @Entity
+@Customizer(JournalEntityLisner.class)
 @Cacheable(value = false)
 public class Journal implements Serializable, BeanSynchronise {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long ID;
+//    @Version
+//    private Integer version;
     /**
      * Le nom du journal. Par exemple : "Le monde", "Libération"
      */
@@ -190,4 +200,6 @@ public class Journal implements Serializable, BeanSynchronise {
             return "journal sans nom";
         }
     }
+
+  
 }

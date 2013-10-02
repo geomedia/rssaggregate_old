@@ -14,9 +14,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -25,6 +27,10 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.xml.ws.http.HTTPException;
 import org.apache.poi.util.Beta;
+import org.eclipse.persistence.annotations.Cache;
+import org.eclipse.persistence.annotations.CacheCoordinationType;
+import org.eclipse.persistence.annotations.CacheType;
+import org.eclipse.persistence.config.CacheIsolationType;
 import rssagregator.beans.BeanSynchronise;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
@@ -42,6 +48,8 @@ import rssagregator.dao.DaoItem;
  */
 @Entity
 @Table(name = "tr_mediatocollecteaction")
+@Cacheable(true)
+@Cache(type = CacheType.FULL, coordinationType = CacheCoordinationType.SEND_NEW_OBJECTS_WITH_CHANGES, isolation = CacheIsolationType.SHARED)
 public class MediatorCollecteAction implements Serializable, Cloneable, BeanSynchronise {
 
     @Transient
@@ -75,7 +83,7 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
      * *
      * Le parseur propre au médiateur.
      */
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch =  FetchType.EAGER)
     private AbstrParseur parseur;
     /**
      * Le requesteur propre au médiateur. C'est l'objet qui permet de formuler des requêtes http
@@ -502,4 +510,31 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
     public Boolean synchroImperative() {
         return true;
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 71 * hash + (this.ID != null ? this.ID.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final MediatorCollecteAction other = (MediatorCollecteAction) obj;
+        if (this.ID != other.ID && (this.ID == null || !this.ID.equals(other.ID))) {
+            return false;
+        }
+        return true;
+    }
+
+    
+    
+    
+    
 }

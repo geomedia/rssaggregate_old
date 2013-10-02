@@ -173,4 +173,25 @@ public class RomeParse extends AbstrParseur implements Cloneable {
         
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final RomeParse other = (RomeParse) obj;
+        return true;
+    }
+
+    
+    
 }

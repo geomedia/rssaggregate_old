@@ -98,15 +98,15 @@
                                 <script>
 
                                     function subExport() {
-                                    if ($('#vue').val() == 'opml') {
+                                        if ($('#vue').val() == 'opml') {
 
-                                    $('#pagina').attr('target', '_blank');
-                                    $('#pagina').submit();
-                                    $('#pagina').attr('target', '');
-                                    $('#vue').val('html');
+                                            $('#pagina').attr('target', '_blank');
+                                            $('#pagina').submit();
+                                            $('#pagina').attr('target', '');
+                                            $('#vue').val('html');
 
 
-                                    }
+                                        }
                                     }
                                 </script>
                                 <button type="submit"  formaction="flux" formtarget="_blank" value="vue">Exporter</button>
@@ -127,30 +127,30 @@
                             </select>
 
                             <script>
-                                $('#bts').click(function() {
+                                    $('#bts').click(function() {
 
-                                if (this.value === '1') {
-                                this.textContent = 'Déselectionner tout';
-                                this.value = '0';
-                                $("#resudiv").find(':checkbox').prop('checked', false);
-                                }
-                                else if (this.value === '0') {
-                                this.textContent = 'Tout sélectionner';
-                                this.value = '1';
-                                $("#resudiv").find(':checkbox').prop('checked', true);
-                                }
-                                });
+                                        if (this.value === '1') {
+                                            this.textContent = 'Déselectionner tout';
+                                            this.value = '0';
+                                            $("#resudiv").find(':checkbox').prop('checked', false);
+                                        }
+                                        else if (this.value === '0') {
+                                            this.textContent = 'Tout sélectionner';
+                                            this.value = '1';
+                                            $("#resudiv").find(':checkbox').prop('checked', true);
+                                        }
+                                    });
                             </script>
                             <button type="button" onclick="actionsub()"> OK</button>
                         </form>
                         <script>
-                            //Petite fonction pour la soumission du formulaire permettant la mise à jour et la suppression en nombre
-                            function actionsub() {
-                            action = $('#act').val();
+                                    //Petite fonction pour la soumission du formulaire permettant la mise à jour et la suppression en nombre
+                                    function actionsub() {
+                                        action = $('#act').val();
 
-                            $('#formaction2').attr('action', '${rootpath}flux/' + action);
-                            $('#formaction2').submit();
-                            }
+                                        $('#formaction2').attr('action', '${rootpath}flux/' + action);
+                                        $('#formaction2').submit();
+                                    }
 
                         </script>
                     </c:when>
@@ -340,69 +340,69 @@
                         ${bean.indiceQuartileNbrItemJour}ddd
                         <script>
 
-                            $(function() {
-                            $('#container').highcharts({
-                            chart: {
-                            type: 'boxplot'
-                            },
-                            title: {
-                            text: 'Highcharts Box Plot Example'
-                            },
-                            legend: {
-                            enabled: false
-                            },
-                            xAxis: {
-                            categories: ['1', '2', '3', '4', '5'],
-                            title: {
-                            text: 'Experiment No.'
-                            }
-                            },
-                            yAxis: {
-                            title: {
-                            text: 'Observations'
-                            },
-                            plotLines: [{
-                            value: 932,
-                            color: 'red',
-                            width: 1,
-                            label: {
-                            text: 'Theoretical mean: 932',
-                            align: 'center',
-                            style: {
-                            color: 'gray'
-                            }
-                            }
-                            }]
-                            },
-                            series: [{
-                            name: 'Observations',
-                            data: [
-                            [${bean.indiceMinimumNbrItemJour}, ${bean.indiceQuartileNbrItemJour}, ${bean.indiceMedianeNbrItemJour}, ${bean.indiceDecileNbrItemJour}, ${bean.indiceMaximumNbrItemJour}]
-                            ],
-                            tooltip: {
-                            headerFormat: '<em>Experiment No {point.key}</em><br/>'
-                            }
-                            }, {
-                            name: 'Outlier',
-                            color: Highcharts.getOptions().colors[0],
-                            type: 'scatter',
-                            data: [// x, y positions where 0 is the first category
-                            [0, 644],
-                            [4, 718],
-                            [4, 951],
-                            [4, 969]
-                            ],
-                            marker: {
-                            fillColor: 'white',
-                            lineWidth: 1,
-                            lineColor: Highcharts.getOptions().colors[0]
-                            },
-                            tooltip: {
-                            pointFormat: 'Observation: {point.y}'
-                            }
-                            }]
-                            });
-                            });
+                                    $(function() {
+                                        $('#container').highcharts({
+                                            chart: {
+                                                type: 'boxplot'
+                                            },
+                                            title: {
+                                                text: 'Highcharts Box Plot Example'
+                                            },
+                                            legend: {
+                                                enabled: false
+                                            },
+                                            xAxis: {
+                                                categories: ['1', '2', '3', '4', '5'],
+                                                title: {
+                                                    text: 'Experiment No.'
+                                                }
+                                            },
+                                            yAxis: {
+                                                title: {
+                                                    text: 'Observations'
+                                                },
+                                                plotLines: [{
+                                                        value: 932,
+                                                        color: 'red',
+                                                        width: 1,
+                                                        label: {
+                                                            text: 'Theoretical mean: 932',
+                                                            align: 'center',
+                                                            style: {
+                                                                color: 'gray'
+                                                            }
+                                                        }
+                                                    }]
+                                            },
+                                            series: [{
+                                                    name: 'Observations',
+                                                    data: [
+                                                        [${bean.indiceMinimumNbrItemJour}, ${bean.indiceQuartileNbrItemJour}, ${bean.indiceMedianeNbrItemJour}, ${bean.indiceDecileNbrItemJour}, ${bean.indiceMaximumNbrItemJour}]
+                                                    ],
+                                                    tooltip: {
+                                                        headerFormat: '<em>Experiment No {point.key}</em><br/>'
+                                                    }
+                                                }, {
+                                                    name: 'Outlier',
+                                                    color: Highcharts.getOptions().colors[0],
+                                                    type: 'scatter',
+                                                    data: [// x, y positions where 0 is the first category
+                                                        [0, 644],
+                                                        [4, 718],
+                                                        [4, 951],
+                                                        [4, 969]
+                                                    ],
+                                                    marker: {
+                                                        fillColor: 'white',
+                                                        lineWidth: 1,
+                                                        lineColor: Highcharts.getOptions().colors[0]
+                                                    },
+                                                    tooltip: {
+                                                        pointFormat: 'Observation: {point.y}'
+                                                    }
+                                                }]
+                                        });
+                                    });
 
                         </script>
 
@@ -420,58 +420,211 @@
                             <input type="hidden" name="phase" value="upload" />
                             <label>Votre fichier CSV : </label>
                             <input type="file" name="csvfile" />
-                            <fieldset>
-                                <legend>Paramettre de Parsing</legend>
-                                <label title="the delimiter to use for separating entries quotechar">Separator : </label><input name="separator" type="text" value="<c:out value="\t"></c:out>" /><br />
-                                <label title="the character to use for quoted elements escape">Quotechar :</label><input name="quotechar" type="text"  value="<c:out value="\""></c:out>" /><br />
-                                <label title="the character to use for escaping a separator or quote line">Escape  :</label><input name="escape" type="text" value="<c:out value="\\"></c:out>" /><br />
-                                    <label title="the line number to skip for start reading strictQuotes">Line : </label><input name="line" type="text" value="0" /><br />
-                                    <label title="sets if characters outside the quotes are ignored">StrictQuotes : </label><input name="strictQuotes" type="checkbox"/><br/>
-                                    <label title="it true, parser should ignore white space before a quote in a field">IgnoreLeadingWhiteSpace : </label><input name="ignoreLeadingWhiteSpace" type="checkbox"/><br />
-                                </fieldset>
-                                <input type="submit" value="Parser">
+                            <!--                            <fieldset>
+                                                            <legend>Paramettre de Parsing</legend>
+                                                            <label title="the delimiter to use for separating entries quotechar">Separator : </label><input name="separator" type="text" value="<c:out value="\t"></c:out>" /><br />
+                                                            <label title="the character to use for quoted elements escape">Quotechar :</label><input name="quotechar" type="text"  value="<c:out value="\""></c:out>" /><br />
+                                                            <label title="the character to use for escaping a separator or quote line">Escape  :</label><input name="escape" type="text" value="<c:out value="\\"></c:out>" /><br />
+                                                                <label title="the line number to skip for start reading strictQuotes">Line : </label><input name="line" type="text" value="0" /><br />
+                                                                <label title="sets if characters outside the quotes are ignored">StrictQuotes : </label><input name="strictQuotes" type="checkbox"/><br/>
+                                                                <label title="it true, parser should ignore white space before a quote in a field">IgnoreLeadingWhiteSpace : </label><input name="ignoreLeadingWhiteSpace" type="checkbox"/><br />
+                                                            </fieldset>-->
+                                <input type="submit" value="Upload">
                             </form>
 
-                                 ICI ${sessionScope.imporComportement} FIN   
-                                    
+
+                        <c:if test="${phase=='parse'}">
+                            PARSE
+                            <form method="POST">
+                                <input type="hidden" name="phase" value="parse" />
+                                <fieldset>
+                                    <legend>Paramettre de Parsing</legend>
+                                    <label title="the delimiter to use for separating entries quotechar">Separator : </label><input name="separator" type="text" value="<c:out value="\t"></c:out>" /><br />
+                                    <label title="the character to use for quoted elements escape">Quotechar :</label><input name="quotechar" type="text"  value="<c:out value="\""></c:out>" /><br />
+                                    <label title="the character to use for escaping a separator or quote line">Escape  :</label><input name="escape" type="text" value="<c:out value="\\"></c:out>" /><br />
+                                        <label title="the line number to skip for start reading strictQuotes">Line : </label><input name="line" type="text" value="0" /><br />
+                                        <label title="sets if characters outside the quotes are ignored">StrictQuotes : </label><input name="strictQuotes" type="checkbox"/><br/>
+                                        <label title="it true, parser should ignore white space before a quote in a field">IgnoreLeadingWhiteSpace : </label><input name="ignoreLeadingWhiteSpace" type="checkbox"/><br />
+
+                                        <label>Correspondance colonne : </label>
+                                        <table>
+
+                                            <tr>
+                                                <th>Titre</th>
+                                                <th>Description</th>
+                                                <th>Link</th>
+                                                <th>GUID</th>
+                                                <th>Date Publication</th>
+                                                <th>DateRecup</th>
+                                                <th>Categorie</th>
+                                                <th>Contenu</th>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <select name="cTitre">
+                                                        <option value="0" selected="selected">Col 1</option>
+                                                        <option value="1">Col 2</option>
+                                                        <option value="2">Col 3</option>
+                                                        <option value="3">Col 4</option>
+                                                        <option value="4">Col 5</option>
+                                                        <option value="5">Col 6</option>
+                                                        <option value="6">Col 7</option>
+                                                        <option value="7">Col 8</option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <select name="cDescription">
+                                                        <option value="0">Col 1</option>
+                                                        <option value="1" selected="selected">Col 2</option>
+                                                        <option value="2">Col 3</option>
+                                                        <option value="3">Col 4</option>
+                                                        <option value="4">Col 5</option>
+                                                        <option value="5">Col 6</option>
+                                                        <option value="6">Col 7</option>
+                                                        <option value="7">Col 8</option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <select name="cLink">
+                                                        <option value="0">Col 1</option>
+                                                        <option value="1">Col 2</option>
+                                                        <option value="2" selected="selected">Col 3</option>
+                                                        <option value="3">Col 4</option>
+                                                        <option value="4">Col 5</option>
+                                                        <option value="5">Col 6</option>
+                                                        <option value="6">Col 7</option>
+                                                        <option value="7">Col 8</option>
+                                                    </select>
+                                                </td>
+
+
+                                                <td>
+                                                    <select name="cGuid">
+                                                        <option value="0">Col 1</option>
+                                                        <option value="1">Col 2</option>
+                                                        <option value="2">Col 3</option>
+                                                        <option value="3" selected="selected">Col 4</option>
+                                                        <option value="4">Col 5</option>
+                                                        <option value="5">Col 6</option>
+                                                        <option value="6">Col 7</option>
+                                                        <option value="7">Col 8</option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <select name="cDatePub">
+                                                        <option value="0">Col 1</option>
+                                                        <option value="1">Col 2</option>
+                                                        <option value="2">Col 3</option>
+                                                        <option value="3">Col 4</option>
+                                                        <option value="4" selected="selected">Col 5</option>
+                                                        <option value="5">Col 6</option>
+                                                        <option value="6">Col 7</option>
+                                                        <option value="7">Col 8</option>
+                                                    </select>
+                                                </td>
+
+                                                <td>
+                                                    <select name="cDateRecup">
+                                                        <option value="0">Col 1</option>
+                                                        <option value="1">Col 2</option>
+                                                        <option value="2">Col 3</option>
+                                                        <option value="3">Col 4</option>
+                                                        <option value="4">Col 5</option>
+                                                        <option value="5" selected="selected">Col 6</option>
+                                                        <option value="6">Col 7</option>
+                                                        <option value="7">Col 8</option>
+                                                    </select>
+                                                </td>
+
+                                                <td>
+                                                    <select name="cCat">
+                                                        <option value="0">Col 1</option>
+                                                        <option value="1">Col 2</option>
+                                                        <option value="2">Col 3</option>
+                                                        <option value="3">Col 4</option>
+                                                        <option value="4">Col 5</option>
+                                                        <option value="5">Col 6</option>
+                                                        <option value="6" selected="selected">Col 7</option>
+                                                        <option value="7">Col 8</option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <select name="cContenu">
+                                                        <option value="0">Col 1</option>
+                                                        <option value="1">Col 2</option>
+                                                        <option value="2">Col 3</option>
+                                                        <option value="3">Col 4</option>
+                                                        <option value="4">Col 5</option>
+                                                        <option value="5">Col 6</option>
+                                                        <option value="6">Col 7</option>
+                                                        <option value="7" selected="selected">Col 8</option>
+                                                    </select>
+                                                </td>
+
+                                            </tr>
+                                        </table>
+
+
+                                    </fieldset>
+                                    <input type="submit" value="Parsssser"/>
+
+
+                                </form>
+
+                        </c:if>
+
+                     
+
                         <c:if test="${!empty sessionScope.imporComportement}">
-                            <h2>Appercut des items parsée</h2>
+                            <h2>Appercut des items parsées</h2>
                             <p><strong>Nombre d'item :</strong> ${fn:length(sessionScope.imporComportement.listItem)}
                             </p>
 
-                            <h3> 5 Premières items : </h3>
+                      
+
                             <ul>
-                                <c:forEach begin="0" end="5" items="${sessionScope.imporComportement.listItem}" var="itDebut">
+                                <c:forEach begin="0" end="5" items="${sessionScope.imporComportement.listItem}" var="itDebut" varStatus="st">
                                     <li>
+                                        <p>Item n°${st.index}</p>
                                         <p>Titre ${itDebut.titre}</p>
                                         <p>Description : ${itDebut.description}</p>
+                                        <p>Lien : ${itDebut.link}</p>
+                                        <p>GUID : ${itDebut.guid}</p>
                                         <p>Date publication : <fmt:formatDate value="${itDebut.datePub}" pattern="dd/MM/yyyy hh:mm"/></p>
                                         <p>Date Reception : <fmt:formatDate value="${itDebut.dateRecup}" pattern="dd/MM/yyyy hh:mm"/></p>
+                                        <p>Categorie : ${itDebut.categorie}</p>
+                                        <p>Contenu : ${itDebut.contenu}</p>
                                     </li>
                                 </c:forEach>
                             </ul>
 
 
                             <c:if test="${fn:length(sessionScope.imporComportement.listItem)-5 > 0}">
-                                <h2>Dernières items parsée</h2>
+                             
+                                <p>[ ... ]</p>
 
 
                                 <ul>
-                                    <c:forEach begin="${fn:length(sessionScope.imporComportement.listItem)-5}" end="${fn:length(sessionScope.imporComportement.listItem)}" items="${sessionScope.imporComportement.listItem}" var="itDebut">
+                                    <c:forEach begin="${fn:length(sessionScope.imporComportement.listItem)-5}" end="${fn:length(sessionScope.imporComportement.listItem)}" items="${sessionScope.imporComportement.listItem}" var="itDebut" varStatus="st">
                                         <li>
+                                            <p>Item n°${st.index}</p>
                                             <p>Titre ${itDebut.titre}</p>
                                             <p>Description : ${itDebut.description}</p>
+                                            <p>Lien : ${itDebut.link}</p>
+                                            <p>GUID : ${itDebut.guid}</p>
                                             <p>Date publication : <fmt:formatDate value="${itDebut.datePub}" pattern="dd/MM/yyyy hh:mm"/></p>
                                             <p>Date Reception : <fmt:formatDate value="${itDebut.dateRecup}" pattern="dd/MM/yyyy hh:mm"/></p>
+                                            <p>Categorie : ${itDebut.categorie}</p>
+                                            <p>Contenu : ${itDebut.contenu}</p>
                                         </li>
                                     </c:forEach>
                                 </ul>
                             </c:if>
-                                
-                                <form method="POST">
-                                    <input type="hidden" name="phase" value="saveItem" />
-                                    <input type="submit" value="Enregistrer les items dans la base de donneés"/>
-                                </form>
+
+                            <form method="POST">
+                                <input type="hidden" name="phase" value="saveItem" />
+                                <input type="submit" value="Enregistrer les items dans la base de donneés"/>
+                            </form>
 
                         </c:if>
 

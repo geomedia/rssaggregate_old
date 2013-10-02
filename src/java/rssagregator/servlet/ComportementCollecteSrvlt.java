@@ -63,7 +63,7 @@ public class ComportementCollecteSrvlt extends HttpServlet {
 
         DAOComportementCollecte dao = DAOFactory.getInstance().getDAOComportementCollecte();
         dao.setClassAssocie(MediatorCollecteAction.class);
-        request.setAttribute("navmenu", "config");
+        request.setAttribute("navmenu", "ComportementCollecte");
 
         // récupération de l'action
         String action = ServletTool.configAction(request, "recherche");

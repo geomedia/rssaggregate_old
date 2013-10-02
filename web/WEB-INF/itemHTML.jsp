@@ -13,8 +13,8 @@
 <div id="header-wrapper">
     <div id="header">
         <div id="logo">
-             <c:import url="/WEB-INF/inc/titre.jsp" />
-        
+            <c:import url="/WEB-INF/inc/titre.jsp" />
+
         </div></div>
 
 </div>
@@ -74,23 +74,23 @@
                             <!--    On calcul des début et fin-->
                             <%--<c:import url="/WEB-INF/paginator.jsp" />--%>
                             <div>
-                            <span id="btPaginDiv"></span>
-                            
+                                <span id="btPaginDiv"></span>
 
-<!--                            <label for="itPrPage">Item par page : </label>-->
-                            Afficher :
-                            <select name="itPrPage" onChange="$('#afin').click();" id="itPrPage"> 
-                                <c:forEach var="i" begin="20" end="500" step="20">
-                                    <option value="${i}" <c:if test="${param.itPrPage==i}"> selected="true"</c:if>>${i}</option>
-                                </c:forEach>
-                            </select> résultats par page.
-                            
+
+                                <!--                            <label for="itPrPage">Item par page : </label>-->
+                                Afficher :
+                                <select name="itPrPage" onChange="$('#afin').click();" id="itPrPage"> 
+                                    <c:forEach var="i" begin="20" end="500" step="20">
+                                        <option value="${i}" <c:if test="${param.itPrPage==i}"> selected="true"</c:if>>${i}</option>
+                                    </c:forEach>
+                                </select> résultats par page.
+
                             </div>
-                            
+
                             <!--<noscript>-->
                             <!--<input type="submit" value="Changer"  />-->
                             <!--</noscript>-->
-                       
+
 
                         </fieldset>
 
@@ -100,12 +100,18 @@
                         <br />
                         <fieldset>
                             <legend>Affiner la recherche</legend>
-                            <label for="flux">Lie au flux : </label>
 
                             <table>
+                                <caption>Flux de provenance</caption>
+                                <tr>
+                                    <th>Journaux</th>
+                                    <th>Flux disponibles</th>
+                                    <th></th>
+                                    <th>Flux sélectionnés</th>
+                                </tr>
                                 <tr>
                                     <td>
-                                        <select id="journalSelection">
+                                        <select id="journalSelection" style="width: 300px">
                                             <option value="null">Journal : </option>
                                             <option id="tous">tous</option>
                                             <c:forEach items="${listJournaux}" var="j">
@@ -114,7 +120,7 @@
                                         </select>
                                     </td>
                                     <td>
-                                        <select id="fluxSelection" name="oldid-flux" style="max-width: 300px" multiple="true">
+                                        <select id="fluxSelection" name="oldid-flux" style="min-width: 300px; width: 400px" multiple="true">
                                             <option value="all">Tous</option>
                                             <c:forEach items="${listflux}" var="fl">
                                                 <option value="${fl.ID}">${fl}</option>                                
@@ -127,7 +133,7 @@
                                         <button type="button" onclick="selectflux();">--></button><br />
                                         <button type="button" onclick="supp();"><--</button>
                                     </td>
-                                    <td><select multiple="true" style="max-width: 300px" name="fluxSelection2" id="fluxSelection2"></select></td>
+                                    <td><select multiple="true" style="max-width: 300px; width: 300px" name="fluxSelection2" id="fluxSelection2"></select></td>
                                 </tr>
 
                             </table>
@@ -158,7 +164,7 @@
                                 <input type="button" value="Affiner la sélection" id="afin">
 
                                 <select name="vue" id="vue" onchange="subExport();">
-                                    <option value="html">Export</option>
+                                    <option value="html">Export de la sélection</option>
                                     <option value="csv">CSV</option>
                                     <option value="csvexpert">CSV Expert</option>
                                     <option value="xls">XLS</option>

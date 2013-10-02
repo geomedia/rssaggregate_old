@@ -16,6 +16,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
+import javax.persistence.Version;
 import org.apache.poi.util.Beta;
 import org.eclipse.persistence.annotations.Cache;
 import org.eclipse.persistence.annotations.CacheType;
@@ -29,6 +30,7 @@ import org.eclipse.persistence.annotations.CacheType;
  *
  * @author clem
  */
+
 @Entity
 @Table(name = "item")
 @Cacheable(value = true)

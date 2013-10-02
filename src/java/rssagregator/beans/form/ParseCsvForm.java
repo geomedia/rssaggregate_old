@@ -19,6 +19,18 @@ public class ParseCsvForm extends AbstrForm {
     private int line;
     private boolean strictQuotes = false;
     private boolean ignoreLeadingWhiteSpace = false;
+    
+    
+    private int cTitre;
+    private int cDescription;
+    private int cLink;
+    private int cGuid;
+    private int cDatePub;
+    private int cDateRecup;
+    private int cCat;
+    private int cContenu;
+                                                        
+                                                        
 
     @Override
     public Object bind(HttpServletRequest request, Object objEntre, Class type) {
@@ -33,6 +45,16 @@ public class ParseCsvForm extends AbstrForm {
             parse.setSeparator(separator);
             parse.setStrictQuotes(strictQuotes);
             
+            parse.setcTitre(cTitre);
+            parse.setcCat(cCat);
+            parse.setcContenu(cContenu);
+            parse.setcDatePub(cDatePub);
+            parse.setcDateRecup(cDateRecup);
+            parse.setcDescription(cDescription);
+            parse.setcGuid(cGuid);
+            parse.setcLink(cLink);
+            
+            
             return parse;
         }
         return null;
@@ -45,10 +67,7 @@ public class ParseCsvForm extends AbstrForm {
 
     @Override
     public Boolean validate(HttpServletRequest request) {
-
-
         String s;
-
         s = request.getParameter("separator");
         if (s != null) {
             if (s.equals("\\t")) {
@@ -82,6 +101,47 @@ public class ParseCsvForm extends AbstrForm {
         s = request.getParameter("ignoreLeadingWhiteSpace");
         if (s != null) {
             ignoreLeadingWhiteSpace = true;
+        }
+        
+        
+        s = request.getParameter("cTitre");
+        if(s!=null){
+            cTitre = new Integer(s);
+        }
+        
+        s = request.getParameter("cDescription");
+        if(s!=null){
+            cDescription = new Integer(s);
+        }
+        
+        s = request.getParameter("cLink");
+        if(s!=null){
+            cLink = new Integer(s);
+        }
+
+        s = request.getParameter("cGuid");
+        if(s != null){
+            cGuid = new Integer(s);
+        }
+        
+        s = request.getParameter("cDatePub");
+        if(s!=null){
+            cDatePub = new Integer(s);
+        }
+        
+        s = request.getParameter("cDateRecup");
+        if(s!=null){
+            cDateRecup = new Integer(s);
+        }
+        
+        s = request.getParameter("cCat");
+        if(s!=null){
+            cCat = new Integer(s);
+        }
+        
+        s = request.getParameter("cContenu");
+        if(s!=null){
+            cContenu = new Integer(s);
         }
 
         if (erreurs.isEmpty()) {

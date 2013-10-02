@@ -5,17 +5,14 @@
 package rssagregator.beans.form;
 
 import rssagregator.dao.DAOGenerique;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import rssagregator.beans.Flux;
-import rssagregator.beans.FluxPeriodeCaptation;
 import rssagregator.beans.FluxType;
 import rssagregator.beans.Journal;
 import rssagregator.beans.traitement.MediatorCollecteAction;
@@ -65,6 +62,24 @@ public class FluxForm extends AbstrForm {
         //............................BIND DES DONNES SI AUCUNE ERREUR 
         //================================================================================================
         if (valide) {
+
+            // Si on observe un changement de comportement.
+            boolean compoHasChange = false;
+            if (flux.getMediatorFlux() != null && mediatorFlux != null) {
+
+                if (!flux.getMediatorFlux().equals(mediatorFlux)) {
+                    flux.changerComportement(mediatorFlux);
+                    compoHasChange = true;
+                    System.out.println("COMPO CHANGEAA");
+//                    System.out.println("1 parseur : " + System.identityHashCode(flux.getMediatorFlux().getParseur()));
+//                    System.out.println("2 parseur: " + System.identityHashCode(mediatorFlux.getParseur()));
+//
+//                    System.out.println("1 media : " + System.identityHashCode(flux.getMediatorFlux()));
+//                    System.out.println("2 media: " + System.identityHashCode(mediatorFlux));
+                }
+            }
+
+
             this.valide = true;
             flux.setActive(active);
             flux.setUrl(url);
@@ -95,44 +110,35 @@ public class FluxForm extends AbstrForm {
             //================================================================================================
             //Il faut ajouter la date de création du flux ainsi que gérer les période de collecte en fonction de l'activation ou non du flux
 
-            if (action.equals("add")) {
-                String actFlux = request.getParameter("active");
-                if (actFlux != null && !actFlux.isEmpty()) {
-                    List<FluxPeriodeCaptation> l = new ArrayList<FluxPeriodeCaptation>();
-                    FluxPeriodeCaptation p = new FluxPeriodeCaptation();
-                    p.setDateDebut(new Date());
-                    p.setFlux(flux);
-                    l.add(p);
-                    flux.setPeriodeCaptations(l);
-                }
-            } else { // Si c'est une action modif
-                String actFlux = request.getParameter("active");
-//Si c'est une demande d'activation du flux
-                if (actFlux != null && !actFlux.isEmpty()) {
-                    // Si le flux a déja des période de captation, on récupère la dernière
-                    if (!flux.getPeriodeCaptations().isEmpty()) { // Si elle a une date de fin, on ajoute une nouvelle période de captation
-                        FluxPeriodeCaptation lastperiode = flux.getPeriodeCaptations().get(flux.getPeriodeCaptations().size() - 1);
-                        if (lastperiode.getDatefin() != null) {
-                            FluxPeriodeCaptation nPeriode = new FluxPeriodeCaptation();
-                            nPeriode.setDateDebut(new Date());
-                            nPeriode.setFlux(flux);
-                            flux.getPeriodeCaptations().add(nPeriode);
-                        }
-                    } else if (flux.getPeriodeCaptations().isEmpty()) {
-                        FluxPeriodeCaptation nP = new FluxPeriodeCaptation();
-                        nP.setDateDebut(new Date());
-                        nP.setFlux(flux);
-                        flux.getPeriodeCaptations().add(nP);
-                    }
-                }
-                if (actFlux == null) { // Si c'est une demande de désactivation du flux
-                    if (!flux.getPeriodeCaptations().isEmpty()) {
-                        FluxPeriodeCaptation lastperiode = flux.getPeriodeCaptations().get(flux.getPeriodeCaptations().size() - 1);
-                        lastperiode.setDatefin(new Date());
-                    }
-                }
-
+            String actFlux = request.getParameter("active");
+            if (actFlux != null && !actFlux.isEmpty() && !compoHasChange) {
+                flux.activation(true);
             }
+            if (actFlux == null && !compoHasChange) { // Si c'est une demande de désactivation du flux
+                flux.activation(false);
+            }
+
+
+//            if (action.equals("add")) {
+//                String actFlux = request.getParameter("active");
+//                if (actFlux != null && !actFlux.isEmpty()) {
+//                    List<FluxPeriodeCaptation> l = new ArrayList<FluxPeriodeCaptation>();
+//                    FluxPeriodeCaptation p = new FluxPeriodeCaptation();
+//                    p.setDateDebut(new Date());
+//                    p.setFlux(flux);
+//                    l.add(p);
+//                    flux.setPeriodeCaptations(l);
+//                }
+//            } else { // Si c'est une action modif
+//                String actFlux = request.getParameter("active");
+////Si c'est une demande d'activation du flux
+//                if (actFlux != null && !actFlux.isEmpty()) {
+//                    flux.activation(true);
+//                }
+//                if (actFlux == null) { // Si c'est une demande de désactivation du flux
+//                    flux.activation(false);
+//                }
+//            }
 
             //-------> Gestion de la date de création du flux
             if (action.equals("add")) {

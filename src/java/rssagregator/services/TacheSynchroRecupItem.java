@@ -19,9 +19,9 @@ import org.joda.time.DateTime;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.beans.ServeurSlave;
-import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.Incidable;
 import rssagregator.beans.incident.SynroRecupItemIncident;
+import rssagregator.beans.traitement.MediatorCollecteAction;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoItem;
 import rssagregator.utils.XMLTool;
@@ -149,6 +149,12 @@ public class TacheSynchroRecupItem extends AbstrTacheSchedule<TacheSynchroRecupI
                 if (input != null) {
                     Object serialisation = XMLTool.unSerialize(input);
                     List<Item> itemTrouvees = (List<Item>) serialisation;
+                    
+                    // Par sécurité, on va utiliser le dédoublonneur du comportement associé au flux pour évincer les icones doublons dans le flux
+                    MediatorCollecteAction comportement = flux.getMediatorFlux().genererClone();
+                    itemTrouvees = comportement.getDedoubloneur().dedoublonne(itemTrouvees, flux);
+                    
+                    //On enregistre chacune des items
                     for (int k = 0; k < itemTrouvees.size(); k++) {
                         Item item = itemTrouvees.get(k);
                         //Les items récupérée depuis le serveur esclave doivent être considérée comme nouvelle. Il ne faut ainsi pas s'intéresser à l'ID de cette item (id qui est propre au serveur escalve)
@@ -160,7 +166,6 @@ public class TacheSynchroRecupItem extends AbstrTacheSchedule<TacheSynchroRecupI
                 }
 
             }
-//            }
             return null;
         } catch (Exception e) {
             this.exeption = e;

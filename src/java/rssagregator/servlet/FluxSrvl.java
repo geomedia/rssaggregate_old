@@ -218,13 +218,15 @@ public class FluxSrvl extends HttpServlet {
             ServletTool.actionREAD(request, Flux.class, ATT_OBJ);
         } //-----------------------------------------------------ACTION IMPORT CSV
         else if (action.equals("importcsv")) {
+            String varPath = DAOFactory.getInstance().getDAOConf().getConfCourante().getVarpath();
+            //On récupère la phase
+            String phase = request.getParameter("phase");
+
+
 
             if (request.getMethod().equals("POST")) {
 
                 // On récupère le flux
-
-
-                String phase = request.getParameter("phase");
                 if (phase != null && phase.equals("upload")) {
                     Part part = request.getPart("csvfile");
                     String nomFichier = getNomFichier(part);
@@ -235,49 +237,11 @@ public class FluxSrvl extends HttpServlet {
                         request.setAttribute(nomChamp, nomFichier);
                         System.out.println("Le nom de fichier : " + nomFichier);
 
-
-                        System.out.println("Y a du fichier");
                         // écriture du fichier sur le disque
-                        ecrireFichier(part, "youpi.txt", "/var/lib/RSSAgregate/");
 
-                        ParseCsvForm form = new ParseCsvForm();
-                        form.validate(request);
-                        CSVParse parse = (CSVParse) form.bind(request, null, CSVParse.class);
-                        parse.setInputStream(new FileInputStream("/var/lib/RSSAgregate/youpi.txt"));
+                        ecrireFichier(part, "import.csv", varPath + "upload/");
+                        request.setAttribute("phase", "parse");
 
-
-                        Flux fl = (Flux) DAOFactory.getInstance().getDAOFlux().find(new Long(request.getParameter("id")));
-                        try {
-                            MediatorCollecteAction clonemediator = fl.getMediatorFlux().genererClone();
-                            clonemediator.setRequesteur(null); // On retire le requesteur
-                            clonemediator.setParseur(parse);
-                            
-
-
-                            clonemediator.executeActions(fl);
-
-//                            request.setAttribute("itemParsees", itemParse);
-                            HttpSession session = request.getSession();
-                            System.out.println("-----> IMPORT");
-                            session.setAttribute("imporComportement", clonemediator);
-                            System.out.println("FINN ----- ");
-                            
-
-
-
-
-
-                        } catch (CloneNotSupportedException ex) {
-                            Logger.getLogger(FluxSrvl.class.getName()).log(Level.SEVERE, null, ex);
-                        } catch (MalformedURLException ex) {
-                            Logger.getLogger(FluxSrvl.class.getName()).log(Level.SEVERE, null, ex);
-                        } catch (HTTPException ex) {
-                            Logger.getLogger(FluxSrvl.class.getName()).log(Level.SEVERE, null, ex);
-                        } catch (FeedException ex) {
-                            Logger.getLogger(FluxSrvl.class.getName()).log(Level.SEVERE, null, ex);
-                        } catch (Exception ex) {
-                            Logger.getLogger(FluxSrvl.class.getName()).log(Level.SEVERE, null, ex);
-                        }
 
 //                        try {
 //                            
@@ -291,6 +255,39 @@ public class FluxSrvl extends HttpServlet {
 //                        }
                     }
 
+                } else if (phase.equals("parse")) {
+                    request.setAttribute("phase", "parse");
+                    ParseCsvForm form = new ParseCsvForm();
+                    form.validate(request);
+                    CSVParse parse = (CSVParse) form.bind(request, null, CSVParse.class);
+                    parse.setInputStream(new FileInputStream(varPath + "upload/import.csv"));
+
+
+                    Flux fl = (Flux) DAOFactory.getInstance().getDAOFlux().find(new Long(request.getParameter("id")));
+                    try {
+                        MediatorCollecteAction clonemediator = fl.getMediatorFlux().genererClone();
+                        clonemediator.setRequesteur(null); // On retire le requesteur
+                        clonemediator.setParseur(parse);
+
+                        clonemediator.executeActions(fl);
+
+//                            request.setAttribute("itemParsees", itemParse);
+                        HttpSession session = request.getSession();
+                        System.out.println("-----> IMPORT");
+                        session.setAttribute("imporComportement", clonemediator);
+                        System.out.println("FINN ----- ");
+
+                    } catch (CloneNotSupportedException ex) {
+                        Logger.getLogger(FluxSrvl.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (MalformedURLException ex) {
+                        Logger.getLogger(FluxSrvl.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (HTTPException ex) {
+                        Logger.getLogger(FluxSrvl.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (FeedException ex) {
+                        Logger.getLogger(FluxSrvl.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (Exception ex) {
+                        Logger.getLogger(FluxSrvl.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 } else if (phase != null && phase.equals("saveItem")) {
 
 
@@ -298,7 +295,7 @@ public class FluxSrvl extends HttpServlet {
                     HttpSession session = request.getSession();
                     MediatorCollecteAction collecteAction = (MediatorCollecteAction) session.getAttribute("imporComportement");
                     //Récupération du flux
-                    
+
                     Flux fl = (Flux) DAOFactory.getInstance().getDAOFlux().find(new Long(request.getParameter("id")));
                     collecteAction.persiter(fl);
 //                    request.setAttribute("itemImport", itemImport);

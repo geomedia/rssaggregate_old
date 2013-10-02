@@ -12,10 +12,13 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
+import org.apache.poi.util.Beta;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import rssagregator.beans.traitement.MediatorCollecteAction;
 
 /**
  * Cette entitée permet de stoquer un intervale de date permettant de renseigner
@@ -40,12 +43,20 @@ public class FluxPeriodeCaptation implements Serializable {
      */
     @ManyToOne(optional = false)
     private Flux flux;
-
+    
+    
+    /***
+     * Il est important de concerver une trace du comportement de collecte utilisé durant cette période de captation. Cette donnée est utilisée dans le dédoublonnage.
+     */
+    @Beta
+    @OneToOne
+    private MediatorCollecteAction comportementDurantLaPeriode;
     
     /***
      * Constructeur par défault.
      */
     public FluxPeriodeCaptation() {
+        
     }
     
     
@@ -97,6 +108,16 @@ public class FluxPeriodeCaptation implements Serializable {
     public void setFlux(Flux flux) {
         this.flux = flux;
     }
+
+    public MediatorCollecteAction getComportementDurantLaPeriode() {
+        return comportementDurantLaPeriode;
+    }
+
+    public void setComportementDurantLaPeriode(MediatorCollecteAction comportementDurantLaPeriode) {
+        this.comportementDurantLaPeriode = comportementDurantLaPeriode;
+    }
+    
+    
 
     @Override
     /**

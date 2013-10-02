@@ -38,14 +38,20 @@ public class CSVParse extends AbstrParseur {
      * Le fichier csv qui doit être analysé
      */
     File csvFile;
-    
     private char separator;
     private char quotechar;
     private char escape;
     private int line;
     private boolean strictQuotes;
     private boolean ignoreLeadingWhiteSpace;
-    
+    private int cTitre;
+    private int cDescription;
+    private int cLink;
+    private int cGuid;
+    private int cDatePub;
+    private int cDateRecup;
+    private int cCat;
+    private int cContenu;
 
     @Override
     public List<Item> execute(InputStream xml) throws IOException, IllegalArgumentException, FeedException {
@@ -53,29 +59,31 @@ public class CSVParse extends AbstrParseur {
         List<Item> listItem = new ArrayList<Item>();
 
 //        FileInputStream fileInputStream = new FileInputStream(csvFile);
-        
+
 //        CSVReader cSVReader = new CSVReader(new InputStreamReader(xml));
 
-        
+
         //Parcours du fichier ligne à ligne
 //        CSVReader reader = new CSVReader(new FileReader(csvFile));
         CSVReader reader = new CSVReader(new InputStreamReader(xml), separator, quotechar, escape, line, strictQuotes, ignoreLeadingWhiteSpace);
 
-       
+
         String[] nextLine;
         DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
-        
-        while ((nextLine = reader.readNext()) != null) {
-//            System.out.println("" + nextLine);
-            String titre = nextLine[0];
-            String description = nextLine[1];
-            String link = nextLine[2];
-            String guid = nextLine[3];
-            String datePub = nextLine[4];
-            String dateRecup = nextLine[5];
-            String cat = nextLine[6];
-            String contenu = nextLine[7];
 
+        while ((nextLine = reader.readNext()) != null) {
+            String titre = nextLine[cTitre];
+            String description = nextLine[cDescription];
+            String link = nextLine[cLink];
+            String guid = nextLine[cGuid];
+            String datePub = nextLine[cDatePub];
+            String dateRecup = nextLine[cDateRecup];
+            String cat = nextLine[cCat];
+            String contenu = nextLine[cContenu];
+            
+            System.out.println("datepub : " + datePub);
+            System.out.println("date recup : " + dateRecup);
+            System.out.println("Coll date recup : " + cDateRecup);
 
             Item item = new Item();
             item.setTitre(titre);
@@ -85,14 +93,14 @@ public class CSVParse extends AbstrParseur {
             item.setCategorie(cat);
             item.setContenu(contenu);
 //            item.setDatePub(new Date(datePub));
-            
+
             // TODO : on a peut être une perte de performance avec cette librairie. Optimisation ?
             item.setDatePub(fmt.parseDateTime(datePub).toDate());
             item.setDateRecup(fmt.parseDateTime(dateRecup).toDate());
             listItem.add(item);
-    
+
         }
-        
+
 //        for (int i = 0; i < listItem.size(); i++) {
 //            Item item = listItem.get(i);
 //            System.out.println("Titre : " + item.getTitre());
@@ -116,7 +124,6 @@ public class CSVParse extends AbstrParseur {
 //    public void setCsvFile(File csvFile) {
 //        this.csvFile = csvFile;
 //    }
-
     public char getSeparator() {
         return separator;
     }
@@ -164,19 +171,81 @@ public class CSVParse extends AbstrParseur {
     public void setIgnoreLeadingWhiteSpace(boolean ignoreLeadingWhiteSpace) {
         this.ignoreLeadingWhiteSpace = ignoreLeadingWhiteSpace;
     }
+
+    public int getcDescription() {
+        return cDescription;
+    }
+
+    public void setcDescription(int cDescription) {
+        this.cDescription = cDescription;
+    }
+
+    public int getcLink() {
+        return cLink;
+    }
+
+    public void setcLink(int cLink) {
+        this.cLink = cLink;
+    }
+
+    public int getcGuid() {
+        return cGuid;
+    }
+
+    public void setcGuid(int cGuid) {
+        this.cGuid = cGuid;
+    }
+
+    public int getcDatePub() {
+        return cDatePub;
+    }
+
+    public void setcDatePub(int cDatePub) {
+        this.cDatePub = cDatePub;
+    }
+
+    public int getcDateRecup() {
+        return cDateRecup;
+    }
+
+    public void setcDateRecup(int cDateRecup) {
+        this.cDateRecup = cDateRecup;
+    }
+
+    public int getcCat() {
+        return cCat;
+    }
+
+    public void setcCat(int cCat) {
+        this.cCat = cCat;
+    }
+
+    public int getcContenu() {
+        return cContenu;
+    }
+
+    public void setcContenu(int cContenu) {
+        this.cContenu = cContenu;
+    }
+
+    public int getcTitre() {
+        return cTitre;
+    }
+
+    public void setcTitre(int cTitre) {
+        this.cTitre = cTitre;
+    }
     
     
-    
-    
-    
+
     public static void main(String[] args) {
         try {
             File f = new File("/home/clem/parseTestLeMonde.csv");
             CSVParse parse = new CSVParse();
-            
+
 //              CSVReader reader = new CSVReader(new FileReader(csvFile), separator, quotechar, escape, line, strictQuotes, ignoreLeadingWhiteSpace);
-            
-            
+
+
             parse.setLine(0);
             parse.setEscape('\\');
             parse.setSeparator('\t');
@@ -184,10 +253,10 @@ public class CSVParse extends AbstrParseur {
 //            parse.setCsvFile(f);
             parse.setStrictQuotes(false);
             parse.setIgnoreLeadingWhiteSpace(true);
-           
-            
+
+
             parse.execute(null);
-            
+
         } catch (IOException ex) {
             Logger.getLogger(CSVParse.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IllegalArgumentException ex) {
@@ -195,6 +264,6 @@ public class CSVParse extends AbstrParseur {
         } catch (FeedException ex) {
             Logger.getLogger(CSVParse.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
     }
 }

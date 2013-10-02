@@ -26,53 +26,37 @@
         <!--Paramètre de la toolbox info du jquery IU-->
         <script>
             $(function() {
-            $( document ).tooltip({
-
-            show: {
-            effect: false,
-            delay: 30
-            }
-            });
-            $( "#hide-option" ).tooltip({
-            hide: {
-            effect: false,
-            delay: 70
-            }
-            });
-            $( "#open-event" ).tooltip({
-            show: null,
-            position: {
-            my: "left top",
-            at: "left bottom"
-            },
-            open: function( event, ui ) {
-            ui.tooltip.animate({ top: ui.tooltip.position().top + 10 }, "fast" );
-            }
-            })
-            ;
+                $(document).tooltip({
+                    show: {
+                        effect: false,
+                        delay: 30
+                    }
+                });
+                $("#hide-option").tooltip({
+                    hide: {
+                        effect: false,
+                        delay: 70
+                    }
+                });
+                $("#open-event").tooltip({
+                    show: null,
+                    position: {
+                        my: "left top",
+                        at: "left bottom"
+                    },
+                    open: function(event, ui) {
+                        ui.tooltip.animate({top: ui.tooltip.position().top + 10}, "fast");
+                    }
+                })
+                        ;
             });
         </script>
-
-       
-
-
-
     </head>
     <body>
 
-
-
-
-
-
-
         <c:set var="rootpath" value="/RSSAgregate/" scope="request"></c:set>
 
-
-
             <header style="width: 1200px; height: 116px">
-
-
 
                 <div style="float: left">
 
@@ -103,8 +87,6 @@
                     } else {
                         out.print("deco");
                     }
-
-
 
                 %>
 
@@ -175,21 +157,23 @@
                 <li <c:if test="${navmenu=='incident'}"> class="current_page_item"</c:if>><a href="${rootpath}incidents">Incidents</a></li>  
 
 
-                    <li <c:if test="${navmenu=='user'}"> class="current_page_item"</c:if>><a href="${rootpath}user/recherche">Utilisateurs</a>
 
-                        <ul>
-                            <li><a href="${rootpath}user/recherche">Recherche</a></li>
-                        <li><a href="${rootpath}user/add">Ajouter</a></li>
-                    </ul>
-
-                </li>
-                <li <c:if test="${navmenu=='typeflux'}"> class="current_page_item"</c:if>><a href="${rootpath}TypeFluxSrvl/recherche">Types de flux</a>
+                    <li <c:if test="${navmenu=='typeflux'}"> class="current_page_item"</c:if>><a href="${rootpath}TypeFluxSrvl/recherche">Types de flux</a>
                         <ul>
                             <li ><a href="${rootpath}TypeFluxSrvl/add">Ajouter</a></li>
                         <li><a href="${rootpath}TypeFluxSrvl/recherche">Rechercher</a></li>
                     </ul>
 
                 </li>
+
+                <li <c:if test="${navmenu=='ComportementCollecte'}"> class="current_page_item"</c:if>><a href="${rootpath}ComportementCollecte/recherche">Comportement de collecte</a>
+                        <ul>
+                            <li><a href="${rootpath}ComportementCollecte/add">Ajouter</a></li>
+                        <li><a href="${rootpath}ComportementCollecte/recherche">Rechercher</a></li>
+                    </ul>
+
+                </li>
+
                 <li <c:if test="${navmenu=='slave'}"> class="current_page_item"</c:if>><a href="${rootpath}slave/recherche">Serveurs esclaves</a>
                         <ul>
                             <li><a href="${rootpath}slave/recherche">Recherche</a></li>
@@ -197,48 +181,58 @@
                         <li><a href="${rootpath}slave/importitem">Synch Manuelle</a></li>
                     </ul>
                 </li>
+
+                <li <c:if test="${navmenu=='user'}"> class="current_page_item"</c:if>><a href="${rootpath}user/recherche">Utilisateurs</a>
+                        <ul>
+                            <li><a href="${rootpath}user/recherche">Recherche</a></li>
+                        <li><a href="${rootpath}user/add">Ajouter</a></li>
+                    </ul>
+                </li>
+
+
                 <li <c:if test="${navmenu=='config'}"> class="current_page_item"</c:if>><a href="${rootpath}config">Configuration</a></li>
-                    <li><a href="#">Aide</a></li>  
-                </ul>  
-            </nav> 
-            <script>
-                var el = document.getElementsByTagName("body")[0];
-                el.className = "";
-            </script>
+                <li <c:if test="${navmenu=='aide'}"> class="current_page_item"</c:if>><a href="${rootpath}aide.jsp">Aide</a></li>  
+            </ul>  
+        </nav> 
+           
+        <script>
+            var el = document.getElementsByTagName("body")[0];
+            el.className = "";
+        </script>
 
 
-            <script>
-                (function($){
+        <script>
+            (function($) {
 
                 //cache nav
                 var nav = $("#topNav");
 
                 //add indicators and hovers to submenu parents
                 nav.find("li").each(function() {
-                if ($(this).find("ul").length > 0) {
+                    if ($(this).find("ul").length > 0) {
 
-                $("<span>").text("^").appendTo($(this).children(":first"));
+                        $("<span>").text("^").appendTo($(this).children(":first"));
 
-                //show subnav on hover
-                $(this).mouseenter(function() {
-                $(this).find("ul").stop(true, true).slideDown();
+                        //show subnav on hover
+                        $(this).mouseenter(function() {
+                            $(this).find("ul").stop(true, true).slideDown();
+                        });
+
+                        //hide submenus on exit
+                        $(this).mouseleave(function() {
+                            $(this).find("ul").stop(true, true).slideUp();
+                        });
+                    }
                 });
-
-                //hide submenus on exit
-                $(this).mouseleave(function() {
-                $(this).find("ul").stop(true, true).slideUp();
-                });
-                }
-                });
-                })(jQuery);
-            </script>
+            })(jQuery);
+        </script>
 
 
 
 
 
 
-            <script src="${rootpath}JMSReconnection.js"></script>
+        <script src="${rootpath}JMSReconnection.js"></script>
         <script src="${rootpath}modernizr.custom.36191.js"></script>
 
 

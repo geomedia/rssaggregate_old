@@ -10,6 +10,7 @@ import java.security.NoSuchAlgorithmException;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoItem;
 import java.util.List;
+import java.util.logging.Level;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -26,13 +27,13 @@ import rssagregator.beans.Item;
 
 /**
  *
- * @author clem 
+ * @author clem
  */
 //@Entity()
 @Entity
-@Table(name =  "tr_dedoub")
+@Table(name = "tr_dedoub")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-public abstract class AbstrDedoublonneur implements Serializable,Cloneable {
+public abstract class AbstrDedoublonneur implements Serializable, Cloneable {
 
     public AbstrDedoublonneur() {
         // On initialise le tableau de compte capture
@@ -43,7 +44,6 @@ public abstract class AbstrDedoublonneur implements Serializable,Cloneable {
         compteCapture[3] = 0;
         compteCapture[4] = 0;
     }
-
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Id
     private Long ID;
@@ -61,13 +61,13 @@ public abstract class AbstrDedoublonneur implements Serializable,Cloneable {
     protected Boolean dedouGUID;
     @Column(name = "dedoubCategory")
     protected Boolean dedoubCategory;
-    
-    /***
-     * 1=nombre item trouvé ; 2 dedoub memoire; 3 BDD item lié ;4 BDD item déjà présente mais lien ajouté ;  5 item nouvelles
+    /**
+     * *
+     * 1=nombre item trouvé ; 2 dedoub memoire; 3 BDD item lié ;4 BDD item déjà présente mais lien ajouté ; 5 item
+     * nouvelles
      */
     @Transient
     protected Integer[] compteCapture;
-    
 
     /**
      * *
@@ -75,8 +75,7 @@ public abstract class AbstrDedoublonneur implements Serializable,Cloneable {
      *
      * @param item
      * @param flux
-     * @return True si l'item à déjà été enregistrée. False si l'item est
-     * nouvelle et n'a pas encoe été taité
+     * @return True si l'item à déjà été enregistrée. False si l'item est nouvelle et n'a pas encoe été taité
      */
     @Deprecated
     public Boolean testDoublonageMemoire(Item item, Flux flux) {
@@ -101,8 +100,7 @@ public abstract class AbstrDedoublonneur implements Serializable,Cloneable {
         return false;
     }
 
-    abstract List<Item> dedoublonne(List<Item> listItemCapture, Flux flux);
-
+   public abstract List<Item> dedoublonne(List<Item> listItemCapture, Flux flux);
 
     public Boolean getDeboubTitle() {
         return deboubTitle;
@@ -159,8 +157,52 @@ public abstract class AbstrDedoublonneur implements Serializable,Cloneable {
     public void setCompteCapture(Integer[] compteCapture) {
         this.compteCapture = compteCapture;
     }
-    
-    
+
+    /**
+     * *
+     * Calcul et retourne le hash pour l'item envoyé en argument
+     *
+     * @param it L'item pour laquelle le hash doit être calculé
+     * @return une chaine de caractère comprenant le hash Md5
+     */
+    public String returnHash(Item it) throws NoSuchAlgorithmException {
+
+        String concat = "";
+
+        if (this.deboubTitle && it.getTitre() != null) {
+            concat += it.getTitre();
+        }
+
+        if (this.deboudDesc && it.getDescription() != null) {
+            concat += it.getDescription();
+        }
+
+        if (this.dedouGUID && it.getDescription() != null) {
+            concat += it.getGuid();
+        }
+
+        if (this.dedoubLink && it.getLink() != null) {
+            concat += it.getLink();
+        }
+
+        if (this.dedoubDatePub && it.getDatePub() != null) {
+            concat += it.getDatePub().toString();
+        }
+
+        if (this.dedoubCategory && it.getCategorie() != null) {
+            concat += it.getCategorie();
+        }
+
+//                concat = item.getTitre() + item.getDescription();
+        MessageDigest digest;
+     
+            digest = MessageDigest.getInstance("MD5");
+            digest.reset();
+            byte[] hash = digest.digest(concat.getBytes());
+            String hashString = new String(HexUtils.toHexString(hash));
+            return hashString;
+
+    }
 
     /**
      * *
@@ -175,7 +217,6 @@ public abstract class AbstrDedoublonneur implements Serializable,Cloneable {
             String concat = "";
             Item item = listItem.get(i);
 
-
             if (this.deboubTitle && item.getTitre() != null) {
                 concat += item.getTitre();
             }
@@ -183,7 +224,6 @@ public abstract class AbstrDedoublonneur implements Serializable,Cloneable {
             if (this.deboudDesc && item.getDescription() != null) {
                 concat += item.getDescription();
             }
-
 
             if (this.dedouGUID && item.getDescription() != null) {
                 concat += item.getGuid();
@@ -193,7 +233,6 @@ public abstract class AbstrDedoublonneur implements Serializable,Cloneable {
                 concat += item.getLink();
             }
 
-
             if (this.dedoubDatePub && item.getDatePub() != null) {
                 concat += item.getDatePub().toString();
             }
@@ -202,7 +241,6 @@ public abstract class AbstrDedoublonneur implements Serializable,Cloneable {
                 concat += item.getCategorie();
             }
 
- 
 //                concat = item.getTitre() + item.getDescription();
             MessageDigest digest = MessageDigest.getInstance("MD5");
             digest.reset();
@@ -224,10 +262,7 @@ public abstract class AbstrDedoublonneur implements Serializable,Cloneable {
     protected AbstrDedoublonneur clone() throws CloneNotSupportedException {
         AbstrDedoublonneur clone = (AbstrDedoublonneur) super.clone();
         clone.compteCapture = this.compteCapture.clone();
-        
+
         return clone; //To change body of generated methods, choose Tools | Templates.
     }
-    
-    
-    
 }

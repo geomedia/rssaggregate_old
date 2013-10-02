@@ -252,25 +252,27 @@ public class DaoItem extends AbstrDao {
      *
      * @param hashContenu : List des items. On va utiliser leur hash pou effectuer la recerche.
      * @param flux : Flux devant être lié aux items
-     * @return List de flux possédant un hash dans la liste et étant lié au flux sélectioné.
+     * @return : euu ne sert a rien ?
      */
-    public synchronized List<Item> findHashFlux(List<Item> hashContenu, Flux flux) {
+    public synchronized List<Item> findHashFlux(String hashParamSQL, Flux flux) {
 //        em = dAOFactory.getEntityManager();
 //        em.getTransaction().begin();
 
         // Constuction de la liste des hash
         int i;
-        String hashParamSQL = "";
-        for (i = 0; i < hashContenu.size(); i++) {
-            hashParamSQL += "'" + hashContenu.get(i).getHashContenu() + "', ";
-        }
-        if (hashParamSQL.length() > 2) {
-            hashParamSQL = hashParamSQL.substring(0, hashParamSQL.length() - 2);
-        }
+//        String hashParamSQL = "";
+//        for (i = 0; i < hashContenu.size(); i++) {
+//            hashParamSQL += "'" + hashContenu.get(i).getHashContenu() + "', ";
+//        }
+//        
+//        if (hashParamSQL.length() > 2) {
+//            hashParamSQL = hashParamSQL.substring(0, hashParamSQL.length() - 2);
+//        }
 // TODO : C'est laid de faire des requete mon préparée en plein milieu du code. Mais on n'arive pas a préparer une requete basée su une liste de string
 //        Query query = em.createQuery("SELECT item FROM Item item JOIN item.listFlux flux where item.hashContenu IN ("+hashParamSQL+") AND flux.ID=:fluxid");
         Query query = em.createQuery("SELECT item FROM Item item LEFT JOIN fetch item.listFlux WHERE item.hashContenu IN (" + hashParamSQL + ")");
         //LEFT JOIN FETCH item.listFlux
+        
 
         List<Item> resuList;
         resuList = query.getResultList();

@@ -78,6 +78,32 @@ public class AbstrParseur implements Serializable, Cloneable,  Callable<List<Ite
        return execute(inputStream);
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 89 * hash + (this.ID != null ? this.ID.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final AbstrParseur other = (AbstrParseur) obj;
+        if (this.ID != other.ID && (this.ID == null || !this.ID.equals(other.ID))) {
+            return false;
+        }
+        return true;
+    }
+    
+    
+    
+    
  
     
 }
