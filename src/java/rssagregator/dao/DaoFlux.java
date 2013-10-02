@@ -7,6 +7,7 @@ package rssagregator.dao;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import javax.persistence.Query;
 import javax.persistence.TransactionRequiredException;
 import javax.persistence.TypedQuery;
@@ -148,8 +149,9 @@ public class DaoFlux extends AbstrDao {
 
             // Pour chaque flux, on va charger les 100 dernier hash 
             DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
-            List<String> dernierHash = daoItem.findLastHash(fl, 100);
+            Set<String> dernierHash = daoItem.findLastHash(fl, 100);
             fl.setLastEmpruntes(dernierHash);
+            
             
             //On enregistre le flux à ses services
             fl.enregistrerAupresdesService();

@@ -63,23 +63,6 @@ public class FluxForm extends AbstrForm {
         //================================================================================================
         if (valide) {
 
-            // Si on observe un changement de comportement.
-            boolean compoHasChange = false;
-            if (flux.getMediatorFlux() != null && mediatorFlux != null) {
-
-                if (!flux.getMediatorFlux().equals(mediatorFlux)) {
-                    flux.changerComportement(mediatorFlux);
-                    compoHasChange = true;
-                    System.out.println("COMPO CHANGEAA");
-//                    System.out.println("1 parseur : " + System.identityHashCode(flux.getMediatorFlux().getParseur()));
-//                    System.out.println("2 parseur: " + System.identityHashCode(mediatorFlux.getParseur()));
-//
-//                    System.out.println("1 media : " + System.identityHashCode(flux.getMediatorFlux()));
-//                    System.out.println("2 media: " + System.identityHashCode(mediatorFlux));
-                }
-            }
-
-
             this.valide = true;
             flux.setActive(active);
             flux.setUrl(url);
@@ -91,54 +74,6 @@ public class FluxForm extends AbstrForm {
             flux.setInfoCollecte(infoCollecte);
             flux.setEstStable(estStable);
 
-            //Depuis que l'on a retirer journaux et type flux du cache cette opération n'est pas utile
-//            if (journalLie != null) {
-//                journalLie.getFluxLie().add(flux);
-//            }
-//            else{
-//                flux.getJournalLie().getFluxLie().remove(flux);
-////                journalLie.getFluxLie().remove(flux);
-//            }
-
-//            flux.setTypeFlux(typeFlux);
-//            if (typeFlux != null) {
-//                typeFlux.getFluxLie().add(flux);
-//            } 
-
-            //================================================================================================
-            //.................AJOUT DE DONNES NE PROVENANT PAS DE LA REQUETE
-            //================================================================================================
-            //Il faut ajouter la date de création du flux ainsi que gérer les période de collecte en fonction de l'activation ou non du flux
-
-            String actFlux = request.getParameter("active");
-            if (actFlux != null && !actFlux.isEmpty() && !compoHasChange) {
-                flux.activation(true);
-            }
-            if (actFlux == null && !compoHasChange) { // Si c'est une demande de désactivation du flux
-                flux.activation(false);
-            }
-
-
-//            if (action.equals("add")) {
-//                String actFlux = request.getParameter("active");
-//                if (actFlux != null && !actFlux.isEmpty()) {
-//                    List<FluxPeriodeCaptation> l = new ArrayList<FluxPeriodeCaptation>();
-//                    FluxPeriodeCaptation p = new FluxPeriodeCaptation();
-//                    p.setDateDebut(new Date());
-//                    p.setFlux(flux);
-//                    l.add(p);
-//                    flux.setPeriodeCaptations(l);
-//                }
-//            } else { // Si c'est une action modif
-//                String actFlux = request.getParameter("active");
-////Si c'est une demande d'activation du flux
-//                if (actFlux != null && !actFlux.isEmpty()) {
-//                    flux.activation(true);
-//                }
-//                if (actFlux == null) { // Si c'est une demande de désactivation du flux
-//                    flux.activation(false);
-//                }
-//            }
 
             //-------> Gestion de la date de création du flux
             if (action.equals("add")) {

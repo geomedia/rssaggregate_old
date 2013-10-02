@@ -77,18 +77,18 @@ public abstract class AbstrDedoublonneur implements Serializable, Cloneable {
      * @param flux
      * @return True si l'item à déjà été enregistrée. False si l'item est nouvelle et n'a pas encoe été taité
      */
-    @Deprecated
-    public Boolean testDoublonageMemoire(Item item, Flux flux) {
-        int i = 0;
-        // test basé sur les dernières emprunte en mémoire.
-        while (i < flux.getLastEmpruntes().size()) {
-            if (item.getHashContenu().equals(flux.getLastEmpruntes().get(i))) {
-                return Boolean.TRUE;
-            }
-            i++;
-        }
-        return false;
-    }
+//    @Deprecated
+//    public Boolean testDoublonageMemoire(Item item, Flux flux) {
+//        int i = 0;
+//        // test basé sur les dernières emprunte en mémoire.
+//        while (i < flux.getLastEmpruntes().size()) {
+//            if (item.getHashContenu().equals(flux.getLastEmpruntes().get(i))) {
+//                return Boolean.TRUE;
+//            }
+//            i++;
+//        }
+//        return false;
+//    }
 
     @Deprecated
     public Boolean testDoublonageBDD(Item get, Flux flux) {

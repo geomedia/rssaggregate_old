@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Set;
 import java.util.logging.Level;
 import javax.persistence.Entity;
 import org.apache.log4j.Logger;
@@ -52,7 +53,7 @@ public class Dedoubloneur extends AbstrDedoublonneur {
          * Dans ce premier bloc on va comparer les hash des dernière items à ces hash en mémoire (temps d'accès beaucoup
          * plus rapide que la BDD)
          */
-        List<String> listLastEmprunte = flux.getLastEmpruntes();
+        Set<String> listLastEmprunte = flux.getLastEmpruntes();
         for (Iterator<String> it = listLastEmprunte.iterator(); it.hasNext();) {
             String hashMemoire = it.next();
             // On parcours toutes les items capturée.

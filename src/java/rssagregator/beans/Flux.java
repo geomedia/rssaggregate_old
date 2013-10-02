@@ -4,15 +4,20 @@ import rssagregator.services.TacheRecupCallable;
 import com.sun.syndication.feed.opml.Attribute;
 import com.sun.syndication.feed.opml.Opml;
 import com.sun.syndication.feed.opml.Outline;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import rssagregator.beans.traitement.MediatorCollecteAction;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Set;
 import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -63,31 +68,94 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long ID;
+
+    public Flux() {
+        propertyChangeSupport = new PropertyChangeSupport(this);
+        FluxChangeLisner changeLisner = new FluxChangeLisner();
+        propertyChangeSupport.addPropertyChangeListener(changeLisner);
+
+        this.debug = new ArrayList<DebugRecapLeveeFlux>();
+        this.item = new ArrayList<Item>();
+        this.lastEmpruntes = new LinkedHashSet<String>();
+
+        this.mediatorFlux = MediatorCollecteAction.getDefaultCollectAction();
+        this.incidentsLie = new ArrayList<CollecteIncident>();
+        this.periodeCaptations = new ArrayList<FluxPeriodeCaptation>();
+
+        this.setChanged();
+    }
+    /**
+     * *
+     * Le beans flux possède un ChangeLisner {@link FluxChangeLisner} chargé d'effectuer des modification dans le beans
+     * lors de l'activation ou de la désactivation. Ce changeLisner est enregistré auprès de ce PropertyChangeSupport
+     */
+    private transient PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+
+    /**
+     * Add PropertyChangeListener.
+     *
+     * @param listener
+     */
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        propertyChangeSupport.addPropertyChangeListener(listener);
+    }
+
+    /**
+     * Remove PropertyChangeListener.
+     *
+     * @param listener
+     */
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        propertyChangeSupport.removePropertyChangeListener(listener);
+    }
     /**
      * URL du flux rss sous la forme http://url/rep.
      */
     @Column(name = "url", length = 2000, nullable = false, unique = true)
     private String url;
+
     /**
      * Permet de déterminer si le flux doit être collecté ou non
      */
+//    protected Boolean active;
     @Column(name = "active")
+    private Boolean active;
+    public static final String PROP_ACTIVE = "active";
+
     /**
-     * Permet de déterminer si le flux doit être collecté ou non
+     * Get the value of active
+     *
+     * @return the value of active
      */
-    protected Boolean active;
+    public Boolean getActive() {
+        return active;
+    }
+
+    /**
+     * Set the value of active
+     *
+     * @param active new value of active
+     */
+    public void setActive(Boolean active) {
+        Boolean oldActive = this.active;
+        this.active = active;
+        propertyChangeSupport.firePropertyChange(PROP_ACTIVE, oldActive, active);
+    }
+    
     /**
      * L'url de la rubrique du flux, il s'agit de la page HTML d'entrée de la rubrique. Cette adresse peut être utilisé
      * pour faire de l'auto discovery.
      */
     @Column(name = "htmlUrl", length = 2000, nullable = true)
     private String htmlUrl;
-    @Transient
+   
+    
     /**
      * Les dernières empruntes md5 des items du flux. On les garde en mémoire pour faire du dédoublonage sans effectuer
      * de requetes dans la base de données. On ne persiste pas dans la base de donnée (TRANSISIENT NORMAL)
      */
-    private List<String> lastEmpruntes;
+     @Transient
+    private transient Set<String> lastEmpruntes;
     /**
      * L'objet Callable qui permet d'être lancé pour effectuer la récupération du flux. Cet objet doit être ajouté dans
      * le pool de thread du service de récupération. Il n'est pas persisté
@@ -158,8 +226,36 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
      * parseur Raffineur etc. IL s4AGIT DU COMPTEMENT DE COLLECTE ACTUELLE. Si auparavant d'autres comportement ont été
      * utilisé, il sont visibles dans les période de captations.
      */
+//    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+//    private MediatorCollecteAction mediatorFlux;
+    /**
+     * Le mediator flux permet d'assigner un flux un comportement de collecte. Un médiator est une configuration de
+     * parseur Raffineur etc. IL s4AGIT DU COMPTEMENT DE COLLECTE ACTUELLE. Si auparavant d'autres comportement ont été
+     * utilisé, il sont visibles dans les période de captations.
+     */
     @OneToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private MediatorCollecteAction mediatorFlux;
+    public static final String PROP_MEDIATORFLUX = "mediatorFlux";
+
+    /**
+     * Get the value of mediatorFlux
+     *
+     * @return the value of mediatorFlux
+     */
+    public MediatorCollecteAction getMediatorFlux() {
+        return mediatorFlux;
+    }
+
+    /**
+     * Set the value of mediatorFlux
+     *
+     * @param mediatorFlux new value of mediatorFlux
+     */
+    public void setMediatorFlux(MediatorCollecteAction mediatorFlux) {
+        MediatorCollecteAction oldMediatorFlux = this.mediatorFlux;
+        this.mediatorFlux = mediatorFlux;
+        propertyChangeSupport.firePropertyChange(PROP_MEDIATORFLUX, oldMediatorFlux, mediatorFlux);
+    }
     /**
      * *
      * C'est une copie du modèle.
@@ -314,14 +410,13 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
 //    public void setPeriodiciteCollecte(Integer periodiciteCollecte) {
 //        this.periodiciteCollecte = periodiciteCollecte;
 //    }
-    public Boolean getActive() {
-        return active;
-    }
-
-    public void setActive(Boolean active) {
-        this.active = active;
-    }
-
+//    public Boolean getActive() {
+//        return active;
+//    }
+//
+//    public void setActive(Boolean active) {
+//        this.active = active;
+//    }
     public String getUrlRubrique() {
         return htmlUrl;
     }
@@ -330,11 +425,11 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
         this.htmlUrl = urlRubrique;
     }
 
-    public List<String> getLastEmpruntes() {
+    public Set<String> getLastEmpruntes() {
         return lastEmpruntes;
     }
 
-    public void setLastEmpruntes(List<String> lastEmpruntes) {
+    public void setLastEmpruntes(Set<String> lastEmpruntes) {
         this.lastEmpruntes = lastEmpruntes;
     }
 
@@ -397,14 +492,6 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
         this.journalLie = journalLie;
     }
 
-    public MediatorCollecteAction getMediatorFlux() {
-        return mediatorFlux;
-    }
-
-    public void setMediatorFlux(MediatorCollecteAction MediatorFlux) {
-        this.mediatorFlux = MediatorFlux;
-    }
-
     public Flux getParentFlux() {
         return parentFlux;
     }
@@ -435,26 +522,6 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
 
     public void setPeriodeCaptations(List<FluxPeriodeCaptation> periodeCaptations) {
         this.periodeCaptations = periodeCaptations;
-    }
-
-    public Flux() {
-
-        this.debug = new ArrayList<DebugRecapLeveeFlux>();
-        this.item = new ArrayList<Item>();
-//        this.lastEmpruntes = new ArrayList<String>();
-        this.lastEmpruntes = new LinkedList<String>();
-
-        this.mediatorFlux = MediatorCollecteAction.getDefaultCollectAction();
-        this.incidentsLie = new ArrayList<CollecteIncident>();
-        this.periodeCaptations = new ArrayList<FluxPeriodeCaptation>();
-
-//        this.incidentEnCours = new ArrayList<FluxIncident>();
-        this.setChanged();
-
-        // On enregistre le Flux auprès des services qu'il doit notifier lors de ses changement d'états
-//        this.addObserver(ServiceCollecteur.getInstance());
-//        this.addObserver(ServiceSynchro.getInstance());
-
     }
 
     public Flux(String url) {
@@ -595,9 +662,6 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
         this.indiceMinimumNbrItemJour = indiceMinimumNbrItemJour;
     }
 
-//    public void setIncidentEnCours(List<FluxIncident> incidentEnCours) {
-//        this.incidentEnCours = incidentEnCours;
-//    }
     /**
      * *
      * Parcours les incidents et retourne ceux qui ne sont pas clos, cad ceux qui n'ont pas de date de fin
@@ -614,25 +678,13 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
                 retour.add(fluxIncident);
             }
         }
-
         return retour;
-//        List<FluxIncident> iRetour = new ArrayList<FluxIncident>();
-//        
-//        List<FluxIncident> fluxIncidents;
-//        fluxIncidents = DAOFactory.getInstance().getDAOIncident().findByFlux(this.ID);
-//
-//        int i;
-//        for (i = 0; i < this.incidentsLie.size(); i++) {
-//            if (this.incidentsLie.get(i).getDateFin() == null) {
-//                iRetour.add(this.incidentsLie.get(i));
-//            }
-//        }
-//        return iRetour;
     }
 
     /**
      * *
-     * Parcours les incident ouvert et retourne le premier incident ouvert du même type que la class envoyé en argument.
+     * Parcours les incident en cours et retourne le premier incident ouvert du même type que la class envoyé en
+     * argument.
      *
      * @param c
      * @return L'incident ouvert du même type que Classc ou null si rien n'a été trouvé
@@ -649,24 +701,6 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
             }
         }
         return null;
-    }
-
-    /**
-     * *
-     * Parcours les incidents du flux et inscrit la date courante en date de fin d'un evenuel incident ouvert. Cette
-     * méthode est éxecuté pour chaque flux losque la levée s'est déroulé avec succes
-     */
-    @Deprecated
-    public void fermerLesIncidentOuvert() {
-        int i;
-        List<CollecteIncident> incidentOuvert = this.getIncidentEnCours();
-
-        for (i = 0; i < incidentOuvert.size(); i++) {
-            // On vérifi quand même que la date de fin est bien null
-            if (incidentOuvert.get(i).getDateFin() == null) {
-                incidentOuvert.get(i).setDateFin(new Date());
-            }
-        }
     }
 
     @Override
@@ -689,13 +723,6 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
             return "FLUX ";
         }
 
-//        String nomRetour = "";
-//        if (this.getJournalLie() != null && this.getTypeFlux() != null) {
-//            nomRetour += this.getJournalLie().getNom() + " - " + this.getTypeFlux().getDenomination();
-//        } else {
-//            nomRetour = this.getUrl();
-//        }
-//        return nomRetour;
 
     }
 
@@ -729,14 +756,6 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
         listoutline.add(outline);
 
         opml.setOutlines(listoutline);
-
-//        List<Flux> fluxs = daoFlux.findChildren(this.ID);
-//
-//        int i;
-//        for (i = 0; i < fluxs.size(); i++) {
-//            Outline suboutline = fluxs.get(i).getOpmlOutline();
-//            
-//        }
         return opml;
     }
 
@@ -780,25 +799,19 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
         return outline;
     }
 
-//    public void forceNotifyObserver() {
-//        this.setChanged();
-//        this.notifyObservers();
-//    }
-    @Override
     /**
      * *
      * Enregistre le flux auprès des service JMS et Service de collecte. Cette procédure ne peut être faite dans le
      * constructeur à cause de l'ORM
      */
+    @Override
     public void enregistrerAupresdesService() {
         this.deleteObservers();
         this.addObserver(ServiceCollecteur.getInstance());
-//        this.addObserver(ServiceSynchro.getInstance());
     }
 
     @Override
     /**
-     * *
      * Ce beans ne doit être synchronisé que si le booleen haschange (du partern observer/observable) est à true. On
      * évite ainsi de synchroniser après calcul des médiane décile et quartile qui ne change pas la nature du bean
      */
@@ -811,7 +824,6 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
     }
 
     /**
-     * *
      * Retourne la durée totale de captation du flux en s'appuyant sur les entites FluxPeriodeCaptation
      */
     public Long returnCaptationDuration() throws DonneeInterneCoherente {
@@ -848,84 +860,85 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
     }
 
     /**
-     * *
-     * Cette méthode contient la logique métier permettant de gérer l'activation et la désactivation du flux. ajoute ou
-     * modifie des enregistrements dans periodicité de collecte.
-     *
-     * @param activation Faut t'il activer ou désactiver le flux
+     * Lors de l'activation désactivation ou du changement de comportement, ce lisner est chargé de modifier des
+     * paramètres du FLUX
      */
-    public void activation(Boolean activation) {
-//        if(activation){
-//            this.periodeCaptations = new ArrayList<FluxPeriodeCaptation>();
-//            FluxPeriodeCaptation fluxPeriodeCaptation = new FluxPeriodeCaptation();
-//            this.periodeCaptations.add(fluxPeriodeCaptation);
-//        }
-        //Si activation
-        if (activation) {
-            //Si on a des période de captation
-            if (!this.getPeriodeCaptations().isEmpty()) {
+    public class FluxChangeLisner implements PropertyChangeListener {
 
-                FluxPeriodeCaptation lastperiode = this.getPeriodeCaptations().get(this.getPeriodeCaptations().size() - 1);
-                // Si la date de din n'est pas null  on ajoute une période de captation
-                if (lastperiode.getDatefin() != null) {
-                    FluxPeriodeCaptation nPeriode = new FluxPeriodeCaptation();
-                    nPeriode.setDateDebut(new Date());
-                    nPeriode.setFlux(this);
-                    nPeriode.setComportementDurantLaPeriode(mediatorFlux);
-//                    System.out.println("LE mediator ICI 1 : " +);
-                    this.getPeriodeCaptations().add(nPeriode);
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            Flux flux = (Flux) evt.getSource();
 
+
+            //============================================================================
+            //..................GESTION DE L'ACTIVATION ET DESACTIVATION DU FLUX
+            //============================================================================
+            if (evt.getPropertyName().equals(PROP_ACTIVE)) {
+                Boolean oldValue = (Boolean) evt.getOldValue();
+                Boolean newValue = (Boolean) evt.getNewValue();
+
+
+                if (oldValue == null) {
+                    oldValue = false;
                 }
-                // Si on n'a pas de période de captation
-            } else if (this.getPeriodeCaptations().isEmpty()) {
-                FluxPeriodeCaptation nP = new FluxPeriodeCaptation();
-                nP.setDateDebut(new Date());
-                nP.setFlux(this);
-                nP.setComportementDurantLaPeriode(mediatorFlux);
-                this.getPeriodeCaptations().add(nP);
-            }
-            // Si c'est une désactivation
-        } else {
-            // Si on a des période de captation
-            if (!this.getPeriodeCaptations().isEmpty()) {
-                // On récupère la derniere
-                FluxPeriodeCaptation lastperiode = this.getPeriodeCaptations().get(this.getPeriodeCaptations().size() - 1);
-                // On ferme la dernière période de captation si nécessaire
-                if (lastperiode.getDatefin() == null) {
-                    lastperiode.setDatefin(new Date());
+                if (newValue == null) {
+                    newValue = false;
+                }
+                //Si c'est une activation 
+                if (oldValue == false && newValue == true) {
+                    if (!flux.getPeriodeCaptations().isEmpty()) {
+
+                        FluxPeriodeCaptation lastperiode = flux.getPeriodeCaptations().get(flux.getPeriodeCaptations().size() - 1);
+                        // Si la date de din n'est pas null  on ajoute une période de captation
+                        if (lastperiode.getDatefin() != null) {
+                            FluxPeriodeCaptation nPeriode = new FluxPeriodeCaptation();
+                            nPeriode.setDateDebut(new Date());
+                            nPeriode.setFlux(flux);
+                            nPeriode.setComportementDurantLaPeriode(mediatorFlux);
+                            flux.getPeriodeCaptations().add(nPeriode);
+
+                        }
+                        // Si on n'a pas de période de captation
+                    } else if (flux.getPeriodeCaptations().isEmpty()) {
+                        FluxPeriodeCaptation nP = new FluxPeriodeCaptation();
+                        nP.setDateDebut(new Date());
+                        nP.setFlux(flux);
+                        nP.setComportementDurantLaPeriode(mediatorFlux);
+                        flux.getPeriodeCaptations().add(nP);
+                    }
+
+                } else if (oldValue == true && newValue == false) {
+                    if (!flux.getPeriodeCaptations().isEmpty()) {
+                        // On récupère la derniere
+                        FluxPeriodeCaptation lastperiode = flux.getPeriodeCaptations().get(flux.getPeriodeCaptations().size() - 1);
+                        // On ferme la dernière période de captation si nécessaire
+                        if (lastperiode.getDatefin() == null) {
+                            lastperiode.setDatefin(new Date());
+                        }
+                    }
+                }
+            } //============================================================================
+            //.................GESTION DES CHANGEMENTS DE COMPORTEMENT
+            //============================================================================
+            else if (evt.getPropertyName().equals(PROP_MEDIATORFLUX)) {
+                MediatorCollecteAction oldValue = (MediatorCollecteAction) evt.getOldValue();
+                MediatorCollecteAction newValue = (MediatorCollecteAction) evt.getNewValue();
+
+                if (oldValue != null && newValue != null) {
+                    if (!oldValue.equals(newValue)) {
+                        // Il est nécessaire d'ouvrir une nouvelle période de captation
+                        flux.setActive(false);
+                        flux.setActive(true);
+
+                        //On place l'ancienne la nouvelle valeur de période de captation dans la dernière période de captation.
+                        int lastIndex = 0;
+                        if (flux.periodeCaptations.size() > 0) {
+                            lastIndex = flux.periodeCaptations.size() - 1;
+                        }
+                        flux.periodeCaptations.get(lastIndex).setComportementDurantLaPeriode(newValue);
+                    }
                 }
             }
         }
-    }
-
-    public static void main(String[] args) {
-    }
-
-    /**
-     * *
-     * Un changement de comportement entraine la création d'une nouvelle période de collecte. Cette méthode permet de
-     * faire les modifications approprié au niveau métier
-     *
-     * @param compoNouv
-     */
-    public void changerComportement(MediatorCollecteAction compoNouv) {
-        try {
-            activation(false);
-            activation(true);
-
-            int lastIndex = 0;
-            if (this.periodeCaptations.size() > 0) {
-                lastIndex = this.periodeCaptations.size() - 1;
-            }
-
-            this.mediatorFlux = compoNouv;
-            this.periodeCaptations.get(lastIndex).setComportementDurantLaPeriode(compoNouv);
-        } catch (Exception e) {
-            System.out.println(">>>>>>>>>>>>>>>>>>><ERRR" + e);
-        }
-        System.out.println(">>>>>>>>>>>>>>>>PAS D'ERREUR");
-
-
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

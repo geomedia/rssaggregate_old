@@ -6,7 +6,9 @@ package rssagregator.dao;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
@@ -303,7 +305,7 @@ public class DaoItem extends AbstrDao {
      * @param fl
      * @param i
      */
-    public List<String> findLastHash(Flux fl, int i) {
+    public Set<String> findLastHash(Flux fl, int i) {
 
 //        em = dAOFactory.getEntityManager();
         Query query = em.createQuery(REQ_FIND_HASH);
@@ -313,8 +315,9 @@ public class DaoItem extends AbstrDao {
         query.setMaxResults(i);
 
         List<String> resu = query.getResultList();
+        Set<String> retu = new LinkedHashSet<String>(resu);
 
-        return resu;
+        return retu;
 //        int j;
 //         
 //        for (j=0; j<resu.size(); j++){
@@ -411,10 +414,10 @@ public class DaoItem extends AbstrDao {
                 EntityTransaction tr = em.getTransaction();
                 tr.begin();
                 em.persist(item);
-
                 tr.commit();
                 // Si le commit s'est bien déroulé, on ajoute l'emprunte au lastEmprunte qui permet le dédoublonnage du Flux 
-                flux.getLastEmpruntes().add(0, item.getHashContenu());
+                flux.getLastEmpruntes().add(item.getHashContenu());
+                
 
             } catch (EntityExistsException existexeption) { // En cas d'erreur, on se rend compte qu'une item possédant le hash existe déjà
                 err = true;
@@ -435,9 +438,10 @@ public class DaoItem extends AbstrDao {
                 em.getTransaction().begin();
                 em.merge(it);
                 em.getTransaction().commit();
-                flux.getLastEmpruntes().add(0, item.getHashContenu());
+                flux.getLastEmpruntes().add(item.getHashContenu());
+                
             } catch (Exception e) {
-                logger.debug("ERREURR");
+                logger.error("ERREURR"+e);
             }
         }
     }
@@ -455,9 +459,7 @@ public class DaoItem extends AbstrDao {
         Query query = em.createQuery(REQ);
         query.setParameter("fluxid", idflux);
         item = (List<Item>) query.getResultList();
-        System.out.println("LISTTTT : " + item.size());
         return item;
-
     }
 
     /**
