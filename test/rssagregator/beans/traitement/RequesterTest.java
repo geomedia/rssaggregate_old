@@ -6,10 +6,10 @@ package rssagregator.beans.traitement;
 
 import org.junit.After;
 import org.junit.AfterClass;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *
@@ -51,7 +51,7 @@ public class RequesterTest {
         else{
             System.out.println("Code retour  : " + instance.getHttpStatut());
         }
-        if (instance.getHttpStatut() == null || instance.getHttpResult().equals("")) {
+        if (instance.getHttpStatut() == null || instance.getHttpResult().isEmpty()) {
             fail("Le contenu retourné es null");
         }
         

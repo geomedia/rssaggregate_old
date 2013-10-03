@@ -63,6 +63,7 @@ public class CountryList {
             this.name = name;
         }
 
+        @Override
         public String toString() {
             return iso + " - " + code + " - " + name.toUpperCase();
         }
@@ -79,6 +80,7 @@ public class CountryList {
         }
 
         @SuppressWarnings("unchecked")
+        @Override
         public int compare(Country c1, Country c2) {
             return comparator.compare(c1.name, c2.name);
         }

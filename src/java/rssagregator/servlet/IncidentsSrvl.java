@@ -4,8 +4,6 @@
  */
 package rssagregator.servlet;
 
-import rssagregator.dao.DAOFactory;
-import rssagregator.dao.DAOIncident;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -16,9 +14,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import rssagregator.beans.form.IncidentForm;
 import rssagregator.beans.incident.AbstrIncident;
-import rssagregator.beans.incident.CollecteIncident;
-import rssagregator.beans.incident.MailIncident;
-import rssagregator.beans.incident.SynchroIncident;
+import rssagregator.dao.DAOFactory;
+import rssagregator.dao.DAOIncident;
 import rssagregator.utils.ServletTool;
 import static rssagregator.utils.ServletTool.redir;
 
@@ -161,7 +158,7 @@ public class IncidentsSrvl extends HttpServlet {
 
 
             try {
-                clos = new Boolean(request.getParameter("clos"));
+                clos = Boolean.valueOf(request.getParameter("clos"));
 
             } catch (Exception e) {
                 clos = false;

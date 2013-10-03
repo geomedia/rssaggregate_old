@@ -133,11 +133,11 @@
 
                         <c:forEach items="${list}" var="compo">
                             <li><a href="${rootpath}ComportementCollecte/read?id=${compo.ID}">${compo}</a></li>
-                        </c:forEach>
+                            </c:forEach>
 
                     </c:when>
                     <c:when test="${action=='read'}">
-                        
+
                         <c:import url="/WEB-INF/inc/editionBean.jsp" />
                         <p><strong>Nom : </strong>${bean.nom}</p>
                         <p><strong>Description : </strong> ${bean.description}</p>
@@ -154,34 +154,44 @@
                                 <c:when test="${bean.dedoubloneur.deboudDesc=='true'}">OUI</c:when>
                                 <c:when test="${bean.dedoubloneur.deboudDesc=='false'}">NON</c:when>
                             </c:choose></p>
-                        
+
                         <p><strong>Lien :</strong>
-                             <c:choose>
+                            <c:choose>
                                 <c:when test="${bean.dedoubloneur.dedoubLink=='true'}">OUI</c:when>
                                 <c:when test="${bean.dedoubloneur.dedoubLink=='false'}">NON</c:when>
                             </c:choose>
                         </p>
                         <p><strong>GUID : </strong>
-                             <c:choose>
+                            <c:choose>
                                 <c:when test="${bean.dedoubloneur.dedouGUID=='true'}">OUI</c:when>
                                 <c:when test="${bean.dedoubloneur.dedouGUID=='false'}">NON</c:when>
                             </c:choose>
                         </p>
-                        
+
                         <p><strong>Categorie : </strong>
-                             <c:choose>
+                            <c:choose>
                                 <c:when test="${bean.dedoubloneur.dedoubCategory=='true'}">OUI</c:when>
                                 <c:when test="${bean.dedoubloneur.dedoubCategory=='false'}">NON</c:when>
                             </c:choose>
                         </p>
                         <p><strong>Date de publication : </strong>
-                         <c:choose>
+                            <c:choose>
                                 <c:when test="${bean.dedoubloneur.dedoubDatePub=='true'}">OUI</c:when>
                                 <c:when test="${bean.dedoubloneur.dedoubDatePub=='false'}">NON</c:when>
                             </c:choose></p>
+
+                        <p><strong>Liste des flux controlé</strong></p>
+                        <ul>
+                            <c:forEach items="${bean.listeFlux}" var="fl">
+                                <li><a href="${rootpath}flux/read?id=${fl.ID}">${fl}</a></li>
+
+
+                            </c:forEach>
+                        </ul>
+
                     </c:when>
-                        
-                        
+
+
                 </c:choose>
 
 

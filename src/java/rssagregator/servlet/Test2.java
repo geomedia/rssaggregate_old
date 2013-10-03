@@ -14,12 +14,8 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import rssagregator.beans.Flux;
 import rssagregator.beans.Journal;
-import rssagregator.dao.DAOFactory;
-import rssagregator.services.ServiceCollecteur;
 import rssagregator.services.ServiceSynchro;
-import rssagregator.services.TacheCalculQualiteFlux;
 
 /**
  *

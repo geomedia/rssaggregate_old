@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 import rssagregator.beans.AbstrObservableBeans;
 import rssagregator.beans.Conf;
 import rssagregator.beans.Flux;
-import rssagregator.beans.Journal;
 import rssagregator.beans.form.AbstrForm;
 import rssagregator.beans.form.FORMFactory;
 import rssagregator.dao.AbstrDao;
@@ -328,5 +327,8 @@ public class ServletTool {
             redir(request, srlvtname + "/rem", "Erreur lors du traitement  : " + e, Boolean.TRUE);
         }
 
+    }
+
+    private ServletTool() {
     }
 }

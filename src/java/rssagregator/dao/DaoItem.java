@@ -5,6 +5,7 @@
 package rssagregator.dao;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -43,6 +44,10 @@ public class DaoItem extends AbstrDao {
     Date date1; // Borne de date début
     Date date2; // Borne de date début
     String hashNotIn; // where where hash
+    /***
+     * Permet de limiter la recherche critériat à un syncstatut
+     */
+    private Integer synchStatut;
     //-------------------------------------------------------------------------------------------
     protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DaoItem.class);
 
@@ -116,7 +121,12 @@ public class DaoItem extends AbstrDao {
         if (date1 != null && date2 != null) {
             listWhere.add(cb.and(cb.between(root.<Date>get("dateRecup"), date1, date2)));
         }
-//        
+        
+        //-------------------------SYNCSTATUT---------------------------------
+        if(synchStatut!=null){
+            listWhere.add(cb.and(cb.equal(root.get("syncStatut"), synchStatut)));
+        }
+        
         // -----------------------Le ORDER BY---------------------------------
         if (order_by != null) {
             if (order_desc != null && order_desc) {
@@ -135,9 +145,7 @@ public class DaoItem extends AbstrDao {
             String[] tabhash = hashNotIn.split(", ");
 
             List<String> listhash = new ArrayList<String>();
-            for (int j = 0; j < tabhash.length; j++) {
-                listhash.add(tabhash[j]);
-            }
+            listhash.addAll(Arrays.asList(tabhash));
 
 //            listWhere.add(cb.and(root.get("hashContenu").  in(listhash)));
             listWhere.add(cb.and(cb.not(root.get("hashContenu").in(listhash))));
@@ -274,7 +282,7 @@ public class DaoItem extends AbstrDao {
 //        Query query = em.createQuery("SELECT item FROM Item item JOIN item.listFlux flux where item.hashContenu IN ("+hashParamSQL+") AND flux.ID=:fluxid");
         Query query = em.createQuery("SELECT item FROM Item item LEFT JOIN fetch item.listFlux WHERE item.hashContenu IN (" + hashParamSQL + ")");
         //LEFT JOIN FETCH item.listFlux
-        
+
 
         List<Item> resuList;
         resuList = query.getResultList();
@@ -392,6 +400,24 @@ public class DaoItem extends AbstrDao {
     }
 
     /**
+     * Get the value of synchStatut
+     *
+     * @return the value of synchStatut
+     */
+    public Integer getSynchStatut() {
+        return synchStatut;
+    }
+
+    /**
+     * Set the value of synchStatut
+     *
+     * @param synchStatut new value of synchStatut
+     */
+    public void setSynchStatut(Integer synchStatut) {
+        this.synchStatut = synchStatut;
+    }
+
+    /**
      * *
      * Enregistre l'item pour le flux. Cette méthode doit être employé en priorité (et non la méthode crée() car elle
      * bloque synchronise la dao afin d'éviter les conflit d'écriture. Si l'item précisé est déjà enregistré dans la
@@ -417,7 +443,7 @@ public class DaoItem extends AbstrDao {
                 tr.commit();
                 // Si le commit s'est bien déroulé, on ajoute l'emprunte au lastEmprunte qui permet le dédoublonnage du Flux 
                 flux.getLastEmpruntes().add(item.getHashContenu());
-                
+
 
             } catch (EntityExistsException existexeption) { // En cas d'erreur, on se rend compte qu'une item possédant le hash existe déjà
                 err = true;
@@ -439,9 +465,9 @@ public class DaoItem extends AbstrDao {
                 em.merge(it);
                 em.getTransaction().commit();
                 flux.getLastEmpruntes().add(item.getHashContenu());
-                
+
             } catch (Exception e) {
-                logger.error("ERREURR"+e);
+                logger.error("ERREURR" + e);
             }
         }
     }

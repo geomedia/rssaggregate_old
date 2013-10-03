@@ -16,10 +16,10 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
-import javax.persistence.Version;
 import org.apache.poi.util.Beta;
 import org.eclipse.persistence.annotations.Cache;
 import org.eclipse.persistence.annotations.CacheType;
+import rssagregator.services.ServiceSynchro;
 
 /**
  * *
@@ -30,7 +30,6 @@ import org.eclipse.persistence.annotations.CacheType;
  *
  * @author clem
  */
-
 @Entity
 @Table(name = "item")
 @Cacheable(value = true)
@@ -102,9 +101,16 @@ public class Item implements Serializable, Comparable<Item> {
     @Column(name = "link", length = 2000)
     private String link;
     /**
-     * Cette variable n'est pas encore implémenté. 0 = nouveau pas encore de sync 1 = synch effectué 2 = item sur le
-     * maitre récupéré du serv esclave 3 = problème non présent dans la base du maitre. Il n'arrive pas à l'enregistrer
-     * après sync. Il faut une notification. Ces items ne sont pas supprimées par la tache automatique.
+     * Cette variable n'est pas encore implémenté.
+     * <ul>
+     * <li>0 = nouveau pas encore de sync</li>
+     * <li>1 = synch effectué </li>
+     * <li>2 = item sur le maitre récupéré du serv esclave</li>
+     * <li>3 : L'item ne doit pas être synchronisée sur le serveur maitre. Ce cas provient lors de la synchrnonisation
+     * de la modification d'un comportement. Le service {@link ServiceSynchro} désactive alors les items qu'il aurait pu
+     * récolter durant le laps de temps entre l'émission de la modification du comportement et la répercution de ce
+     * comportement sur l'esclave.</li>
+     * </ul>
      */
     @Beta
     private Integer syncStatut;

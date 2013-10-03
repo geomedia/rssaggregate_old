@@ -61,8 +61,8 @@ public class TESTRecapActiviteGeneraleSrvl extends HttpServlet {
             Integer x = rnd.intValue();
             Date dateDebut = new Date();
             Long time = dateDebut.getTime();
-            time = time/1000;
-            time = time*1000;
+            time /= 1000;
+            time *= 1000;
             x = time.intValue();
      
 

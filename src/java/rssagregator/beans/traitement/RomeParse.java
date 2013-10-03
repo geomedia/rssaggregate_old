@@ -7,17 +7,16 @@ import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.ParsingFeedException;
 import com.sun.syndication.io.SyndFeedInput;
-
+import com.sun.syndication.io.XmlReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import rssagregator.beans.Item;
-import com.sun.syndication.io.XmlReader;
-import java.util.Date;
 import javax.persistence.Entity;
 import javax.persistence.Transient;
+import rssagregator.beans.Item;
 
 /**
  * test

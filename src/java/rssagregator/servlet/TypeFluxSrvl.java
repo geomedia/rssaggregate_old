@@ -4,22 +4,16 @@
  */
 package rssagregator.servlet;
 
-import rssagregator.dao.DAOFactory;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import rssagregator.beans.FluxType;
+import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DAOGenerique;
-import rssagregator.beans.form.FluxTypeForm;
-import static rssagregator.servlet.ComportementCollecteSrvlt.ATT_SERV_NAME;
 import rssagregator.utils.ServletTool;
 
 /**

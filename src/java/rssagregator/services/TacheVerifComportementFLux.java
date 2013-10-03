@@ -7,10 +7,8 @@ package rssagregator.services;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Observer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -104,7 +102,7 @@ public class TacheVerifComportementFLux extends AbstrTacheSchedule<TacheVerifCom
             while (dtIt.isBefore(dt2)) {
                 Integer nbJour = result.get(dtIt.toDate());
                 if (nbJour != null) {
-                    somme = somme + result.get(dtIt.toDate());
+                    somme += result.get(dtIt.toDate());
                 }
                 //On cherche à savoir si le jour doit être considéré dans le diviseur
                 if (dtIt.isAfter(dtTimeAjoutFlux)) {

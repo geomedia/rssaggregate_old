@@ -6,7 +6,6 @@ package rssagregator.beans.incident;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import rssagregator.services.ServiceSynchro;
 import rssagregator.services.TacheDiffuserMessageJMS;
 
 /**

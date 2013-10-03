@@ -11,7 +11,6 @@ import java.util.logging.Logger;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import org.eclipse.persistence.jaxb.xmlmodel.XmlBindings;
-import rssagregator.beans.Item;
 
 
 /**

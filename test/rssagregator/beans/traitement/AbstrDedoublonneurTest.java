@@ -8,10 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.After;
 import org.junit.AfterClass;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 
@@ -113,7 +113,7 @@ public class AbstrDedoublonneurTest {
         
         List<Item> result = instance.dedoublonne(listItemCapture, flux);
         
-        if(result.size()!=0){
+        if(!result.isEmpty()){
             fail("la liste devrait être vide");
         }
         

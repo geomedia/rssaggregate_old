@@ -8,8 +8,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -19,7 +17,6 @@ import rssagregator.beans.form.ComportementCollecteForm;
 import rssagregator.beans.traitement.MediatorCollecteAction;
 import rssagregator.dao.DAOComportementCollecte;
 import rssagregator.dao.DAOFactory;
-import static rssagregator.servlet.IncidentsSrvl.ATT_SERV_NAME;
 import rssagregator.utils.ServletTool;
 
 /**

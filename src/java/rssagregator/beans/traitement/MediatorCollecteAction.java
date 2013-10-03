@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -22,9 +23,11 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.Version;
 import javax.xml.ws.http.HTTPException;
 import org.apache.poi.util.Beta;
 import org.eclipse.persistence.annotations.Cache;
@@ -49,7 +52,7 @@ import rssagregator.dao.DaoItem;
 @Entity
 @Table(name = "tr_mediatocollecteaction")
 @Cacheable(true)
-@Cache(type = CacheType.FULL, coordinationType = CacheCoordinationType.SEND_NEW_OBJECTS_WITH_CHANGES, isolation = CacheIsolationType.SHARED)
+@Cache(type = CacheType.FULL, coordinationType = CacheCoordinationType.INVALIDATE_CHANGED_OBJECTS, isolation = CacheIsolationType.SHARED)
 public class MediatorCollecteAction implements Serializable, Cloneable, BeanSynchronise {
 
     @Transient
@@ -83,7 +86,7 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
      * *
      * Le parseur propre au médiateur.
      */
-    @OneToOne(cascade = CascadeType.ALL, fetch =  FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private AbstrParseur parseur;
     /**
      * Le requesteur propre au médiateur. C'est l'objet qui permet de formuler des requêtes http
@@ -99,7 +102,8 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
 //    /***
 //     * Liste de flux pour ce médiateur   LA RELATION EST PORTÉ PAR L'ENTITÉ FLUX. UN FLUX POSSEDE 0 OU 1 MEDIATEUR
 //     */
-//    public List<Flux> listeFlux;
+    @OneToMany(mappedBy = "mediatorFlux")
+    public List<Flux> listeFlux;
     /**
      * *
      * Les médiateur raffineurs associées au médiateur de collecte. les raffineurs vont être très souvent réutilisé d'ou
@@ -132,6 +136,32 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
      */
     @Transient
     protected List<Item> listItem;
+//    @Version
+////    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+//    private Long lastUpdate;
+//
+//    public Long getLastUpdate() {
+//        return lastUpdate;
+//    }
+//
+//    public void setLastUpdate(Long lastUpdate) {
+//        this.lastUpdate = lastUpdate;
+//    }
+    
+    
+    @Version
+    private Timestamp dateUpdate;
+
+    public Timestamp getDateUpdate() {
+        return dateUpdate;
+    }
+
+    public void setDateUpdate(Timestamp dateUpdate) {
+        this.dateUpdate = dateUpdate;
+    }
+    
+    
+    
 
     /**
      * Le médiator récolte les item les parse et les dédoublonne.
@@ -445,6 +475,17 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
         this.listItem = listItem;
     }
 
+    public List<Flux> getListeFlux() {
+        return listeFlux;
+    }
+
+    public void setListeFlux(List<Flux> listeFlux) {
+        this.listeFlux = listeFlux;
+    }
+    
+    
+     
+
     @Override
     public String toString() {
 
@@ -532,9 +573,4 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
         }
         return true;
     }
-
-    
-    
-    
-    
 }

@@ -9,7 +9,6 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import rssagregator.beans.Conf;
-import rssagregator.beans.ServeurSlave;
 import rssagregator.beans.UserAccount;
 import rssagregator.utils.PropertyLoader;
 

@@ -4,8 +4,6 @@
  */
 package rssagregator.beans;
 
-import rssagregator.dao.DAOFactory;
-import rssagregator.dao.DaoItem;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -15,6 +13,8 @@ import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.Period;
 import org.json.simple.JSONArray;
+import rssagregator.dao.DAOFactory;
+import rssagregator.dao.DaoItem;
 
 /**
  * <strong>Implémentation beta des correctif à effectuer</strong>

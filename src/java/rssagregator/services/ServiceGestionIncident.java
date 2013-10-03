@@ -7,7 +7,6 @@ package rssagregator.services;
 import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.ParsingFeedException;
 import java.io.IOException;
-import rssagregator.dao.DAOFactory;
 import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.List;
@@ -21,8 +20,9 @@ import javax.persistence.RollbackException;
 import javax.xml.ws.http.HTTPException;
 import rssagregator.beans.Flux;
 import rssagregator.beans.incident.AbstrIncident;
-import rssagregator.beans.incident.MailIncident;
 import rssagregator.beans.incident.CollecteIncident;
+import rssagregator.beans.incident.MailIncident;
+import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DAOIncident;
 
 /**

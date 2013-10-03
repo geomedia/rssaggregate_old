@@ -16,7 +16,6 @@ import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.Incidable;
 import rssagregator.beans.incident.MailIncident;
 

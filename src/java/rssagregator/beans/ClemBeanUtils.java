@@ -4,7 +4,6 @@
  */
 package rssagregator.beans;
 
-import rssagregator.dao.DAOFactory;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -18,6 +17,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.servlet.http.HttpServletRequest;
 import rssagregator.beans.form.AbstrForm;
+import rssagregator.dao.DAOFactory;
 
 /**
  * <p>CETTE CLASSE N'EST PLUS UTILISÉE</p>
@@ -98,7 +98,7 @@ public class ClemBeanUtils {
                     // si c'est un boollen
                     if (typeArgSetter.equals(Boolean.class)) {
                         // Pour une checkbox si on n'a pas de contenu dans l'argument c'est false, si il y a du contenu c'est vrai (pour les fomulaire html)
-                        if (contenuRequest == null || contenuRequest.equals("")) {
+                        if (contenuRequest == null || contenuRequest.isEmpty()) {
                             setter.invoke(bean, Boolean.FALSE);
                         } else {
                             setter.invoke(bean, Boolean.TRUE);
@@ -251,5 +251,8 @@ public class ClemBeanUtils {
 
 
 //        return erreurs;
+    }
+
+    private ClemBeanUtils() {
     }
 }

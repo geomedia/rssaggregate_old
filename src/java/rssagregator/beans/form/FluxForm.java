@@ -4,7 +4,6 @@
  */
 package rssagregator.beans.form;
 
-import rssagregator.dao.DAOGenerique;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.logging.Level;
@@ -18,6 +17,7 @@ import rssagregator.beans.Journal;
 import rssagregator.beans.traitement.MediatorCollecteAction;
 import rssagregator.dao.DAOComportementCollecte;
 import rssagregator.dao.DAOFactory;
+import rssagregator.dao.DAOGenerique;
 import rssagregator.dao.DaoFlux;
 import rssagregator.dao.DaoJournal;
 
@@ -100,7 +100,7 @@ public class FluxForm extends AbstrForm {
     @Deprecated
     public void check_url(String url) throws Exception {
         System.out.println("---> CHECK URL");
-        if (url == null || url.equals("")) {
+        if (url == null || url.isEmpty()) {
             throw new Exception("L'url est vide");
         }
         // doit commencer par http.

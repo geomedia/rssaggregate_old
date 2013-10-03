@@ -18,9 +18,9 @@ import rssagregator.beans.Conf;
 import rssagregator.dao.DAOConf;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoFlux;
-import rssagregator.services.ServiceServer;
 import rssagregator.services.ServiceCollecteur;
 import rssagregator.services.ServiceMailNotifier;
+import rssagregator.services.ServiceServer;
 import rssagregator.services.ServiceSynchro;
 import rssagregator.utils.ServiceXMLTool;
 

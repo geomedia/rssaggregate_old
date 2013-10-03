@@ -4,7 +4,6 @@
  */
 package rssagregator.servlet;
 
-import rssagregator.dao.DAOFactory;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Date;
@@ -19,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import rssagregator.beans.RecapActivite;
 import rssagregator.beans.form.RecapActiviteForm;
+import rssagregator.dao.DAOFactory;
 
 /**
  *

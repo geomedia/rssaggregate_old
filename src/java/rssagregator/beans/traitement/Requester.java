@@ -47,7 +47,7 @@ public class Requester extends AbstrRequesteur {
         int i;
 
         if (requestProperty != null) {
-            for (i = 0; i < requestProperty.length; i = i + 2) {
+            for (i = 0; i < requestProperty.length; i += 2) {
                 conn.setRequestProperty(this.requestProperty[i][0], this.requestProperty[i][1]);
             }
         }

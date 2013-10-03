@@ -4,8 +4,6 @@
  */
 package rssagregator.servlet;
 
-import rssagregator.dao.DAOFactory;
-import rssagregator.dao.DaoItem;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +18,8 @@ import org.joda.time.format.DateTimeFormatter;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.beans.form.ItemForm;
+import rssagregator.dao.DAOFactory;
+import rssagregator.dao.DaoItem;
 import rssagregator.utils.ServletTool;
 
 /**
@@ -93,7 +93,7 @@ public class ItemSrvl extends HttpServlet {
         //          - id : Il s'agit de l'id de l'item à lire
         if (action.equals("read")) {
             String idString = request.getParameter("id");
-            if (idString != null && !idString.equals("")) {
+            if (idString != null && !idString.isEmpty()) {
                 Long id = new Long(idString);
                 request.setAttribute("id", id);
                 item = (Item) daoItem.find(id);
@@ -159,7 +159,7 @@ public class ItemSrvl extends HttpServlet {
             try {
                 String s = request.getParameter("order");
                 String desc = request.getParameter("desc");
-                if (!s.equals("")) {
+                if (!s.isEmpty()) {
                     if (s.equals("dateRecup") || s.equals("datePub") || s.equals("listFlux")) {
                         daoItem.setOrder_by(s);
                         if (desc.equals("true")) {
@@ -188,6 +188,12 @@ public class ItemSrvl extends HttpServlet {
             } catch (Exception e) {
             }
 
+            
+            // Critère Sync Statut
+            try {
+                daoItem.setSynchStatut(new Integer(request.getParameter("syncStatut")));
+            } catch (Exception e) {
+            }
 
             //On récupère le nombre max d'item
             Integer nbItem = daoItem.findNbMax();
@@ -288,7 +294,7 @@ public class ItemSrvl extends HttpServlet {
     public static String getParam(String param, HttpServletRequest request) {
 
         String s = request.getParameter(param);
-        if (s != null && !s.equals("")) {
+        if (s != null && !s.isEmpty()) {
             System.out.println("laa");
             return s;
 

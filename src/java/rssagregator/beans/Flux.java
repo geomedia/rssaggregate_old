@@ -1,6 +1,5 @@
 package rssagregator.beans;
 
-import rssagregator.services.TacheRecupCallable;
 import com.sun.syndication.feed.opml.Attribute;
 import com.sun.syndication.feed.opml.Opml;
 import com.sun.syndication.feed.opml.Outline;
@@ -12,8 +11,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import rssagregator.beans.traitement.MediatorCollecteAction;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -21,7 +18,6 @@ import java.util.Set;
 import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import rssagregator.beans.incident.CollecteIncident;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -42,10 +38,13 @@ import org.eclipse.persistence.config.CacheIsolationType;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import rssagregator.beans.exception.DonneeInterneCoherente;
+import rssagregator.beans.incident.CollecteIncident;
+import rssagregator.beans.traitement.MediatorCollecteAction;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoFlux;
 import rssagregator.services.ServiceCollecteur;
 import rssagregator.services.TacheCalculQualiteFlux;
+import rssagregator.services.TacheRecupCallable;
 import rssagregator.services.TacheVerifComportementFLux;
 
 /**
@@ -233,7 +232,9 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
      * parseur Raffineur etc. IL s4AGIT DU COMPTEMENT DE COLLECTE ACTUELLE. Si auparavant d'autres comportement ont été
      * utilisé, il sont visibles dans les période de captations.
      */
-    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+//    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+//    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private MediatorCollecteAction mediatorFlux;
     public static final String PROP_MEDIATORFLUX = "mediatorFlux";
 

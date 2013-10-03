@@ -407,7 +407,6 @@ public class DaoFlux extends AbstrDao {
             listWhere.add(cb.and(cb.equal(root.get("active"), true)));
         }
 
-
         // On applique les wheres
         if (listWhere.size() == 1) {
 
@@ -419,8 +418,6 @@ public class DaoFlux extends AbstrDao {
             }
             cq.where(pr);
         }
-
-
 
         TypedQuery<Flux> tq = em.createQuery(cq);
 

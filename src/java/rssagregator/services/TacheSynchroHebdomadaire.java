@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Observer;
 import java.util.concurrent.Future;
-import rssagregator.beans.Item;
 import rssagregator.beans.ServeurSlave;
 import rssagregator.dao.DAOFactory;
 

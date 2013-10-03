@@ -10,15 +10,13 @@ import java.util.ListIterator;
 import java.util.Observer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.mail.internet.InternetAddress;
 import rssagregator.beans.UserAccount;
 import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DAOIncident;
-import rssagregator.services.mailtemplate.TemplateMailAlertIncident;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.eclipse.persistence.jpa.jpql.utility.iterable.ListIterable;
 
 /**
  * Cette tache a pour role de collecter toutes les 30 minutes les incidents nouveaux et d'envoyer un mail aux

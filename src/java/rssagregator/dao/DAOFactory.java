@@ -14,7 +14,6 @@ import rssagregator.beans.FluxType;
 import rssagregator.beans.Journal;
 import rssagregator.beans.ServeurSlave;
 import rssagregator.beans.UserAccount;
-import rssagregator.beans.exception.UnIncidableException;
 import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.AliveIncident;
 import rssagregator.beans.incident.AnomalieCollecte;

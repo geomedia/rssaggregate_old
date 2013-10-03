@@ -4,7 +4,6 @@
  */
 package rssagregator.services;
 
-import java.util.ArrayList;
 import java.util.List;
 import rssagregator.beans.Item;
 

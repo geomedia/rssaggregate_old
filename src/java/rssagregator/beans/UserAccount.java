@@ -132,7 +132,7 @@ public class UserAccount implements Serializable, BeanSynchronise {
         MessageDigest digest = MessageDigest.getInstance("MD5");
         digest.reset();
         byte[] hash = digest.digest(entre.getBytes());
-        String hashString = new String(HexUtils.toHexString(hash));
+        String hashString = HexUtils.toHexString(hash);
         this.setPass(hashString);
     }
 
@@ -149,7 +149,7 @@ public class UserAccount implements Serializable, BeanSynchronise {
             MessageDigest digest = MessageDigest.getInstance("MD5");
             digest.reset();
             byte[] hash = digest.digest(pTest.getBytes());
-            String enc = new String(HexUtils.toHexString(hash));
+            String enc = HexUtils.toHexString(hash);
 
             if (this.pass != null && this.pass.equals(enc)) {
                 return true;

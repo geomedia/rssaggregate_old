@@ -1,5 +1,4 @@
 
-import rssagregator.beans.Flux;
 
 /*
  * To change this template, choose Tools | Templates
@@ -36,6 +35,7 @@ JAVA("Langage JAVA",
     System.out.println("Editeur : " + editor);
   }
     
+@Override
   public String toString(){
     return name;
   }

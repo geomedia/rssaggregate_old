@@ -4,14 +4,11 @@
  */
 package rssagregator.beans;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Date;
@@ -88,7 +85,7 @@ public class StillAlivePOJO {
                 retour = true;
             }
         }
-        else if(alive!=null && alive.size()==0){
+        else if(alive!=null && alive.isEmpty()){
             Date[] nDate = new Date[]{new Date(), new Date()};
             alive.add(nDate);
             retour = false;

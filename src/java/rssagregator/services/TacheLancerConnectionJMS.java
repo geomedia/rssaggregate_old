@@ -5,7 +5,6 @@
 package rssagregator.services;
 
 import java.util.Observer;
-import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.Incidable;
 import rssagregator.beans.incident.JMSPerteConnectionIncident;
 

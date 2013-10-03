@@ -5,21 +5,18 @@
 package rssagregator.beans;
 
 import com.meterware.httpunit.PostMethodWebRequest;
-import com.meterware.httpunit.WebRequest;
 import com.meterware.servletunit.InvocationContext;
 import com.meterware.servletunit.ServletRunner;
 import com.meterware.servletunit.ServletUnitClient;
-import rssagregator.dao.DAOFactory;
-import rssagregator.dao.DaoJournal;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import org.junit.After;
 import org.junit.AfterClass;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import rssagregator.beans.form.AbstrForm;
 import rssagregator.beans.form.JournalForm;
 import rssagregator.servlet.JournauxSrvlOLD;

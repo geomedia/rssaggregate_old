@@ -5,8 +5,6 @@
 package rssagregator.beans.form;
 
 import java.util.ArrayList;
-import rssagregator.dao.DAOFactory;
-import rssagregator.dao.DaoItem;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +14,8 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import rssagregator.beans.Flux;
 import rssagregator.beans.RecapActivite;
+import rssagregator.dao.DAOFactory;
+import rssagregator.dao.DaoItem;
 
 /**
  * L'affichage du récapitulatif de l'activité est a refaire. Cette class va surement subir des modifications

@@ -6,7 +6,6 @@ package rssagregator.services;
 
 import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.ParsingFeedException;
-import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -22,7 +21,6 @@ import java.util.logging.Logger;
 import javax.xml.ws.http.HTTPException;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
-import rssagregator.beans.Conf;
 import rssagregator.beans.Flux;
 import rssagregator.beans.exception.UnIncidableException;
 import rssagregator.beans.incident.AnomalieCollecte;
@@ -31,7 +29,6 @@ import rssagregator.beans.incident.Incidable;
 import rssagregator.beans.incident.IncidentFactory;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DAOIncident;
-import rssagregator.utils.PropertyLoader;
 
 /**
  * Cette classe permet d'instancier le service de collecte du projet. Elle est

@@ -3,7 +3,6 @@ package rssagregator.beans.incident;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.Observable;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,7 +13,6 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.Temporal;
 import javax.persistence.Transient;
-import org.eclipse.jdt.internal.compiler.ast.ThisReference;
 import org.eclipse.persistence.annotations.Cache;
 import org.eclipse.persistence.annotations.CacheCoordinationType;
 import org.eclipse.persistence.annotations.CacheType;
@@ -23,7 +21,6 @@ import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import rssagregator.beans.Conf;
 import rssagregator.dao.DAOFactory;
-import rssagregator.services.ServiceMailNotifier;
 import rssagregator.services.TacheAlerteMail;
 
 /**

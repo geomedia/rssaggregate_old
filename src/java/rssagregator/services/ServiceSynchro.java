@@ -6,23 +6,20 @@ package rssagregator.services;
 
 import java.io.EOFException;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.jms.DeliveryMode;
 import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
-import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.Topic;
 import javax.jms.TopicConnection;
@@ -35,23 +32,26 @@ import rssagregator.beans.BeanSynchronise;
 import rssagregator.beans.Conf;
 import rssagregator.beans.Flux;
 import rssagregator.beans.FluxType;
+import rssagregator.beans.Item;
 import rssagregator.beans.Journal;
 import rssagregator.beans.exception.UnIncidableException;
-import rssagregator.dao.DAOGenerique;
 import rssagregator.beans.incident.IncidentFactory;
 import rssagregator.beans.incident.JMSDiffusionIncident;
 import rssagregator.beans.incident.JMSPerteConnectionIncident;
 import rssagregator.beans.incident.SynchroIncident;
 import rssagregator.beans.traitement.MediatorCollecteAction;
 import rssagregator.dao.DAOFactory;
+import rssagregator.dao.DAOGenerique;
 import rssagregator.dao.DAOIncident;
+import rssagregator.dao.DaoItem;
 import rssagregator.dao.DaoJournal;
 import rssagregator.utils.XMLTool;
 
 /**
- * Cette classe utilise le client activeMq en vue de synchroniser les beans (flux, comportement de collecte) entre
- * serveurs du projet GEOMEDIA. La méthode run doit être lancée au démarrage du projet afin de lancer un daemon
- * cherchant à relancer la connection toutes les 30 secondes si le booleen statutConnection est à f
+ * Cette classe utilise le client activeMq en vue de synchroniser les beans
+ * ({@link Flux}, {@link MediatorCollecteAction}) entre serveurs du projet GEOMEDIA. La méthode run doit être lancée au
+ * démarrage du projet afin de lancer un daemon cherchant à relancer la connection toutes les 30 secondes si le booleen
+ * statutConnection est à f
  *
  * @author clem
  */
@@ -402,6 +402,32 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
                             }
                         } else if (action.equals("mod")) {
                             try {
+                                MediatorCollecteAction cast = (MediatorCollecteAction) bean;
+                                List<Flux> fluxCollecte = cast.getListeFlux();
+                                Timestamp stampModif = cast.getDateUpdate();
+
+                                DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
+                                daoItem.initcriteria();
+                                daoItem.setWhere_clause_Flux(fluxCollecte);
+                                daoItem.setDate1(stampModif);
+                                daoItem.setDate2(new Date());
+                                List<Item> items = daoItem.findCretaria();
+                                for (int i = 0; i < items.size(); i++) {
+                                    Item item = items.get(i);
+                                    item.setSyncStatut(3);
+                                    try {
+                                        daoItem.modifier(item);
+                                    } catch (Exception e) {
+                                        logger.error("erreur lors de la modification du bean : " + e);
+                                    }
+
+                                }
+
+
+
+
+
+
                                 DAOFactory.getInstance().getDAOComportementCollecte().modifier(bean);
                                 logger.debug("On tente de modifier");
                                 msg.acknowledge();

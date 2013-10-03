@@ -7,10 +7,7 @@ package rssagregator.beans.traitement;
 import java.io.Serializable;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import rssagregator.dao.DAOFactory;
-import rssagregator.dao.DaoItem;
 import java.util.List;
-import java.util.logging.Level;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -24,6 +21,8 @@ import org.apache.log4j.Logger;
 import org.apache.tomcat.util.buf.HexUtils;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
+import rssagregator.dao.DAOFactory;
+import rssagregator.dao.DaoItem;
 
 /**
  *
@@ -199,7 +198,7 @@ public abstract class AbstrDedoublonneur implements Serializable, Cloneable {
             digest = MessageDigest.getInstance("MD5");
             digest.reset();
             byte[] hash = digest.digest(concat.getBytes());
-            String hashString = new String(HexUtils.toHexString(hash));
+            String hashString = HexUtils.toHexString(hash);
             return hashString;
 
     }
@@ -245,7 +244,7 @@ public abstract class AbstrDedoublonneur implements Serializable, Cloneable {
             MessageDigest digest = MessageDigest.getInstance("MD5");
             digest.reset();
             byte[] hash = digest.digest(concat.getBytes());
-            String hashString = new String(HexUtils.toHexString(hash));
+            String hashString = HexUtils.toHexString(hash);
             item.setHashContenu(hashString);
         }
     }

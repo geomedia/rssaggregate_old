@@ -4,8 +4,6 @@
  */
 package rssagregator.servlet;
 
-import rssagregator.dao.DAOFactory;
-import rssagregator.dao.DaoJournal;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -17,6 +15,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import rssagregator.beans.Journal;
 import rssagregator.beans.form.JournalForm;
+import rssagregator.dao.DAOFactory;
+import rssagregator.dao.DaoJournal;
 import rssagregator.utils.CodePays;
 import rssagregator.utils.ServletTool;
 

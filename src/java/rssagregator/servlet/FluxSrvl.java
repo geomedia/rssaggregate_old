@@ -10,9 +10,6 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import rssagregator.dao.DAOFactory;
-import rssagregator.dao.DaoFlux;
-import rssagregator.dao.DaoJournal;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -29,18 +26,20 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
+import javax.xml.ws.http.HTTPException;
 import rssagregator.beans.Flux;
 import rssagregator.beans.FluxType;
 import rssagregator.beans.Journal;
-import rssagregator.dao.DAOGenerique;
-import rssagregator.services.ServiceCollecteur;
-import rssagregator.utils.ServletTool;
-import javax.servlet.http.Part;
-import javax.xml.ws.http.HTTPException;
-import rssagregator.beans.Item;
 import rssagregator.beans.form.ParseCsvForm;
 import rssagregator.beans.traitement.CSVParse;
 import rssagregator.beans.traitement.MediatorCollecteAction;
+import rssagregator.dao.DAOFactory;
+import rssagregator.dao.DAOGenerique;
+import rssagregator.dao.DaoFlux;
+import rssagregator.dao.DaoJournal;
+import rssagregator.services.ServiceCollecteur;
+import rssagregator.utils.ServletTool;
 
 /**
  *
@@ -302,20 +301,6 @@ public class FluxSrvl extends HttpServlet {
 
 
                 }
-
-
-                //Enregistement des items en fonction de la demande utilisateur
-
-
-
-
-
-
-
-
-
-
-
 
             }
         }

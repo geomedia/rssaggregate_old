@@ -5,7 +5,6 @@
 package rssagregator.servlet;
 
 import java.io.BufferedInputStream;
-import rssagregator.dao.DAOFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -25,6 +24,7 @@ import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.beans.form.ConfForm;
 import rssagregator.dao.DAOConf;
+import rssagregator.dao.DAOFactory;
 import rssagregator.services.ServiceSynchro;
 import rssagregator.services.TacheSynchroHebdomadaire;
 import rssagregator.utils.ServletTool;
