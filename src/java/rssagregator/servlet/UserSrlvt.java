@@ -16,8 +16,7 @@ import rssagregator.dao.DAOFactory;
 import rssagregator.utils.ServletTool;
 
 /**
- * Servlet permettant de gérer les requetes concernant le CRUD de l'entité
- * UserAccount. action :
+ * Servlet permettant de gérer les requetes concernant le CRUD de l'entité UserAccount. action :
  *
  * @author clem
  */
@@ -49,7 +48,9 @@ public class UserSrlvt extends HttpServlet {
         String action = ServletTool.configAction(request, "recherche");
 
         request.setAttribute("srlvtname", ATT_SRVLT_NAME);
-         request.setAttribute("navmenu", "user");
+        request.setAttribute("navmenu", "user");
+
+
 
         //========================================================================================
         //................................GESTION DES ACTION 
@@ -120,8 +121,15 @@ public class UserSrlvt extends HttpServlet {
         //============================================================================================
         //................................GESTION DE LA VUE 
         //============================================================================================
+        String vue = request.getParameter("vue");
+        String jsp = "/WEB-INF/userHTML.jsp";
+        if(vue!=null && !vue.isEmpty()){
+            if(vue.equals("jsonform")){
+                jsp = "/WEB-INF/jsonform.jsp";
+            }
+        }
 
-        this.getServletContext().getRequestDispatcher("/WEB-INF/userHTML.jsp").forward(request, response);
+        this.getServletContext().getRequestDispatcher(jsp).forward(request, response);
 
     }
 

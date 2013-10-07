@@ -51,33 +51,26 @@
                             <li><a href="${rootpath}ComportementCollecte/rem?id=${bean.ID}">Supprimer le comportement</a></li>
                         </ul>
 
-                        <form method="POST">
-
+                        <form method="POST" id="beanForm">
                             <fieldset>
-
                                 <legend>Information propre au comportement</legend>
                                 <label>Comportement utilisé par défaut :</label>
                                 <input type="checkbox" name="defaut" <c:if test="${bean.defaut}"> checked="true"</c:if> /><br />
-
+                                
                                     <label> Nom du comportement : </label>
-                                    <input type="text" name="comportement_nom" value="${bean.nom}"/><br/>
-
-
+                                    <input type="text" name="comportement_nom" value="${bean.nom}"/><span class="erreur" id="errcomportement_nom"></span><br/>
+                                
                                 <label>Description du comportement : </label><br />
                                 <textarea name="comportement_desc" rows="10" cols="60">${bean.description}</textarea><br />
 
                                 <label title="Nombre de secondes entre deux levée de flux">Periodicité de collecte : </label>
-                                <input  name="periodiciteCollecte" type="text" value="${bean.periodiciteCollecte}" />
-
+                                <input  name="periodiciteCollecte" type="text" value="${bean.periodiciteCollecte}" /><span class="erreur" id="errperiodiciteCollecte"></span>
                             </fieldset>
-
 
                             <fieldset>
                                 <legend>Request : </legend>
                                 <label>Time Out : </label>
-                                <input name="requester_time_out" value="${bean.requesteur.timeOut}"/><br />
-
-
+                                <input name="requester_time_out" value="${bean.requesteur.timeOut}"/><span class="erreur" id="errrequester_time_out"></span><br />
 
                                 <label>Request Property</label><button type="button"  onclick="addProp();">ajouter</button>
 
@@ -126,8 +119,10 @@
                                 </fieldset>
 
                                 <br />
+                                <input type="hidden" name="vue" value="jsonform" />
                                 <input type="submit">
                             </form>
+                            <script src="${rootpath}AjaxAddModBean.js"></script>
                     </c:when>
                     <c:when test="${action=='recherche'}">
 

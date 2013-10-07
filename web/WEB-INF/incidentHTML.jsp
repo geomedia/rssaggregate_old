@@ -99,6 +99,7 @@
                             <textarea name="noteIndicent" id="noteIndicent" cols="80" rows="30">${bean.noteIndicent}</textarea><br />
                             <input type="submit">
                         </form>
+                            ${bean['class'].simpleName}
                     </c:when>
                     <c:when test="${action=='read'}">
 

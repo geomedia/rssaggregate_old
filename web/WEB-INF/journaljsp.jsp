@@ -13,8 +13,8 @@
 <div id="header-wrapper">
     <div id="header">
         <div id="logo">
-           <c:import url="/WEB-INF/inc/titre.jsp" />
-        
+            <c:import url="/WEB-INF/inc/titre.jsp" />
+
         </div></div>
 
 
@@ -37,7 +37,7 @@
                         <ul>
                             <c:forEach items="${listjournaux}" var="it">
                                 <li><a href="${rootpath}journaux/read?id=${it.ID}"><c:out value="${it.nom}"></c:out></a></li>
-                            </c:forEach>
+                                </c:forEach>
                         </ul>
                     </c:when> 
 
@@ -49,20 +49,21 @@
                         </ul>
 
                         ${form.resultat}
-                        <form method="post" action="${rootpath}journaux/${action}">
+                        <form method="POST" action="${rootpath}journaux/${action}" id="beanForm">
                             <fieldset>
                                 <legend>journal</legend>
                                 <label for="url">Nom du journal<span class="requis">*</span></label>
                                 <input type="text" id="nom" name="nom" value="<c:out value="${bean.nom}" />" size="20" maxlength="60" />
-                                <span class="erreur"> ${form.erreurs['nom']}</span>
+                                <span class="erreur" id="errnom"></span>
                                 <br />
-                                
-                                
+
+
                                 <label>Page Accueil du journal : </label>
-                                <input type="text" name="urlAccueil" value="<c:out value="${bean.urlAccueil}" />"/><br />
-                                
+                                <input type="text" name="urlAccueil" value="<c:out value="${bean.urlAccueil}" />"/><span class="erreur" id="errurlAccueil"></span><br />
+                                 
+
                                 <label>urlHtmlRecapFlux : </label>
-                                <input type="text" name="urlHtmlRecapFlux" value="<c:out value="${bean.urlHtmlRecapFlux}"></c:out>"/>
+                                <input type="text" name="urlHtmlRecapFlux" value="<c:out value="${bean.urlHtmlRecapFlux}"></c:out>"/><span class="erreur" id="errurlHtmlRecapFlux"></span>
                                     <br />
                                     <label for="langue">Langue : </label>
                                     <select name="langue" id="langue">
@@ -91,32 +92,38 @@
 
                                 <br />
 
-                                <textarea name="information">${bean.information}</textarea>
+                                <label>Information : </label><br />
+                                <textarea name="information" rows="10" cols="60">${bean.information}</textarea><br />
 
                                 <input type="hidden" name="id" value="${bean.ID}">
+                                <input type="hidden" name="vue" value="jsonform" />
 
                                 <input type="submit" value="Inscription" class="sansLabel" />
                                 <br />
                             </fieldset>
                         </form>
+                                <script src="${rootpath}AjaxAddModBean.js"></script>
+
+
+
                     </c:when>
-                        <c:when test="${action=='read'}">
-                            <c:import url="/WEB-INF/inc/editionBean.jsp" />
-                            <p><strong>Titre :</strong> ${bean.nom}</p>
-                            <p><strong>Page accueil : </strong>${bean.urlAccueil}</p>
-                            <p><strong>Page HTML recaptulatif des flux : </strong>${bean.urlHtmlRecapFlux}</p>
-                            <p><strong>Langue : </strong>${bean.langue}</p>
-                            <p><strong>Pays : </strong>${bean.pays}</p>
-                            <p><strong>Fuseau Horraire : </strong>${bean.fuseauHorraire}</p>
-                            <p><strong>Information : </strong>${bean.information}</p>
-                            <p><strong>Flux liés : </strong></p>
-                            <ul>
-                                <c:forEach items="${bean.fluxLie}" var="fl"> 
-                                    <li><a href="${rootpath}flux/read?id=${fl.ID}">${fl}</a></li>
-                                    
-                                </c:forEach>
-                            </ul>
-                        </c:when>
+                    <c:when test="${action=='read'}">
+                        <c:import url="/WEB-INF/inc/editionBean.jsp" />
+                        <p><strong>Titre :</strong> ${bean.nom}</p>
+                        <p><strong>Page accueil : </strong>${bean.urlAccueil}</p>
+                        <p><strong>Page HTML recaptulatif des flux : </strong>${bean.urlHtmlRecapFlux}</p>
+                        <p><strong>Langue : </strong>${bean.langue}</p>
+                        <p><strong>Pays : </strong>${bean.pays}</p>
+                        <p><strong>Fuseau Horraire : </strong>${bean.fuseauHorraire}</p>
+                        <p><strong>Information : </strong>${bean.information}</p>
+                        <p><strong>Flux liés : </strong></p>
+                        <ul>
+                            <c:forEach items="${bean.fluxLie}" var="fl"> 
+                                <li><a href="${rootpath}flux/read?id=${fl.ID}">${fl}</a></li>
+
+                            </c:forEach>
+                        </ul>
+                    </c:when>
                 </c:choose>
 
             </c:when>

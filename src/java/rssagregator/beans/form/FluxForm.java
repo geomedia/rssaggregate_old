@@ -82,8 +82,6 @@ public class FluxForm extends AbstrForm {
 
             //------> Dernière date de modification du flux
             flux.setModified(new Date());
-
-
         }
         return objEntre;
     }
@@ -150,17 +148,26 @@ public class FluxForm extends AbstrForm {
 
         //------------->Verification de l'url
         s = request.getParameter("url");
-        if (s != null && !s.isEmpty() && s.matches("[hH][tT]{2}[pP][:][//].*")) {
-            url = s;
+        if (s != null && !s.isEmpty()) {
+            if (!s.matches(REG_EXP_HTTP_URL)) {
+                erreurs.put("url", new String[]{"URL Incorrect", "Incorrect"});
+            } else {
+                url = s;
+            }
         } else {
-            erreurs.put("url", new String[]{"Incorrect", "Incorrect"});
+            erreurs.put("url", new String[]{"Ne peut être null", "Incorrect"});
         }
 
 
         //-------------->Verif de Page HTML
         s = request.getParameter("htmlUrl");
         if (s != null && !s.isEmpty()) {
-            htmlUrl = s;
+            if (!s.matches(REG_EXP_HTTP_URL)) {
+                erreurs.put("htmlUrl", new String[]{"URL incorrect", "Incorrect"});
+            } else {
+                htmlUrl = s;
+            }
+
         }
 
         //-------------> COMPORTEMENT DE COLLECTE
@@ -171,10 +178,10 @@ public class FluxForm extends AbstrForm {
                 DAOComportementCollecte dao = DAOFactory.getInstance().getDAOComportementCollecte();
                 mediatorFlux = (MediatorCollecteAction) dao.find(new Long(s));
             } catch (Exception e) {
-                erreurs.put("mediatorFlux", new String[]{"Incorrect", "Incorrect"});
+                erreurs.put("mediatorFlux", new String[]{"Le comportement saisi n'a pu être trouvé", "Incorrect"});
             }
         } else {
-            erreurs.put("mediatorFlux", new String[]{"Incorrect", "Incorrect"});
+            erreurs.put("mediatorFlux", new String[]{ERR_NE_PEUT_ETRE_NULL, ERR_NE_PEUT_ETRE_NULL});
         }
 
 
@@ -206,11 +213,13 @@ public class FluxForm extends AbstrForm {
 
         //----------> NOM DU FLUX
         s = request.getParameter("nom");
-        if (s != null) {
-            if (s.isEmpty()) {
+        if (s != null && !s.isEmpty()) {
+            if (!s.matches("^[a-zA-Z0-9 -]*$")) {
+                erreurs.put("nom", new String[]{"N'utilisez que des caractères alpha numéric", "Incorrect"});
             } else {
                 nom = s;
             }
+
         }
 
         //-----------> FLUX PARENT

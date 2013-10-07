@@ -27,7 +27,7 @@ import rssagregator.utils.ServletTool;
 @WebServlet(name = "Journaux", urlPatterns = {"/journaux/*"})
 public class JournauxSrvl extends HttpServlet {
 
-    public static final String VUE = "/WEB-INF/journaljsp.jsp";
+    public String VUE = "/WEB-INF/journaljsp.jsp";
     public static final String ATT_FORM = "form";
     public static final String ATT_JOURNAL = "bean";
     public static final String ATT_LIST_JOURNAUX = "listjournaux";
@@ -73,6 +73,11 @@ public class JournauxSrvl extends HttpServlet {
 
         request.setAttribute(ATT_FORM, journalForm);
         request.setAttribute(ATT_JOURNAL, journal);
+        
+         VUE = request.getParameter("vue");
+        if(VUE==null || VUE.isEmpty()){
+            VUE = "/WEB-INF/journaljsp.jsp";
+        }
 
         /**
          * *===================================================================================================
@@ -104,7 +109,7 @@ public class JournauxSrvl extends HttpServlet {
 
         //---------------------------------ACTION ADD ---------------------------------------------------
         if (action.equals("add")) {
-            ServletTool.actionADD(request, ATT_JOURNAL, ATT_FORM, Journal.class, Boolean.TRUE);
+            ServletTool.actionADD2(request, ATT_JOURNAL, ATT_FORM, Journal.class, Boolean.TRUE);
 
         } //-----------------------------------ACTION MOD ---------------------------------------------------
         else if (action.equals("mod")) {
@@ -116,6 +121,16 @@ public class JournauxSrvl extends HttpServlet {
         }
 
 
+        //-----------------------------------------------------------------------------------------------
+        //.....................................GESTION DE LA VUE
+        //-----------------------------------------------------------------------------------------------
+         
+        if(VUE!=null){
+            if(VUE.equals("jsonform")){
+                VUE = "/WEB-INF/jsonform.jsp";
+            }
+        }
+        
 // redirection de l'utilisateur
 //        if (action.equals("add") && journalForm.getValide()) {
 //            response.sendRedirect("journaux?action=mod&id=" + journal.getID());

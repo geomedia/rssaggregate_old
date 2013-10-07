@@ -9,6 +9,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import rssagregator.beans.Conf;
 import rssagregator.beans.Flux;
 import rssagregator.beans.FluxType;
 import rssagregator.beans.Journal;
@@ -205,6 +206,12 @@ public class DAOFactory<T extends AbstrDao> {
             dao = (T) new DAOIncident<JMSDiffusionIncident>(this);
             dao.setClassAssocie(beansClass);
         }
+        else if (beansClass.equals(Conf.class)){
+//            dao = (T) new DAOConf(this);
+            dao = (T) daoConf;
+//            dao.setClassAssocie(beansClass);
+        }
+        
 
         if (dao != null) {
             return dao;

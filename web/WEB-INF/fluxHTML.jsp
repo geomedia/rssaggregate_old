@@ -98,15 +98,15 @@
                                 <script>
 
                                     function subExport() {
-                                        if ($('#vue').val() == 'opml') {
+                                    if ($('#vue').val() == 'opml') {
 
-                                            $('#pagina').attr('target', '_blank');
-                                            $('#pagina').submit();
-                                            $('#pagina').attr('target', '');
-                                            $('#vue').val('html');
+                                    $('#pagina').attr('target', '_blank');
+                                    $('#pagina').submit();
+                                    $('#pagina').attr('target', '');
+                                    $('#vue').val('html');
 
 
-                                        }
+                                    }
                                     }
                                 </script>
                                 <button type="submit"  formaction="flux" formtarget="_blank" value="vue">Exporter</button>
@@ -127,30 +127,30 @@
                             </select>
 
                             <script>
-                                    $('#bts').click(function() {
+                                $('#bts').click(function() {
 
-                                        if (this.value === '1') {
-                                            this.textContent = 'Déselectionner tout';
-                                            this.value = '0';
-                                            $("#resudiv").find(':checkbox').prop('checked', false);
-                                        }
-                                        else if (this.value === '0') {
-                                            this.textContent = 'Tout sélectionner';
-                                            this.value = '1';
-                                            $("#resudiv").find(':checkbox').prop('checked', true);
-                                        }
-                                    });
+                                if (this.value === '1') {
+                                this.textContent = 'Déselectionner tout';
+                                this.value = '0';
+                                $("#resudiv").find(':checkbox').prop('checked', false);
+                                }
+                                else if (this.value === '0') {
+                                this.textContent = 'Tout sélectionner';
+                                this.value = '1';
+                                $("#resudiv").find(':checkbox').prop('checked', true);
+                                }
+                                });
                             </script>
                             <button type="button" onclick="actionsub()"> OK</button>
                         </form>
                         <script>
-                                    //Petite fonction pour la soumission du formulaire permettant la mise à jour et la suppression en nombre
-                                    function actionsub() {
-                                        action = $('#act').val();
+                            //Petite fonction pour la soumission du formulaire permettant la mise à jour et la suppression en nombre
+                            function actionsub() {
+                            action = $('#act').val();
 
-                                        $('#formaction2').attr('action', '${rootpath}flux/' + action);
-                                        $('#formaction2').submit();
-                                    }
+                            $('#formaction2').attr('action', '${rootpath}flux/' + action);
+                            $('#formaction2').submit();
+                            }
 
                         </script>
                     </c:when>
@@ -170,7 +170,7 @@
                 <c:choose> 
                     <c:when test="${action=='add' or action=='mod'}">
                         ${form.resultat}
-                        <form method="POST" action="${rootpath}flux/${action}" id="formbean">
+                        <form method="POST" action="${rootpath}flux/${action}" id="beanForm">
 
                             <input type="hidden" value="<c:out value="${action}"></c:out>" name="action">
                                 <fieldset>
@@ -181,12 +181,14 @@
 
                                     <br />
                                     <label for="url" title="Adresse a laquelle on trouve le XML du flux">URL du flux<span class="requis">*</span></label>
-                                    <input type="text" id="url" name="url" value="<c:out value="${form.erreurs['url'][0]}" default="${bean.url}" />" size="20" maxlength="60" />
-                                <span class="erreur"> ${form.erreurs['url'][1]}</span><br />
+                                    <input type="text" id="url" name="url" value="${bean.url}" size="20" maxlength="60" />
+                                <span class="erreur" id="errurl"></span><br />
+                         
 
                                 <label title="Indiquez la page html de la rubrique capturée. Exemple, la page international du monde http://www.lemonde.fr/international/">Page html</label>
                                 <input name="htmlUrl" type="text" value="<c:out value="${form.erreurs['htmlUrl'][0]}" default="${bean.htmlUrl}" />"/>
                                 <span class="erreur"> ${form.erreurs['htmlUrl'][1]}</span>
+                                <span class="erreur" id="errhtmlUrl"></span>
                                 <br />
 
                                 <label title="Ensemble de paramettres régulant la collecte du flux. CE PARAMETTRE EST PRIMORDIALE">Comportement de collecte : </label>
@@ -194,7 +196,9 @@
                                     <c:forEach items="${listcomportement}" var="compo">
                                         <option value="${compo.ID}" <c:if test="${bean.mediatorFlux.ID==compo.ID}"> selected="true"</c:if> >${compo}</option>
                                     </c:forEach>
-                                </select><br />
+                                </select>
+                                <span class="erreur" id="errmediatorFlux"></span>
+                                <br />
 
                                 <label for="journalLie" title="Un journal comprends plusieurs flux... Si vous ne trouvez pas le journal concerné, allez dans Journal-> ajouter">Journal :</label>
                                 <select name="journalLie" id="journalLie">
@@ -217,6 +221,7 @@
 
                                 <label for="nom" title="Paramettre facultatif : Par défaut le flux sera nommé en fonction du journal et du type de flux sélectionné. Ce paramettre permet de forcer un nom">Nom du flux : </label>
                                 <input type="text" name="nom" value="${bean.nom}" />
+                                <span class="erreur" id="errnom"></span>
 
                                 <br />
 
@@ -244,14 +249,16 @@
                                     <textarea id="infoCollecte" name="infoCollecte" rows="20" cols="80">${bean.infoCollecte}</textarea>
                                 <input type="hidden" name="id" value="${bean.ID}">
                                 <br />
+
+                                <input type="hidden" name="vue" value="jsonform"/>
                                 <input type="submit" value="Enregitrer" class="sansLabel" />
                                 <br />
                             </fieldset>
                         </form>
 
+                        <script src="${rootpath}AjaxAddModBean.js"></script>
 
-
-                        <script src="${rootpath}test.js"></script>
+                    
                     </c:when>
 
 
@@ -340,69 +347,69 @@
                         ${bean.indiceQuartileNbrItemJour}ddd
                         <script>
 
-                                    $(function() {
-                                        $('#container').highcharts({
-                                            chart: {
-                                                type: 'boxplot'
-                                            },
-                                            title: {
-                                                text: 'Highcharts Box Plot Example'
-                                            },
-                                            legend: {
-                                                enabled: false
-                                            },
-                                            xAxis: {
-                                                categories: ['1', '2', '3', '4', '5'],
-                                                title: {
-                                                    text: 'Experiment No.'
-                                                }
-                                            },
-                                            yAxis: {
-                                                title: {
-                                                    text: 'Observations'
-                                                },
-                                                plotLines: [{
-                                                        value: 932,
-                                                        color: 'red',
-                                                        width: 1,
-                                                        label: {
-                                                            text: 'Theoretical mean: 932',
-                                                            align: 'center',
-                                                            style: {
-                                                                color: 'gray'
-                                                            }
-                                                        }
-                                                    }]
-                                            },
-                                            series: [{
-                                                    name: 'Observations',
-                                                    data: [
-                                                        [${bean.indiceMinimumNbrItemJour}, ${bean.indiceQuartileNbrItemJour}, ${bean.indiceMedianeNbrItemJour}, ${bean.indiceDecileNbrItemJour}, ${bean.indiceMaximumNbrItemJour}]
-                                                    ],
-                                                    tooltip: {
-                                                        headerFormat: '<em>Experiment No {point.key}</em><br/>'
-                                                    }
-                                                }, {
-                                                    name: 'Outlier',
-                                                    color: Highcharts.getOptions().colors[0],
-                                                    type: 'scatter',
-                                                    data: [// x, y positions where 0 is the first category
-                                                        [0, 644],
-                                                        [4, 718],
-                                                        [4, 951],
-                                                        [4, 969]
-                                                    ],
-                                                    marker: {
-                                                        fillColor: 'white',
-                                                        lineWidth: 1,
-                                                        lineColor: Highcharts.getOptions().colors[0]
-                                                    },
-                                                    tooltip: {
-                                                        pointFormat: 'Observation: {point.y}'
-                                                    }
-                                                }]
-                                        });
-                                    });
+                            $(function() {
+                            $('#container').highcharts({
+                            chart: {
+                            type: 'boxplot'
+                            },
+                            title: {
+                            text: 'Highcharts Box Plot Example'
+                            },
+                            legend: {
+                            enabled: false
+                            },
+                            xAxis: {
+                            categories: ['1', '2', '3', '4', '5'],
+                            title: {
+                            text: 'Experiment No.'
+                            }
+                            },
+                            yAxis: {
+                            title: {
+                            text: 'Observations'
+                            },
+                            plotLines: [{
+                            value: 932,
+                            color: 'red',
+                            width: 1,
+                            label: {
+                            text: 'Theoretical mean: 932',
+                            align: 'center',
+                            style: {
+                            color: 'gray'
+                            }
+                            }
+                            }]
+                            },
+                            series: [{
+                            name: 'Observations',
+                            data: [
+                            [${bean.indiceMinimumNbrItemJour}, ${bean.indiceQuartileNbrItemJour}, ${bean.indiceMedianeNbrItemJour}, ${bean.indiceDecileNbrItemJour}, ${bean.indiceMaximumNbrItemJour}]
+                            ],
+                            tooltip: {
+                            headerFormat: '<em>Experiment No {point.key}</em><br/>'
+                            }
+                            }, {
+                            name: 'Outlier',
+                            color: Highcharts.getOptions().colors[0],
+                            type: 'scatter',
+                            data: [// x, y positions where 0 is the first category
+                            [0, 644],
+                            [4, 718],
+                            [4, 951],
+                            [4, 969]
+                            ],
+                            marker: {
+                            fillColor: 'white',
+                            lineWidth: 1,
+                            lineColor: Highcharts.getOptions().colors[0]
+                            },
+                            tooltip: {
+                            pointFormat: 'Observation: {point.y}'
+                            }
+                            }]
+                            });
+                            });
 
                         </script>
 
@@ -573,14 +580,14 @@
 
                         </c:if>
 
-                     
+
 
                         <c:if test="${!empty sessionScope.imporComportement}">
                             <h2>Appercut des items parsées</h2>
                             <p><strong>Nombre d'item :</strong> ${fn:length(sessionScope.imporComportement.listItem)}
                             </p>
 
-                      
+
 
                             <ul>
                                 <c:forEach begin="0" end="5" items="${sessionScope.imporComportement.listItem}" var="itDebut" varStatus="st">
@@ -600,7 +607,7 @@
 
 
                             <c:if test="${fn:length(sessionScope.imporComportement.listItem)-5 > 0}">
-                             
+
                                 <p>[ ... ]</p>
 
 

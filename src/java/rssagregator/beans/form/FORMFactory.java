@@ -4,11 +4,13 @@
  */
 package rssagregator.beans.form;
 
+import rssagregator.beans.Conf;
 import rssagregator.beans.Flux;
 import rssagregator.beans.FluxType;
 import rssagregator.beans.Journal;
 import rssagregator.beans.ServeurSlave;
 import rssagregator.beans.UserAccount;
+import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.beans.traitement.MediatorCollecteAction;
 
@@ -68,6 +70,14 @@ public class FORMFactory {
         }
         else if(beansClass.equals(ServeurSlave.class)){
             return new ServeurSlaveForm();
+        }
+        else if (AbstrIncident.class.isAssignableFrom(beansClass)) {
+            return new IncidentForm();
+        }
+        
+        else if(beansClass.equals(Conf.class)){
+            System.out.println("----INSTANCIATION FORM");
+            return new ConfForm();
         }
         throw new UnsupportedOperationException("Le beans envoyé en argument n'a pas de formulaire associé dans cette factory");
 

@@ -45,20 +45,25 @@
                         <div>
                             <ul>
                                 <c:if test="${admin=='true'}"> <li><a href="${rootpath}TypeFluxSrvl/rem?id=${bean.ID}">Supprimer ce type</a></li></c:if>
-                            </ul>
-                        </div>
+                                </ul>
+                            </div>
 
-                        <form method="POST" action="${rootpath}TypeFluxSrvl/${action}?id=${bean.ID}">
+                            <form method="POST" action="${rootpath}TypeFluxSrvl/${action}?id=${bean.ID}" id="beanForm">
                             <label for="denomination">Dénomination : </label>
-                            <input name="denomination" id="denomination" value="${bean.denomination}"/><br />
-                            
+                            <input name="denomination" id="denomination" value="${bean.denomination}"/>
+                            <span id="errdenomination" class="erreur"></span>
+                            <br />
+
                             <label for="description">Description :</label><br>
-                            
+
                             <textarea name="description" id="description" cols="60" rows="15">${bean.description}</textarea>
                             <br />
-                            
+                            <input type="hidden" name="vue" value="jsonform"/>
+
                             <input type="submit"/>
                         </form>
+                        <script src="${rootpath}AjaxAddModBean.js"></script>
+
                     </c:when>
                     <c:when test="${action=='read'}">
                         <c:import url="/WEB-INF/inc/editionBean.jsp" />
@@ -66,9 +71,9 @@
                         <p><strong>Description : </strong>${bean.description}</p>
                         <p>Flux Appartenant à cet type : </p>
                         <ul>
-                        <c:forEach items="${bean.fluxLie}" var="fl">
-                            <li><a href="${rootpath}flux/read?id=${fl.ID}">${fl}</li>
-                        </c:forEach>
+                            <c:forEach items="${bean.fluxLie}" var="fl">
+                                <li><a href="${rootpath}flux/read?id=${fl.ID}">${fl}</li>
+                                </c:forEach>
                         </ul>
                     </c:when>
                 </c:choose>

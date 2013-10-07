@@ -9,8 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import rssagregator.beans.ServeurSlave;
 
 /**
- * Class permettant de valider et binder les données issues de la requête dans
- * un beans <strong>ServeurSlave</strong>
+ * Class permettant de valider et binder les données issues de la requête dans un beans <strong>ServeurSlave</strong>
  *
  * @author clem
  */
@@ -23,13 +22,12 @@ public class ServeurSlaveForm extends AbstrForm {
     private String pass;
     private String url;
     private String description;
-    
-    //------------------------------------------------------
 
+    //------------------------------------------------------
     public ServeurSlaveForm() {
         super();
     }
-
+    
     @Override
     public Object bind(HttpServletRequest request, Object objEntre, Class type) {
 
@@ -56,37 +54,44 @@ public class ServeurSlaveForm extends AbstrForm {
 
         return serveurSlave;
     }
-
+    
     @Override
     public Boolean validate(HttpServletRequest request) {
         this.erreurs = new HashMap<String, String[]>();
         String s;
-
+        
         s = request.getParameter("servHost");
         if (s != null) {
             this.servHost = s;
         }
-
+        
         s = request.getParameter("login");
         if (s != null) {
             this.login = s;
         }
-
+        
         s = request.getParameter("pass");
         if (s != null) {
             this.pass = s;
         }
         
         s = request.getParameter("description");
-        if(s!=null){
+        if (s != null) {
             this.description = s;
         }
         
         s = request.getParameter("url");
-        if(s!=null){
-            this.url = s;
+        if (s != null) {
+            if (s.matches(REG_EXP_HTTP_URL)) {
+                this.url = s;
+            }
+            else{
+                erreurs.put("url", new String[]{"URL incorrect", "ne peu"});
+            }
+        } else {
+            erreurs.put("url", new String[]{"ne peut être null", "ne peu"});
         }
-
+        
         if (erreurs.isEmpty()) {
             this.valide = true;
         } else {

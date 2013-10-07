@@ -18,7 +18,7 @@ function changepass() {
 }
 function  subfunction() {
     if ($('#btchgpass').val() === '0') {
-        $('#form').submit();
+        $('#beanForm').submit();
     }
     else if ($('#btchgpass').val() === '1') {
         if ($('#pass1').val() === $('#pass2').val()) {
@@ -26,7 +26,7 @@ function  subfunction() {
             if ($('#pass1').val().length < 3) {
                 alert('mot de passe trop court');
             } else {
-                $('#form').submit();
+                $('#beanForm').submit();
             }
         }
         else {

@@ -7,7 +7,7 @@ package rssagregator.servlet;
 import com.sun.syndication.io.FeedException;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.File;
+import java.io.File; 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -323,7 +323,11 @@ public class FluxSrvl extends HttpServlet {
         } else if (vue.equals("fluxXMLsync")) {
             VUE = "/WEB-INF/fluxXMLsync.jsp";
             System.out.println("coucou");
-        } else {
+        } 
+        else if(vue.equals("jsonform")){
+            VUE = "/WEB-INF/jsonform.jsp";
+        }
+        else {
             response.setContentType("text/html;charset=UTF-8");
             response.setCharacterEncoding("UTF-8");
             VUE = "/WEB-INF/fluxHTML.jsp";

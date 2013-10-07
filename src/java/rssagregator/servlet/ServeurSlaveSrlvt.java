@@ -87,6 +87,19 @@ public class ServeurSlaveSrlvt extends HttpServlet {
             ServletTool.actionREAD(request, ServeurSlave.class, ATT_BEAN);
         }
         
+        
+        //================================================================================================================
+        //............................GESTION DE LA VUE
+        //================================================================================================================
+        String jsp ="";
+        String vue = request.getParameter("vue");
+        if(vue==null){
+            jsp = "/WEB-INF/serveurslavejsp.jsp";
+        }
+        else if(vue.equals("jsonform")){
+            jsp = "/WEB-INF/jsonform.jsp";
+        }
+        
 
 //        if (action.equals("mod") || action.equals("rem")) {
 //            try {
@@ -148,7 +161,7 @@ public class ServeurSlaveSrlvt extends HttpServlet {
 //            }
 //        }
 
-        this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
+        this.getServletContext().getRequestDispatcher(jsp).forward(request, response);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

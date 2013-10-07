@@ -14,8 +14,8 @@ import rssagregator.beans.Conf;
 import rssagregator.beans.ServeurSlave;
 
 /**
- * La class permettant de vérifier et binder les données saisie par
- * l'utilisateur avec le beans <strong>Conf</strong @aut
+ * La class permettant de vérifier et binder les données saisie par l'utilisateur avec le beans <strong>Conf</strong
+ * @aut
  *
  *
  * hor clem
@@ -32,8 +32,6 @@ public class ConfForm extends AbstrForm {
     private Integer purgeDuration;
     //-------------------------------------
 
-
-
     @Override
     public Object bind(HttpServletRequest request, Object objEntre, Class type) {
         erreurs = new HashMap<String, String[]>();
@@ -48,7 +46,7 @@ public class ConfForm extends AbstrForm {
         } else {
             conf.setActive(false);
         }
-
+        
         if (valide) {
             conf.setServname(servname);
             conf.setJmsprovider(jmsprovider);
@@ -59,7 +57,7 @@ public class ConfForm extends AbstrForm {
         }
         return objEntre;
     }
-
+    
     public void check_nbThreadRecup(String entre) throws Exception {
         try {
             Integer i = Integer.parseInt(entre);
@@ -67,7 +65,7 @@ public class ConfForm extends AbstrForm {
             throw new Exception("Ceci n'est pas un nombre entier");
         }
     }
-
+    
     @Override
     public Boolean validate(HttpServletRequest request) {
         //=====================================================================================
@@ -76,7 +74,7 @@ public class ConfForm extends AbstrForm {
         String s;
         //----------------------->Nom de serveur
         s = request.getParameter("servname");
-        if (s != null) {
+        if (s != null && !s.isEmpty()) {
             Pattern p = Pattern.compile("^[a-z]*$");
             Matcher m = p.matcher(s);
             if (!m.find()) {
@@ -85,13 +83,23 @@ public class ConfForm extends AbstrForm {
                 this.servname = s;
             }
         }
+        else{
+            erreurs.put("servname", new String[]{ERR_NE_PEUT_ETRE_NULL, ERR_NE_PEUT_ETRE_NULL});
+        }
         // Vérification doit être uniquement composé de caractère
 
         //------------------->JMS Provider
         s = request.getParameter("jmsprovider");
         if (s != null && !s.isEmpty()) {
-            this.jmsprovider = s;
+            if (s.matches("^(https?|tcp)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]")) {
+                
+                this.jmsprovider = s;
+            }
+            else{
+                erreurs.put("jmsprovider", new String[]{"URL incorrect", "ne peu"});
+            }
         }
+
 
         //------------------>Master statut
         s = request.getParameter("master");
@@ -140,10 +148,10 @@ public class ConfForm extends AbstrForm {
         //-------------------------------------------------------------------------------------
         if (erreurs.isEmpty()) {
             resultat = "Traitement effectué";
-            valide = true;
+            this.valide = true;
         } else {
             resultat = "Erreur lors de la validation des données";
-            valide = false;
+            this.valide = false;
         }
         return this.valide;
     }

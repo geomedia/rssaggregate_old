@@ -23,6 +23,7 @@
     JSONArray array = new JSONArray();
     export.put("items", array);
     
+    
 
     List<Item> listItem = (List<Item>) request.getAttribute("listItem");
 

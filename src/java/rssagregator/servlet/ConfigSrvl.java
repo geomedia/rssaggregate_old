@@ -49,9 +49,10 @@ import rssagregator.utils.XMLTool;
 @WebServlet(name = "Config", urlPatterns = {"/config/*"})
 public class ConfigSrvl extends HttpServlet {
 
-    public String VUE = "/WEB-INF/configjsp.jsp";
+    public String vue = "/WEB-INF/configjsp.jsp";
     public static final String ATT_FORM = "form";
     public static final String ATT_BEANS = "conf";
+    public static final String ATT_SERV_NAME = "config";
 
     /**
      * Processes requests for both HTTP.
@@ -73,6 +74,8 @@ public class ConfigSrvl extends HttpServlet {
 
         // Un simple attribut pour que le menu brille sur la navigation courante
         request.setAttribute("navmenu", "config");
+         request.setAttribute("srlvtname", ATT_SERV_NAME);
+        
 
 
         String action = ServletTool.configAction(request, "mod");
@@ -87,9 +90,11 @@ public class ConfigSrvl extends HttpServlet {
         System.out.println("ACTION : " + action);
 
         // Configuration de la vue
-        VUE = request.getParameter("vue");
-        if (VUE == null || VUE.isEmpty()) {
-            VUE = "/WEB-INF/configjsp.jsp";
+        vue = request.getParameter("vue");
+        String jsp = "/WEB-INF/configjsp.jsp";
+        if (vue == null || vue.isEmpty()) {
+            vue = "/WEB-INF/configjsp.jsp";
+            
         }
 
         /**
@@ -98,26 +103,36 @@ public class ConfigSrvl extends HttpServlet {
          *///=====================================================================================
         if (action.equals("mod")) {
             //Si l'utilisateur à posté on bind
-            if (request.getMethod().equals("POST")) {
-                confcourante = (Conf) form.bind(request, confcourante, Conf.class);
-            }
-
-            request.setAttribute(ATT_FORM, form);
-            request.setAttribute(ATT_BEANS, confcourante);
-
-            // SAUVEGARDE SI INFOS 
-            if (form.getValide()) {
-                try {
-                    DAOFactory.getInstance().getDAOConf().modifierConf(confcourante);
-                    // Il faut notifier le changement pour recharger le service de reception
-//                    confcourante.forceNotifyObserver();
-//                DAOFactory.getInstance().getDAOConf().forceNotifyObservers();
-                    ServletTool.redir(request, "config/mod", "Modification de la config effectuée", Boolean.FALSE);
-
-                } catch (Exception ex) {
-                    Logger.getLogger(ConfigSrvl.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
+            
+            ServletTool.actionMOD(request, ATT_BEANS, ATT_FORM, Conf.class, Boolean.TRUE);
+//            if (request.getMethod().equals("POST")) {
+//                confcourante = (Conf) form.bind(request, confcourante, Conf.class);
+//            }
+//
+//            request.setAttribute(ATT_FORM, form);
+//            request.setAttribute(ATT_BEANS, confcourante);
+//
+//            // SAUVEGARDE SI INFOS 
+//            if (form.getValide()) {
+//                try {
+//                    DAOFactory.getInstance().getDAOConf().modifierConf(confcourante);
+//                    // Il faut notifier le changement pour recharger le service de reception
+////                    confcourante.forceNotifyObserver();
+////                DAOFactory.getInstance().getDAOConf().forceNotifyObservers();
+//                    ServletTool.redir(request, "config/mod", "Modification de la config effectuée", Boolean.FALSE);
+//
+//                } catch (Exception ex) {
+//                    Logger.getLogger(ConfigSrvl.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//            }
+        }
+                /**
+         * *=====================================================================================
+         * . ....................................ACTION : READ
+         *///=====================================================================================
+        
+        else if (action.equals("read")){
+            ServletTool.actionREAD(request, Conf.class, ATT_BEANS);
         }
 
         /**
@@ -184,9 +199,20 @@ public class ConfigSrvl extends HttpServlet {
                 msg = "erreur : " + ex;
             }
             request.setAttribute("msg", msg);
-            VUE = "/WEB-INF/configJMSinfo.jsp"; // C'est une vue retournant un message texte comprennant le message en paramettre plus haut.
+            jsp = "/WEB-INF/configJMSinfo.jsp"; // C'est une vue retournant un message texte comprennant le message en paramettre plus haut.
+            
         }
-        this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
+        
+        
+        if(vue ==null || vue.isEmpty()){
+            jsp = "/WEB-INF/configjsp.jsp";
+        }
+        else if(vue.equals("jsonform")){
+            jsp = "/WEB-INF/jsonform.jsp";
+        }
+
+        System.out.println("-------------JSP : " + jsp);        
+        this.getServletContext().getRequestDispatcher(jsp).forward(request, response);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

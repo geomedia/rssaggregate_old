@@ -34,7 +34,7 @@ CETTE JSP N'EST PLUS UTILISE LA GESTION DES SERVEUR ESCLAVE SE FAIT MAINTENANT D
                 <c:choose>
                     <c:when test="${action=='add' or action=='mod'}">
                         <c:if test="${action=='mod'}"><p><a href="${rootpath}slave/rem?id=${bean.ID}">Supprimer</a></p></c:if>
-                            <form method="POST">
+                        <form method="POST" id="beanForm">
                                 <label>Host :</label>
                                 <input type="text" name="servHost" value="${bean.servHost}"/><br/>
 
@@ -45,9 +45,15 @@ CETTE JSP N'EST PLUS UTILISE LA GESTION DES SERVEUR ESCLAVE SE FAIT MAINTENANT D
                             <input type="text" name="pass" value="${bean.pass}" /><br />
 
                             <label for="url">Url de l'application : </label>
-                            <input type="text" name="url" id="url" value="${bean.url}"/><br />
+                            <input type="text" name="url" id="url" value="${bean.url}"/>
+                            <span id="errurl"></span>
+                            <br />
+                            
+                            
+                            <input type="hidden" name="vue" value="jsonform" />
                             <input type="submit" />
                         </form>
+                            <script src="${rootpath}AjaxAddModBean.js"></script>
                     </c:when>
 
                     <c:when test="${action=='recherche'}">

@@ -111,10 +111,8 @@ public class PropertyLoader {
      * @param fileDestination : le fichier destination
      */
     public static void saveToFile(Properties prop, String fileDestination, String comment) throws FileNotFoundException, IOException {
-
         OutputStreamWriter osw = new FileWriter(fileDestination);
         prop.store(osw, comment);
-
     }
 
     /**

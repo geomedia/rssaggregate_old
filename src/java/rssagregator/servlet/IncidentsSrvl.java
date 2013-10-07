@@ -175,7 +175,7 @@ public class IncidentsSrvl extends HttpServlet {
             request.setAttribute(ATT_LIST, listAll);
             //--------------------------------------------ACTION : MOD-------------------------------------
         } else if (action.equals("mod")) {
-
+            System.out.println("");
             try {
                 Class c = Class.forName("rssagregator.beans.incident." + request.getParameter("type"));
                 ServletTool.actionMOD(request, ATT_OBJ, ATT_FORM, c, false);

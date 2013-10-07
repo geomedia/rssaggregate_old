@@ -5,62 +5,66 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%--<%@page contentType="text/html" pageEncoding="UTF-8"%>--%>
+<c:set var="rootpath" value="/RSSAgregate/" scope="request"></c:set>
+    <!DOCTYPE html>
+    <html>
+        <head>
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+            <title>RSSAgregate</title>
 
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>JSP Page</title>
 
-        <link href="/RSSAgregate/ress/style.css" type="text/css" rel="stylesheet" media="all"/>
-
-        <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
-        <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-
+            <link href="${rootpath}/ress/style.css" type="text/css" rel="stylesheet" media="all" />
+        <link rel="stylesheet" href="${rootpath}ress/jquery-ui.css" />
+        <script src="${rootpath}ress/jquery-1.10.2.min.js"></script>
+        <script src="${rootpath}ress/jquery-ui.js"></script>
+        <script src="${rootpath}ress/JMSReconnection.js"></script>
+        <script src="${rootpath}ress/modernizr.custom.36191.js"></script>
+        <!--<script src="http://code.jquery.com/jquery-1.9.1.js"></script>-->
         <!--<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>-->
-        <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
-        <link rel="stylesheet" href="/resources/demos/style.css" />
+        <!--<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>-->
+        <!--<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />-->
+        <!--        <link rel="stylesheet" href="/resources/demos/style.css" />-->
 
 
 
         <!--Paramètre de la toolbox info du jquery IU-->
         <script>
             $(function() {
-                $(document).tooltip({
-                    show: {
-                        effect: false,
-                        delay: 30
-                    }
-                });
-                $("#hide-option").tooltip({
-                    hide: {
-                        effect: false,
-                        delay: 70
-                    }
-                });
-                $("#open-event").tooltip({
-                    show: null,
-                    position: {
-                        my: "left top",
-                        at: "left bottom"
-                    },
-                    open: function(event, ui) {
-                        ui.tooltip.animate({top: ui.tooltip.position().top + 10}, "fast");
-                    }
-                })
-                        ;
+            $(document).tooltip({
+            show: {
+            effect: false,
+            delay: 30
+            }
+            });
+            $("#hide-option").tooltip({
+            hide: {
+            effect: false,
+            delay: 70
+            }
+            });
+            $("#open-event").tooltip({
+            show: null,
+            position: {
+            my: "left top",
+            at: "left bottom"
+            },
+            open: function(event, ui) {
+            ui.tooltip.animate({top: ui.tooltip.position().top + 10}, "fast");
+            }
+            })
+            ;
             });
         </script>
     </head>
     <body>
 
-        <c:set var="rootpath" value="/RSSAgregate/" scope="request"></c:set>
 
-            <header style="width: 1200px; height: 116px">
 
-                <div style="float: left">
+        <header style="width: 1200px; height: 116px">
 
-                    <a href ="/RSSAgregate/index" style="display: block;">
+            <div style="float: left">
+
+                <a href ="/RSSAgregate/index" style="display: block;">
                     <%
                         if (DAOFactory.getInstance().getDAOConf().getConfCourante().getMaster()) {
                             out.println("<img src=\"/RSSAgregate/ress/img/logo_mastervert.png\"/>");
@@ -99,19 +103,7 @@
                     %></span>
                 <button type="button" id="jmsrecoBT">Reconnection</button>
                 <span id="pinfoJMS"></span>
-
-
             </div>
-
-
-
-
-
-
-
-
-
-
 
             <%
                 }
@@ -120,21 +112,6 @@
         </header>
         <div style="clear: both"></div>
 
-
-
-        <!--        <div id="menu-wrapper">
-                    <div id="menu">
-                        <ul class="menu">
-        
-                            <li<c:if test="${navmenu=='item'}"> class="current_page_item"</c:if>><a href="${rootpath}item">Items</a></li>
-                            <li<c:if test="${navmenu=='flux'}"> class="current_page_item"</c:if>><a href="${rootpath}flux">Flux</a></li>
-                            <li<c:if test="${navmenu=='journaux'}"> class="current_page_item"</c:if>><a href="${rootpath}journaux">Jounaux</a></li>
-                            <li<c:if test="${navmenu=='recap'}"> class="current_page_item"</c:if>><a href="${rootpath}recapActiviteGenerale">Récapitulatif de l'activité</a></li>
-                            <li<c:if test="${navmenu=='incident'}"> class="current_page_item"</c:if>><a href="${rootpath}incidents">Incidents</a></li>
-                            <li<c:if test="${navmenu=='config'}"> class="current_page_item"</c:if>><a href="${rootpath}config">Configuration générale</a></li>
-                            </ul>
-                        </div>
-                    </div>-->
             <nav id="topNav">  
                 <ul>  
                     <li <c:if test="${navmenu=='item'}"> class="current_page_item"</c:if>><a href="${rootpath}item">Items</a></li>  
@@ -190,11 +167,11 @@
                 </li>
 
 
-                <li <c:if test="${navmenu=='config'}"> class="current_page_item"</c:if>><a href="${rootpath}config">Configuration</a></li>
+                <li <c:if test="${navmenu=='config'}"> class="current_page_item"</c:if>><a href="${rootpath}config/read?id=1">Configuration</a></li>
                 <li <c:if test="${navmenu=='aide'}"> class="current_page_item"</c:if>><a href="${rootpath}aide.jsp">Aide</a></li>  
             </ul>  
         </nav> 
-           
+
         <script>
             var el = document.getElementsByTagName("body")[0];
             el.className = "";
@@ -204,43 +181,30 @@
         <script>
             (function($) {
 
-                //cache nav
-                var nav = $("#topNav");
+            //cache nav
+            var nav = $("#topNav");
 
-                //add indicators and hovers to submenu parents
-                nav.find("li").each(function() {
-                    if ($(this).find("ul").length > 0) {
+            //add indicators and hovers to submenu parents
+            nav.find("li").each(function() {
+            if ($(this).find("ul").length > 0) {
 
-                        $("<span>").text("^").appendTo($(this).children(":first"));
+            $("<span>").text("^").appendTo($(this).children(":first"));
 
-                        //show subnav on hover
-                        $(this).mouseenter(function() {
-                            $(this).find("ul").stop(true, true).slideDown();
-                        });
+            //show subnav on hover
+            $(this).mouseenter(function() {
+            $(this).find("ul").stop(true, true).slideDown();
+            });
 
-                        //hide submenus on exit
-                        $(this).mouseleave(function() {
-                            $(this).find("ul").stop(true, true).slideUp();
-                        });
-                    }
-                });
+            //hide submenus on exit
+            $(this).mouseleave(function() {
+            $(this).find("ul").stop(true, true).slideUp();
+            });
+            }
+            });
             })(jQuery);
         </script>
-
-
-
-
-
-
-        <script src="${rootpath}JMSReconnection.js"></script>
-        <script src="${rootpath}modernizr.custom.36191.js"></script>
-
-
-
 
         <div id="wrapper">
             <div id="page">
                 <div id="page-bgtop">
                     <div id="page-bgbtm">
-
-

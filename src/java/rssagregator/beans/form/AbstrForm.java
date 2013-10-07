@@ -23,6 +23,20 @@ import javax.servlet.http.HttpServletRequest;
  */
 public abstract class AbstrForm {
 
+    /***
+     * Expression régulière permettant de matcher une url
+     */
+    public static final String REG_EXP_HTTP_URL = "^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
+    
+    /***
+     * Toutes les lettre les accents francais les espace et les tirret
+     */
+    public static final String REG_EXP_ALPHANUM_FR = "[A-Za-zéèàê -]*";
+    public static final String ERR_ALPHANUM_FR= "Seul les lettres espaces et tirret sont acceptés";
+    public static final String ERR_NE_PEUT_ETRE_NULL= "Ce champs doit impérativement être complété";
+    
+    
+    
     /**
      * *
      * Ce hash map d'erreur permet de stocker des messages d'erreurs lorsque
@@ -30,7 +44,7 @@ public abstract class AbstrForm {
      */
     protected Map<String, String[]> erreurs = new HashMap<String, String[]>();
     /**
-     * *
+     * * 
      * Un message générique pour informer l'utilisateur à la fin du traitement
      * exemple : "Erreur de saisie" ou "Donnée valider"...
      */

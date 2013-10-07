@@ -92,9 +92,23 @@ public class TypeFluxSrvl extends HttpServlet {
         } else if (action.equals("read")) {
             ServletTool.actionREAD(request, FluxType.class, ATT_BEAN_JSP);
         }
+        
+        
+        //==============================================================================================================
+        //..............................GESTION DE LA VUE
+        //==============================================================================================================
 
+        String jsp="/WEB-INF/typefluxjsp.jsp";
+        String vue = request.getParameter("vue");
+        if(vue!= null){
+            if(vue.equals("jsonform")){
+                jsp = "/WEB-INF/jsonform.jsp";
+            }
+        }
+        
+        
 //        }
-        this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
+        this.getServletContext().getRequestDispatcher(jsp).forward(request, response);
     }
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
 

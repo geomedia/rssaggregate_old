@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 import rssagregator.beans.Conf;
 import rssagregator.beans.UserAccount;
 import rssagregator.utils.PropertyLoader;
+import rssagregator.utils.ServletTool;
 
 /**
  * La DAO permettant l'intéraction entre un bean de type {@link Conf}. Contrairement aux autres beans, la {@link Conf}
@@ -157,6 +158,9 @@ public class DAOConf extends AbstrDao {
         s = prop.getProperty("servurl");
         conf.setServurl(s);
 
+        System.out.println("=============================================================");
+        System.out.println("CONF COURANTE : " + conf);
+        System.out.println("=============================================================");
         this.confCourante = conf;
     }
 
@@ -336,4 +340,20 @@ public class DAOConf extends AbstrDao {
         }
 
     }
+
+    
+    /***
+     * Il n'y a qu'une conf. La redéfinition de cette méthode permet la compatibilité avec les outils de {@link ServletTool). Cette méthode se contente de renvoyer l'instance de confcourante
+     * @param id
+     * @return 
+     */
+    @Override
+    public Object find(Long id) {
+        System.out.println("FIND CONF : " + this.confCourante);
+        return confCourante;
+//        return super.find(id); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    
+    
 }

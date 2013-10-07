@@ -16,13 +16,13 @@ import org.apache.poi.util.Beta;
 import org.eclipse.persistence.annotations.Customizer;
 
 
-/**
+/** 
  * Un journal : Le monde, le Figaro... Chaque journal est instancier dans un objet. Un journal peut contenir plusieurs
  * {@link Flux}. Les journaux sont synchronisé du serveur maitre vers les serveur esclave d'ou l'implémentation de
  * l'interface {@link BeanSynchronise}
  */
 @Entity
-@Customizer(JournalEntityLisner.class)
+//@Customizer(JournalEntityLisner.class)
 @Cacheable(value = false)
 public class Journal implements Serializable, BeanSynchronise {
 

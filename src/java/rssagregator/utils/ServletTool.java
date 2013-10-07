@@ -199,19 +199,24 @@ public class ServletTool {
     public static void actionMOD(HttpServletRequest request, /*AbstrDao dao, */ String beansname, String formNameJSP, Class beansClass, Boolean notifiObserver) {
         String srlvtname = (String) request.getAttribute("srlvtname");
         String id = request.getParameter("id");
+       
         AbstrDao dao = DAOFactory.getInstance().getDaoFromType(beansClass);
 
         try {
             Object bean = dao.find(new Long(id));
             request.setAttribute(beansname, bean);
             if (bean == null) {
+                       System.out.println("------------ NO RESULT"); 
                 throw new NoResultException();
+         
             }
             //On bind
             //On crée un formulaire 
             AbstrForm f = FORMFactory.getInstance().getForm(bean.getClass());
+               System.out.println(" FORM DS TOOL : " + f);
             f.setAction("mod");
             request.setAttribute("form", f);
+         
 //            AbstrForm form = (AbstrForm) request.getAttribute("form");
             if (request.getMethod().equals("POST")) {
                 //On tente de binder dans un objet nouveau
@@ -251,7 +256,6 @@ public class ServletTool {
                     else{
                         redir(request, srlvtname + "/mod?id=" + id+"&type="+type, "Traitement Effectué : ", Boolean.FALSE);
                     }
-
                 }
             }
             //Si le formulaire est valide, on effectue les modifications
@@ -276,11 +280,15 @@ public class ServletTool {
 //            form.setAddAction(true);
             request.setAttribute(formNameJSP, form);
             AbstrDao dao = DAOFactory.getInstance().getDaoFromType(beansClass);
+            
             if (request.getMethod().equals("POST")) {
+                System.out.println("-->AV VALID");
                 form.validate(request);
+                System.out.println("AP VALIDATION");
                 request.setAttribute(beansnameJSP, o);
-
+                System.out.println("-->4");
                 if (form.getValide()) {
+                    System.out.println("VALID SERVTOOL"); 
                     o = form.bind(request, o, beansClass);
                     dao.creer(o);
                     System.out.println("3");
@@ -295,7 +303,44 @@ public class ServletTool {
             }
 
         } catch (Exception e) {
+            e.printStackTrace();
             redir(request, srlvtname + "/add", "ERREUR lors du traitement : " + e, Boolean.TRUE);
+        }
+    }
+    public static void actionADD2(HttpServletRequest request, String beansnameJSP, String formNameJSP, Class beansClass, Boolean notifiObserver) {
+            String srlvtname = (String) request.getAttribute("srlvtname");
+        System.out.println("--->>>>>> ADD ");
+        try {
+            Object o = null;
+
+            AbstrForm form = FORMFactory.getInstance().getForm(beansClass);
+            form.setAction("add");
+//            form.setAddAction(true);
+            request.setAttribute(formNameJSP, form);
+            AbstrDao dao = DAOFactory.getInstance().getDaoFromType(beansClass);
+            if (request.getMethod().equals("POST")) {
+                form.validate(request);
+                request.setAttribute(beansnameJSP, o);
+
+                if (form.getValide()) {
+                    o = form.bind(request, o, beansClass);
+                    dao.creer(o);
+                    if (notifiObserver && AbstrObservableBeans.class.isAssignableFrom(o.getClass())) {
+                        AbstrObservableBeans aob = (AbstrObservableBeans) o;
+                        aob.enregistrerAupresdesService();
+                        aob.forceChangeStatut();
+                        aob.notifyObservers("add");
+                    }
+                    redir(request, srlvtname + "/recherche", "AJOUT effectué : ", Boolean.FALSE);
+                }
+                else{ // Si le formulaire n'est pas valide
+                    System.out.println("Servlet : pas valid ");
+                }
+            }
+
+        } catch (Exception e) {
+            redir(request, srlvtname + "/add", "ERREUR lors du traitement : " + e, Boolean.TRUE);
+            System.out.println("ERR : " + e);
         }
     }
 
@@ -315,6 +360,7 @@ public class ServletTool {
                 aob.enregistrerAupresdesService();
                 aob.forceChangeStatut();
                 aob.notifyObservers("rem");
+
 
             }
             redir(request, srlvtname + "/recherche", "Suppression éffectué ! : ", Boolean.FALSE);

@@ -74,10 +74,10 @@ public class UserForm extends AbstrForm {
             if (s.matches(EMAIL_PATTERN)) {
                 mail = s;
             } else {
-                erreurs.put("mail", new String[]{s, "l'email n'est pas correct"});
+                erreurs.put("mail", new String[]{"l'email n'est pas correct", "l'email n'est pas correct"});
             }
         } else {
-            erreurs.put("mail", new String[]{s, "Ce champ ne peut être vide"});
+            erreurs.put("mail", new String[]{"Ce champ ne peut être vide", "Ce champ ne peut être vide"});
         }
 
         //----------------------------------------Mot de pass--------------------------------------------
@@ -109,14 +109,14 @@ public class UserForm extends AbstrForm {
         //------------------------------USER NAME----------------------------------
         s = request.getParameter("username");
         if (s != null && !s.isEmpty()) {
-            if (!s.matches("[A-Za-zéèàê -]*")) {
+            if (!s.matches(REG_EXP_ALPHANUM_FR)) {
 //           if(!s.matches("[\\w]*")){
-                erreurs.put("username", new String[]{s, "Présence de caractères interdits, n'utilisez que des lettres de a à z des espaces et des tirrets"});
+                erreurs.put("username", new String[]{"Présence de caractères interdits, n'utilisez que des lettres de a à z des espaces et des tirrets", "Présence de caractères interdits, n'utilisez que des lettres de a à z des espaces et des tirrets"});
             } else {
                 username = s;
             }
         } else {
-            erreurs.put("username", new String[]{s, "Ce champs ne peut être nul"});
+            erreurs.put("username", new String[]{"Ce champs ne peut être nul", "Ce champs ne peut être nul"});
         }
 
 
@@ -124,7 +124,7 @@ public class UserForm extends AbstrForm {
         s = request.getParameter("adminMail");
         if (s != null && !s.isEmpty()) {
             if (!adminstatut) {
-                erreurs.put("adminMail", new String[]{s, "Il est impossible de recevoir les mail sans être administrateur"});
+                erreurs.put("adminMail", new String[]{"Il est impossible de recevoir les mail sans être administrateur", "Il est impossible de recevoir les mail sans être administrateur"});
             } else {
                 adminMail = true;
             }

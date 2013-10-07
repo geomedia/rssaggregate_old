@@ -1,7 +1,7 @@
  
-Document   : index
+<!--Document   : index
 Created on : 22 avr. 2013, 14:36:12
-Author     : clem
+Author     : clem-->
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
@@ -37,14 +37,12 @@ Author     : clem
                             <c:when test="${empty redirmap}">
 
                                 ${form.resultat}
-                                <c:forEach items="form.erreurs" var="e">
-                                    ${e}
-                                </c:forEach>
+                   
 
                                 <c:choose>
                                     <c:when test="${action=='mod'}">
                                         MOD
-                                        <form method="post" action="${rootpath}config/${action}" id="form">
+                                        <form method="post" action="${rootpath}config/${action}" id="beanForm">
                                             <fieldset>
                                                 <legend>Paramètres du serveur:</legend>
 
@@ -52,14 +50,14 @@ Author     : clem
                                                 <input type="checkbox" id="active" name="active"<c:if test="${conf.active=='true'}"> checked="true"</c:if>/>
                                                     <br />
 
-                                                <label>Nom du serveur</label>
-                                                <input type="text" name="servname" value="<c:out value="${form.erreurs['servname'][0]}" default="${conf.servname}"/>"/>
-                                                <span class="erreur"> ${form.erreurs['servname'][1]}</span>
+                                                    <label>Nom du serveur</label>
+                                                    <input type="text" name="servname" value="<c:out value="${form.erreurs['servname'][0]}" default="${conf.servname}"/>"/>
+                                                <span class="erreur" id="errservname"></span>
                                                 <br />
 
                                                 <label>JMS provider :</label>
                                                 <input type="text" name="jmsprovider" value="<c:out value="${form.erreurs['jmsprovider'][0]}" default="${conf.jmsprovider}"/>" />
-                                                <span class="erreur"> ${form.erreurs['jmsprovider'][1]}</span><br />
+                                                <span class="erreur" id="errjmsprovider"></span><br />
 
                                                 <button type="button" onclick="changepass()" value="0" id="btchgpass">Changer de mot de passe</button>
                                                 <span class="erreur"> ${form.erreurs['pass'][1]}</span>
@@ -78,17 +76,21 @@ Author     : clem
                                                     <button type="button" onclick="subfunction()">Valider</button>
                                                     <!--<input type="submit" />-->
                                                 </fieldset>
+                                                <input type="hidden" name="id" value="1"/>
+
+                                                <input type="hidden" name="vue" value="jsonform" />
 
                                             </form>
+                                            <script src="${rootpath}AjaxAddModBean.js"></script>
+                                        <script src="${rootpath}changePass.js"></script> 
 
-                                                <script src="${rootpath}changePass.js"></script> 
-                                            <script>
-                                                $(document).ready(function() {
-                                                masterSelect();
-                                                })
+                                        <script>
+                                                    $(document).ready(function() {
+                                                        masterSelect();
+                                                    })
 
 
-                                                // Cette fonction est executé lors du click sur la checkbox permettant de définir le serveur comme master
+                                                    // Cette fonction est executé lors du click sur la checkbox permettant de définir le serveur comme master
 //                                                var serveurSlave = [
                                             <%--<c:forEach items="${conf.serveurSlave}" var="serv">--%>
 //                                                {
@@ -97,13 +99,13 @@ Author     : clem
 //                                                host: '${serv.servHost}',
 //                                                urlServletRecup: '${serv.url}',
 //                                                },
-                                                                                            <%--</c:forEach>--%>
+                                            <%--</c:forEach>--%>
 //                                                ];
                                                 function masterSelect() {
-                                                if ($('#master').prop('checked')) {
-                                                $('#divSlave').empty();
-                             
-                                               
+                                                    if ($('#master').prop('checked')) {
+                                                        $('#divSlave').empty();
+
+
 
 //                                            $('#divSlave').append('<button type="button" onclick="addSlave()">ajouter des serveurs esclaves</button>');
 
@@ -116,16 +118,16 @@ Author     : clem
 //                                            <label title="exemple : http://172.17.200.197:8080/RSSAgregate">Url application  : </label><input type="text" name="urlSlave" value="' + s['urlServletRecup'] + '"/>\n\
 //                                            <button value="' + i + '" type="button" onclick="remSlave(this)">Supprimer</button></div>');
 //                                            }
-                                            }
-                                            else {
-                                            $('#divSlave').empty();
-                                            $('#divSlave').append('<label>Host du serveur maître</label><input type="text" name="hostMaster" value="${conf.hostMaster}" />\n\
-                                            <br /><label>Durée avant purge</label><input type="text" name="purgeDuration" value="${conf.purgeDuration}" /><span class="erreur"> ${form.erreurs['purgeDuration'][1]}</span>');
-                                            }
-                                            }
+                                                    }
+                                                    else {
+                                                        $('#divSlave').empty();
+                                                        $('#divSlave').append('<label>Host du serveur maître</label><input type="text" name="hostMaster" value="${conf.hostMaster}" />\n\
+                                        <br /><label>Durée avant purge</label><input type="text" name="purgeDuration" value="${conf.purgeDuration}" /><span class="erreur"> ${form.erreurs['purgeDuration'][1]}</span>');
+                                                    }
+                                                }
 
 
-                                            //Fonction utilisé pour ajouter un serveur esclave dans la page
+                                                //Fonction utilisé pour ajouter un serveur esclave dans la page
 //                                            function addSlave() {
 //                                            nbenfants = $('#divSlave div').length;
 //                                            $('#divSlave').append('<div id="slave' + nbenfants + '"><label>host :</label><input name="hostslave" value=""/> \n\
@@ -134,7 +136,7 @@ Author     : clem
 //                                            <label>Url Recupération : </label><input type="text" name="urlSlave" value=""/>\n\
 //                                            <button value="' + nbenfants + '" type="button" onclick="remSlave(this)">Supprimer</button></div>');
 //                                            }
-                                            //Fonction utilisé pour supprimer un serveur esclave dans la page
+                                                //Fonction utilisé pour supprimer un serveur esclave dans la page
 
 //                                            function remSlave(bt) {
 //                                            divname = '#slave' + bt.value;
@@ -162,20 +164,29 @@ Author     : clem
                                     </c:when>
                                     <c:when test="${action=='importitem'}">
                                         <h2>Liste des items rapportées par synchronisation : </h2>
-                                        
-                                            <c:forEach items="${tacheGenerale.synchroSlave}" var="synch">
-                                                <h2>Recup sur le serveur : ${synch.serveurSlave}</h2>
-                                                <p>Etat : <c:if test="${synch.exeption==null}">OK</c:if><c:if test="${synch.exeption!=null}">ERREUR</c:if></p>
+
+                                        <c:forEach items="${tacheGenerale.synchroSlave}" var="synch">
+                                            <h2>Recup sur le serveur : ${synch.serveurSlave}</h2>
+                                            <p>Etat : <c:if test="${synch.exeption==null}">OK</c:if><c:if test="${synch.exeption!=null}">ERREUR</c:if></p>
                                                 <ul>
                                                 <c:forEach items="${synch.itemTrouvees}" var="it">
                                                     <li>${it}</li>
-                                                </c:forEach>
-                                                </ul>
-                                            
-                                                </c:forEach>
-                                        
+                                                    </c:forEach>
+                                            </ul>
+
+                                        </c:forEach>
+
                                     </c:when>
 
+                                    <c:when test="${action=='read'}">
+                                        <c:if test="${admin=='true'}">
+                                            <p><a href="${rootpath}${srlvtname}/mod?id=1">Editer</a></p>
+                                        </c:if>
+                                        <p><strong>Nom du serveur : </strong>${conf.servname}</p>
+                                        <p><strong>Maitre : </strong><c:if test="${conf.master==true}">OUI</c:if><c:if test="${conf.master==false}">NON</c:if></p>
+
+                                    </c:when>
+ 
 
                                 </c:choose>
 

@@ -143,8 +143,22 @@ public class ComportementCollecteSrvlt extends HttpServlet {
 
 
 //        request.setAttribute("bean", obj);
+        
+        //============================================================================================================
+        //.........................................GESTION DE LA VUE
+        //============================================================================================================
+        String jsp =  "/WEB-INF/comportementcollecteHTML.jsp";
+        
+        if(vue==null){
+            jsp = "/WEB-INF/comportementcollecteHTML.jsp";
+        }
+        else if (vue.equals("jsonform")){
+            jsp = "/WEB-INF/jsonform.jsp";
+        }
+        
+        
 
-        this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
+        this.getServletContext().getRequestDispatcher(jsp).forward(request, response);
     }
 
     private void redir(HttpServletRequest request, String url, String msg) {

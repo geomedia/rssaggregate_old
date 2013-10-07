@@ -4,20 +4,23 @@
  */
 package rssagregator.beans.form;
 
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import rssagregator.beans.Journal;
+import rssagregator.dao.DAOFactory;
+import rssagregator.dao.DaoJournal;
 
 /**
- * Classe permettant de valider et binder les données issues d'une requête dans
- * un bean <strong>Journal</strong>
+ * Classe permettant de valider et binder les données issues d'une requête dans un bean <strong>Journal</strong>
  *
  * @author clem
  */
 public class JournalForm extends AbstrForm {
     //--------------------------------------
     // Les variables devant être récupérées
+
     private String nom;
     private String urlAccueil;
     private String urlHtmlRecapFlux;
@@ -47,7 +50,7 @@ public class JournalForm extends AbstrForm {
             }
         }
         Journal journal = (Journal) objEntre;
-        
+
         //---------------------------------------------------
         // Bind des valeurs
         journal.setNom(nom);
@@ -81,16 +84,36 @@ public class JournalForm extends AbstrForm {
         String s = request.getParameter("nom");
         if (s != null && !s.isEmpty()) {
             nom = s;
+            // On doit chercher si il s'existe pas déjà un journal avec ce nom
+            DaoJournal dao = DAOFactory.getInstance().getDaoJournal();
+
+            if (action.equals("add")) {
+                Journal j = dao.findWithName(nom);
+                if (j != null) {
+                    erreurs.put("nom", new String[]{"Il existe déjà un journal portant ce nom dans la base de données", "Il existe déjà un journal portant ce nom dans la base de données"});
+                }
+
+            }
+
+        } else {
+            erreurs.put("nom", new String[]{"ne peut être null", "ne peu"});
         }
 
 
         s = request.getParameter("urlAccueil");
         if (s != null && !s.isEmpty()) {
+            System.out.println("111");
+            if (!s.matches(REG_EXP_HTTP_URL)) {
+                erreurs.put("urlAccueil", new String[]{"Ce n'est pas une URL correcte", "ne peu"});
+            }
             urlAccueil = s;
         }
 
         s = request.getParameter("urlHtmlRecapFlux");
         if (s != null && !s.isEmpty()) {
+            if (!s.matches(REG_EXP_HTTP_URL)) {
+                erreurs.put("urlHtmlRecapFlux", new String[]{"Ce n'est pas une URL correcte", "ne peu"});
+            }
             urlHtmlRecapFlux = s;
         }
 

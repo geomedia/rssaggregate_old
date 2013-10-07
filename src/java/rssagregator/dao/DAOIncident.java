@@ -12,6 +12,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import org.apache.poi.ss.formula.functions.T;
 import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.beans.incident.JMSPerteConnectionIncident;
 
@@ -34,7 +35,11 @@ public class DAOIncident<T> extends AbstrDao {
 
 //JOIN item.listFlux flux
     protected DAOIncident(DAOFactory dAOFactory) {
-        this.classAssocie = CollecteIncident.class;
+        
+//       this.classAssocie = cc; 
+       
+       
+//        this.classAssocie = CollecteIncident.class;
         this.dAOFactory = dAOFactory;
         em = dAOFactory.getEntityManager();
         nullLastNotification = false;

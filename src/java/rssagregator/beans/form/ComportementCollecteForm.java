@@ -85,16 +85,28 @@ public class ComportementCollecteForm extends AbstrForm {
 
         //-----------> TIME OUT
         s = request.getParameter("requester_time_out");
-        try {
-            requester_time_out = new Integer(s);
-        } catch (Exception e) {
+        if (s != null && !s.isEmpty()) {
+            try {
+                requester_time_out = new Integer(s);
+            } catch (Exception e) {
+                erreurs.put("requester_time_out", new String[]{"N'est pas un numéric", "N'est pas un chiffre"});
+            }
+        } else {
+            erreurs.put("requester_time_out", new String[]{"Ne peut être nul", ""});
         }
 
+
         //-----------> PERIODICITE DE COLLECTE 
-        try {
-            s = request.getParameter("periodiciteCollecte");
-            periodiciteCollecte = new Integer(s);
-        } catch (Exception e) {
+        s = request.getParameter("periodiciteCollecte");
+        if (s != null && !s.isEmpty()) {
+            try {
+                periodiciteCollecte = new Integer(s);
+            } catch (Exception e) {
+                erreurs.put("periodiciteCollecte", new String[]{"N'est pas un numéric", ""});
+            }
+        }
+        else{
+            erreurs.put("periodiciteCollecte", new String[]{"Ne peut être nul", ""});
         }
 
         String[] cle = request.getParameterValues("requestPropertyCle");
@@ -161,8 +173,12 @@ public class ComportementCollecteForm extends AbstrForm {
         // Les paramettre propre au mediateur Comportement collect
         //------------> NOM DU COMPORTEMENT
         s = request.getParameter("comportement_nom");
-        if (s != null) {
+        if (s != null && !s.isEmpty()) {
+            System.out.println("--------------------COMPO : " + s);
             comportement_nom = s;
+        } else {
+            System.out.println("=+=+=+=++===+===");
+            erreurs.put("comportement_nom", new String[]{"ne peut être null", "ne peu"});
         }
 
         //----------> DESCRIPTION DU COMPORTEMENT
@@ -182,7 +198,7 @@ public class ComportementCollecteForm extends AbstrForm {
             defaut = true;
         }
 
-        
+
         //---------------------------------------------------------------
         //---------------------------------------------------------------
         if (erreurs.isEmpty()) {

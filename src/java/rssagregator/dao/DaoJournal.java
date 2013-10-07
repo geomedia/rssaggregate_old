@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.persistence.Query;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Journal;
 import rssagregator.services.ServiceCollecteur;
@@ -108,6 +109,22 @@ public class DaoJournal extends AbstrDao {
 //        super.remove(obj); //To change body of generated methods, choose Tools | Templates.
         
          
+    }
+    /***
+     * Recherche une liste de jounaux possédant le nom mentionné
+     * @param name le nom recherché
+     * @return Une liste de journaux. D'après les contrainte ce retour ne doit posséder qu'un élément dans la liste
+     */
+    public Journal findWithName(String name){
+               String req = "SELECT j FROM Journal j WHERE j.nom like(:name)";
+        Query query = em.createQuery(req);
+        query.setParameter("name", name);
+        
+        return (Journal) query.getSingleResult();
+//        List r = query.getResultList();
+        
+        
+//        return r;
     }
     
     

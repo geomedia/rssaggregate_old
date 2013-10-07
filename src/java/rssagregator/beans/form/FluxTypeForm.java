@@ -11,8 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import rssagregator.beans.FluxType;
 
 /**
- * Objet formulaire permettant de valider les données saisies par l'utilisateur
- * pour le beans <strong>FluxType</strong>
+ * Objet formulaire permettant de valider les données saisies par l'utilisateur pour le beans <strong>FluxType</strong>
  *
  * @author clem
  */
@@ -32,7 +31,12 @@ public class FluxTypeForm extends AbstrForm {
         //-----------> DENOMINATION 
         s = request.getParameter("denomination");
         if (s != null) {
-            denomination = s;
+            if (s.matches(REG_EXP_ALPHANUM_FR)) {
+                denomination = s;
+            } 
+            else {
+                erreurs.put("denomination", new String[]{ERR_ALPHANUM_FR, ERR_ALPHANUM_FR});
+            }
         }
 
         //-----------> DESCRIPTION 

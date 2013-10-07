@@ -6,6 +6,7 @@ package rssagregator.beans.form;
 
 import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
+import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.CollecteIncident;
 
 /**
@@ -29,7 +30,7 @@ public class IncidentForm extends AbstrForm {
     @Override
     public Object bind(HttpServletRequest request, Object objEntre, Class type) {
         if (valide) {
-            CollecteIncident incident = (CollecteIncident) objEntre;
+            AbstrIncident incident = (AbstrIncident) objEntre;
             incident.setNoteIndicent(noteIndicent);
             incident.setDateFin(dateFin);
             return incident;
