@@ -164,8 +164,10 @@ public class DAOFactory<T extends AbstrDao> {
         if (beansClass.equals(Flux.class)) {
             dao = (T) getDAOFlux();
 //            return (T) getDAOFlux();
-        } else if (CollecteIncident.class.isAssignableFrom(beansClass)) {
-            dao = (T) getDAOIncident();
+        } else if (CollecteIncident.class.equals(beansClass)) {
+            dao = (T) new DAOIncident<CollecteIncident>(this);
+            dao.setClassAssocie(CollecteIncident.class);
+//            dao = (T) getDAOIncident();
         } else if (beansClass.equals(Journal.class)) {
             dao = (T) getDaoJournal();
         } else if (beansClass.equals(MediatorCollecteAction.class)) {
@@ -199,7 +201,6 @@ public class DAOFactory<T extends AbstrDao> {
             dao.setClassAssocie(beansClass);
         } else if (beansClass.equals(ServeurSlave.class)) {
             dao = (T) new DAOServeurSlave(this);
-//)            dao = (T) new DAOGenerique(this);
             dao.setClassAssocie(beansClass);
         }
         else if (beansClass.equals(JMSDiffusionIncident.class)){
@@ -207,9 +208,7 @@ public class DAOFactory<T extends AbstrDao> {
             dao.setClassAssocie(beansClass);
         }
         else if (beansClass.equals(Conf.class)){
-//            dao = (T) new DAOConf(this);
             dao = (T) daoConf;
-//            dao.setClassAssocie(beansClass);
         }
         
 

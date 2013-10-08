@@ -161,7 +161,7 @@
                             <li><a href="${rootpath}flux/mod?id=${bean.ID}">Configurer le flux</a></li>
                             <li><a href="${rootpath}flux/maj?id=${bean.ID}">Mettre à jour manuellement</a></li>
                             <li><a href="${rootpath}flux/rem?id=${bean.ID}">Supprimer le flux</a></li>
-                            <li><a href="${rootpath}flux/read-incident&id=${bean.ID}">Parcourir les incidents</a></li>
+                            <li><a href="${rootpath}incidents/recherche?fluxSelection2=${bean.ID}&type=CollecteIncident">Parcourir les incidents</a></li>
                             <li><a href="${rootpath}flux/importcsv?id=${bean.ID}">Importer des items</a></li>
                         </ul>
                     </c:when> 
@@ -191,7 +191,7 @@
                                 <span class="erreur" id="errhtmlUrl"></span>
                                 <br />
 
-                                <label title="Ensemble de paramettres régulant la collecte du flux. CE PARAMETTRE EST PRIMORDIALE">Comportement de collecte : </label>
+                                <label title="Ensemble de paramettres régulant la collecte du flux. CE PARAMETTRE EST PRIMORDIALE">Comportement de collecte : <span class="requis">*</span></label>
                                 <select name="mediatorFlux">
                                     <c:forEach items="${listcomportement}" var="compo">
                                         <option value="${compo.ID}" <c:if test="${bean.mediatorFlux.ID==compo.ID}"> selected="true"</c:if> >${compo}</option>
@@ -262,21 +262,6 @@
                     </c:when>
 
 
-
-                    <c:when test="${action=='read-incident'}">
-                        <h2>Liste des incidets du flux</h2>
-                        <c:forEach items="${bean.incidentsLie}" var="incid">
-
-                            <li class="item">
-                                <h3><a href="incidents?action=mod&id=${incid.ID}">${incid}</a></h3>
-                                <p>Début : ${incid.dateDebut} fin : ${incid.dateFin}</p>
-                                <p>${incid.messageEreur}</p>
-
-                            </li>
-
-                        </c:forEach>
-                    </c:when>
-
                     <c:when test="${action=='maj'}">
                         <table border="1">
                             <tr>
@@ -306,6 +291,11 @@
                                             <c:set var="erreur" value="1"></c:set>
                                             ${inci.messageEreur}
                                         </c:forEach>
+                                        <c:if test="${not empty fl.tacheRechupManuelle.exeption}">
+                                            <c:set var="erreur" value="1"></c:set>
+                                            ${fl.tacheRechupManuelle.exeption.message}
+                                        </c:if>
+                         
                                         <c:if test="${erreur!=1}">OK</c:if>
                                     </tr>
                             </c:forEach>

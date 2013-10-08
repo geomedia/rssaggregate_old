@@ -49,7 +49,7 @@
                             </div>
 
                             <form method="POST" action="${rootpath}TypeFluxSrvl/${action}?id=${bean.ID}" id="beanForm">
-                            <label for="denomination">Dénomination : </label>
+                            <label for="denomination">Dénomination<span class="requis">*</span> : </label>
                             <input name="denomination" id="denomination" value="${bean.denomination}"/>
                             <span id="errdenomination" class="erreur"></span>
                             <br />

@@ -57,19 +57,19 @@
                                 <label>Comportement utilisé par défaut :</label>
                                 <input type="checkbox" name="defaut" <c:if test="${bean.defaut}"> checked="true"</c:if> /><br />
                                 
-                                    <label> Nom du comportement : </label>
+                                    <label> Nom du comportement<span class="requis">*</span> : </label>
                                     <input type="text" name="comportement_nom" value="${bean.nom}"/><span class="erreur" id="errcomportement_nom"></span><br/>
                                 
                                 <label>Description du comportement : </label><br />
                                 <textarea name="comportement_desc" rows="10" cols="60">${bean.description}</textarea><br />
 
-                                <label title="Nombre de secondes entre deux levée de flux">Periodicité de collecte : </label>
+                                <label title="Nombre de secondes entre deux levée de flux">Periodicité de collecte<span class="requis">*</span> : </label>
                                 <input  name="periodiciteCollecte" type="text" value="${bean.periodiciteCollecte}" /><span class="erreur" id="errperiodiciteCollecte"></span>
                             </fieldset>
 
                             <fieldset>
                                 <legend>Request : </legend>
-                                <label>Time Out : </label>
+                                <label>Time Out<span class="requis">*</span> : </label>
                                 <input name="requester_time_out" value="${bean.requesteur.timeOut}"/><span class="erreur" id="errrequester_time_out"></span><br />
 
                                 <label>Request Property</label><button type="button"  onclick="addProp();">ajouter</button>

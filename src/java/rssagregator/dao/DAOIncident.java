@@ -10,9 +10,11 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.apache.poi.ss.formula.functions.T;
+import rssagregator.beans.Flux;
 import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.beans.incident.JMSPerteConnectionIncident;
 
@@ -27,11 +29,12 @@ public class DAOIncident<T> extends AbstrDao {
     Integer maxResult;
     Boolean nullLastNotification;
     Boolean criteriaNotificationImperative;
+    List<Flux> criteriaFluxLie;
     private static final String REQ_FIND_ALL_AC_LIMIT = "SELECT i FROM incidentflux i LEFT JOIN i.fluxLie flux ORDER BY i.dateFin DESC";
 
     //        private static final String REQ_FIND = "SELECT i FROM incidentflux i LEFT JOIN i.fluxLie flux WHERE id=:id";
-    public DAOIncident() {
-    }
+//    public DAOIncident() {
+//    }
 
 //JOIN item.listFlux flux
     protected DAOIncident(DAOFactory dAOFactory) {
@@ -45,6 +48,7 @@ public class DAOIncident<T> extends AbstrDao {
         nullLastNotification = false;
         criteriaNotificationImperative = false;
         clos = false;
+        criteriaFluxLie = new ArrayList<Flux>();
     }
 
     @Deprecated
@@ -84,11 +88,12 @@ public class DAOIncident<T> extends AbstrDao {
         if (criteriaNotificationImperative != null && criteriaNotificationImperative) {
             listWhere.add(cb.and(cb.equal(root.get("notificationImperative"), true)));
             logger.debug("DAO Notification imperative");
-//            listWhere.add(cb.and(cb.equal(root.get("estStable"), true)));
-//            cq.where(cb.equal(root.get("estStable"), true));
         }
-
-
+        
+        if(criteriaFluxLie!= null && !criteriaFluxLie.isEmpty()){
+            Join joinFlux = root.join("fluxLie");
+            listWhere.add(joinFlux.in(criteriaFluxLie));
+        }
 
         // On applique les wheres
         int i;
@@ -300,4 +305,14 @@ public class DAOIncident<T> extends AbstrDao {
     public void setCriteriaNotificationImperative(Boolean criteriaNotificationImperative) {
         this.criteriaNotificationImperative = criteriaNotificationImperative;
     }
+
+    public List<Flux> getCriteriaFluxLie() {
+        return criteriaFluxLie;
+    }
+
+    public void setCriteriaFluxLie(List<Flux> criteriaFluxLie) {
+        this.criteriaFluxLie = criteriaFluxLie;
+    }
+    
+    
 }

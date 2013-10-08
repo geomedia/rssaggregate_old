@@ -55,6 +55,13 @@ public abstract class AbstrForm {
      * envoyées par l'utilisateur sont conformes sinon false...
      */
     protected Boolean valide = false;
+    
+    /***
+     * Lors du bind, ce booleean peut être passé à false. Le message d'erreur a afficher est alors stocké dans this.resultat.
+     */
+    protected Boolean operationOk = true;
+    
+    
     /**
      * *
      * Préciser le type d'action (add ou mod). La gestion du bind peut en effet
@@ -165,6 +172,17 @@ public abstract class AbstrForm {
     public AbstrForm() {
     }
 
+    public Boolean getOperationOk() {
+        return operationOk;
+    }
+
+    public void setOperationOk(Boolean operationOk) {
+        this.operationOk = operationOk;
+    }
+
+    
+    
+    
     /**
      * *
      * Permet de préciser au formulaire le type d'action (add ou mod)

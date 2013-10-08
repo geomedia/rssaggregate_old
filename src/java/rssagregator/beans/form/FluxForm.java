@@ -73,6 +73,7 @@ public class FluxForm extends AbstrForm {
             flux.setParentFlux(parentFlux);
             flux.setInfoCollecte(infoCollecte);
             flux.setEstStable(estStable);
+            flux.setTypeFlux(typeFlux);
 
 
             //-------> Gestion de la date de création du flux

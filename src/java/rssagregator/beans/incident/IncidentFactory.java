@@ -7,6 +7,7 @@ package rssagregator.beans.incident;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import rssagregator.beans.exception.CollecteUnactiveFlux;
 import rssagregator.beans.exception.UnIncidableException;
 import rssagregator.services.AbstrTacheSchedule;
 
@@ -65,6 +66,12 @@ public class IncidentFactory<T extends AbstrIncident> {
         
         // On vérifie que la tache est incidable;
         if(Incidable.class.isAssignableFrom(tache.getClass())){
+            
+            
+            if(tache.getExeption().getClass().equals(CollecteUnactiveFlux.class)){
+                return null;
+            }
+            
             logger.debug("c'est une tâche incidable");
             
             Incidable cast = (Incidable) tache;

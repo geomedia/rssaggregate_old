@@ -13,11 +13,11 @@
 <%
     JSONObject export = new JSONObject();
     JSONArray array = new JSONArray();
-    
+
     System.out.println("json serv 1");
 //     On parcours les erreurs
     AbstrForm form = (AbstrForm) request.getAttribute("form");
-    System.out.println("-->> FORM"+form);
+    System.out.println("-->> FORM" + form);
     Map<String, String[]> erreurMap = form.getErreurs();
     for (Map.Entry<String, String[]> en : erreurMap.entrySet()) {
         String key = en.getKey();
@@ -26,38 +26,51 @@
         obj.put("key", key);
         obj.put("value", value);
         array.add(obj);
-        
+
     }
     export.put("erreurs", array);
-        System.out.println("json serv 2");
-    
-    if(erreurMap.isEmpty()){
+
+    if (erreurMap.isEmpty()) {
         export.put("valid", true);
-    }
-    else{
+    } else {
         export.put("valid", false);
     }
-    System.out.println("json serv 1");
+
+    if (!form.getOperationOk()) {
+        System.out.println("--->>>>>>> ERREUR SERVEUR");
+        export.put("OperationOk", false);
+    }
+    else{
+        export.put("OperationOk", true);
+    }
+
+    if (form.getResultat() != null) {
+        export.put("resultat", form.getResultat());
+    }
+    else{
+              export.put("resultat", "Rien");
+    }
+
+
     //Gestion de la redirection
-    String rootpath = (String)request.getAttribute("rootpath");
+    String rootpath = (String) request.getAttribute("rootpath");
     String servUrl = DAOFactory.getInstance().getDAOConf().getConfCourante().getServurl();
     String servlet = (String) request.getAttribute("srlvtname");
-    String action = (String)request.getAttribute("action");
-    String rediraction ="";
-    if(action.equals("add")){
+    String action = (String) request.getAttribute("action");
+    String rediraction = "";
+    if (action.equals("add")) {
         rediraction = "recherche";
+    } else if (action.equals("mod")) {
+        rediraction = "read?id=" + request.getParameter("id");
     }
-    else if(action.equals("mod")){
-        rediraction = "read?id="+request.getParameter("id");
-    }
-    
-    
-    
-    
-   export.put("redirUrl", servUrl+servlet+"/"+rediraction);
 
 
-System.out.println(export.toJSONString());
+
+
+    export.put("redirUrl", servUrl + servlet + "/" + rediraction);
+
+
+    System.out.println(export.toJSONString());
     out.clear();
     out.print(export.toJSONString());
     out.flush();

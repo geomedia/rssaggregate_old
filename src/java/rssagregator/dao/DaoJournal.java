@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
 import javax.persistence.Query;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Journal;
@@ -115,11 +117,11 @@ public class DaoJournal extends AbstrDao {
      * @param name le nom recherché
      * @return Une liste de journaux. D'après les contrainte ce retour ne doit posséder qu'un élément dans la liste
      */
-    public Journal findWithName(String name){
+    public Journal findWithName(String name) throws NonUniqueResultException, NoResultException, Exception{
                String req = "SELECT j FROM Journal j WHERE j.nom like(:name)";
         Query query = em.createQuery(req);
         query.setParameter("name", name);
-        
+
         return (Journal) query.getSingleResult();
 //        List r = query.getResultList();
         

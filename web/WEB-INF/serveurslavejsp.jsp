@@ -35,16 +35,16 @@ CETTE JSP N'EST PLUS UTILISE LA GESTION DES SERVEUR ESCLAVE SE FAIT MAINTENANT D
                     <c:when test="${action=='add' or action=='mod'}">
                         <c:if test="${action=='mod'}"><p><a href="${rootpath}slave/rem?id=${bean.ID}">Supprimer</a></p></c:if>
                         <form method="POST" id="beanForm">
-                                <label>Host :</label>
+                                <label>Host<span class="requis">*</span> :</label>
                                 <input type="text" name="servHost" value="${bean.servHost}"/><br/>
 
-                            <label>Login : </label>
+                            <label>Login<span class="requis">*</span> : </label>
                             <input type="text" name="login" value="${bean.login}" /><br />
 
-                            <label>Pass : </label>
+                            <label>Pass<span class="requis">*</span> : </label>
                             <input type="text" name="pass" value="${bean.pass}" /><br />
 
-                            <label for="url">Url de l'application : </label>
+                            <label for="url">Url de l'application<span class="requis">*</span> : </label>
                             <input type="text" name="url" id="url" value="${bean.url}"/>
                             <span id="errurl"></span>
                             <br />

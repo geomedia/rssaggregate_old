@@ -27,13 +27,12 @@ public class ServletTool {
 
     /**
      * *
-     * Outil utilisé dans toutes les sevlet pour récupérer l'action demandé par
-     * l'utilisateur. La récupération se base sur le path (request.getPathInfo).
+     * Outil utilisé dans toutes les sevlet pour récupérer l'action demandé par l'utilisateur. La récupération se base
+     * sur le path (request.getPathInfo).
      *
      * @param request la request dans la servlet
-     * @param defaultAction L'action par défault. Devient la valeur de l'action
-     * si on ne trouve pas d'action dans la request. Permet de rediriger sur
-     * recherche ou list facilement
+     * @param defaultAction L'action par défault. Devient la valeur de l'action si on ne trouve pas d'action dans la
+     * request. Permet de rediriger sur recherche ou list facilement
      * @return l'action
      */
     public static String configAction(HttpServletRequest request, String defaultAction) {
@@ -57,9 +56,8 @@ public class ServletTool {
      * @param request La request envoyée par la servlet
      * @param url adresse de redirection
      * @param msg message a afficher à l'utilisateur
-     * @param err true si il s'agit d'une erreur. false si c'est une redirection
-     * de routine, l'utilisateur est alors redirigé par javascript secondes
-     * après.
+     * @param err true si il s'agit d'une erreur. false si c'est une redirection de routine, l'utilisateur est alors
+     * redirigé par javascript secondes après.
      */
     public static void redir(HttpServletRequest request, String url, String msg, Boolean err) {
 
@@ -74,19 +72,15 @@ public class ServletTool {
 
     /**
      * *
-     * Cette méthode est utilisée par les servlet pour vérifier si un
-     * utilisateur a acces non à la page demandée. Elle va s'intéresser a
-     * plusieurs paramettre : <ul>
-     * <li>JMS : Si le serveur JMS n'est pas joignable on va refuser a
-     * l'utilisateur de lancer des action type add mod del. En effet celles ci
-     * se serait pas répercuté sur les serveur esclave.</li>
-     * <li>action l'action demandé par l'utilisateur Elle est récupéré a partir
-     * de l'url envoyé</li>
+     * Cette méthode est utilisée par les servlet pour vérifier si un utilisateur a acces non à la page demandée. Elle
+     * va s'intéresser a plusieurs paramettre : <ul>
+     * <li>JMS : Si le serveur JMS n'est pas joignable on va refuser a l'utilisateur de lancer des action type add mod
+     * del. En effet celles ci se serait pas répercuté sur les serveur esclave.</li>
+     * <li>action l'action demandé par l'utilisateur Elle est récupéré a partir de l'url envoyé</li>
      * </ul>
      *
-     * @param request : un tableau d'objet. La première case permet de savoir si
-     * l'acces est accepté ou non ; la seconde contient une chaine de caractère
-     * avec le potentiel message d'erreur en cas de refus d'acces.
+     * @param request : un tableau d'objet. La première case permet de savoir si l'acces est accepté ou non ; la seconde
+     * contient une chaine de caractère avec le potentiel message d'erreur en cas de refus d'acces.
      * @return
      */
     public static boolean accesControl(HttpServletRequest request) {
@@ -115,18 +109,17 @@ public class ServletTool {
 
     /**
      * *
-     * Récupère les id mentionnés dans la requête puis utilise la dao envoyé en
-     * paramettre pour rechercher les objets. Retourne la liste des objets
-     * trouvés. Renvoi une exeption si un des id n'a pas pu être converti en
-     * Long ou si il ne correspondait pas à un objet dans la base
+     * Récupère les id mentionnés dans la requête puis utilise la dao envoyé en paramettre pour rechercher les objets.
+     * Retourne la liste des objets trouvés. Renvoi une exeption si un des id n'a pas pu être converti en Long ou si il
+     * ne correspondait pas à un objet dans la base
      *
      * @param request
      * @param dao
      * @return
-     * @throws NumberFormatException Exception levée si un des identifiants (id)
-     * trouvés dans la requête n'a pu être convertis en Long
-     * @throws NoResultException Exception levée si il n'y a pas d'objet dans la
-     * base de donnée pour un des identifiants trouvés dans la requete
+     * @throws NumberFormatException Exception levée si un des identifiants (id) trouvés dans la requête n'a pu être
+     * convertis en Long
+     * @throws NoResultException Exception levée si il n'y a pas d'objet dans la base de donnée pour un des identifiants
+     * trouvés dans la requete
      */
     public static List getListFluxFromRequest(HttpServletRequest request, AbstrDao dao) throws NumberFormatException, NoResultException {
         List<Object> listFlux = new ArrayList<Object>();
@@ -148,10 +141,9 @@ public class ServletTool {
 
     /**
      * *
-     * Permet de gérer l'action de read d'une servlet. Le paramettre id est
-     * recherche dans la request. La dao est ensuite utilisée pour retrouver
-     * l'entité correpondante. Un attribue de la requete est ensuite associé au
-     * nom beansnameJSP avec l'entitée récupéré par la dao
+     * Permet de gérer l'action de read d'une servlet. Le paramettre id est recherche dans la request. La dao est
+     * ensuite utilisée pour retrouver l'entité correpondante. Un attribue de la requete est ensuite associé au nom
+     * beansnameJSP avec l'entitée récupéré par la dao
      *
      * @param request
      * @param dao
@@ -164,10 +156,6 @@ public class ServletTool {
 
         try {
             Object bean = dao.find(new Long(id));
-
-
-//
-
             if (bean == null) {
                 throw new NoResultException();
             }
@@ -179,15 +167,13 @@ public class ServletTool {
         } catch (Exception e) {
             redir(request, srlvtname + "/read?id=" + id, "ERREUR lors du traitement : " + e, Boolean.TRUE);
         }
-
     }
 
     /**
      * *
      * Demande d'avoir au préalable configuré dans la servlet les attribus :
      * <ul>
-     * <li><strong>srlvtname : une chaine de caractère contenanat le nom de la
-     * servlet</strong></li>
+     * <li><strong>srlvtname : une chaine de caractère contenanat le nom de la servlet</strong></li>
      * <li>form : L'objet de controle de formulaire</li>
      * </ul>
      *
@@ -199,24 +185,22 @@ public class ServletTool {
     public static void actionMOD(HttpServletRequest request, /*AbstrDao dao, */ String beansname, String formNameJSP, Class beansClass, Boolean notifiObserver) {
         String srlvtname = (String) request.getAttribute("srlvtname");
         String id = request.getParameter("id");
-       
+        AbstrForm f = null;
         AbstrDao dao = DAOFactory.getInstance().getDaoFromType(beansClass);
-
         try {
             Object bean = dao.find(new Long(id));
             request.setAttribute(beansname, bean);
             if (bean == null) {
-                       System.out.println("------------ NO RESULT"); 
+                System.out.println("------------ NO RESULT");
                 throw new NoResultException();
-         
             }
             //On bind
             //On crée un formulaire 
-            AbstrForm f = FORMFactory.getInstance().getForm(bean.getClass());
-               System.out.println(" FORM DS TOOL : " + f);
+            f = FORMFactory.getInstance().getForm(bean.getClass());
+            System.out.println(" FORM DS TOOL : " + f);
             f.setAction("mod");
             request.setAttribute("form", f);
-         
+
 //            AbstrForm form = (AbstrForm) request.getAttribute("form");
             if (request.getMethod().equals("POST")) {
                 //On tente de binder dans un objet nouveau
@@ -230,17 +214,13 @@ public class ServletTool {
 
                     if (bean instanceof Flux) {
                         Flux ff = (Flux) bean;
-                        System.out.println("FLUX URL2 : " + ff.getUrl());
                     }
 
                     dao.modifier(bean);
-                    System.out.println("--->> MODIF DAO");
 
                     if (bean instanceof Flux) {
                         Flux ff = (Flux) bean;
-                        System.out.println("FLUX URL3 : " + ff.getUrl());
                     }
-
 
                     if (notifiObserver && AbstrObservableBeans.class.isAssignableFrom(bean.getClass())) {
                         AbstrObservableBeans b = (AbstrObservableBeans) bean;
@@ -251,10 +231,10 @@ public class ServletTool {
                     //Si un type est précisé
                     String type = request.getParameter("type");
                     if (type == null) {
+                        
                         redir(request, srlvtname + "/mod?id=" + id, "Traitement Effectué : ", Boolean.FALSE);
-                    }
-                    else{
-                        redir(request, srlvtname + "/mod?id=" + id+"&type="+type, "Traitement Effectué : ", Boolean.FALSE);
+                    } else {
+                        redir(request, srlvtname + "/mod?id=" + id + "&type=" + type, "Traitement Effectué : ", Boolean.FALSE);
                     }
                 }
             }
@@ -262,33 +242,42 @@ public class ServletTool {
 
         } catch (NumberFormatException e) {
             redir(request, srlvtname + "/mod?id=" + id, "L'entité demandée n'existe pas !", Boolean.TRUE);
+            if (f != null) {
+                f.setOperationOk(false);
+                f.setResultat("Les données utilisateur sont valides, mais une erreur serveur est survenue : " + e);
+            }
         } catch (NoResultException e) {
             redir(request, srlvtname + "/mod?id=" + id, "L'entité demandée n'existe pas !", Boolean.TRUE);
+            if (f != null) {
+                f.setOperationOk(false);
+                f.setResultat("Les données utilisateur sont valides, mais une erreur serveur est survenue : " + e);
+            }
         } catch (Exception e) {
             redir(request, srlvtname + "/mod?id=" + id, "ERREUR lors du traitement : " + e, Boolean.TRUE);
+            if (f != null) {
+                f.setOperationOk(false);
+                f.setResultat("Les données utilisateur sont valides, mais une erreur serveur est survenue : " + e);
+            }
         }
     }
 
     public static void actionADD(HttpServletRequest request, String beansnameJSP, String formNameJSP, Class beansClass, Boolean notifiObserver) {
         String srlvtname = (String) request.getAttribute("srlvtname");
         System.out.println("--->>>>>> ADD ");
+        AbstrForm form = null;
         try {
             Object o = null;
 
-            AbstrForm form = FORMFactory.getInstance().getForm(beansClass);
+            form = FORMFactory.getInstance().getForm(beansClass);
             form.setAction("add");
 //            form.setAddAction(true);
             request.setAttribute(formNameJSP, form);
             AbstrDao dao = DAOFactory.getInstance().getDaoFromType(beansClass);
-            
+
             if (request.getMethod().equals("POST")) {
-                System.out.println("-->AV VALID");
                 form.validate(request);
-                System.out.println("AP VALIDATION");
                 request.setAttribute(beansnameJSP, o);
-                System.out.println("-->4");
                 if (form.getValide()) {
-                    System.out.println("VALID SERVTOOL"); 
                     o = form.bind(request, o, beansClass);
                     dao.creer(o);
                     System.out.println("3");
@@ -304,11 +293,18 @@ public class ServletTool {
 
         } catch (Exception e) {
             e.printStackTrace();
+            if (form != null) {
+//                form.setResultat("erreur lors de l'ajout : " + e);
+                form.setOperationOk(false);
+                form.setResultat("Les données utilisateur sont valides, mais une erreur serveur est survenue : " + e);
+            }
+
             redir(request, srlvtname + "/add", "ERREUR lors du traitement : " + e, Boolean.TRUE);
         }
     }
+
     public static void actionADD2(HttpServletRequest request, String beansnameJSP, String formNameJSP, Class beansClass, Boolean notifiObserver) {
-            String srlvtname = (String) request.getAttribute("srlvtname");
+        String srlvtname = (String) request.getAttribute("srlvtname");
         System.out.println("--->>>>>> ADD ");
         try {
             Object o = null;
@@ -332,8 +328,7 @@ public class ServletTool {
                         aob.notifyObservers("add");
                     }
                     redir(request, srlvtname + "/recherche", "AJOUT effectué : ", Boolean.FALSE);
-                }
-                else{ // Si le formulaire n'est pas valide
+                } else { // Si le formulaire n'est pas valide
                     System.out.println("Servlet : pas valid ");
                 }
             }
@@ -360,8 +355,6 @@ public class ServletTool {
                 aob.enregistrerAupresdesService();
                 aob.forceChangeStatut();
                 aob.notifyObservers("rem");
-
-
             }
             redir(request, srlvtname + "/recherche", "Suppression éffectué ! : ", Boolean.FALSE);
 

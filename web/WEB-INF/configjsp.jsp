@@ -11,10 +11,13 @@ Author     : clem-->
 <div id="header-wrapper">
     <div id="header">
         <div id="logo">
-            <h1>Administration des <span>Flux</span></h1></div></div>
+            <!--<h1>Administration des <span>Flux</span></h1></div></div>-->
+            <h1>Administration du<span> serveur</span></h1>
 
 
-</div>
+        </div></div></div>
+
+
 <div id="sidebar">
     <p><a href="${rootpath}config">générale</a></p>
     <p><a href="${rootpath}ComportementCollecte">Gérer les compotement </a></p>
@@ -22,26 +25,23 @@ Author     : clem-->
     <p><a href="${rootpath}user">Gérer les utilisateurs </a></p>
     <p><a href="${rootpath}slave">Gérer les serveurs esclave</a></p>
     <c:if test="${!master}"><p><a href="${rootpath}config/importflux">Obtenir flux du serveur maitre</a></p></c:if>
-    <c:if test="${master}"><p><a href="${rootpath}config/importitem">Récupérer les données des serveurs esclaces<a></p></c:if>
+    <c:if test="${master}"><p><a href="${rootpath}config/importitem">Récupérer les données des serveurs esclaces</a></p></c:if>
                     </div> 
+
                     <div id="content">
                         <div class="post">
-
-                            <h1>Administration du serveur</h1>
-                            <p></p>
 
                         <c:choose >
                             <c:when test="${not empty redirmap}">
                                 <c:import url="/WEB-INF/redirJspJavascriptPart.jsp" />
                             </c:when>
+
+
                             <c:when test="${empty redirmap}">
-
-                                ${form.resultat}
-                   
-
                                 <c:choose>
                                     <c:when test="${action=='mod'}">
-                                        MOD
+
+                                        <p>La majorité des paramètre de configuration de l'aggrégateur doivent être configuré à l'aide de fichiers systèmes. Voir la doc administrateur</p>
                                         <form method="post" action="${rootpath}config/${action}" id="beanForm">
                                             <fieldset>
                                                 <legend>Paramètres du serveur:</legend>
@@ -91,33 +91,33 @@ Author     : clem-->
 
 
                                                     // Cette fonction est executé lors du click sur la checkbox permettant de définir le serveur comme master
-//                                                var serveurSlave = [
+                                                    //                                                var serveurSlave = [
                                             <%--<c:forEach items="${conf.serveurSlave}" var="serv">--%>
-//                                                {
-//                                                login: '${serv.login}',
-//                                                pass: '${serv.pass}',
-//                                                host: '${serv.servHost}',
-//                                                urlServletRecup: '${serv.url}',
-//                                                },
+                                                //                                                {
+                                                //                                                login: '${serv.login}',
+                                                //                                                pass: '${serv.pass}',
+                                                //                                                host: '${serv.servHost}',
+                                                //                                                urlServletRecup: '${serv.url}',
+                                                //                                                },
                                             <%--</c:forEach>--%>
-//                                                ];
+                                                //                                                ];
                                                 function masterSelect() {
                                                     if ($('#master').prop('checked')) {
                                                         $('#divSlave').empty();
 
 
 
-//                                            $('#divSlave').append('<button type="button" onclick="addSlave()">ajouter des serveurs esclaves</button>');
+                                                        //                                            $('#divSlave').append('<button type="button" onclick="addSlave()">ajouter des serveurs esclaves</button>');
 
-//                                            for (i = 0; i < serveurSlave.length; i++) {
-//                                            s = serveurSlave[i];
+                                                        //                                            for (i = 0; i < serveurSlave.length; i++) {
+                                                        //                                            s = serveurSlave[i];
 
-//                                            $('#divSlave').append('<div id="slave' + i + '"><label title="ip ou le dns du serveur a joindre">host :</label><input name="hostslave" value="' + s['host'] + '"/> \n\
-//                                            <label>login :</label><input type="text" name="loginSlave" value="' + s['login'] + '" /> \n\
-//                                            <label>pass : </label><input type="text" name="passSlave" value="' + s['pass'] + '" />\n\
-//                                            <label title="exemple : http://172.17.200.197:8080/RSSAgregate">Url application  : </label><input type="text" name="urlSlave" value="' + s['urlServletRecup'] + '"/>\n\
-//                                            <button value="' + i + '" type="button" onclick="remSlave(this)">Supprimer</button></div>');
-//                                            }
+                                                        //                                            $('#divSlave').append('<div id="slave' + i + '"><label title="ip ou le dns du serveur a joindre">host :</label><input name="hostslave" value="' + s['host'] + '"/> \n\
+                                                        //                                            <label>login :</label><input type="text" name="loginSlave" value="' + s['login'] + '" /> \n\
+                                                        //                                            <label>pass : </label><input type="text" name="passSlave" value="' + s['pass'] + '" />\n\
+                                                        //                                            <label title="exemple : http://172.17.200.197:8080/RSSAgregate">Url application  : </label><input type="text" name="urlSlave" value="' + s['urlServletRecup'] + '"/>\n\
+                                                        //                                            <button value="' + i + '" type="button" onclick="remSlave(this)">Supprimer</button></div>');
+                                                        //                                            }
                                                     }
                                                     else {
                                                         $('#divSlave').empty();
@@ -128,20 +128,20 @@ Author     : clem-->
 
 
                                                 //Fonction utilisé pour ajouter un serveur esclave dans la page
-//                                            function addSlave() {
-//                                            nbenfants = $('#divSlave div').length;
-//                                            $('#divSlave').append('<div id="slave' + nbenfants + '"><label>host :</label><input name="hostslave" value=""/> \n\
-//                                            <label>login :</label><input type="text" name="loginSlave" value="" /> \n\
-//                                            <label>pass : </label><input type="text" name="passSlave" value="" />\n\
-//                                            <label>Url Recupération : </label><input type="text" name="urlSlave" value=""/>\n\
-//                                            <button value="' + nbenfants + '" type="button" onclick="remSlave(this)">Supprimer</button></div>');
-//                                            }
+                                                //                                            function addSlave() {
+                                                //                                            nbenfants = $('#divSlave div').length;
+                                                //                                            $('#divSlave').append('<div id="slave' + nbenfants + '"><label>host :</label><input name="hostslave" value=""/> \n\
+                                                //                                            <label>login :</label><input type="text" name="loginSlave" value="" /> \n\
+                                                //                                            <label>pass : </label><input type="text" name="passSlave" value="" />\n\
+                                                //                                            <label>Url Recupération : </label><input type="text" name="urlSlave" value=""/>\n\
+                                                //                                            <button value="' + nbenfants + '" type="button" onclick="remSlave(this)">Supprimer</button></div>');
+                                                //                                            }
                                                 //Fonction utilisé pour supprimer un serveur esclave dans la page
 
-//                                            function remSlave(bt) {
-//                                            divname = '#slave' + bt.value;
-//                                            $(divname).remove()();
-//                                            }
+                                                //                                            function remSlave(bt) {
+                                                //                                            divname = '#slave' + bt.value;
+                                                //                                            $(divname).remove()();
+                                                //                                            }
 
                                         </script>
                                     </c:when>
@@ -186,7 +186,7 @@ Author     : clem-->
                                         <p><strong>Maitre : </strong><c:if test="${conf.master==true}">OUI</c:if><c:if test="${conf.master==false}">NON</c:if></p>
 
                                     </c:when>
- 
+
 
                                 </c:choose>
 

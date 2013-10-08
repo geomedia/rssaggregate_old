@@ -147,8 +147,6 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
 //    public void setLastUpdate(Long lastUpdate) {
 //        this.lastUpdate = lastUpdate;
 //    }
-    
-    
     @Version
     private Timestamp dateUpdate;
 
@@ -159,9 +157,6 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
     public void setDateUpdate(Timestamp dateUpdate) {
         this.dateUpdate = dateUpdate;
     }
-    
-    
-    
 
     /**
      * Le médiator récolte les item les parse et les dédoublonne.
@@ -333,17 +328,17 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
 
     /**
      * Retourne un objet mediator par default. Il permet de répondre à 95% des flux en se basant sur le parse par defaut
-     * de l'API Rome, le connecteur standart....
+     * de l'API Rome, le connecteur standart.... Cette methode n'est plus maintenue. Déterminer le comportement par
+     * défault par du code compilé et non changeable est mal, juste bon pour faire des test!
      */
+    @Deprecated
     public static MediatorCollecteAction getDefaultCollectAction() {
         MediatorCollecteAction collecteAction = new MediatorCollecteAction();
 
         collecteAction.setDefaut(false);
         collecteAction.periodiciteCollecte = 3600;
-
         collecteAction.requesteur = Requester.getDefaulfInstance();
         collecteAction.parseur = RomeParse.getDefaultInstance();
-
 
         collecteAction.dedoubloneur = new Dedoubloneur();
         collecteAction.dedoubloneur.setDeboubTitle(Boolean.TRUE);
@@ -482,9 +477,6 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
     public void setListeFlux(List<Flux> listeFlux) {
         this.listeFlux = listeFlux;
     }
-    
-    
-     
 
     @Override
     public String toString() {

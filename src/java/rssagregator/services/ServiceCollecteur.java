@@ -22,6 +22,7 @@ import javax.xml.ws.http.HTTPException;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import rssagregator.beans.Flux;
+import rssagregator.beans.exception.CollecteUnactiveFlux;
 import rssagregator.beans.exception.UnIncidableException;
 import rssagregator.beans.incident.AnomalieCollecte;
 import rssagregator.beans.incident.CollecteIncident;
@@ -542,7 +543,10 @@ public class ServiceCollecteur extends AbstrService {
                         si.setMessageEreur("ParsingFeedException : Impossible de parser le flux XML.");
                     } else if (exception instanceof FeedException) {
                         si.setMessageEreur("FeedException : Impossible de parser le flux XML.");
-                    } else if (exception instanceof Exception) {
+                    } else if(exception instanceof CollecteUnactiveFlux){
+                        logger.info("Tentative de collecte d'un flux innactif, ce n'est surement pas grave");
+                    }
+                    else if (exception instanceof Exception) {
                         si.setMessageEreur("ERREUR inconnue : " + exception.toString());
                     }
                     cast.setIncident(si);

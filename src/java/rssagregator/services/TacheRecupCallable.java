@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Observer;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
+import rssagregator.beans.exception.CollecteUnactiveFlux;
 import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.beans.incident.Incidable;
@@ -89,13 +90,15 @@ public class TacheRecupCallable extends AbstrTacheSchedule<TacheRecupCallable> i
      */
     @Override
     public TacheRecupCallable call() throws Exception {
-        System.out.println("DAns la tache");
         // On block le flux pour eviter que la tache automanique et la tache manuelle agissent en même temps.
         synchronized (this.flux) {
-            System.out.println("Dans le synchro");
+            this.exeption = null;
             // Si la tache n'a pas été annulé elle se déroule normalement.
             try {
-                System.out.println("Annule : " + annulerTache);
+                if(!flux.getActive()){
+                    throw new CollecteUnactiveFlux("Ce flux doit être activé pour être récolté"); 
+                }
+                
                 if (!annulerTache) {
                     flux.setTacheRechup(this);
                     //On crée une copie du mediator devant être employé. C'est notre façon d'être thread safe

@@ -43,13 +43,13 @@
                                 <c:if test="${action=='mod'}"><a href="${rootpath}user/rem?id=${bean.ID}">Supprimer l'utilisateur</a></c:if>
                                     <form id="beanForm" method="POST">
 
-                                        <label title="Champ utilisé à titre informatif">Nom de l'utilisateur : </label>
+                                        <label title="Champ utilisé à titre informatif">Nom de l'utilisateur<span class="requis">*</span> : </label>
                                         <input type="text" name="username" value="${bean.username}" />
                                     <span class="erreur" id="errusername"></span>
                                     <br />
 
 
-                                    <label>email : </label><input type="text" name="mail" id="mail" value="${bean.mail}"/>
+                                    <label>Email<span class="requis">*</span> : </label><input type="text" name="mail" id="mail" value="${bean.mail}"/>
                                     <span class="erreur" id="errmail"></span>
                                     <br />
 

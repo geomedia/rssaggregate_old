@@ -77,7 +77,7 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
         this.item = new ArrayList<Item>();
         this.lastEmpruntes = new LinkedHashSet<String>();
 
-        this.mediatorFlux = MediatorCollecteAction.getDefaultCollectAction();
+//        this.mediatorFlux = MediatorCollecteAction.getDefaultCollectAction();
         this.incidentsLie = new ArrayList<CollecteIncident>();
         this.periodeCaptations = new ArrayList<FluxPeriodeCaptation>();
 
@@ -112,7 +112,6 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
      */
     @Column(name = "url", length = 2000, nullable = false, unique = true)
     private String url;
-
     /**
      * Permet de déterminer si le flux doit être collecté ou non
      */
@@ -140,20 +139,17 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
         this.active = active;
         propertyChangeSupport.firePropertyChange(PROP_ACTIVE, oldActive, active);
     }
-    
     /**
      * L'url de la rubrique du flux, il s'agit de la page HTML d'entrée de la rubrique. Cette adresse peut être utilisé
      * pour faire de l'auto discovery.
      */
     @Column(name = "htmlUrl", length = 2000, nullable = true)
     private String htmlUrl;
-   
-    
     /**
      * Les dernières empruntes md5 des items du flux. On les garde en mémoire pour faire du dédoublonage sans effectuer
      * de requetes dans la base de données. On ne persiste pas dans la base de donnée (TRANSISIENT NORMAL)
      */
-     @Transient
+    @Transient
     private transient Set<String> lastEmpruntes;
     /**
      * L'objet Callable qui permet d'être lancé pour effectuer la récupération du flux. Cet objet doit être ajouté dans
@@ -854,10 +850,6 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
         } else {
             return duration;
         }
-
-
-//        return null;
-
     }
 
     /**
@@ -874,6 +866,9 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
             //============================================================================
             //..................GESTION DE L'ACTIVATION ET DESACTIVATION DU FLUX
             //============================================================================
+            /***
+             * L'activation et la désactivation des flux entraine la création de nouvelles période de captation.
+             */
             if (evt.getPropertyName().equals(PROP_ACTIVE)) {
                 Boolean oldValue = (Boolean) evt.getOldValue();
                 Boolean newValue = (Boolean) evt.getNewValue();
@@ -918,25 +913,36 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
                         }
                     }
                 }
+
             } //============================================================================
             //.................GESTION DES CHANGEMENTS DE COMPORTEMENT
             //============================================================================
+            /***
+             * Lors de changement de comportement, il est nécessaire de fermer et ouvrir des période de captation. C'est le rôle de ce bloc. 
+             */
             else if (evt.getPropertyName().equals(PROP_MEDIATORFLUX)) {
                 MediatorCollecteAction oldValue = (MediatorCollecteAction) evt.getOldValue();
                 MediatorCollecteAction newValue = (MediatorCollecteAction) evt.getNewValue();
 
+                //Si il s'agit d'(un changement de comportement
                 if (oldValue != null && newValue != null) {
                     if (!oldValue.equals(newValue)) {
-                        // Il est nécessaire d'ouvrir une nouvelle période de captation
-                        flux.setActive(false);
-                        flux.setActive(true);
-
-                        //On place l'ancienne la nouvelle valeur de période de captation dans la dernière période de captation.
-                        int lastIndex = 0;
-                        if (flux.periodeCaptations.size() > 0) {
-                            lastIndex = flux.periodeCaptations.size() - 1;
+                        // Il est nécessaire d'ouvrir une nouvelle période de captation, si le flux est actif
+                        if (flux.active) {
+                            flux.setActive(false);
+                            flux.setActive(true);
                         }
-                        flux.periodeCaptations.get(lastIndex).setComportementDurantLaPeriode(newValue);
+
+                        //On place la nouvelle valeur de période de captation dans la dernière période de captation (si période de captation il y a).
+                        if(!flux.periodeCaptations.isEmpty()){
+                            flux.periodeCaptations.get(flux.periodeCaptations.size()-1).setComportementDurantLaPeriode(newValue);
+                        }
+                    }
+                } //Si auparavant il n'y avait pas de comportement (exemple création nouvelle d'un flux actif)
+                else if (oldValue == null && newValue != null) {
+//                    int lastIndex = 0;
+                    if (!flux.periodeCaptations.isEmpty()) {
+                        flux.periodeCaptations.get(flux.periodeCaptations.size() - 1).setComportementDurantLaPeriode(newValue);
                     }
                 }
             }

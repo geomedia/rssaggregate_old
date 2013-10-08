@@ -7,6 +7,7 @@ package rssagregator.beans.form;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.persistence.NonUniqueResultException;
 import javax.servlet.http.HttpServletRequest;
 import rssagregator.beans.Journal;
 import rssagregator.dao.DAOFactory;
@@ -29,6 +30,8 @@ public class JournalForm extends AbstrForm {
     private String fuseauHorraire;
     private String information;
     //--------------------------------------
+    
+        org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(JournalForm.class);
 
     public JournalForm() {
         super();
@@ -44,6 +47,8 @@ public class JournalForm extends AbstrForm {
                 objEntre = type.newInstance();
 //                objEntre =  type.newInstance();
             } catch (InstantiationException ex) {
+               
+                
                 Logger.getLogger(JournalForm.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IllegalAccessException ex) {
                 Logger.getLogger(JournalForm.class.getName()).log(Level.SEVERE, null, ex);
@@ -88,7 +93,17 @@ public class JournalForm extends AbstrForm {
             DaoJournal dao = DAOFactory.getInstance().getDaoJournal();
 
             if (action.equals("add")) {
-                Journal j = dao.findWithName(nom);
+                Journal j = null;
+                try {
+                    j = dao.findWithName(nom);
+                } catch (NonUniqueResultException e) {
+                     logger.error("Plusieurs journaux portent le même nom. Ceci ne devrait jamais arriver !");
+                     j = new Journal(); // C'est un problème on va instancier un journal pour bloquer l'ajout
+                }
+                catch(Exception e){
+                    logger.error("Problème lors de l'usage de la dao : " + e);
+                }
+                
                 if (j != null) {
                     erreurs.put("nom", new String[]{"Il existe déjà un journal portant ce nom dans la base de données", "Il existe déjà un journal portant ce nom dans la base de données"});
                 }
