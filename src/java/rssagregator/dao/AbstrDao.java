@@ -4,6 +4,7 @@
  */
 package rssagregator.dao;
 
+import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.logging.Level;
@@ -97,7 +98,7 @@ public abstract class AbstrDao {
                 tr.commit();
                 //En cas d'échec de la synchronisation, on rollback la modification.
             } catch (Exception e) {
-                logger.error("erreur lors de la modification du beans : " + e +". La dao la modification de l'enregistrement dans la base de données.");
+                logger.error("erreur lors de la modification d'un beans : " + e +"\n trace : " + e.getStackTrace());
                 tr.rollback();
                 throw e;
             }
@@ -192,4 +193,6 @@ public abstract class AbstrDao {
     public void setEm(EntityManager em) {
         this.em = em;
     }
+    
+
 }

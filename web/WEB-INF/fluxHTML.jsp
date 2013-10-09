@@ -181,7 +181,7 @@
 
                                     <br />
                                     <label for="url" title="Adresse a laquelle on trouve le XML du flux">URL du flux<span class="requis">*</span></label>
-                                    <input type="text" id="url" name="url" value="${bean.url}" size="20" maxlength="60" />
+                                    <input type="text" id="url" name="url" value="${bean.url}" size="20" maxlength="2000" />
                                 <span class="erreur" id="errurl"></span><br />
                          
 

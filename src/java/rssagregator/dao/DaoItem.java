@@ -44,7 +44,8 @@ public class DaoItem extends AbstrDao {
     Date date1; // Borne de date début
     Date date2; // Borne de date début
     String hashNotIn; // where where hash
-    /***
+    /**
+     * *
      * Permet de limiter la recherche critériat à un syncstatut
      */
     private Integer synchStatut;
@@ -121,12 +122,12 @@ public class DaoItem extends AbstrDao {
         if (date1 != null && date2 != null) {
             listWhere.add(cb.and(cb.between(root.<Date>get("dateRecup"), date1, date2)));
         }
-        
+
         //-------------------------SYNCSTATUT---------------------------------
-        if(synchStatut!=null){
+        if (synchStatut != null) {
             listWhere.add(cb.and(cb.equal(root.get("syncStatut"), synchStatut)));
         }
-        
+
         // -----------------------Le ORDER BY---------------------------------
         if (order_by != null) {
             if (order_desc != null && order_desc) {
@@ -176,6 +177,8 @@ public class DaoItem extends AbstrDao {
     }
 
     public static void main(String[] args) {
+
+
 
         DaoItem dao = DAOFactory.getInstance().getDaoItem();
 

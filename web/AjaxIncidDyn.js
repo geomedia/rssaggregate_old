@@ -5,8 +5,10 @@
 
 //Lors du click sur un bouton de la pagination il faut modifier le paramettre du champ caché en fonction du bouton cliqué, ensuite, on lance la requete
 function paginsubmit(bt) {
+      
     // On supprimer la liste 1 des journaux
     $('#firstResult').val(bt.value);
+    
     $('#afin').click();
 }
 
@@ -23,7 +25,6 @@ $(document).ready(function() {
 
 //    truc2();
     if ($requestOnStart === 'true') {
-        alert('true');
         clickAfin();
     }
     else {
@@ -66,7 +67,6 @@ $(document).ready(function() {
 //alert($(this).attr('value'));
         if($(this).attr('value')==='CollecteIncident'){
             $('#limiterFlux').show();
-            alert('collecte');
         }
         else{
             $('#limiterFlux').hide();

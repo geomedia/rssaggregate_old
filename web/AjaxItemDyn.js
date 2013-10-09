@@ -66,14 +66,35 @@ $(document).ready(function() {
                     var j;
                     // réécriture du 
                     for (i = 0; i < json.length; i++) {
-                        $resudiv.append('<li><a href="item/read?id=' + json[i]['id'] + '">' + json[i]['titre'].trim() + '</a>');
+                        var $str="";
+                        $str+='<li class="item"><a href="item/read?id=' + json[i]['id'] + '">' + json[i]['titre'].trim() + '</a>';
+//                        $resudiv.append('<li class="item"><a href="item/read?id=' + json[i]['id'] + '">' + json[i]['titre'].trim() + '</a>');
                         var $tabflux = json[i]['flux'];
                         for (j = 0; j < $tabflux.length; j++) {
-                            $resudiv.append($tabflux[j] + ' ; ');
+                            $str+=$tabflux[j] + ' ; ';
+//                            $resudiv.append($tabflux[j] + ' ; ');
                         }
-                        $resudiv.append('<p>' + json[i]['desc'] + '</p>')
-                        $resudiv.append('</li>');
+                        
+//                        $cont = json[i]['desc'];
+//                        
+//                        alert(json[i]['desc']);
+
+                        var p = '<p>'+json[i]['desc']+'<p>';
+                        var $p = $(p).text();
+                        $str+='<p>'+$p+'</p>';
+                        
+                        $str+='</li>';
+//                        alert((json[i]['desc']));
+//                        $resudiv.append('<p>' + json[i]['desc'] + '</p>');
+//                        $resudiv.append('</li>');
+                        
+                        $resudiv.append($str);
+
                     }
+                    $('p.descP').each(function (r){
+//                        $(('p.descP')[r]).replaceWith("d");
+//                        alert($($('p.descP')[r]).text());
+                    });
 
                     // Il faut redessiner les boutton 
                     $('#btPaginDiv').empty();

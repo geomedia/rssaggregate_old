@@ -12,16 +12,17 @@ import rssagregator.beans.exception.UnIncidableException;
 import rssagregator.services.AbstrTacheSchedule;
 
 /**
- *  Permet de créer un incident
+ * Permet de créer un incident
+ *
  * @author clem
  */
 public class IncidentFactory<T extends AbstrIncident> {
 
-        protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(IncidentFactory.class);
+    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(IncidentFactory.class);
+
     /**
      * *
-     * Retourne un incident en utilisant la généricité. Les champs dateDebut
-     * message et log sont complétés.
+     * Retourne un incident en utilisant la généricité. Les champs dateDebut message et log sont complétés.
      *
      * @param typeRetourne : la class de l'incident
      * @param message : le message à destination des administrateurs
@@ -31,10 +32,6 @@ public class IncidentFactory<T extends AbstrIncident> {
     public T getIncident(Class<T> typeRetourne, String message, Throwable tw) {
         T incid = null;
 
-//        if (typeRetourne.equals(SynchroIncident.class)) {
-//            System.out.println("LA");
-//            incid = (T) new SynchroIncident();
-//        }
         try {
             incid = typeRetourne.newInstance();
         } catch (InstantiationException ex) {
@@ -43,11 +40,7 @@ public class IncidentFactory<T extends AbstrIncident> {
             Logger.getLogger(IncidentFactory.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-
-        // On configure ce qui est général à tout les incident
-        incid.setDateDebut(new Date());
-        incid.setMessageEreur(message);
-        incid.setLogErreur(tw.toString());
+        configurerIncident(incid, message, tw);
         System.out.println("C'est un incident de type  : " + incid.getClass());
 
 
@@ -58,34 +51,58 @@ public class IncidentFactory<T extends AbstrIncident> {
      * *
      * Crée un incident à partir de la tache envoyée en paramettre. Pour cela il faut que la tâche envoyé soit incidable
      *
-     * @param tache : 
+     * @param tache :
      * @param message
      */
     public T createIncidentFromTask(AbstrTacheSchedule tache, String message) throws InstantiationException, IllegalAccessException, UnIncidableException {
-        AbstrIncident incid = null;
-        
+        AbstrIncident incid;
+
         // On vérifie que la tache est incidable;
-        if(Incidable.class.isAssignableFrom(tache.getClass())){
-            
-            
-            if(tache.getExeption().getClass().equals(CollecteUnactiveFlux.class)){
+        if (Incidable.class.isAssignableFrom(tache.getClass())) {
+            if (tache.getExeption().getClass().equals(CollecteUnactiveFlux.class)) {
                 return null;
             }
-            
             logger.debug("c'est une tâche incidable");
-            
+
             Incidable cast = (Incidable) tache;
             Class c = cast.getTypeIncident();
-            
+
             Object o = c.newInstance();
             incid = (AbstrIncident) o;
-            incid.setMessageEreur(message);
-            incid.setNombreTentativeEnEchec(1);
-            incid.setDateDebut(new Date());
+            configurerIncident(incid, message, tache.getExeption());
+//            incid.setMessageEreur(message);
+//            incid.setNombreTentativeEnEchec(1);
+//            incid.setDateDebut(new Date());
             return (T) o;
+        } else {
+            throw new UnIncidableException("La tache envoyée en paramettre n'implémente pas l'interface incidable.");
+        }
+    }
+
+    /**
+     * *
+     * Cette méthode permet de gérer la configuration d'un incident. Elle est utilisée par les deux méthodes permettant
+     * d'obtenir un indident.
+     *
+     * @param incid
+     * @param message : le message qui doit être délivré.
+     * @param tw L'exception java a l'origine de l'incident
+     */
+    private static void configurerIncident(AbstrIncident incid, String message, Throwable tw) {
+        incid.setMessageEreur(message);
+        incid.setNombreTentativeEnEchec(1);
+        incid.setDateDebut(new Date());
+        
+        
+        if(incid.getClass().equals(MailIncident.class)){
+            incid.setNotificationImperative(false);
         }
         else{
-            throw new UnIncidableException("La tache envoyée en paramettre n'implémente pas l'interface incidable.");
+            incid.setNotificationImperative(true);
+        }
+        
+        if(tw != null){
+            incid.setLogErreur(tw.toString());
         }
     }
 }

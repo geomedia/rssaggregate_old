@@ -464,6 +464,17 @@ form{
     font-weight: bold;
 }
 
+.item{
+    border: #000000;
+    border-style: dotted;
+    border-width: thin;
+    margin-bottom: 1em;
+    margin-top: 1em;
+    padding: 1em;
+    border-radius: 10px;
+    
+}
+
 
 
 

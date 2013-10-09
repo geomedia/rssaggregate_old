@@ -40,10 +40,10 @@ public class AbstrIncident implements Serializable {
 
     /**
      * *
-     * Constructeur par défaut d'un incident. La variable notificationImperative est définie à false
+     * Constructeur par défaut d'un incident. IL FAUT PASSER PAR LA FACTORY {@link IncidentFactory} POUR INSTANCIER UN INCIDENT
      */
-    public AbstrIncident() {
-        this.notificationImperative = false;
+    protected AbstrIncident() {
+//        this.notificationImperative = true;
     }
     @Transient
     protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(AbstrIncident.class);
@@ -123,7 +123,7 @@ public class AbstrIncident implements Serializable {
     protected Date dateFin;
     /**
      * *
-     * Permet de forcer un incident à être notifié, même si il est déjà clos.
+     * Permet de déterminer si un incident doit ou non être notifié par la tache {@link TacheAlerteMail}
      */
     @Column(name = "notificationImperative")
     protected Boolean notificationImperative;

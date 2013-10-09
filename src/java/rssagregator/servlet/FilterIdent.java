@@ -58,14 +58,11 @@ public class FilterIdent implements Filter {
                 ok = false;
             }
         }
-
         //------------------TRATEMENT DE LA REDIRECTION
         if (ok) { // Si le passage est ok (url de libre passage ou authentification ok
-            System.out.println("Passage ok");
             chain.doFilter(request, response);
         } else { // Sinon on redirige l'utilisateur vers la page d'identification. On ajoutye un attribut url demande
-            System.out.println("DDE IDENT");
-            request.setAttribute("askurl", req.getRequestURI());
+            request.setAttribute("askurl", req.getRequestURL().append('?').append(req.getQueryString()));
             request.getRequestDispatcher("/ident").forward(request, response);
         }
     }

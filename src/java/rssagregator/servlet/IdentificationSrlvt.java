@@ -61,6 +61,7 @@ public class IdentificationSrlvt extends HttpServlet {
                     try {
                         if (u.authWithThisPass(p)) {
                             session.setAttribute("authuser", u);
+                            System.out.println("######### ASK : " + request.getParameter("askurl"));
                             ServletTool.redir(request, request.getParameter("askurl"), "Identification réussie", Boolean.FALSE);
                         } else {
                             request.setAttribute("err", "Echec de l'identification");

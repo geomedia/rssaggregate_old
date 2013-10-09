@@ -38,7 +38,12 @@ protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(Tem
         this.listIncident = listIncident;
     }
 
-    public String getCorpsMail() {
+    /***
+     * Retourne une chaine de caractère (mise en forme html) construite a partir les incidents.
+     * @return
+     * @throws Exception 
+     */
+    public String getCorpsMail() throws Exception{
         logger.debug("corps de mail debut");
         String corps = "";
         DateTimeFormatter fmt = DateTimeFormat.forPattern("dd MMMM yyyy à hh'h'mm");

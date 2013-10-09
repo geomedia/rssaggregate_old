@@ -44,7 +44,7 @@
                                 </div>
 
 
-                                <input type="hidden" id="firstResult" value="0"/> 
+                                <input type="hidden" name="firstResult" id="firstResult" value="0"/> 
 
                                 <label>Type D'incident :</label>
                                 Collecte :<input type="radio" name="type" value="CollecteIncident" checked="checked" id="type" />

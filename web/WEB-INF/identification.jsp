@@ -15,24 +15,34 @@
         <link href="/RSSAgregate/ress/style.css" type="text/css" rel="stylesheet" media="all"/>
     </head>
     <body>
-            <div id="banner">
-                <a href ="/RSSAgregate/index">
-                    <%
-                        if (DAOFactory.getInstance().getDAOConf().getConfCourante().getMaster()) {
-                            out.println("<img src=\"/RSSAgregate/ress/img/logo_mastervert.png\"/>");
-                            request.setAttribute("master", true);
-                        } else {
-                            out.println("<img src=\"/RSSAgregate/ress/img/logo_masterrouge.png\"/>");
-                            request.setAttribute("master", false);
-                        }
+        <div id="banner">
+            <a href ="/RSSAgregate/index">
+                <%
+                    if (DAOFactory.getInstance().getDAOConf().getConfCourante().getMaster()) {
+                        out.println("<img src=\"/RSSAgregate/ress/img/logo_mastervert.png\"/>");
+                        request.setAttribute("master", true);
+                    } else {
+                        out.println("<img src=\"/RSSAgregate/ress/img/logo_masterrouge.png\"/>");
+                        request.setAttribute("master", false);
+                    }
 
-                    %>
-                </a>
-            </div>
-                    <div class="post">
+                %>
+            </a>
+        </div>
+        <div class="post">
 
             <c:choose>
                 <c:when test="${not empty redirmap}">
+
+                    <p>youpi ${askurl}</p>
+                    <p>lala 
+                    ${rootpath}${redirmap['url']}</p>
+                    <script type="text/JavaScript">
+                        <!--
+                        setTimeout("location.href = '${rootpath}${redirmap['url']}';",3000);
+                        -->
+                    </script>
+
                     <c:import url="/WEB-INF/redirJspJavascriptPart.jsp" />
                 </c:when>
                 <c:when test="${empty redirmap}">
@@ -42,7 +52,7 @@
                     <p>
                         Pour accéder à la page 
                     </p>
-                   
+
                     <form method="POST" action="/RSSAgregate/ident/login">
                         <span class="erreur">${err}</span>
                         <label>Email : </label>
@@ -54,7 +64,7 @@
                     </form>
                 </c:when>
             </c:choose>
-                    </div>
-       
+        </div>
+
     </body>
 </html>

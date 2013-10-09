@@ -21,6 +21,7 @@ import javax.xml.ws.http.HTTPException;
 import rssagregator.beans.Flux;
 import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.CollecteIncident;
+import rssagregator.beans.incident.IncidentFactory;
 import rssagregator.beans.incident.MailIncident;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DAOIncident;
@@ -162,7 +163,10 @@ public class ServiceGestionIncident {
     
     public static AbstrIncident creeIncidentServer(String msg, Object objEnErreur, Throwable e) {
 
-        MailIncident incident = new MailIncident();
+        IncidentFactory<MailIncident> facto = new IncidentFactory<MailIncident>();
+        
+        MailIncident incident = facto.getIncident(MailIncident.class, msg, e);
+//        IncidentFactorynew MailIncident();
 //        incident.setEntiteErreur(objEnErreur.getClass());
         incident.setMessageEreur(msg);
         incident.setLogErreur(e.getClass().getSimpleName() + " : " + e.toString());

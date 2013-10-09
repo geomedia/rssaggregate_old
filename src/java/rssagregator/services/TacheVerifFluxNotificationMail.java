@@ -6,8 +6,6 @@ package rssagregator.services;
 
 import java.util.List;
 import java.util.Observer;
-import javax.mail.internet.InternetAddress;
-import rssagregator.beans.UserAccount;
 import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DAOIncident;
@@ -23,7 +21,7 @@ public class TacheVerifFluxNotificationMail extends AbstrTacheSchedule<TacheVeri
 
     private String corps;
     private String objet;
-    private InternetAddress[] address;
+//    private InternetAddress[] address;
     
     
     public TacheVerifFluxNotificationMail(Observer s) {
@@ -51,6 +49,8 @@ public class TacheVerifFluxNotificationMail extends AbstrTacheSchedule<TacheVeri
         try {
                      // On récupère la liste des Incidents 
         DAOIncident dao = DAOFactory.getInstance().getDAOIncident();
+        
+        dao.setClos(false);
         List<CollecteIncident> incid = dao.findAllOpenIncident();
 
         //Préparation du corps du mail
@@ -59,20 +59,16 @@ public class TacheVerifFluxNotificationMail extends AbstrTacheSchedule<TacheVeri
         corps = template.getCorpsMail();
 
         // Construction de la liste des destinataire.
-        List<UserAccount> listuser = DAOFactory.getInstance().getDAOUser().findUserANotifier();
-        address = new InternetAddress[listuser.size()];
-        for (int i = 0; i < listuser.size(); i++) {
-            UserAccount userAccount = listuser.get(i);
-            address[i] = new InternetAddress(userAccount.getMail());
-            System.out.println("destinataire : "+userAccount.getMail());
-        }
+//        List<UserAccount> listuser = DAOFactory.getInstance().getDAOUser().findUserANotifier();
+//        address = new InternetAddress[listuser.size()];
+//        for (int i = 0; i < listuser.size(); i++) {
+//            UserAccount userAccount = listuser.get(i);
+//            address[i] = new InternetAddress(userAccount.getMail());
+//            System.out.println("destinataire : "+userAccount.getMail());
+//        }
         
         objet = "Compte rendu des flux en erreur";
-//        ServiceMailNotifier.getInstance().envoyerMail(address, "Compte rendu des flux en erreur", corps);
 
-        // Le mail doit réinscrire auprès du service d'envoie des email 
-//        ServiceMailNotifier.getInstance().taskEnd(this);
-//        DaemonCentral.getInstance().executorServiceAdministratif.submit(this);
         return this;
             
         } catch (Exception e) {
@@ -101,13 +97,13 @@ public class TacheVerifFluxNotificationMail extends AbstrTacheSchedule<TacheVeri
         this.objet = objet;
     }
 
-    public InternetAddress[] getAddress() {
-        return address;
-    }
-
-    public void setAddress(InternetAddress[] address) {
-        this.address = address;
-    }
+//    public InternetAddress[] getAddress() {
+//        return address;
+//    }
+//
+//    public void setAddress(InternetAddress[] address) {
+//        this.address = address;
+//    }
 
 
     

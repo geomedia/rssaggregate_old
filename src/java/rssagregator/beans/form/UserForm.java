@@ -12,8 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import rssagregator.beans.UserAccount;
 
 /**
- * Class permettant de valider et binder les données issues de requêtes dans un
- * bean <strong>UserAccount</strong>
+ * Class permettant de valider et binder les données issues de requêtes dans un bean <strong>UserAccount</strong>
  *
  * @author clem
  */
@@ -47,12 +46,15 @@ public class UserForm extends AbstrForm {
             u.setMail(mail);
 
             //PASSWORD : Il est nécessaire de le crypter avant de l'enregistrer
-            try {
-                u.setEncPassword(encPassword);
-            } catch (NoSuchAlgorithmException ex) {
-                logger.error("Erreur lors du chiffrement du mot de pass.");
-                Logger.getLogger(UserForm.class.getName()).log(Level.SEVERE, null, ex);
+            if (encPassword != null) {
+                try {
+                    u.setEncPassword(encPassword);
+                } catch (NoSuchAlgorithmException ex) {
+                    logger.error("Erreur lors du chiffrement du mot de pass.");
+                    Logger.getLogger(UserForm.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
+
 
             u.setAdminstatut(adminstatut);
             u.setUsername(username);

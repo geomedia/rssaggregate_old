@@ -19,6 +19,12 @@ import rssagregator.services.TacheEnvoyerMail;
 @Entity(name = "i_mailincident")
 public class MailIncident extends AbstrIncident implements Serializable {
 
+    protected MailIncident() {
+    }
+
+    
+    
+    
     /**
      * *
      * Le corps du message qui n'a pu être envoyé

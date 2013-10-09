@@ -41,6 +41,7 @@ public class IncidentsSrvl extends HttpServlet {
     public static final String ATT_OBJ = "bean";
     public String VUE = "/WEB-INF/incidentHTML.jsp";
     public static final String ATT_SERV_NAME = "incidents";
+        protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(IncidentsSrvl.class);
 
     /**
      * Processes requests for both HTTP

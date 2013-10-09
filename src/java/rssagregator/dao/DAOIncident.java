@@ -35,19 +35,18 @@ public class DAOIncident<T> extends AbstrDao {
     //        private static final String REQ_FIND = "SELECT i FROM incidentflux i LEFT JOIN i.fluxLie flux WHERE id=:id";
 //    public DAOIncident() {
 //    }
-
 //JOIN item.listFlux flux
     protected DAOIncident(DAOFactory dAOFactory) {
-        
+
 //       this.classAssocie = cc; 
-       
-       
+
+
 //        this.classAssocie = CollecteIncident.class;
         this.dAOFactory = dAOFactory;
         em = dAOFactory.getEntityManager();
-        nullLastNotification = false;
-        criteriaNotificationImperative = false;
-        clos = false;
+//        nullLastNotification = false;
+//        criteriaNotificationImperative = false;
+//        clos = false;
         criteriaFluxLie = new ArrayList<Flux>();
     }
 
@@ -89,8 +88,8 @@ public class DAOIncident<T> extends AbstrDao {
             listWhere.add(cb.and(cb.equal(root.get("notificationImperative"), true)));
             logger.debug("DAO Notification imperative");
         }
-        
-        if(criteriaFluxLie!= null && !criteriaFluxLie.isEmpty()){
+
+        if (criteriaFluxLie != null && !criteriaFluxLie.isEmpty()) {
             Join joinFlux = root.join("fluxLie");
             listWhere.add(joinFlux.in(criteriaFluxLie));
         }
@@ -118,9 +117,7 @@ public class DAOIncident<T> extends AbstrDao {
         for (int j = 0; j < l.size(); j++) {
             Object object = l.get(j);
             System.out.println(object);
-
         }
-
         return l;
     }
 
@@ -141,8 +138,7 @@ public class DAOIncident<T> extends AbstrDao {
 
     /**
      * *
-     * Ne prend pas en compte la généricité. Ne permet que de trouver des
-     * incident de flux
+     * Ne prend pas en compte la généricité. Ne permet que de trouver des incident de flux
      *
      * @return
      */
@@ -209,10 +205,12 @@ public class DAOIncident<T> extends AbstrDao {
         List<Predicate> listWhere = new ArrayList<Predicate>();
 
 
-        if (clos) {
-            listWhere.add(cb.isNotNull(root.get("dateFin")));
-        } else {
-            listWhere.add(cb.isNull(root.get("dateFin")));
+        if (clos != null) {
+            if (clos) {
+                listWhere.add(cb.isNotNull(root.get("dateFin")));
+            } else {
+                listWhere.add(cb.isNull(root.get("dateFin")));
+            }
         }
 
 
@@ -313,6 +311,4 @@ public class DAOIncident<T> extends AbstrDao {
     public void setCriteriaFluxLie(List<Flux> criteriaFluxLie) {
         this.criteriaFluxLie = criteriaFluxLie;
     }
-    
-    
 }

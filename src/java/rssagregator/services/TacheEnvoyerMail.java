@@ -66,7 +66,7 @@ public class TacheEnvoyerMail extends AbstrTacheSchedule<TacheEnvoyerMail> imple
             Transport.send(message);
             return this;
         } catch (Exception e) {
-            logger.error(e);
+            logger.error("Echec de la tâche envoie de mail", e);
             this.exeption = e;
             return this;
         } finally {

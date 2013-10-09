@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Observable;
 import java.util.Properties;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,8 +46,7 @@ public class ServiceMailNotifier extends AbstrService {
 
     /**
      * *
-     * Constructeur privée. Configure l'objet avec le contenu du fichier
-     * properties du répertoire de configuration
+     * Constructeur privée. Configure l'objet avec le contenu du fichier properties du répertoire de configuration
      */
     private ServiceMailNotifier() {
         super();
@@ -59,8 +59,6 @@ public class ServiceMailNotifier extends AbstrService {
             Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
-    
 
     public static ServiceMailNotifier getInstance() {
         if (instance == null) {
@@ -80,8 +78,7 @@ public class ServiceMailNotifier extends AbstrService {
 
             //=====================>VERIFICATION QUOTIDIENNE<================================
             /**
-             * Tous les jours, à 8h, cette tâche est lancée pour vérifier nofier
-             * ler erreurs en cours.
+             * Tous les jours, à 8h, cette tâche est lancée pour vérifier nofier ler erreurs en cours.
              */
             if (o.getClass().equals(TacheVerifFluxNotificationMail.class)) {
                 TacheVerifFluxNotificationMail tvfnm = (TacheVerifFluxNotificationMail) o;
@@ -89,8 +86,13 @@ public class ServiceMailNotifier extends AbstrService {
                     TacheEnvoyerMail envoyerMail = new TacheEnvoyerMail(this);
                     envoyerMail.setContent(tvfnm.getCorps());
                     envoyerMail.setPropertiesMail(propertiesMail);
-                    envoyerMail.setToMailAdresses(tvfnm.getAddress());
-                    executorService.submit(envoyerMail);
+                    try {
+                        envoyerMail.setToMailAdresses(returnMailAdmin());
+                        executorService.submit(envoyerMail);
+                    } catch (AddressException ex) {
+                        logger.error("Erreur lors de la récupération des mail a notifier", ex);
+                        Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
                 if (tvfnm.getSchedule()) {
                     // Les mail doivent partir à 8h, pour que les admins aient ca a leur arrivée au boulot. On calcul le temps
@@ -102,9 +104,8 @@ public class ServiceMailNotifier extends AbstrService {
 
             } //=========================>ENVOYER UN MAIL<===================================
             /**
-             * Gestion du retour de la tache permettant d'envoyer un mail. On
-             * tente par trois fois de le réenvoyer. Si c'est toujours un échec,
-             * on créer un incident dans la base de données
+             * Gestion du retour de la tache permettant d'envoyer un mail. On tente par trois fois de le réenvoyer. Si
+             * c'est toujours un échec, on créer un incident dans la base de données
              */
             else if (o.getClass().equals(TacheEnvoyerMail.class)) {
 
@@ -119,10 +120,9 @@ public class ServiceMailNotifier extends AbstrService {
                 }
             } //=======================>ALERT MAIL (30minutes)<==============================
             /**
-             * Gestion du retour de la tache lancée toutes les 30 minutes afin
-             * d'envoyer un mail alertant les administrateurs des derniers
-             * incidents. En fonction de ce retour, on va envoyer un mail. A la
-             * fin on modifie la date de dernière notification des incidents.
+             * Gestion du retour de la tache lancée toutes les 30 minutes afin d'envoyer un mail alertant les
+             * administrateurs des derniers incidents. En fonction de ce retour, on va envoyer un mail. A la fin on
+             * modifie la date de dernière notification des incidents.
              */
             else if (o.getClass().equals(TacheAlerteMail.class)) {
                 TacheAlerteMail cast = (TacheAlerteMail) o;
@@ -137,12 +137,12 @@ public class ServiceMailNotifier extends AbstrService {
                         mailSendTask.setPropertiesMail(propertiesMail);
                         mailSendTask.setToMailAdresses(returnMailAdmin());
                         mailSendTask.setSubject("ALERTE : de nouveaux incidents se sont produits");
-                        logger.debug("mail avant submit");
-//                        ExecutorService exe = Executors.newCachedThreadPool();
                         executorService.submit(mailSendTask);
-//                        Future<TacheEnvoyerMail> futurmail = executorService.submit(mailSendTask);
-//                        futurmail.get();
-                        logger.debug("mail après submit");
+                        Future<TacheEnvoyerMail> futurmail = executorService.submit(mailSendTask);
+              
+               
+                        futurmail.get(20, TimeUnit.SECONDS); // On laisse 20 seconde à la tache pour s'effectuer
+                        
                         List<AbstrIncident> listIncid = cast.getIncidents();
                         for (int i = 0; i < listIncid.size(); i++) {
                             AbstrIncident abstrIncident = listIncid.get(i);
@@ -154,21 +154,15 @@ public class ServiceMailNotifier extends AbstrService {
                                 try {
                                     dao.modifier(abstrIncident);
                                 } catch (Exception ex) {
-                                    logger.error(ex);
-                                    Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
+                                    logger.error("erreur lors de la modification de l'incident", ex);
                                 }
                             }
                         }
-                    } //                    catch (InterruptedException ex) {
-                    //                        logger.error(ex);
-                    //                        Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
-                    //                    } catch (ExecutionException ex) {
-                    //                         logger.error(ex);
-                    //                        Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
-                    //                    } 
+                    } 
                     catch (AddressException ex) {
-                        logger.error(ex);
-                        Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
+                        logger.error("Erreur lors de l'envoie du mail AddressException", ex);
+                    } catch (Exception ex) {
+                        logger.error("erreur lors de la gestion du retour de la tache AlertMail", ex);
                     }
                 }
                 if (cast.getSchedule()) {
@@ -228,8 +222,7 @@ public class ServiceMailNotifier extends AbstrService {
 ////        Transport.send(message);
 //    }
     /**
-     * Permet à la tache qutotidienne d'envoie des email de se réinscrire auprès
-     * du service.
+     * Permet à la tache qutotidienne d'envoie des email de se réinscrire auprès du service.
      */
 //    public void taskEnd(Callable tache) {
 //
@@ -240,8 +233,7 @@ public class ServiceMailNotifier extends AbstrService {
 //    }
     /**
      * *
-     * Retourne la liste des adresses mail des admins en se basant sur la dao
-     * UserAccount.
+     * Retourne la liste des adresses mail des admins en se basant sur la dao UserAccount.
      *
      * @return
      */
@@ -284,7 +276,6 @@ public class ServiceMailNotifier extends AbstrService {
 //        Duration dur = new Duration(dtCurrent, next);
 //        executorService.schedule(notificationMail, dur.getStandardSeconds(), TimeUnit.SECONDS);
 //    }
-
     @Override
     protected void gererIncident(AbstrTacheSchedule tache) {
 
@@ -299,12 +290,12 @@ public class ServiceMailNotifier extends AbstrService {
             MailIncident si = null;
             IncidentFactory factory = new IncidentFactory();
             try {
-                si = (MailIncident) factory.createIncidentFromTask(tache, "blabla");
+                si = (MailIncident) factory.createIncidentFromTask(tache, "Le mail n'a pu être envoyé");
             } catch (InstantiationException ex) {
                 Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IllegalAccessException ex) {
                 Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
-            }  catch (UnIncidableException ex) {
+            } catch (UnIncidableException ex) {
                 Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
             }
 
@@ -315,10 +306,12 @@ public class ServiceMailNotifier extends AbstrService {
             //=================================================================================================
 
             if (si != null) {
+                synchronized(si){ 
+
                 //TODO : Reprendre ce qui est dans update pour mieu gérer
                 if (tache.getClass().equals(TacheEnvoyerMail.class)) {
                     TacheEnvoyerMail cast = (TacheEnvoyerMail) tache;
-                    logger.error("Le mail ne semble pas être envoyé : " + cast.getExeption());
+//                    logger.error("Le mail ne semble pas être envoyé : ", cast.getExeption());
                     si.setMessage(cast.getContent());
                     si.setObjet(cast.getSubject());
                     si.setLogErreur(cast.getExeption().toString());
@@ -330,35 +323,36 @@ public class ServiceMailNotifier extends AbstrService {
                 //...............................Enregistrment de l'incident
                 //=================================================================================================
 
-
                 DAOIncident dao = (DAOIncident) DAOFactory.getInstance().getDAOFromTask(tache);
                 try {
-                    dao.creer(si);
+                    if (si.getID() == null) {
+                        dao.creer(si);
+                    } else {
+                        dao.modifier(si);
+                    }
                 } catch (Exception ex) {
-                    logger.error("Erreur lors de la création : " + ex);
-                    Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
+                    logger.error("Erreur lors de la création : ", ex);
                 }
+
+
+//                DAOIncident dao = (DAOIncident) DAOFactory.getInstance().getDAOFromTask(tache);
+//                try {
+//                    dao.creer(si);
+//                } catch (Exception ex) {
+//                    logger.error("Erreur lors de la création : " + ex);
+//                    Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+            }
             }
 
 
             //=================================================================================================
             //.........................Terminaison correct des TACHE et FERMETURE DE L'INCIDENT
             //=================================================================================================
-            DAOIncident dao = (DAOIncident) DAOFactory.getInstance().getDAOFromTask(tache);
-            try {
-                if (si.getID() == null) {
-                    dao.creer(si);
 
-                } else {
-                    dao.modifier(si);
-                }
-            } catch (Exception ex) {
-                logger.error("Erreur lors de la création : " + ex);
-                Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
-            }
         }
 
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public static void main(String[] args) throws AddressException {
