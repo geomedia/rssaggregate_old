@@ -54,15 +54,15 @@
                                     <br />
 
 
-                                    <label>Administrateur : </label>
+                                     <c:if test="${admin == 'true'}"><label>Administrateur : </label>
                                     <input type="checkbox" name="adminstatut"<c:if test="${bean.adminstatut=='true'}"> checked="checked"</c:if> />
                                     <span class="erreur" id="erradminstatut"></span>
-                                    <br />
+                                    <br /></c:if>
                                     
                                     
-                                    <label>Reçoit les mails d'alerte :</label>
+                                    <c:if test="${admin == 'true'}"> <label>Reçoit les mails d'alerte :</label>
                                         <input type="checkbox" name="adminMail" <c:if test="${bean.adminMail=='true'}">checked="checked"</c:if>/> 
-                                    <span class="erreur" id="erradminMail"></span><br />
+                                        <span class="erreur" id="erradminMail"></span><br /></c:if>
 
 
                                     <button type="button" id="btchgpass" value="0" onclick="changepass()">changer de mot de passe</button>

@@ -88,6 +88,7 @@
                         if (u.getAdminstatut()) {
                             request.setAttribute("admin", true);
                         }
+                %> | <a href="${rootpath}user/mod?id=<% out.print(u.getID()); %>">Mon compte</a><%
                     } else {
                         out.print("deco");
                     }
@@ -119,14 +120,14 @@
                     <a href="${rootpath}flux">Flux</a>
                     <ul>    
                         <li><a href="${rootpath}flux/recherche">Rechercher</a></li>  
-                        <li><a href="${rootpath}flux/add">Ajouter</a></li>  
+                        <c:if test="${admin == 'true'}">  <li><a href="${rootpath}flux/add">Ajouter</a></li>  </c:if>
                         <li><a href="${rootpath}recapActiviteGenerale">Récapitulatif de l'activité</a></li>
                     </ul>                  
                 </li>  
                 <li <c:if test="${navmenu=='journaux'}"> class="current_page_item"</c:if>><a href="${rootpath}journaux">Journaux</a>
                         <ul>
                             <li><a href="${rootpath}journaux/recherche">Recherche</a></li>
-                        <li><a href="${rootpath}journaux/add">Ajout</a></li>
+                        <c:if test="${admin == 'true'}"> <li><a href="${rootpath}journaux/add">Ajout</a></li></c:if>
 
                     </ul> 
                 </li>  
@@ -137,7 +138,7 @@
 
                     <li <c:if test="${navmenu=='typeflux'}"> class="current_page_item"</c:if>><a href="${rootpath}TypeFluxSrvl/recherche">Types de flux</a>
                         <ul>
-                            <li ><a href="${rootpath}TypeFluxSrvl/add">Ajouter</a></li>
+                        <c:if test="${admin == 'true'}"> <li ><a href="${rootpath}TypeFluxSrvl/add">Ajouter</a></li></c:if>
                         <li><a href="${rootpath}TypeFluxSrvl/recherche">Rechercher</a></li>
                     </ul>
 
@@ -145,29 +146,29 @@
 
                 <li <c:if test="${navmenu=='ComportementCollecte'}"> class="current_page_item"</c:if>><a href="${rootpath}ComportementCollecte/recherche">Comportement de collecte</a>
                         <ul>
-                            <li><a href="${rootpath}ComportementCollecte/add">Ajouter</a></li>
+                        <c:if test="${admin == 'true'}"><li><a href="${rootpath}ComportementCollecte/add">Ajouter</a></li></c:if>
                         <li><a href="${rootpath}ComportementCollecte/recherche">Rechercher</a></li>
                     </ul>
 
                 </li>
 
-                <li <c:if test="${navmenu=='slave'}"> class="current_page_item"</c:if>><a href="${rootpath}slave/recherche">Serveurs esclaves</a>
+               <c:if test="${admin == 'true'}"> <li <c:if test="${navmenu=='slave'}"> class="current_page_item"</c:if>><a href="${rootpath}slave/recherche">Serveurs esclaves</a>
                         <ul>
                             <li><a href="${rootpath}slave/recherche">Recherche</a></li>
                         <li><a href="${rootpath}slave/add">Ajouter</a></li>
                         <li><a href="${rootpath}slave/importitem">Synch Manuelle</a></li>
                     </ul>
-                </li>
+                   </li></c:if>
 
-                <li <c:if test="${navmenu=='user'}"> class="current_page_item"</c:if>><a href="${rootpath}user/recherche">Utilisateurs</a>
+                <c:if test="${admin == 'true'}"><li <c:if test="${navmenu=='user'}"> class="current_page_item"</c:if>><a href="${rootpath}user/recherche">Utilisateurs</a>
                         <ul>
                             <li><a href="${rootpath}user/recherche">Recherche</a></li>
                         <li><a href="${rootpath}user/add">Ajouter</a></li>
                     </ul>
-                </li>
+                    </li></c:if>
 
 
-                <li <c:if test="${navmenu=='config'}"> class="current_page_item"</c:if>><a href="${rootpath}config/read?id=1">Configuration</a></li>
+                    <c:if test="${admin == 'true'}"><li <c:if test="${navmenu=='config'}"> class="current_page_item"</c:if>><a href="${rootpath}config/read?id=1">Configuration</a></li></c:if>
                 <li <c:if test="${navmenu=='aide'}"> class="current_page_item"</c:if>><a href="${rootpath}aide.jsp">Aide</a></li>  
             </ul>  
         </nav> 

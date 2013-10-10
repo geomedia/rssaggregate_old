@@ -158,7 +158,7 @@
                     </c:when>
                     <c:when test="${action=='read'}">
 
-                        <p><a href="${rootpath}incidents/mod?id=${bean.ID}&type=${bean['class'].simpleName}">EDITER</a></p>
+                        <c:if test="${admin == 'true'}"><p><a href="${rootpath}incidents/mod?id=${bean.ID}&type=${bean['class'].simpleName}">EDITER</a></p></c:if>
 
 
 

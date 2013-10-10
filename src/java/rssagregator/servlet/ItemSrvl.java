@@ -64,6 +64,7 @@ public class ItemSrvl extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
         request.setCharacterEncoding("UTF-8");
+        
 
         String action = ServletTool.configAction(request, "recherche");
 
@@ -82,7 +83,7 @@ public class ItemSrvl extends HttpServlet {
         Item item = null;
 
 
-
+        System.out.println("ACTION : " + action);
         request.setAttribute("navmenu", "item");
         request.setAttribute("srlvtname", ATT_SERV_NAME);
         /**
@@ -107,7 +108,7 @@ public class ItemSrvl extends HttpServlet {
          *///=================================================================================
         //Il s'agit de l'action demandant en AJAX des informations sur les items. Elles seront renvoyées en JSON. 
         if (action.equals("list")) {
-
+           
             /**
              * Entrée des parametres pour compléter les vues
              */

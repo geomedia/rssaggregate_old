@@ -141,15 +141,23 @@
                                 }
                                 });
                             </script>
-                            <button type="button" onclick="actionsub()"> OK</button>
+                            <button type="button" onclick="actionsub();"> OK</button>
                         </form>
                         <script>
                             //Petite fonction pour la soumission du formulaire permettant la mise à jour et la suppression en nombre
                             function actionsub() {
                             action = $('#act').val();
-
+                            if(action==='rem'){
+                            reponse = confirm('Vous vous apprétez à supprimer un flux. Toutes les items associées seront supprimée. Cette manipulation est irréverssible. Confirmez vous votre choix ?');
+                            if(reponse){
+                                $('#formaction2').attr('action', '${rootpath}flux/' + action);
+                                $('#formaction2').submit();
+                            }
+                            }
+                            else if(action==='maj'){
                             $('#formaction2').attr('action', '${rootpath}flux/' + action);
                             $('#formaction2').submit();
+                            }
                             }
 
                         </script>
@@ -160,9 +168,28 @@
                             <li><a href="${rootpath}item?id-flux=${bean.ID}">Parcourir les items du flux</a></li>
                             <li><a href="${rootpath}flux/mod?id=${bean.ID}">Configurer le flux</a></li>
                             <li><a href="${rootpath}flux/maj?id=${bean.ID}">Mettre à jour manuellement</a></li>
-                            <li><a href="${rootpath}flux/rem?id=${bean.ID}">Supprimer le flux</a></li>
+                            <li><a id="suppLink" href="${rootpath}flux/rem?id=${bean.ID}">Supprimer le flux</a></li>
                             <li><a href="${rootpath}incidents/recherche?fluxSelection2=${bean.ID}&type=CollecteIncident">Parcourir les incidents</a></li>
                             <li><a href="${rootpath}flux/importcsv?id=${bean.ID}">Importer des items</a></li>
+                            <script>
+                                $(document).ready(function() {
+                                $('#suppLink').on('click', function truc2(e) {
+
+                                reponse = confirm('Vous vous apprétez à supprimer un flux. Toutes les items associées seront supprimée. Cette manipulation est irréverssible. Confirmez vous votre choix ?');
+                                if(reponse){
+                                    return true;
+                                }else{
+                                    e.preventDefault();
+                                    return false;
+                                }
+                                });
+
+                                });
+
+
+                            </script>
+
+
                         </ul>
                     </c:when> 
                 </c:choose>
@@ -183,7 +210,7 @@
                                     <label for="url" title="Adresse a laquelle on trouve le XML du flux">URL du flux<span class="requis">*</span></label>
                                     <input type="text" id="url" name="url" value="${bean.url}" size="20" maxlength="2000" />
                                 <span class="erreur" id="errurl"></span><br />
-                         
+
 
                                 <label title="Indiquez la page html de la rubrique capturée. Exemple, la page international du monde http://www.lemonde.fr/international/">Page html</label>
                                 <input name="htmlUrl" type="text" value="<c:out value="${form.erreurs['htmlUrl'][0]}" default="${bean.htmlUrl}" />"/>
@@ -258,7 +285,7 @@
 
                         <script src="${rootpath}AjaxAddModBean.js"></script>
 
-                    
+
                     </c:when>
 
 
@@ -295,7 +322,7 @@
                                             <c:set var="erreur" value="1"></c:set>
                                             ${fl.tacheRechupManuelle.exeption.message}
                                         </c:if>
-                         
+
                                         <c:if test="${erreur!=1}">OK</c:if>
                                     </tr>
                             </c:forEach>

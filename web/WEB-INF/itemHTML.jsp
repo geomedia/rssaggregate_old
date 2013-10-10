@@ -67,7 +67,7 @@
                 <h1>Liste des items</h1>
                 <div>
 
-                    <form method="GET" id="pagina">
+                    <form method="GET" id="pagina" action="${rootpath}item/list">
                         <fieldset>
                             <legend title="truc"  >Pages : </legend> 
 
@@ -175,6 +175,7 @@
                     if ($('#vue').val() == 'csv' || $('#vue').val() == 'csvexpert' || $('#vue').val() == 'xls') {
                         var old = $('#order').val();
                         $('#order').val('listFlux');
+//                        $('#afin').click()
                         $('#pagina').submit();
                         $('#order').val(old);
                     }

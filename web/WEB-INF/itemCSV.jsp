@@ -25,6 +25,7 @@
     CSVWriter cSVWriter = new CSVWriter(sw);
     List<String[]> data = new ArrayList<String[]>();
     List<Item> listItem = (List<Item>) request.getAttribute("listItem");
+    System.out.println("--->" + listItem);
 
 
     // Gestion des enetes

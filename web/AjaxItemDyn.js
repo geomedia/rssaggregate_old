@@ -44,6 +44,7 @@ $(document).ready(function() {
 
 
 
+
             // Traitement du paramettre flux selectionne. Cette variable sera utilisée dans les paramettres ajax 
             var param = "";
             for (i = 0; i < $fluxSelection2.val().length; i++) {

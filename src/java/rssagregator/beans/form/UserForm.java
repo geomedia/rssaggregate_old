@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import rssagregator.beans.UserAccount;
 
 /**
@@ -103,7 +104,15 @@ public class UserForm extends AbstrForm {
         //--------------------------------ADMIN STATUT---------------------------------------------------
         s = request.getParameter("adminstatut");
         if (s != null && !s.isEmpty()) {
-            adminstatut = true;
+            // Pour modifier le admin statut, il faut être soit même admin...
+            HttpSession session = request.getSession();
+            UserAccount u = (UserAccount) session.getAttribute("authuser");
+            if (u != null && u.getAdminstatut()) {
+                adminstatut = true;
+            } else {
+                erreurs.put("adminstatut", new String[]{"Il faut être admin pour modifier ce parametre", "Il est impossible de recevoir les mail sans être administrateur"});
+                adminstatut = false;
+            }
         } else {
             adminstatut = false;
         }
@@ -125,10 +134,14 @@ public class UserForm extends AbstrForm {
         //------------------------------Mail Administration------------------------------
         s = request.getParameter("adminMail");
         if (s != null && !s.isEmpty()) {
-            if (!adminstatut) {
-                erreurs.put("adminMail", new String[]{"Il est impossible de recevoir les mail sans être administrateur", "Il est impossible de recevoir les mail sans être administrateur"});
-            } else {
+
+            HttpSession session = request.getSession();
+            UserAccount u = (UserAccount) session.getAttribute("authuser");
+            if (u != null && u.getAdminstatut()) {
                 adminMail = true;
+            } else {
+                erreurs.put("adminMail", new String[]{"Il faut être admin pour modifier ce parametre", "Il est impossible de recevoir les mail sans être administrateur"});
+                adminMail = false;
             }
         }
 

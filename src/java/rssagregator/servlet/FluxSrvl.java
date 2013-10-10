@@ -73,6 +73,7 @@ public class FluxSrvl extends HttpServlet {
 
         response.setCharacterEncoding("UTF-8");
         request.setCharacterEncoding("UTF-8");
+        
 
         //Liste des clause servant à criteria, ces variables seront envoyé dans la dao par la suite
         Journal journalLie = null;
