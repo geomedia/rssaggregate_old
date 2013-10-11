@@ -121,7 +121,8 @@
                     <ul>    
                         <li><a href="${rootpath}flux/recherche">Rechercher</a></li>  
                         <c:if test="${admin == 'true'}">  <li><a href="${rootpath}flux/add">Ajouter</a></li>  </c:if>
-                        <li><a href="${rootpath}recapActiviteGenerale">Récapitulatif de l'activité</a></li>
+                        <!--<li><a href="${rootpath}recapActiviteGenerale">Récapitulatif de l'activité</a></li>-->
+                        <li><a href="${rootpath}flux/highchart">Récapitulatif de l'activité</a></li>
                     </ul>                  
                 </li>  
                 <li <c:if test="${navmenu=='journaux'}"> class="current_page_item"</c:if>><a href="${rootpath}journaux">Journaux</a>

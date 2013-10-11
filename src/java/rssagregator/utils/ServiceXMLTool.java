@@ -47,9 +47,7 @@ public class ServiceXMLTool {
 
         for (int i = 0; i < listService.size(); i++) {
             Element elementService = (Element) listService.get(i);
-            System.out.println("" + elementService);
             Attribute attributclass = elementService.getAttribute("class");
-            System.out.println("Class : " + attributclass.getValue());
 
             // on instancie la class
             Class cService = Class.forName(attributclass.getValue());
@@ -64,7 +62,6 @@ public class ServiceXMLTool {
                 Integer nbThread = new Integer(attNbThread.getValue());
 
                 Attribute attMethodeInstanciation = ElementPool.getAttribute("methodeInstanciation");
-                System.out.println("attMethodeInstanciation  = " + attMethodeInstanciation.getValue());
                 Method methodFactory = Executors.class.getMethod(attMethodeInstanciation.getValue(), int.class);
                 ScheduledExecutorService es = (ScheduledExecutorService) methodFactory.invoke(null, nbThread);
                 service.setExecutorService(es);
@@ -76,7 +73,6 @@ public class ServiceXMLTool {
                 Element tacheElement = (Element) listTache.get(j);
                 // Récupération de la class
                 Attribute attClassTache = tacheElement.getAttribute("class");
-                System.out.println("CLASS TACHE : " + attClassTache.getValue());
                 Class cTache = Class.forName(attClassTache.getValue());
                 AbstrTacheSchedule castTache = (AbstrTacheSchedule) cTache.newInstance();
                 castTache.addObserver(service);

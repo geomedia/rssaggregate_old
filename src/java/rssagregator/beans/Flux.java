@@ -7,6 +7,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
+import java.lang.management.ManagementFactory;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
+import javax.management.MBeanServer;
 import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -58,11 +60,11 @@ import rssagregator.services.TacheVerifComportementFLux;
  * <li>{@link CollecteIncident} : un flux peut posséder 0 à N incidents de Collecte.</li>
  * </ul>
  */
-@Entity
+@Entity()
 @Table(name = "flux")
 @Cacheable(value = true)
 @Cache(type = CacheType.FULL, coordinationType = CacheCoordinationType.SEND_NEW_OBJECTS_WITH_CHANGES, isolation = CacheIsolationType.SHARED)
-public class Flux extends AbstrObservableBeans implements Observer, Serializable, BeanSynchronise {
+public class Flux extends AbstrObservableBeans implements Observer, Serializable, BeanSynchronise, FluxMBean {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -392,12 +394,33 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
         this.mediatorFluxAction = mediatorFluxAction;
     }
 
+    @Override
     public String getUrl() {
         return url;
     }
 
     public void setUrl(String url) {
         this.url = url;
+          MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+ 
+//        try {
+//
+//            FluxMBean cast = this;
+//            ObjectName name = new ObjectName("rssagregator.beans:type=BeanIfs" + this.getID());
+//            mbs.registerMBean(cast, name);
+//            
+//            
+//   
+//
+//        } catch (MalformedObjectNameException ex) {
+//            Logger.getLogger(ServletTool.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (InstanceAlreadyExistsException ex) {
+//            Logger.getLogger(ServletTool.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (MBeanRegistrationException ex) {
+//            Logger.getLogger(ServletTool.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (NotCompliantMBeanException ex) {
+//            Logger.getLogger(ServletTool.class.getName()).log(Level.SEVERE, null, ex);
+//        }
     }
 
 //    public Integer getPeriodiciteCollecte() {
@@ -509,6 +532,7 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
         return periodeCaptations;
     }
 
+    @Override
     public String getInfoCollecte() {
         return infoCollecte;
     }
@@ -563,6 +587,7 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
         this.erreurDerniereLevee = erreurDerniereLevee;
     }
 
+    @Override
     public Long getID() {
         return ID;
     }
@@ -866,7 +891,8 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
             //============================================================================
             //..................GESTION DE L'ACTIVATION ET DESACTIVATION DU FLUX
             //============================================================================
-            /***
+            /**
+             * *
              * L'activation et la désactivation des flux entraine la création de nouvelles période de captation.
              */
             if (evt.getPropertyName().equals(PROP_ACTIVE)) {
@@ -917,8 +943,10 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
             } //============================================================================
             //.................GESTION DES CHANGEMENTS DE COMPORTEMENT
             //============================================================================
-            /***
-             * Lors de changement de comportement, il est nécessaire de fermer et ouvrir des période de captation. C'est le rôle de ce bloc. 
+            /**
+             * *
+             * Lors de changement de comportement, il est nécessaire de fermer et ouvrir des période de captation. C'est
+             * le rôle de ce bloc.
              */
             else if (evt.getPropertyName().equals(PROP_MEDIATORFLUX)) {
                 MediatorCollecteAction oldValue = (MediatorCollecteAction) evt.getOldValue();
@@ -934,8 +962,8 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
                         }
 
                         //On place la nouvelle valeur de période de captation dans la dernière période de captation (si période de captation il y a).
-                        if(!flux.periodeCaptations.isEmpty()){
-                            flux.periodeCaptations.get(flux.periodeCaptations.size()-1).setComportementDurantLaPeriode(newValue);
+                        if (!flux.periodeCaptations.isEmpty()) {
+                            flux.periodeCaptations.get(flux.periodeCaptations.size() - 1).setComportementDurantLaPeriode(newValue);
                         }
                     }
                 } //Si auparavant il n'y avait pas de comportement (exemple création nouvelle d'un flux actif)

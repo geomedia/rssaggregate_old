@@ -86,7 +86,6 @@ public class DAOIncident<T> extends AbstrDao {
 
         if (criteriaNotificationImperative != null && criteriaNotificationImperative) {
             listWhere.add(cb.and(cb.equal(root.get("notificationImperative"), true)));
-            logger.debug("DAO Notification imperative");
         }
 
         if (criteriaFluxLie != null && !criteriaFluxLie.isEmpty()) {

@@ -150,8 +150,8 @@
                             if(action==='rem'){
                             reponse = confirm('Vous vous apprétez à supprimer un flux. Toutes les items associées seront supprimée. Cette manipulation est irréverssible. Confirmez vous votre choix ?');
                             if(reponse){
-                                $('#formaction2').attr('action', '${rootpath}flux/' + action);
-                                $('#formaction2').submit();
+                            $('#formaction2').attr('action', '${rootpath}flux/' + action);
+                            $('#formaction2').submit();
                             }
                             }
                             else if(action==='maj'){
@@ -177,10 +177,10 @@
 
                                 reponse = confirm('Vous vous apprétez à supprimer un flux. Toutes les items associées seront supprimée. Cette manipulation est irréverssible. Confirmez vous votre choix ?');
                                 if(reponse){
-                                    return true;
+                                return true;
                                 }else{
-                                    e.preventDefault();
-                                    return false;
+                                e.preventDefault();
+                                return false;
                                 }
                                 });
 
@@ -192,6 +192,91 @@
 
                         </ul>
                     </c:when> 
+
+                    <c:when test="${action=='highchart'}">
+                        youpi
+
+                        <script src="http://code.highcharts.com/highcharts.js"></script>
+                        <script src="http://code.highcharts.com/modules/exporting.js"></script>
+
+                        <script>
+                            $(function() {
+                            $(".datepicker").datepicker();
+                            });</script>
+
+
+
+                        <form method="POST" action="${rootpath}item/comptejour?vue=hightchart" id="form">
+                            <input type="hidden" name="action" value="print"/>
+                            <label for="date1">Date début : </label>
+                            <input type="text" name="date1" class="datepicker"/>
+                            <label for="date2">Date fin : </label>
+                            <input type="text" name="date2" class="datepicker"/>
+                            <br />
+
+
+                            <label>Flux : </label>
+
+                            <table>
+                                <tr>
+                                    <td>
+                                        <select id="journalSelection">
+                                            <option value="null">Journal : </option>
+                                            <option id="tous">tous</option>
+                                            <c:forEach items="${listJournaux}" var="j">
+                                                <option value="${j.ID}">${j.nom}</option>
+                                            </c:forEach>
+
+                                        </select>
+                                    </td>
+
+                                    <td>
+
+                                        <select multiple="multiple" name="flux" id="fluxSelection" style="width: 300px">
+                                            <option value="">NULL</option>
+                                            <c:forEach items="${listFlux}" var="fl">
+                                                <option value="${fl.ID}">${fl}</option>
+                                            </c:forEach>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <button type="button" onclick="selectflux();">--></button><p />
+
+                                        <button type="button" onclick="supp();"><--</button>
+                                    </td>
+                                    <td>
+                                        <select id="fluxSelection2" name="fluxSelection2" multiple="multiple" style="width: 300px"></select>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <script src="dynListJournauxFLux.js"></script>
+
+                            <br />
+                            <label for="temporalite">Temporalité : </label>
+                            <select name="temporalite">
+                                <option>jour</option>
+                                <option>mois</option>
+                            </select>
+                            <input type="submit" />
+
+
+                        </form>
+
+                        <script src="${rootpath}dynListJournauxFLux.js"></script>
+
+                        <div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+                        <script>
+                            $.getJSON('http://localhost:8080/RSSAgregate/flux?vue=highchart', function(essence) {
+                            $('#container').highcharts(essence);
+                            });
+
+                        </script>
+
+                        <script src="${rootpath}FluxRecapHighChart.js"></script>
+
+
+                    </c:when>
                 </c:choose>
 
                 <c:choose> 

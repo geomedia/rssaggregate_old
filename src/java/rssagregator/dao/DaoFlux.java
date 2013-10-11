@@ -156,6 +156,7 @@ public class DaoFlux extends AbstrDao {
             //On enregistre le flux à ses services
             fl.enregistrerAupresdesService();
 
+             //Lors de l'attribution d'un id, on enregistre le flux aurpès du Server de Mbeans
 
             //On doit également charger les incident en cours pour les flux
 //            DAOIncident dAOIncident = DAOFactory.getInstance().getDAOIncident();
@@ -266,8 +267,6 @@ public class DaoFlux extends AbstrDao {
     public synchronized void modifier(Object obj) throws Exception {
 
         Flux flux = (Flux) obj;
-        System.out.println("LE FLUX DS DAO  : " + flux.getUrl());
-        System.out.println("LE FLUX DS DAO  : " + flux.getID());
         super.modifier(flux);
 
 //        try {

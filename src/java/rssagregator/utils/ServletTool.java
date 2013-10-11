@@ -4,12 +4,22 @@
  */
 package rssagregator.utils;
 
+import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.MBeanRegistrationException;
+import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
 import javax.persistence.NoResultException;
 import javax.servlet.http.HttpServletRequest;
 import rssagregator.beans.AbstrObservableBeans;
+import rssagregator.beans.FluxMBean;
 import rssagregator.beans.Conf;
 import rssagregator.beans.Flux;
 import rssagregator.beans.form.AbstrForm;
@@ -139,6 +149,28 @@ public class ServletTool {
         return listFlux;
     }
 
+    
+    public static void mbeanEnregistre(Object o){
+        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+        try {
+            
+            FluxMBean cast = (FluxMBean) o;
+            ObjectName name = new ObjectName("rssagregator.beans:type=BeanIfs"+cast.getID());
+            mbs.registerMBean(cast, name);
+            
+        } catch (MalformedObjectNameException ex) {
+            Logger.getLogger(ServletTool.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InstanceAlreadyExistsException ex) {
+            Logger.getLogger(ServletTool.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (MBeanRegistrationException ex) { 
+            Logger.getLogger(ServletTool.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NotCompliantMBeanException ex) {
+            Logger.getLogger(ServletTool.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
+    
+    
     /**
      * *
      * Permet de gérer l'action de read d'une servlet. Le paramettre id est recherche dans la request. La dao est
@@ -156,6 +188,8 @@ public class ServletTool {
 
         try {
             Object bean = dao.find(new Long(id));
+            mbeanEnregistre(bean);
+            
             if (bean == null) {
                 throw new NoResultException();
             }

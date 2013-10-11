@@ -602,7 +602,6 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
 //                }
             }
 
-            logger.debug("--------------");
             gererIncident((AbstrTacheSchedule) o);
         }
     }

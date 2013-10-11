@@ -6,6 +6,7 @@ package rssagregator.servlet;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -17,25 +18,23 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
+import rssagregator.beans.POJOCompteItem;
 import rssagregator.beans.form.ItemForm;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoItem;
 import rssagregator.utils.ServletTool;
 
 /**
- * La servlet permettant de gérer l'acces des utilisateurs aux items. Elle est
- * aussi utilisée dans le processus de synchronisation. Cette servlet doit gérer
- * les types d'action suivant :  
+ * La servlet permettant de gérer l'acces des utilisateurs aux items. Elle est aussi utilisée dans le processus de
+ * synchronisation. Cette servlet doit gérer les types d'action suivant :  
  * <ul>
- * <li><strong>read : </strong>l'utilisateur a demandé a lire les informations
- * détaillées d'une items. </li>
- * <li><strong>rechercher : </strong> Permet de charger la page html permettant
- * d'interroger les données items contenues dans la base de données</li>
- * <li><strong>list : </strong>utilisé par l'interface ajax pour interroger la
- * base de donnée et renvoyé des informations sur les flux au format Json</li>
- * <li><strong>xmlsync :</strong> utilisée par le serveur maitre pour récupérer
- * des données items sur le serveur esclave. Les données sont envoyées au format
- * XML</li>
+ * <li><strong>read : </strong>l'utilisateur a demandé a lire les informations détaillées d'une items. </li>
+ * <li><strong>rechercher : </strong> Permet de charger la page html permettant d'interroger les données items contenues
+ * dans la base de données</li>
+ * <li><strong>list : </strong>utilisé par l'interface ajax pour interroger la base de donnée et renvoyé des
+ * informations sur les flux au format Json</li>
+ * <li><strong>xmlsync :</strong> utilisée par le serveur maitre pour récupérer des données items sur le serveur
+ * esclave. Les données sont envoyées au format XML</li>
  * </ul>
  *
  *
@@ -64,7 +63,7 @@ public class ItemSrvl extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
         request.setCharacterEncoding("UTF-8");
-        
+
 
         String action = ServletTool.configAction(request, "recherche");
 
@@ -108,7 +107,7 @@ public class ItemSrvl extends HttpServlet {
          *///=================================================================================
         //Il s'agit de l'action demandant en AJAX des informations sur les items. Elles seront renvoyées en JSON. 
         if (action.equals("list")) {
-           
+
             /**
              * Entrée des parametres pour compléter les vues
              */
@@ -189,7 +188,7 @@ public class ItemSrvl extends HttpServlet {
             } catch (Exception e) {
             }
 
-            
+
             // Critère Sync Statut
             try {
                 daoItem.setSynchStatut(new Integer(request.getParameter("syncStatut")));
@@ -227,6 +226,59 @@ public class ItemSrvl extends HttpServlet {
             request.setAttribute("listJournaux", DAOFactory.getInstance().getDaoJournal().findall());
         }
 
+        /**
+         * *=============================================================================
+         * ...........................ACTION COMPTE
+         *///=============================================================================
+        if (action.equals("comptejour")) {
+
+            // On récupère les flux
+            String[] fluxtab = request.getParameterValues("fluxSelection2");
+            List<POJOCompteItem> listeCompte = new ArrayList<POJOCompteItem>();
+            if (fluxtab != null) {
+
+                for (int i = 0; i < fluxtab.length; i++) {
+                    String string = fluxtab[i];
+                    Flux f = (Flux) DAOFactory.getInstance().getDAOFlux().find(new Long(string));
+                    List<Flux> listF = new ArrayList<Flux>();
+                    listF.add(f);
+
+                    //Mise en forme de la requete
+                    Date date1 = null;
+                    DateTimeFormatter fmt = DateTimeFormat.forPattern("dd/MM/yyyy");
+                    try {
+                        date1 = fmt.parseDateTime(request.getParameter("date1")).toDate();
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        System.out.println("ERR date " + e);
+                    }
+
+                    Date date2 = null;
+                    try {
+                        date1 = fmt.parseDateTime(request.getParameter("date2")).toDate();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    daoItem.initcriteria();
+                    daoItem.setDate1(date1); 
+                    daoItem.setDate2(date2);
+                    daoItem.setWhere_clause_Flux(listF);
+                    List<Item> itDuflux = daoItem.findCretaria();
+
+                    POJOCompteItem compteItem = new POJOCompteItem();
+                    compteItem.setFlux(f);
+                    compteItem.setItems(itDuflux);
+                    compteItem.compte();
+                    listeCompte.add(compteItem);
+
+                }
+            }
+
+            request.setAttribute("compte", listeCompte);
+
+        }
+
 
 
 
@@ -246,8 +298,8 @@ public class ItemSrvl extends HttpServlet {
             String date1 = request.getParameter("date1");
             String date2 = request.getParameter("date2");
             String idflux = request.getParameter("idflux");
-            
-            
+
+
             Flux flux = (Flux) DAOFactory.getInstance().getDAOFlux().find(new Long(idflux));
             List<Flux> lFl = new ArrayList<Flux>();
             lFl.add(flux);
@@ -286,8 +338,10 @@ public class ItemSrvl extends HttpServlet {
         } else if (vue.equals("xmlsync")) {
             System.out.println("OUIIIII");
             VUE = "/WEB-INF/itemXMLsync.jsp";
+        } else if (vue.equals("hightchart")) {
+            VUE = "/WEB-INF/itemHighchart.jsp";
+
         }
-        System.out.println("LAAA");
 
         this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
     }

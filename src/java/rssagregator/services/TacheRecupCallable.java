@@ -121,11 +121,12 @@ public class TacheRecupCallable extends AbstrTacheSchedule<TacheRecupCallable> i
                     return null;
                 }
             } catch (Exception e) {
-                this.setExeption(e);
+                this.exeption = e;
                 return this;
             } finally { // Dans tous les cas on notifi
                 setChanged();
                 notifyObservers();
+                return this;
             }
         }
     }

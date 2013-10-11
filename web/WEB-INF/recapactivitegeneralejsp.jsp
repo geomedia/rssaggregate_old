@@ -43,7 +43,7 @@
 
 
 
-        <form method="POST" action="recapActiviteGenerale">
+        <form method="POST" action="${rootpath}item/highchart">
             <input type="hidden" name="action" value="print"/>
             <label for="date1">Date début : </label>
             <input type="text" name="date1" class="datepicker"/>
@@ -60,7 +60,7 @@
                         <select id="journalSelection">
                             <option value="null">Journal : </option>
                             <option id="tous">tous</option>
-                            <c:forEach items="${listJournaux}" var="j">
+                            <c:forEach items="${listJournaux}" var="j"> 
                                 <option value="${j.ID}">${j.nom}</option>
                             </c:forEach>
 

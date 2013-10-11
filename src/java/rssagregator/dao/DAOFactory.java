@@ -46,6 +46,7 @@ public class DAOFactory<T extends AbstrDao> {
     private DaoFlux daoflux;
     private DAOConf daoConf;
     EntityManagerFactory emf;
+    
 
     public static DAOFactory getInstance() {
         if (instance == null) {
@@ -244,7 +245,6 @@ public class DAOFactory<T extends AbstrDao> {
             Incidable cast = (Incidable) tache;
 
             Class incidClass = cast.getTypeIncident();
-            System.out.println("--> Tout va bien");
             return (T) getDaoFromType(incidClass);
         } else {
             throw new UnsupportedOperationException("La tâche envoyée n'est pas incidable."); //To change body of generated methods, choose Tools | Templates.

@@ -85,6 +85,7 @@ public class FluxSrvl extends HttpServlet {
 
         SecurityManager manager = System.getSecurityManager();
         System.out.println("SECUMANAGER : " + manager);
+ 
 
         // Un simple attribut pour que le menu brille sur la navigation courante
         request.setAttribute("navmenu", "flux");
@@ -327,6 +328,9 @@ public class FluxSrvl extends HttpServlet {
         } 
         else if(vue.equals("jsonform")){
             VUE = "/WEB-INF/jsonform.jsp";
+        }
+        else if(vue.equals("highchart")){
+            VUE = "/WEB-INF/highchartFlux.jsp";
         }
         else {
             response.setContentType("text/html;charset=UTF-8");

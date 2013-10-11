@@ -78,7 +78,7 @@ public class TacheStillAlive extends AbstrTacheSchedule<TacheStillAlive> impleme
 //    }
     @Override
     public TacheStillAlive call() throws Exception {
-        logger.debug("Lancement de tache STILL ALIVE");
+        logger.debug("->RUN");
         try {
 
             StillAlivePOJO alivePOJO = StillAlivePOJO.load(file);
@@ -102,7 +102,7 @@ public class TacheStillAlive extends AbstrTacheSchedule<TacheStillAlive> impleme
 
             }
             else{
-                logger.debug("PAS DE RUPTURE");
+                logger.debug("OK");
             }
 
             alivePOJO.write(file);
