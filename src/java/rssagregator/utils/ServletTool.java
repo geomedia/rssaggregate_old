@@ -4,29 +4,29 @@
  */
 package rssagregator.utils;
 
-import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.MBeanRegistrationException;
-import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
-import javax.management.NotCompliantMBeanException;
-import javax.management.ObjectName;
 import javax.persistence.NoResultException;
 import javax.servlet.http.HttpServletRequest;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import rssagregator.beans.AbstrObservableBeans;
-import rssagregator.beans.FluxMBean;
 import rssagregator.beans.Conf;
 import rssagregator.beans.Flux;
+import rssagregator.beans.Journal;
 import rssagregator.beans.form.AbstrForm;
 import rssagregator.beans.form.FORMFactory;
 import rssagregator.dao.AbstrDao;
 import rssagregator.dao.DAOFactory;
+import rssagregator.dao.SearchFilter;
 import rssagregator.services.ServiceSynchro;
+import rssagregator.servlet.JournauxSrvl;
 
 /**
  * Une série de methode static pouvant être utilisée dans les Servlet du projet.
@@ -34,6 +34,8 @@ import rssagregator.services.ServiceSynchro;
  * @author clem
  */
 public class ServletTool {
+
+    protected static org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(ServletTool.class);
 
     /**
      * *
@@ -149,28 +151,167 @@ public class ServletTool {
         return listFlux;
     }
 
-    
-    public static void mbeanEnregistre(Object o){
-        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-        try {
-            
-            FluxMBean cast = (FluxMBean) o;
-            ObjectName name = new ObjectName("rssagregator.beans:type=BeanIfs"+cast.getID());
-            mbs.registerMBean(cast, name);
-            
-        } catch (MalformedObjectNameException ex) {
-            Logger.getLogger(ServletTool.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InstanceAlreadyExistsException ex) {
-            Logger.getLogger(ServletTool.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (MBeanRegistrationException ex) { 
-            Logger.getLogger(ServletTool.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NotCompliantMBeanException ex) {
-            Logger.getLogger(ServletTool.class.getName()).log(Level.SEVERE, null, ex);
+//    public static void mbeanEnregistre(Object o){
+//        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+//        try {
+//            
+//            FluxMBean cast = (FluxMBean) o;
+//            ObjectName name = new ObjectName("rssagregator.beans:type=BeanIfs"+cast.getID());
+//            mbs.registerMBean(cast, name);
+//            
+//        } catch (MalformedObjectNameException ex) {
+//            Logger.getLogger(ServletTool.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (InstanceAlreadyExistsException ex) {
+//            Logger.getLogger(ServletTool.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (MBeanRegistrationException ex) { 
+//            Logger.getLogger(ServletTool.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (NotCompliantMBeanException ex) {
+//            Logger.getLogger(ServletTool.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        
+//    }
+    public static void actionLIST(HttpServletRequest request, Class beansClass, String beansnameJSP, AbstrDao dao) {
+
+        // Obtenssion de la dao
+//        AbstrDao dao = DAOFactory.getInstance().getDaoFromType(beansClass);
+//        dao.initcriteria();
+
+        //Gestion des paramettre filtre permet de configurer les where clause dans criteria en fonction de ce qui est envoyé par JQGRID
+        if (request.getParameter("filters") != null && !request.getParameter("filters").isEmpty()) {
+            String filter = request.getParameter("filters");
+            JSONObject obj = new JSONObject();
+            JSONParser parse = new JSONParser();
+            try {
+                JSONObject obj2 = (JSONObject) parse.parse(filter);
+                JSONArray rules = (JSONArray) obj2.get("rules");
+                for (int i = 0; i < rules.size(); i++) {
+                    JSONObject object = (JSONObject) rules.get(i);
+                    String field = (String) object.get("field");
+                    String op = (String) object.get("op");
+                    String data = (String) object.get("data");
+                    System.out.println("field : " + field);
+                    System.out.println("op : " + op);
+                    System.out.println("data : " + data);
+                    
+                    SearchFilter filt = new SearchFilter();
+             
+                    
+                    filt.setData(data);
+                    filt.setField(field);
+                    filt.setOp(op);
+                    //On essai de retrouver le type du champs par reflexivité
+                    try {
+                        System.out.println("On tente de trouver le type");
+                        filt.setType(beansClass.getDeclaredField(field).getType());
+                        
+                    } catch (NoSuchFieldException ex) {
+                        Logger.getLogger(ServletTool.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (SecurityException ex) {
+                        Logger.getLogger(ServletTool.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    
+                    
+                    dao.getCriteriaSearchFilters().getFilters().add(filt);
+                }
+
+            } catch (ParseException ex) {
+                Logger.getLogger(JournauxSrvl.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
+
+            //Compte du nombre total de résultat
+            Integer count = null;
+            try {
+                count = dao.cptCriteria();
+                request.setAttribute("count", count);
+            } catch (Exception e) {
+                logger.debug("err count", e);
+            }
+
+
+            // Juste un bloc de test permettant d'afficher les paramettre de la dequete pour faire du debug
+            Map<String, String[]> map = request.getParameterMap();
+            for (Map.Entry<String, String[]> entry : map.entrySet()) {
+                String string = entry.getKey();
+                String[] strings = entry.getValue();
+                System.out.println("-- key : " + string + " // value : " + strings[0] + " size " + strings.length);
+            }
+
+            System.out.println("AV ROW");
+            // ROW
+            if (request.getParameter("vue") != null && !request.getParameter("vue").equals("csv")) {
+                Integer limit = null;
+                if (request.getParameter("rows") != null && !request.getParameter("rows").isEmpty()) {
+                    try {
+                        limit = new Integer(request.getParameter("rows"));
+                        request.setAttribute("rows", limit);
+                        dao.setCriteriaRow(limit);
+                    } catch (Exception e) {
+                    }
+                } else {
+                }
+                System.out.println("°1");
+
+                //-----PAGE
+                Integer page = null;
+                if (request.getParameter("page") != null && !request.getParameter("page").isEmpty()) {
+                    System.out.println("°°°°°°°°°))");
+                    try {
+                        page = new Integer(request.getParameter("page"));
+
+                        request.setAttribute("page", new Integer(request.getParameter("page")));
+                        Integer startRows = limit * page - limit;
+                        dao.setCriteriaStartRow(startRows);
+
+                        Double totalPagedbl;
+                        Integer totalPage = null;
+                        if (count != null && limit != null && count > 0 && limit > 0) {
+                            totalPagedbl = Math.ceil(count.doubleValue() / limit.doubleValue());
+                            totalPage = totalPagedbl.intValue();
+                            System.out.println("--->> TOTAL PAGE : " + totalPage);
+
+                            request.setAttribute("total", totalPage);
+                        } else {
+                            totalPage = 1;
+                            request.setAttribute("total", totalPage);
+                        }
+                    } catch (Exception e) {
+                        logger.debug("Erreur", e);
+                    }
+                } else {
+                    request.setAttribute("page", new Integer(1));
+                }
+            }
+
+            // Traitement de l'ordre 
+            if (request.getParameter("sidx") != null && !request.getParameter("sidx").isEmpty()) {
+                try {
+                    request.setAttribute("sidx", request.getParameter("sidx"));
+                    dao.setCriteriaSidx(request.getParameter("sidx"));
+                } catch (Exception e) {
+                }
+            }
+
+            if (request.getParameter("sord") != null && !request.getParameter("sord").isEmpty()) {
+                dao.setCriteriaSord(request.getParameter("sord"));
+            }
+
+
+            if (request.getParameter("sord") != null && !request.getParameter("sord").isEmpty()) {
+                request.setAttribute("sord", request.getParameter("sord"));
+            }
+
+
+                        // On utilise la dao pour effectuer la sélection
+            List<Object> items = dao.findCriteria();
+            request.setAttribute("items", items);
+
+            Integer records = dao.cptCriteria();
+            System.out.println("RECORDS : " + records);
+            request.setAttribute("records", records);
         
     }
-    
-    
+
     /**
      * *
      * Permet de gérer l'action de read d'une servlet. Le paramettre id est recherche dans la request. La dao est
@@ -188,8 +329,7 @@ public class ServletTool {
 
         try {
             Object bean = dao.find(new Long(id));
-            mbeanEnregistre(bean);
-            
+
             if (bean == null) {
                 throw new NoResultException();
             }
@@ -265,7 +405,7 @@ public class ServletTool {
                     //Si un type est précisé
                     String type = request.getParameter("type");
                     if (type == null) {
-                        
+
                         redir(request, srlvtname + "/mod?id=" + id, "Traitement Effectué : ", Boolean.FALSE);
                     } else {
                         redir(request, srlvtname + "/mod?id=" + id + "&type=" + type, "Traitement Effectué : ", Boolean.FALSE);

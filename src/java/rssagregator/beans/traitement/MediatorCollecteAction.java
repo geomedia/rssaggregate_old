@@ -39,6 +39,7 @@ import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoItem;
+import rssagregator.services.ServiceCollecteur;
 
 /**
  * Cette classe gère les relations entre un ou plusieurs flux et les differents objets de traitement(parseurs,
@@ -292,7 +293,9 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
                 listItem.get(i).getListFlux().add(flux);
 //                if (persit) {
                 try {
-                    daoItem.enregistrement(listItem.get(i), flux);
+                    // La persistance se fait maintenant en passant par le service
+                    ServiceCollecteur.getInstance().ajouterItemAuFlux(flux, listItem.get(i));
+//                    daoItem.enregistrement(listItem.get(i), flux);
                 } catch (Exception e) {
                     logger.error("Catch d'une errreur dans l'enregistrement d'un item");
                 }

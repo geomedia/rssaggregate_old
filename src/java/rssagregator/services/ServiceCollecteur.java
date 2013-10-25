@@ -22,6 +22,7 @@ import javax.xml.ws.http.HTTPException;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import rssagregator.beans.Flux;
+import rssagregator.beans.Item;
 import rssagregator.beans.exception.CollecteUnactiveFlux;
 import rssagregator.beans.exception.UnIncidableException;
 import rssagregator.beans.incident.AnomalieCollecte;
@@ -30,12 +31,12 @@ import rssagregator.beans.incident.Incidable;
 import rssagregator.beans.incident.IncidentFactory;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DAOIncident;
+import rssagregator.dao.DaoItem;
 
 /**
- * Cette classe permet d'instancier le service de collecte du projet. Elle est
- * organisée autours de deux objets priomordiaux : le pool de tache schedulé qui
- * permet de lancer périodiquement les tache lié aux flux ; et le pool de tache
- * manuelle qui permet annectodiquement de lancer la mise à jour des flux
+ * Cette classe permet d'instancier le service de collecte du projet. Elle est organisée autours de deux objets
+ * priomordiaux : le pool de tache schedulé qui permet de lancer périodiquement les tache lié aux flux ; et le pool de
+ * tache manuelle qui permet annectodiquement de lancer la mise à jour des flux
  *
  * @author clem
  */
@@ -56,9 +57,9 @@ public class ServiceCollecteur extends AbstrService {
             // Le nombre de thread doit être relevé dans la conf. 
             poolPrioritaire = Executors.newFixedThreadPool(5);
         } catch (ArithmeticException e) {
-            logger.error("Impossible de charger le nombre de Thread pour ce service. Vérifier la conf",e);
+            logger.error("Impossible de charger le nombre de Thread pour ce service. Vérifier la conf", e);
         } catch (Exception e) {
-            logger.error("Erreur lors de l'instanciation du service",e);
+            logger.error("Erreur lors de l'instanciation du service", e);
         }
     }
 
@@ -76,26 +77,22 @@ public class ServiceCollecteur extends AbstrService {
     }
     /**
      * *
-     * Le pool de thread permettant de lancer des récupération de flux en
-     * passant devant le pool schedulé
+     * Le pool de thread permettant de lancer des récupération de flux en passant devant le pool schedulé
      */
     private ExecutorService poolPrioritaire;
 
     /**
      * *
      * Update le service de récupération. Plusieurs observable sont gérés : <ul>
-     * <li>Les flux : lors de l'ajout de la modification ou suppression, le
-     * service doit être informé afin de recharger son pool de thread en
-     * conséquence</li>
-     * <li>Tache de récup : A la fin de l'éxecution d'une tâche de récupération,
-     * le service est notifié. Il décide si il faut schedule la tache, cad le
-     * remettre dans son pool. Si la tache est en échec (présence d'une
-     * exeption), il faut appel au service de gestion des incidents</li>
+     * <li>Les flux : lors de l'ajout de la modification ou suppression, le service doit être informé afin de recharger
+     * son pool de thread en conséquence</li>
+     * <li>Tache de récup : A la fin de l'éxecution d'une tâche de récupération, le service est notifié. Il décide si il
+     * faut schedule la tache, cad le remettre dans son pool. Si la tache est en échec (présence d'une exeption), il
+     * faut appel au service de gestion des incidents</li>
      * <li>Conf</li>
      * </ul>
-     * <p>Le deuxieme argument permet de préciser les actions au service. C'est
-     * notamment utile lors de la modifiction ou ajour d'un flux. Les actions
-     * suivantes doivent être gérée : <ul>
+     * <p>Le deuxieme argument permet de préciser les actions au service. C'est notamment utile lors de la modifiction
+     * ou ajour d'un flux. Les actions suivantes doivent être gérée : <ul>
      * <li>add</li>
      * <li>mod</li>
      * <li>rem</li>
@@ -105,10 +102,8 @@ public class ServiceCollecteur extends AbstrService {
      * </p>
      *
      *
-     * @param o : L'observable se notifiant auprès du service (Flux, Conf,
-     * Tache)
-     * @param arg Une précision sur l'action : une chaine de caractère exemple :
-     * add, mod, del.
+     * @param o : L'observable se notifiant auprès du service (Flux, Conf, Tache)
+     * @param arg Une précision sur l'action : une chaine de caractère exemple : add, mod, del.
      */
     @Override
     public void update(Observable o, Object arg) {
@@ -138,8 +133,8 @@ public class ServiceCollecteur extends AbstrService {
             if (arg instanceof String && arg.equals("mod")) {
                 logger.debug("modification d'un flux");
                 /**
-                 * Si le flux a été modifié, On annule sa tâche, on en crée une
-                 * nouvelle et l'on l'envoie dans le scheduler.
+                 * Si le flux a été modifié, On annule sa tâche, on en crée une nouvelle et l'on l'envoie dans le
+                 * scheduler.
                  */
                 if (flux.getTacheRechup() != null) {
                     flux.getTacheRechup().setAnnulerTache(Boolean.TRUE);
@@ -195,7 +190,7 @@ public class ServiceCollecteur extends AbstrService {
                         try {
                             DAOFactory.getInstance().getDaoFromType(AnomalieCollecte.class).creer(anomalie);
                         } catch (Exception ex) {
-                            logger.error("Erreur de la tâche : " + cast+". Flux : " + cast.getFlux()+". Lors de la création de l'anomanie : " + anomalie, ex);
+                            logger.error("Erreur de la tâche : " + cast + ". Flux : " + cast.getFlux() + ". Lors de la création de l'anomanie : " + anomalie, ex);
                             Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
@@ -213,17 +208,17 @@ public class ServiceCollecteur extends AbstrService {
                         // Il faut enregistrer le résultat. 
                         DAOFactory.getInstance().getDAOFlux().modifier(cast.getFlux());
                     } catch (Exception ex) {
-                        logger.error("Erreur de la tâche "+cast+" lors de la modification du flux "+cast.getFlux(), ex);
-                        
+                        logger.error("Erreur de la tâche " + cast + " lors de la modification du flux " + cast.getFlux(), ex);
+
                     }
-                } 
+                }
             }
             gererIncident((AbstrTacheSchedule) o);
         }
 
         /**
-         * ========================================================================================
-         * ............BLOC PERMETTANT LE RECHARGEMENT COMPLET DU SERVICE.
+         * ======================================================================================== ............BLOC
+         * PERMETTANT LE RECHARGEMENT COMPLET DU SERVICE.
          *///======================================================================================
         // Si l'élément Observable est la conf ou si On a donnée l'ordre reload all
 //        if ((o instanceof Conf) || (o == null && arg instanceof String && arg.equals("reload all"))) {
@@ -358,8 +353,7 @@ public class ServiceCollecteur extends AbstrService {
 
     /**
      * *
-     * Stope le service de collecte en fermant proprement les deux pool de
-     * tâches de collecte
+     * Stope le service de collecte en fermant proprement les deux pool de tâches de collecte
      */
 //    public void stopCollecte() {
 //        // Fermeture du scheduler
@@ -388,11 +382,9 @@ public class ServiceCollecteur extends AbstrService {
 
     /**
      * *
-     * Cette méthode lance la mise à jour manuelle de chacun des flux envoyés en
-     * parametres
+     * Cette méthode lance la mise à jour manuelle de chacun des flux envoyés en parametres
      *
-     * @param listFlux Liste de flux pour lequels il faut lancer une mise à jour
-     * manuelle
+     * @param listFlux Liste de flux pour lequels il faut lancer une mise à jour manuelle
      * @throws Exception
      */
     public void majManuellAll(List<Flux> listFlux) throws Exception {
@@ -409,10 +401,9 @@ public class ServiceCollecteur extends AbstrService {
 
     /**
      * *
-     * Permet d'ajouter un callable au pool schedulé. La méthode
-     * scheduleAtFixedRate ne permet pas d'ajouter des Callable, seulement des
-     * runnable. Pour cette raison, les renable doivent se réajouter en fin de
-     * tache pour avoir un effet scheduleAtFixedRate
+     * Permet d'ajouter un callable au pool schedulé. La méthode scheduleAtFixedRate ne permet pas d'ajouter des
+     * Callable, seulement des runnable. Pour cette raison, les renable doivent se réajouter en fin de tache pour avoir
+     * un effet scheduleAtFixedRate
      *
      * @param t Le RUNNABLE qui doit être ajouté au pool
      */
@@ -422,9 +413,8 @@ public class ServiceCollecteur extends AbstrService {
 //    }
     /**
      * *
-     * Retoune le pool prioritaire du service. Il s'agit du pool pour lancer des
-     * collectes manuelle. Celles ci sont lancée avec une priorité suppréieure
-     * au pool schedulé
+     * Retoune le pool prioritaire du service. Il s'agit du pool pour lancer des collectes manuelle. Celles ci sont
+     * lancée avec une priorité suppréieure au pool schedulé
      *
      * @return
      */
@@ -499,9 +489,9 @@ public class ServiceCollecteur extends AbstrService {
                 try {
                     si = (CollecteIncident) factory.createIncidentFromTask(tache, "blabla");
                 } catch (InstantiationException ex) {
-                    logger.error("Erreur d'instanciation de l'incident. Pour la tache"+tache, ex);
+                    logger.error("Erreur d'instanciation de l'incident. Pour la tache" + tache, ex);
                 } catch (IllegalAccessException ex) {
-                   logger.error("Erreur d'instanciation de l'incident. Pour la tache"+tache, ex);
+                    logger.error("Erreur d'instanciation de l'incident. Pour la tache" + tache, ex);
                 } catch (UnIncidableException ex) {
                     logger.debug("La tâche n'est pas incidable");
                 }
@@ -513,7 +503,7 @@ public class ServiceCollecteur extends AbstrService {
             if (si != null) {
                 if (tache.getClass().equals(TacheRecupCallable.class)) {
                     TacheRecupCallable cast = (TacheRecupCallable) tache;
-                    logger.debug("Erreur lors de la récupération du flux  : " + cast.getFlux() + ". Erreur : " + cast.getExeption());
+                    logger.debug("Erreur lors de la récupération du flux  : " + cast.getFlux() + ". Erreur : " + cast.getExeption(), cast.getExeption());
                     si.setFluxLie(cast.getFlux());
 
                     if (si.getDateDebut() == null) {
@@ -534,10 +524,9 @@ public class ServiceCollecteur extends AbstrService {
                         si.setMessageEreur("ParsingFeedException : Impossible de parser le flux XML.");
                     } else if (exception instanceof FeedException) {
                         si.setMessageEreur("FeedException : Impossible de parser le flux XML.");
-                    } else if(exception instanceof CollecteUnactiveFlux){
+                    } else if (exception instanceof CollecteUnactiveFlux) {
                         logger.info("Tentative de collecte d'un flux innactif, ce n'est surement pas grave");
-                    }
-                    else if (exception instanceof Exception) {
+                    } else if (exception instanceof Exception) {
                         si.setMessageEreur("ERREUR inconnue : " + exception.toString());
                     }
                     cast.setIncident(si);
@@ -571,9 +560,9 @@ public class ServiceCollecteur extends AbstrService {
         //Si la tâche s'est déroulée correctement. Il est peut être nécessaire de fermer des incident
         if (tache.exeption == null) {
             if (tache.getClass().equals(TacheRecupCallable.class)) {
-             
+
                 TacheRecupCallable cast = (TacheRecupCallable) tache;
-                   logger.debug("La récuperation du flux " + cast.getFlux() + ". S'est déroulée correctement. Fermeture des possibles incidents");
+                logger.debug("La récuperation du flux " + cast.getFlux() + ". S'est déroulée correctement. Fermeture des possibles incidents");
                 Flux f = cast.getFlux();
                 List<CollecteIncident> listIncid = f.getIncidentEnCours();
                 for (int i = 0; i < listIncid.size(); i++) {
@@ -589,6 +578,86 @@ public class ServiceCollecteur extends AbstrService {
                 }
             }
         }
+    }
+
+    /**
+     * *
+     * Cette méthode permet d'ajouter un item à un flux. Si l'item est déja présente dans la base de donnée, le service
+     * crée un liaison vers cette item. Sinon il la crée. La méthode est synchronisé afin que plusieurs thread
+     * n'ajoutent pas en même temps des items
+     *
+     * @param flux Le flux pour lequel il faut ajouter une item
+     * @param item L'item devant être ajouté
+      */
+    public synchronized void ajouterItemAuFlux(Flux flux, Item item) {
+        DaoItem dao = DAOFactory.getInstance().getDaoItem();
+
+        // On commence par ajouter l'item au flux si ce n'est pas déjà le cas
+        List<Flux> lf = item.getListFlux();
+        Boolean ajouter = true;
+        for (int i = 0; i < lf.size(); i++) {
+            Flux flux1 = lf.get(i);
+            if (flux1.getID().equals(flux.getID())) {
+                ajouter = false;
+            }
+        }
+        if (ajouter) {
+            item.getListFlux().add(flux);
+        }
+
+        Boolean itemEstNouvelle = true;
+        Boolean err = false;
+        if (item.getID() != null) {
+            itemEstNouvelle = true;
+        }
+
+
+        //
+        if (itemEstNouvelle) {
+            try {
+                // Si l'item est nouvelle 
+                dao.creer(item);
+            } catch (Exception ex) {
+                err = true;
+                Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        // Si l'item n'est pas nouvelle ou si il y a eu une erreur lors de l'enregistrement précédent, Il faut retrouver l'item dans la base de donnée et l'aéjouter si besoin est au flux
+        if (!itemEstNouvelle || err) {
+            Item itBDD = dao.findByHash(item.getHashContenu());
+            // Si on a bien trouvé une item
+            if (itBDD != null) {
+                // On ajoute l'item au flux 
+                itBDD.getListFlux().add(flux);
+                try {
+                    // On tente de modifier l'item 
+                    dao.modifier(itBDD);
+                    err = false;
+                } catch (Exception ex) {
+                    Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+
+        // Si le traitement s'est bien déroulé
+        if (!err) {
+            try {
+                dao.commit(); // On commit
+                flux.getLastEmpruntes().add(item.getHashContenu());    // On ajoute le hash aux hash en mémoire
+            } catch (Exception e) {
+                logger.debug("erreur lors du commit", e);
+            }
+        }
+
+
+        // Il faudra trouver qqchose en cas a nouveau d'erreur exemple la base de de donnée ne répond pas.
+
+
+        item.getListFlux().add(flux);
+
+
+
     }
 
     @Override

@@ -49,8 +49,30 @@ $(document).ready(function() {
             var param = "";
             for (i = 0; i < $fluxSelection2.val().length; i++) {
                 param = param + "&fluxSelection2=" + $fluxSelection2.val()[i];
+                alert($fluxSelection2.val()[i]);
             }
             param = param.substr(1, param.length);
+
+
+//-----------------------------------------------------------------
+//              CONSTRUCTION DU FILTRE POUR Recharger la GRID
+//-----------------------------------------------------------------
+filters = 
+    {"groupOp":"AND",
+     "rules":[
+       {"field":"invdate","op":"ge","data":"2007-10-06"},
+       {"field":"invdate","op":"le","data":"2007-10-20"}, 
+       {"field":"name","op":"bw","data":"Client 3"}
+      ]
+    };
+    
+    $('#list').jqGrid().setGridParam(
+            {postData: filters}
+            ).trigger.('reloadGrid');
+                alert('exe');
+//                $('#list').jqID().trigger.('reloadGrid');
+
+
 
 
 //-----------------------------------------------------------------

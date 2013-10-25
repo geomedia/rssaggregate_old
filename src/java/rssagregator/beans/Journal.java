@@ -13,16 +13,14 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import org.apache.poi.util.Beta;
-import org.eclipse.persistence.annotations.Customizer;
 
-
-/** 
+/**
  * Un journal : Le monde, le Figaro... Chaque journal est instancier dans un objet. Un journal peut contenir plusieurs
  * {@link Flux}. Les journaux sont synchronisé du serveur maitre vers les serveur esclave d'ou l'implémentation de
  * l'interface {@link BeanSynchronise}
  */
 @Entity
-//@Customizer(JournalEntityLisner.class)
+//@Customizer(JournalEntityLisner.class) 
 @Cacheable(value = false)
 public class Journal implements Serializable, BeanSynchronise {
 
@@ -82,6 +80,30 @@ public class Journal implements Serializable, BeanSynchronise {
      */
     @Column(name = "information", columnDefinition = "text")
     private String information;
+    /**
+     * *
+     * Le type du journal : <ul><li>quotidien, </li><li>hebdomadaire</li></ul>
+     */
+    @Column(name = "typeJournal", nullable = false)
+    private String typeJournal;
+
+    /**
+     * Get the value of typeJournal
+     *
+     * @return the value of typeJournal
+     */
+    public String getTypeJournal() {
+        return typeJournal;
+    }
+
+    /**
+     * Set the value of typeJournal
+     *
+     * @param typeJournal new value of typeJournal
+     */
+    public void setTypeJournal(String typeJournal) {
+        this.typeJournal = typeJournal;
+    }
 
     public Journal() {
         this.fluxLie = new ArrayList<Flux>();
@@ -195,6 +217,4 @@ public class Journal implements Serializable, BeanSynchronise {
             return "journal sans nom";
         }
     }
-
-  
 }

@@ -54,18 +54,172 @@
 
         <c:when test="${action=='recherche'}">
 
-            <link rel="stylesheet" href="jquery-ui.css" />
-            <script src="jquery-ui.js"></script>
+            <!--            <link rel="stylesheet" href="jquery-ui.css" />
+                        <script src="jquery-ui.js"></script>-->
 
             <script>
                 $(function() {
-                    $(".datepicker").datepicker();
+                     $(".datepicker").datepicker({dateFormat: "dd/mm/yy"});
                 });</script>
+
 
 
             <div class="post">
                 <h1>Liste des items</h1>
                 <div>
+
+
+                    <script src="${rootpath}ress/jqgrid/js/i18n/grid.locale-fr.js" type="text/javascript"></script>
+                    <script src="${rootpath}ress/jqgrid/js/jquery.jqGrid.min.js" type="text/javascript"></script>
+                    <!--<script src="${rootpath}ress/jqgrid/plugins/grid.addons.js" type="text/javascript"></script>-->
+
+                    <link rel="stylesheet" type="text/css" media="screen" href="css/ui-lightness/jquery-ui-1.7.1.custom.css" />
+                    <link rel="stylesheet" type="text/css" media="screen" href="${rootpath}ress/jqgrid/css/ui.jqgrid.css" />
+                    <link rel="stylesheet" type="text/css" media="screen" href="${rootpath}ress/jquery-ui-1.10.3.custom/css/base/jquery-ui.css" />
+
+                    <table id="list" width="600"><tr><td></td></tr></table> 
+                    <div id="pager"></div> 
+
+                    <div id="mysearch">ssss</div>
+
+
+
+
+                    <script type="text/javascript">
+
+
+                /***
+                 *  Utilisé par JQgrid pour formater le champ journal en un lien
+                 * @param {type} cellvalue
+                 * @param {type} options
+                 * @param {type} rowObjcet
+                 * @param {type} l4
+                 * @param {type} l5
+                 * @returns {String}
+                 */
+                function myLinkFormatter(cellvalue, options, rowObjcet, l4, l5) {
+                    return '<a href = "/RSSAgregate/item/read?id=' + rowObjcet[0] + '">' + rowObjcet[1] + '</a>';
+                }
+                function  fluxFormatter(cellvalue, options, rowObjcet, l4) {
+//                    alert(JSON.stringify(cellvalue))
+                    txt = "<ul>";
+                    for (i = 0; i < cellvalue.length; i++) {
+                        txt = +"<li>" + cellvalue[i]['val'] + "</li>";
+
+                    }
+                    txt += "</ul>";
+
+                    return txt;
+                }
+                /***
+                 * Supprimer les balise html coté utilisateur
+                 * @param {type} cellvalue
+                 * @param {type} options
+                 * @param {type} rowObjcet
+                 * @param {type} l4
+                 * @returns {@exp;@call;$@call;text}
+                 */
+                function descFormatter(cellvalue, options, rowObjcet, l4) {
+                    var d = document;
+                    var odv = d.createElement("div");
+                    $(odv).append(cellvalue);
+                    return $(odv).text();
+                }
+
+
+
+                $(document).ready(function() {
+//                    var myfilter = {groupOp: "AND", rules: []};
+//
+//// addFilteritem("invdate", "gt", "2007-09-06");
+//                    myfilter.rules.push({field: "invdate", op: "gt", data: "2007-09-06"});
+//
+//// addFilteritem("invdate", "lt", "2007-10-04");
+//                    myfilter.rules.push({field: "invdate", op: "lt", data: "2007-10-04"});
+//
+//// addFilteritem("name", "bw", "test");
+//                    myfilter.rules.push({field: "name", op: "bw", data: "test"});
+
+                    var grid = $("#list");
+
+                    grid.jqGrid({
+                        loadonce: false,
+                        url: "${rootpath}item/listgrid?vue=grid",
+                        datatype: "json",
+                        mtype: "GET",
+                        colNames: ["ID", "titre", "description", "flux"],
+                        colModel: [
+                            {name: "ID", width: 55, hidden: true},
+                            {name: "titre", width: 90, formatter: myLinkFormatter, searchoptions: {sopt: ['cn', 'eq']}},
+                            {name: "description", index: 'description', key: true, formatter: descFormatter, search: true, width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
+                            {name: "flux", index: 'flux', key: true, search: true, width: 80, formatter: fluxFormatter, align: "right", searchoptions: {sopt: ['cn', 'eq']}}
+//                            {name: "pays", width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
+//                            {name: "typeJournal", width: 80, align: "right", stype: 'select', editoptions: {value: {'': 'tous', 'autre': 'autre', 'quotidien': 'quotidien'}}},
+//                            {name: "urlAccueil", width: 150, sortable: true, searchoptions: {sopt: ['cn', 'eq']}}
+                        ],
+                        pager: '#pager',
+                        rowNum: 10,
+                        rowList: [10, 20, 30],
+                        sortname: "invid",
+                        sortorder: "desc",
+                        viewrecords: true,
+                        gridview: true,
+                        autoencode: true,
+                        caption: "Recherche parmis les journaux",
+                        sortable: true,
+                        sorttype: 'text',
+                        autowidth: true,
+                        exptype: "csvstring",
+                        root: "grid",
+                        ident: "\t",
+                        search: true,
+//                        search: {
+//                            modal: true,
+//                            Find: 'txt recherche',
+//                            multipleSearch: true,
+//                            sFilter: 'lalalalaa'
+//                        },
+                        multipleSearch: true,
+                        postData: {
+                            filters: {groupOp: "AND", rules: [/*{field: "titre", op: "gt", data: "truc"}, {field: "nom", op: "lt", data: "ss"}*/]}
+                        }
+
+                    }
+                    );
+                    grid.jqGrid('navGrid', '#pager', {add: false, edit: false, del: false, search: true, refresh: true},
+                    {}, {}, {}, {multipleSearch: true, multipleGroup: true, showQuery: true});
+
+                    optionsSearch = {
+                        multipleSearch: true, multipleGroup: true, showQuery: true
+                    };
+
+////                    jQuery("#list").searchGrid(optionsSearch);
+//                    jQuery('#list').jqGrid('searchGrid', {multipleSearch: true, modal: true, Find: 'zouzouzouu tralala', beforeShowSearch: function() {
+//                            alert('beafore');
+//                        }});
+//
+//
+//
+//                    jQuery("#list").navGrid('#pager', {add: false, edit: false, del: false, search: true, refresh: true}, {}, {}, {}, optionsSearch).navButtonAdd('#pager',
+//                            {
+//                                caption: "'Export To CSV",
+//                                buttonicon: "ui-icon-add",
+//                                onClickButton: function() {
+//                                    opt = {exptype: "jsonstring"};
+//                                    $("#list").jqGrid('excelExport', {tag: 'csv', url: '${rootpath}journaux/list?vue=csv'});
+//                                },
+//                                position: "last"
+//                            });
+
+                });
+
+                    </script>                    
+
+
+
+
+
+
 
                     <form method="GET" id="pagina" action="${rootpath}item/list">
                         <fieldset>
@@ -140,7 +294,7 @@
 
 
                             <script src="dynListJournauxFLux.js"></script>
-                            <script src="AjaxItemDyn.js"></script>
+                            <script src="AjaxItemDynGrid.js"></script>
                             <br />
 
                             <label>Ordonner par : </label>
@@ -175,7 +329,7 @@
                     if ($('#vue').val() == 'csv' || $('#vue').val() == 'csvexpert' || $('#vue').val() == 'xls') {
                         var old = $('#order').val();
                         $('#order').val('listFlux');
-//                        $('#afin').click()
+                        //                        $('#afin').click()
                         $('#pagina').submit();
                         $('#order').val(old);
                     }

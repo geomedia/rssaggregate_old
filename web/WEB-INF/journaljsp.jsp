@@ -34,19 +34,134 @@
             <c:when test="${empty redirmap}">
                 <c:choose>
                     <c:when test="${action=='recherche'}">
-                        <ul>
+<!--                        Critere
+                        <form method="POST" action="${rootpath}journaux/recherche">
+                            <label>Pays : </label>
+                            <select name="pays">
+                                <option value="">Tous</option>
+                                <c:forEach var="country" items="${listCountry}">
+                                    <option>${country}</option>
+                                    <option value="${country.key}" <c:if test="${country.key==bean.pays}"> selected="true"</c:if>>${country.value}</option>
+                                </c:forEach>
+                            </select><br />
+
+                            <label>Langue</label>
+                            <select name="langue">
+                                <option value="">Toutes</option>
+                                <c:forEach items="${listLocal}" var="loc">
+                                    <option value="${loc.key}" <c:if test="${loc.key==bean.langue}"> selected="true"</c:if>>${loc.value}</option>>
+                                </c:forEach>
+                            </select>
+
+                            <input type="submit" />
+                        </form>-->
+
+                        <!--<script src="js/jquery-1.4.2.min.js" type="text/javascript"></script>-->
+                        <script src="${rootpath}ress/jqgrid/js/i18n/grid.locale-fr.js" type="text/javascript"></script>
+                        <script src="${rootpath}ress/jqgrid/js/jquery.jqGrid.min.js" type="text/javascript"></script>
+                        
+                        <link rel="stylesheet" type="text/css" media="screen" href="css/ui-lightness/jquery-ui-1.7.1.custom.css" />
+                        <link rel="stylesheet" type="text/css" media="screen" href="${rootpath}ress/jqgrid/css/ui.jqgrid.css" />
+                        <link rel="stylesheet" type="text/css" media="screen" href="${rootpath}ress/jquery-ui-1.10.3.custom/css/base/jquery-ui.css" />
+
+
+
+
+                        <table id="list" width="600"><tr><td></td></tr></table> 
+                        <div id="pager"></div> 
+
+
+                        <script type="text/javascript">
+                            /***
+                             *  Utilisé par JQgrid pour formater le champ journal en un lien
+                             * @param {type} cellvalue
+                             * @param {type} options
+                             * @param {type} rowObjcet
+                             * @param {type} l4
+                             * @param {type} l5
+                             * @returns {String}
+                             */
+                            function myLinkFormatter(cellvalue, options, rowObjcet, l4, l5) {
+                                return '<a href = "/RSSAgregate/journaux/read?id=' + rowObjcet[0] + '">' + rowObjcet[1] + '</a>';
+                            }
+
+                            $(function() {
+                                $("#list").jqGrid({
+                                    url: "${rootpath}journaux/list?vue=grid",
+                                    datatype: "json",
+                                    mtype: "GET",
+                                    colNames: ["ID", "nom", "langue", "pays", "typeJournal", "urlAccueil"],
+                                    colModel: [
+                                        {name: "ID", width: 55, hidden: false, searchoptions: {sopt: ['cn', 'eq']}},
+                                        {name: "nom", classtype: 'clem',sorttype:'float', width: 90, formatter: myLinkFormatter, searchoptions: {sopt: ['cn', 'eq']}},
+                                        {name: "langue", index: 'langue', key: true, search: true, width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
+                                        {name: "pays", width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
+                                        {name: "typeJournal", width: 80, align: "right", stype: 'select', editoptions:{value:{'' : 'tous', 'autre':'autre','quotidien':'quotidien'}}},
+                                        {name: "urlAccueil", width: 150, sortable: true, searchoptions: {sopt: ['cn', 'eq']}}
+                                    ],
+                                    pager: "#pager",
+                                    rowNum: 10,
+                                    rowList: [10, 20, 30],
+                                    sortname: "invid",
+                                    sortorder: "desc",
+                                    viewrecords: true,
+                                    gridview: true,
+                                    autoencode: true,
+                                    caption: "Recherche parmis les journaux",
+                                    sortable: true,
+                                    sorttype: 'text',
+                                    autowidth: true,
+                                    exptype: "csvstring",
+                                    root: "grid",
+                                    
+                                    ident: "\t"
+//                                    filterToolbar: {searchOperators: true},
+//                                    search: {
+//                                        caption: "Search...",
+//                                        Find: "Find",
+//                                        Reset: "Reset",
+//                                        odata: ['equal', 'not equal', 'less', 'less or equal', 'greater', 'greater or equal', 'begins with', 'does not begin with', 'is in', 'is not in', 'ends with', 'does not end with', 'contains', 'does not contain'],
+//                                        groupOps: [{op: "AND", text: "all"}, {op: "OR", text: "any"}],
+//                                        matchText: " match",
+//                                        rulesText: " rules"
+//                                    }
+                                }
+                                );
+
+optionsearch = {searchOperators: true, stringResult:true};
+//                                jQuery("#list").jqGrid('filterToolbar', {searchOperators: true});
+                                jQuery("#list").filterToolbar(optionsearch);
+                                jQuery("#list").navGrid('#pager', {edit: false, add: false, del: false, search: false})
+                                        .navButtonAdd('#pager', {
+                                    caption: "'Export To CSV",
+                                    buttonicon: "ui-icon-add",
+                                    onClickButton: function() {
+
+                                        opt = {exptype: "jsonstring"};
+                                        $("#list").jqGrid('excelExport', {tag: 'csv', url: '${rootpath}journaux/list?vue=csv'});
+                                    },
+                                    position: "last"
+                                });
+                            });
+                        </script>
+
+
+<!--                        <ul>
                             <c:forEach items="${listjournaux}" var="it">
                                 <li><a href="${rootpath}journaux/read?id=${it.ID}"><c:out value="${it.nom}"></c:out></a></li>
-                                </c:forEach>
-                        </ul>
+                            </c:forEach>
+                        </ul>-->
                     </c:when> 
 
                     <c:when test="${action=='mod' or action=='add'}">
                         <h2>Administration du journal : ${bean.nom}</h2>
-                        <ul>
-                            <li>  <a href="${rootpath}journaux/rem?id=${bean.ID}">Supprimer journal</a></li>
-                            <li>  <a href="${rootpath}flux/list?journal-id=${bean.ID}">Parcourir les flux du journal</a></li>
-                        </ul>
+                        <c:if test="${action=='mod'}">
+                            <ul>
+                                <li>  <a href="${rootpath}journaux/rem?id=${bean.ID}">Supprimer journal</a></li>
+                                <li>  <a href="${rootpath}flux/list?journal-id=${bean.ID}">Parcourir les flux du journal</a></li>
+                                <li><a href="${rootpath}flux/add?journal-id=${bean.ID}">Ajouter un flux au journal</a></li>
+                            </ul>
+                        </c:if>
 
                         ${form.resultat}
                         <form method="POST" action="${rootpath}journaux/${action}" id="beanForm">
@@ -58,12 +173,12 @@
                                 <br />
 
 
-                                <label>Page Accueil du journal : </label>
+                                <label>Page Accueil du journal <span class="requis">*</span>: </label>
                                 <input type="text" name="urlAccueil" value="<c:out value="${bean.urlAccueil}" />"/><span class="erreur" id="errurlAccueil"></span><br />
-                                 
 
-                                <label>urlHtmlRecapFlux : </label>
-                                <input type="text" name="urlHtmlRecapFlux" value="<c:out value="${bean.urlHtmlRecapFlux}"></c:out>"/><span class="erreur" id="errurlHtmlRecapFlux"></span>
+
+                                <label title="De nombreux journaux présente un page avec des liens pour chacun des flux RSS disponible.">URL de la page présentant les flux RSS du journal : </label>
+                                <input type="text" name="urlHtmlRecapFlux" value="<c:out value="${bean.urlHtmlRecapFlux}"></c:out>" /><span class="erreur" id="errurlHtmlRecapFlux"></span>
                                     <br />
                                     <label for="langue">Langue : </label>
                                     <select name="langue" id="langue">
@@ -87,13 +202,22 @@
                                     <c:forEach items="${fuseau}" var="fus">
                                         <option value="${fus}" <c:if test="${fus==bean.fuseauHorraire}"> selected="true"</c:if> >${fus}</option>
                                     </c:forEach>
-                                </select>
+                                </select><br />
 
+                                <label title="Une variable informative permettant de renseigner la nature du journal en fonction principalement de sa périodicité de parution">Type de journal</label>
+                                <select name="typeJournal" id="typeJournal">
+                                    <option<c:if test="${bean.typeJournal=='quotidien'}"> selected="selected"</c:if>>quotidien</option>
+                                    <option<c:if test="${bean.typeJournal=='hebdomadaire'}"> selected="selected"</c:if>>hebdomadaire</option>
+                                    <option<c:if test="${bean.typeJournal=='mensuel'}"> selected="selected"</c:if>>mensuel</option>
+                                    <option<c:if test="${bean.typeJournal=='pure-player'}"> selected="selected"</c:if>>pure-player</option>
+                                    <option<c:if test="${bean.typeJournal=='autre'}"> selected="selected"</c:if>>autre</option>
+                                    </select>
+                                    <span class="erreur" id="errtypeJournal"></span>
 
-                                <br />
+                                    <br />
 
-                                <label>Information : </label><br />
-                                <textarea name="information" rows="10" cols="60">${bean.information}</textarea><br />
+                                    <label>Information : </label><br />
+                                    <textarea name="information" rows="10" cols="60">${bean.information}</textarea><br />
 
                                 <input type="hidden" name="id" value="${bean.ID}">
                                 <input type="hidden" name="vue" value="jsonform" />
@@ -102,7 +226,9 @@
                                 <br />
                             </fieldset>
                         </form>
-                                <script src="${rootpath}AjaxAddModBean.js"></script>
+
+                        <script src="${rootpath}AjaxAddModBean.js"></script>
+
 
 
 
@@ -112,6 +238,7 @@
                         <p><strong>Titre :</strong> ${bean.nom}</p>
                         <p><strong>Page accueil : </strong>${bean.urlAccueil}</p>
                         <p><strong>Page HTML recaptulatif des flux : </strong>${bean.urlHtmlRecapFlux}</p>
+                        <p><strong>Type de journal : </strong> ${bean.typeJournal}</p>
                         <p><strong>Langue : </strong>${bean.langue}</p>
                         <p><strong>Pays : </strong>${bean.pays}</p>
                         <p><strong>Fuseau Horraire : </strong>${bean.fuseauHorraire}</p>

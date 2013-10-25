@@ -7,6 +7,7 @@ package rssagregator.beans.form;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.servlet.http.HttpServletRequest;
 import rssagregator.beans.Journal;
@@ -29,9 +30,9 @@ public class JournalForm extends AbstrForm {
     private String pays;
     private String fuseauHorraire;
     private String information;
+    private String typeJournal;
     //--------------------------------------
-    
-        org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(JournalForm.class);
+    org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(JournalForm.class);
 
     public JournalForm() {
         super();
@@ -47,8 +48,8 @@ public class JournalForm extends AbstrForm {
                 objEntre = type.newInstance();
 //                objEntre =  type.newInstance();
             } catch (InstantiationException ex) {
-               
-                
+
+
                 Logger.getLogger(JournalForm.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IllegalAccessException ex) {
                 Logger.getLogger(JournalForm.class.getName()).log(Level.SEVERE, null, ex);
@@ -65,6 +66,7 @@ public class JournalForm extends AbstrForm {
         journal.setPays(pays);
         journal.setFuseauHorraire(fuseauHorraire);
         journal.setInformation(information);
+        journal.setTypeJournal(typeJournal);
         //---------------------------------------------------
         return journal;
     }
@@ -88,7 +90,7 @@ public class JournalForm extends AbstrForm {
         //Bind du nom
         String s = request.getParameter("nom");
         if (s != null && !s.isEmpty()) {
-            nom = s;
+            nom = s.trim();
             // On doit chercher si il s'existe pas déjà un journal avec ce nom
             DaoJournal dao = DAOFactory.getInstance().getDaoJournal();
 
@@ -97,21 +99,22 @@ public class JournalForm extends AbstrForm {
                 try {
                     j = dao.findWithName(nom);
                 } catch (NonUniqueResultException e) {
-                     logger.error("Plusieurs journaux portent le même nom. Ceci ne devrait jamais arriver !");
-                     j = new Journal(); // C'est un problème on va instancier un journal pour bloquer l'ajout
+                    logger.error("Plusieurs journaux portent le même nom. Ceci ne devrait jamais arriver !");
+                    j = new Journal(); // C'est un problème on va instancier un journal pour bloquer l'ajout
+                } 
+                catch (NoResultException e){
+                    logger.debug("pas de résult OK");
                 }
-                catch(Exception e){
+                catch (Exception e) {
                     logger.error("Problème lors de l'usage de la dao : " + e);
+                    j = new Journal(); // C'est un problème on va instancier un journal pour bloquer l'ajout
                 }
-                
                 if (j != null) {
                     erreurs.put("nom", new String[]{"Il existe déjà un journal portant ce nom dans la base de données", "Il existe déjà un journal portant ce nom dans la base de données"});
                 }
-
             }
-
         } else {
-            erreurs.put("nom", new String[]{"ne peut être null", "ne peu"});
+            erreurs.put("nom", new String[]{ERR_NE_PEUT_ETRE_NULL, ERR_NE_PEUT_ETRE_NULL});
         }
 
 
@@ -119,15 +122,17 @@ public class JournalForm extends AbstrForm {
         if (s != null && !s.isEmpty()) {
             System.out.println("111");
             if (!s.matches(REG_EXP_HTTP_URL)) {
-                erreurs.put("urlAccueil", new String[]{"Ce n'est pas une URL correcte", "ne peu"});
+                erreurs.put("urlAccueil", new String[]{ERR_URL_INCORRECTE, ERR_URL_INCORRECTE});
             }
             urlAccueil = s;
+        } else {
+            erreurs.put("urlAccueil", new String[]{ERR_NE_PEUT_ETRE_NULL, ERR_NE_PEUT_ETRE_NULL});
         }
 
         s = request.getParameter("urlHtmlRecapFlux");
         if (s != null && !s.isEmpty()) {
             if (!s.matches(REG_EXP_HTTP_URL)) {
-                erreurs.put("urlHtmlRecapFlux", new String[]{"Ce n'est pas une URL correcte", "ne peu"});
+                erreurs.put("urlHtmlRecapFlux", new String[]{ERR_URL_INCORRECTE, ERR_URL_INCORRECTE});
             }
             urlHtmlRecapFlux = s;
         }
@@ -150,8 +155,20 @@ public class JournalForm extends AbstrForm {
         s = request.getParameter("information");
         if (s != null && !s.isEmpty()) {
             information = s;
-//            journal.setInformation(s);
         }
+
+
+        s = request.getParameter("typeJournal");
+        if (s != null && !s.isEmpty()) {
+            if (s.equals("quotidien") || s.equals("hebdomadaire") || s.equals("mensuel") || s.equals("pure-player") || s.equals("autre")) {
+                this.typeJournal = s;
+            } else {
+                erreurs.put("typeJournal", new String[]{"Valeur incorrecte", "Valeur incorrecte"});
+            }
+        } else {
+            erreurs.put("typeJournal", new String[]{ERR_NE_PEUT_ETRE_NULL, ERR_NE_PEUT_ETRE_NULL});
+        }
+
         valide = erreurs.isEmpty();
         return valide;
     }

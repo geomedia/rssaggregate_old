@@ -16,9 +16,9 @@
     
       
     
-    export.put("firsResult", request.getAttribute("firsResult"));
+    export.put("firsResult", request.getAttribute("firsResult").toString());
 //    export.put("itPrPage", request.getAttribute("itPrPage"));
-    export.put("nbitem", request.getAttribute("nbitem"));
+    export.put("nbitem", request.getAttribute("nbitem").toString());
     
     JSONArray array = new JSONArray();
     export.put("items", array);

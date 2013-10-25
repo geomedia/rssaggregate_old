@@ -11,16 +11,16 @@ import java.util.Set;
 import javax.persistence.Query;
 import javax.persistence.TransactionRequiredException;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import rssagregator.beans.Flux;
 import rssagregator.beans.FluxType;
 import rssagregator.beans.Item;
 import rssagregator.beans.Journal;
 import rssagregator.beans.traitement.MediatorCollecteAction;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Predicate;
 
 /**
  *
@@ -31,11 +31,12 @@ public class DaoFlux extends AbstrDao {
 //    public List<Flux> listFlux;
     private static String REQ_FIND_ALL = "SELECT f FROM Flux f";
     org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DaoFlux.class);
+//    private List<Journal> criteriaJournauxLie = new ArrayList<Journal>();
+    Journal criteriaJournalLie;
 
     /**
      * *
-     * Ce constructeur NE DOIT PAS ETRE UTILISE (d'ou le protected), il faut
-     * passer par la DAOFactory
+     * Ce constructeur NE DOIT PAS ETRE UTILISE (d'ou le protected), il faut passer par la DAOFactory
      *
      * @param dAOFactory
      */
@@ -62,9 +63,8 @@ public class DaoFlux extends AbstrDao {
 //    }
     /**
      * *
-     * Supprimer le flux et tous ses objets liées (item, incident). Si une item
-     * est encore liée à un autre flux, la liaison est rompu mais l'item n'est
-     * pas supprimée Infocollecte...)
+     * Supprimer le flux et tous ses objets liées (item, incident). Si une item est encore liée à un autre flux, la
+     * liaison est rompu mais l'item n'est pas supprimée Infocollecte...)
      *
      * @param flux
      */
@@ -113,9 +113,8 @@ public class DaoFlux extends AbstrDao {
 
     /**
      * *
-     * Permet de récupérer la liste complete des flux. Pour éviter d'éffectuer
-     * milles fois la même requête, il est possible de limiter la recherche au
-     * cache de l'ORM.
+     * Permet de récupérer la liste complete des flux. Pour éviter d'éffectuer milles fois la même requête, il est
+     * possible de limiter la recherche au cache de l'ORM.
      *
      * @param sql true= parcourir la base, false : juste le cache
      * @return
@@ -130,10 +129,33 @@ public class DaoFlux extends AbstrDao {
         return result;
     }
 
+//    protected void criteriaTraitementDeschampsSpecifique(CriteriaQuery cq, CriteriaBuilder cb, Root root, List<Predicate> listWhere) {
+//        //critère sur les journaux
+//
+//        Join joinFlux = root.join("journalLie");
+////            cq.where(cb.equal(joinFlux.get("ID"), jLie.getID()));
+////            listWhere.add(cb.and(cb.equal(joinFlux.get("ID"), jLie.getID())));
+//
+//
+//    }
+    @Override
+    public void criteriaTraitementDeschampsSpecifique(CriteriaQuery cq, CriteriaBuilder cb, Root root, List listWhere) {
+        System.out.println("------------------ Traitement Spécifique");
+        //Gestion des journaux liés
+        if (criteriaJournalLie != null) {
+            Join joinFlux = root.join("journalLie");
+            System.out.println("--->>> Journal");
+            listWhere.add(cb.and(cb.equal(joinFlux.get("ID"), criteriaJournalLie.getID())));
+        }
+    }
+//    @Override
+//        public void bbb(CriteriaQuery cq, CriteriaBuilder cb, Root root, List<Predicate> listWhere){
+//            
+//        };
+
     /**
      * *
-     * Charger les flux depuis la base de données. Les dernier hash des items
-     * sont aussi chargé pour résidé en mémoire
+     * Charger les flux depuis la base de données. Les dernier hash des items sont aussi chargé pour résidé en mémoire
      */
     public void chargerDepuisBd() {
         logger.info("Chargement des flux depuis la base de données");
@@ -151,12 +173,12 @@ public class DaoFlux extends AbstrDao {
             DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
             Set<String> dernierHash = daoItem.findLastHash(fl, 100);
             fl.setLastEmpruntes(dernierHash);
-            
-            
+
+
             //On enregistre le flux à ses services
             fl.enregistrerAupresdesService();
 
-             //Lors de l'attribution d'un id, on enregistre le flux aurpès du Server de Mbeans
+            //Lors de l'attribution d'un id, on enregistre le flux aurpès du Server de Mbeans
 
             //On doit également charger les incident en cours pour les flux
 //            DAOIncident dAOIncident = DAOFactory.getInstance().getDAOIncident();
@@ -166,12 +188,10 @@ public class DaoFlux extends AbstrDao {
 
     /**
      * *
-     * Ajoute un flux à la liste des flux collecté puis persiste dans la base de
-     * donées. Pour chacun des objet lié au flux (journal comportement, type),
-     * on va vérifier que l'objet n'est pas déjà présent dans la base de donnée
-     * pour éviter la double créeation par la cascade persit. A la fin de
-     * l'enregistrement, on met le change statut du bean flux a true afin qu'il
-     * puisse si besoin est être notifié aux observeur (le service de collecte).
+     * Ajoute un flux à la liste des flux collecté puis persiste dans la base de donées. Pour chacun des objet lié au
+     * flux (journal comportement, type), on va vérifier que l'objet n'est pas déjà présent dans la base de donnée pour
+     * éviter la double créeation par la cascade persit. A la fin de l'enregistrement, on met le change statut du bean
+     * flux a true afin qu'il puisse si besoin est être notifié aux observeur (le service de collecte).
      *
      * @param obj Le flux a créer
      */
@@ -185,11 +205,9 @@ public class DaoFlux extends AbstrDao {
 
         /**
          * *
-         * La cascade persist nous oblige à vérifier que chacun des objet lié
-         * n'est pas déjà existant. Si il est existant, il faut retrouver ces
-         * objet et les mettre dans le flux avant de persister. Si on ne le fait
-         * pas, l'ORM va chercher à créer 2x la même chose et provoquer une
-         * erreur *
+         * La cascade persist nous oblige à vérifier que chacun des objet lié n'est pas déjà existant. Si il est
+         * existant, il faut retrouver ces objet et les mettre dans le flux avant de persister. Si on ne le fait pas,
+         * l'ORM va chercher à créer 2x la même chose et provoquer une erreur *
          */
         MediatorCollecteAction m = fl.getMediatorFlux();
         if (m != null) {
@@ -224,7 +242,7 @@ public class DaoFlux extends AbstrDao {
                 }
             }
         }
-        
+
         System.out.println("PERIODE : " + fl.getPeriodeCaptations().size());
         super.creer(fl);
 
@@ -260,9 +278,8 @@ public class DaoFlux extends AbstrDao {
     @Override
     /**
      * *
-     * Redéclaration de la méthode modifié. En plus de l'eefet classique de la
-     * méthode modifié, cette méthode bloque la DaoFlux. Elle change aussi le
-     * changeStatut du beans modifié (un flux est un observable)
+     * Redéclaration de la méthode modifié. En plus de l'eefet classique de la méthode modifié, cette méthode bloque la
+     * DaoFlux. Elle change aussi le changeStatut du beans modifié (un flux est un observable)
      */
     public synchronized void modifier(Object obj) throws Exception {
 
@@ -287,8 +304,8 @@ public class DaoFlux extends AbstrDao {
 
     /**
      * *
-     * Enregistre les modifications du flux dans la base de donnée. SI Erreur,
-     * on consigne en utilisant le service de gestion des incidents l'observer
+     * Enregistre les modifications du flux dans la base de donnée. SI Erreur, on consigne en utilisant le service de
+     * gestion des incidents l'observer
      *
      * @param flux
      */
@@ -311,7 +328,6 @@ public class DaoFlux extends AbstrDao {
 //            throw e;
 //        }
 //    }
-
     /**
      * *
      * Modifi le statut Change de L'observable et notifi les observer.
@@ -322,8 +338,8 @@ public class DaoFlux extends AbstrDao {
 //    }
     /**
      * *
-     * Trouve le nombre max de flux. Le journal envoyé en argument permet de
-     * restreindre le compte au flux lie en journal en question
+     * Trouve le nombre max de flux. Le journal envoyé en argument permet de restreindre le compte au flux lie en
+     * journal en question
      *
      * @param j Journal lie, null pour compter tous les flux
      * @return
@@ -357,8 +373,7 @@ public class DaoFlux extends AbstrDao {
 
     /**
      * *
-     * Rechercher une liste de flux par criteria (qui peuvent être null pour
-     * absence de critères)
+     * Rechercher une liste de flux par criteria (qui peuvent être null pour absence de critères)
      *
      * @param jLie : le flux doit être lié au journal
      * @param order_by : le champs sur lequel doit porter le trie
@@ -455,4 +470,14 @@ public class DaoFlux extends AbstrDao {
 //            }
         }
     }
+
+    public Journal getCriteriaJournalLie() {
+        return criteriaJournalLie;
+    }
+
+    public void setCriteriaJournalLie(Journal criteriaJournalLie) {
+        this.criteriaJournalLie = criteriaJournalLie;
+    }
+
+
 }

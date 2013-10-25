@@ -190,6 +190,7 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
         connection.setExceptionListener(this);
         session = connection.createTopicSession(true, Session.CLIENT_ACKNOWLEDGE);
         topic = session.createTopic(queueName);
+        
 
         consumer = session.createDurableSubscriber(topic, servname);
         // Si le serveur n'est pas maitre (cad, si il est esclave), il doit ecouter le topic

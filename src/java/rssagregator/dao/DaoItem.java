@@ -93,6 +93,18 @@ public class DaoItem extends AbstrDao {
         }
     }
 
+    @Override
+    public void criteriaTraitementDeschampsSpecifique(CriteriaQuery cq, CriteriaBuilder cb, Root root, List listWhere) {
+        //--> C'est maintenant pris en charge dans le champs commum a toute les DAO grace a l'opérateur in et une jointure
+//        System.out.println("----Traitement Spe ITEM");
+//        if (where_clause_Flux != null && where_clause_Flux.size() > 0) {
+//            System.out.println("WHERE ITEMMM");
+//            Join joinFlux = root.join("listFlux");
+//            listWhere.add(joinFlux.in(where_clause_Flux));
+//        }
+//        super.criteriaTraitementDeschampsSpecifique(cq, cb, root, listWhere); //To change body of generated methods, choose Tools | Templates.
+    }
+
     /**
      * *
      * Lance la requete criteria. Ili faut veiller auparavant à configurer les critères propre à la dao
@@ -100,6 +112,7 @@ public class DaoItem extends AbstrDao {
      *
      * @return
      */
+    @Deprecated
     public List<Item> findCretaria() {
 
 //        em = dAOFactory.getEntityManager();
@@ -176,6 +189,16 @@ public class DaoItem extends AbstrDao {
         return tq.getResultList();
     }
 
+    public Integer calculGridTotal() {
+        // On reprend les paramettres criteria
+
+        // Rquete de compte
+
+
+
+        return null;
+    }
+
     public static void main(String[] args) {
 
 
@@ -236,6 +259,7 @@ public class DaoItem extends AbstrDao {
         TypedQuery<Item> tq = em.createQuery(cq);
 
         List resu = tq.getResultList();
+
 
         try {
             Integer retour = new Integer(resu.get(0).toString());
@@ -496,9 +520,9 @@ public class DaoItem extends AbstrDao {
      * Met les paramettre de critère à null, utile car la daoItem est singleton, cette commande permet donc de
      * réinitialiser les paramettres de recherche.
      */
+    @Override
     public void initcriteria() {
-//        where_clause_flux = null;
-
+        criteriaSearchFilters = new SearchFiltersList();
         where_clause_Flux = new ArrayList<Flux>();
         order_by = null;
         order_desc = null;
@@ -507,4 +531,16 @@ public class DaoItem extends AbstrDao {
         date1 = null;
         date2 = null;
     }
+    
+    
+    /***
+     * Commiter les modif de la dao
+     * @throws IllegalStateException
+     * @throws RollbackException 
+     */
+    public void commit() throws IllegalStateException, RollbackException{
+        em.getTransaction().commit();
+    }
+    
+    
 }

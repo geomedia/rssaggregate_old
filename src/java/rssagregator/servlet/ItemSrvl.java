@@ -7,6 +7,7 @@ package rssagregator.servlet;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -16,12 +17,16 @@ import javax.servlet.http.HttpServletResponse;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.beans.POJOCompteItem;
 import rssagregator.beans.form.ItemForm;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoItem;
+import rssagregator.dao.SearchFilter;
 import rssagregator.utils.ServletTool;
 
 /**
@@ -46,6 +51,7 @@ public class ItemSrvl extends HttpServlet {
     public String VUE = null;
     public static final String ATT_ITEM = "item";
     public static final String ATT_SERV_NAME = "item";
+    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(ItemSrvl.class);
 
     /**
      * Processes requests for both HTTP
@@ -212,6 +218,81 @@ public class ItemSrvl extends HttpServlet {
             listItem = daoItem.findCretaria();
             request.setAttribute("listItem", listItem);
         }
+        //--------------------------------------------------------------------------------------------------------------
+        //.........................LIST GRID
+        //--------------------------------------------------------------------------------------------------------------
+        // Va être fusionné avec list
+        if (action.equals("listgrid")) {
+
+            //Il faut récupérer les champs spéciaux de recherche (flux lié, date comme critère limitant...)
+            if (request.getParameter("filters") != null && !request.getParameter("filters").isEmpty()) {
+                String filter = request.getParameter("filters");
+                JSONParser parse = new JSONParser();
+                try {
+                    JSONObject obj2 = (JSONObject) parse.parse(filter);
+                    JSONArray rules = (JSONArray) obj2.get("spefield");
+                    for (int i = 0; i < rules.size(); i++) {
+                        JSONObject obj = (JSONObject) rules.get(i);
+                        String field = (String) obj.get("field");
+                        if (field.equals("idFlux")) {
+                            JSONArray idString = (JSONArray) obj.get("data"); // C'est un tableau d'id en JSON
+                            List<Flux> lfDao = new ArrayList<Flux>(); // La liste des flux qui servira dans les critère pour la dao
+                            for (Iterator it1 = idString.iterator(); it1.hasNext();) { // Pour chaque ID on va chercher le flux qu'on inscrit dans une liste
+                                try {
+                                    String idStr = (String) it1.next();
+                                    Flux flux = (Flux) DAOFactory.getInstance().getDAOFlux().find(new Long(idStr));
+                                    lfDao.add(flux);
+                                } catch (Exception e) {
+                                    logger.debug("Impossible de retrouver le flux ", e);
+                                }
+                            }
+
+                            SearchFilter searchFilter = new SearchFilter();                            //On configure un nouveau critère
+                            searchFilter.setData(lfDao);
+                            searchFilter.setField("listFlux");
+                            searchFilter.setOp("in");
+                            searchFilter.setType(List.class);
+                            daoItem.getCriteriaSearchFilters().getFilters().add(searchFilter);
+
+                        } else if (field.equals("date1")) {
+                            try {
+                                String data = (String) obj.get("data");
+                                DateTimeFormatter fmt = DateTimeFormat.forPattern("dd/MM/yyyy");
+                                DateTime dt1 = fmt.parseDateTime(data).withTimeAtStartOfDay();
+                                SearchFilter searchFilter = new SearchFilter();
+                                searchFilter.setData(dt1.toDate());
+                                searchFilter.setOp("gt");
+                                searchFilter.setType(Date.class);
+                                searchFilter.setField("datePub");
+                                daoItem.getCriteriaSearchFilters().getFilters().add(searchFilter);
+                            } catch (Exception e) {
+                                logger.debug("erreur lors de l'interprétation de la data1 ", e);
+                            }
+
+                        } else if (field.equals("date2")) {
+                            try {
+                                String data = (String) obj.get("data");
+                                DateTimeFormatter fmt = DateTimeFormat.forPattern("dd/MM/yyyy");
+                                DateTime dt1 = fmt.parseDateTime(data).withTimeAtStartOfDay().plusDays(1);
+                                SearchFilter searchFilter = new SearchFilter();
+                                searchFilter.setData(dt1.toDate());
+                                searchFilter.setOp("lt");
+                                searchFilter.setType(Date.class);
+                                searchFilter.setField("datePub");
+                                daoItem.getCriteriaSearchFilters().getFilters().add(searchFilter);
+                            } catch (Exception e) {
+                                logger.debug("erreur lors de l'interprétation de la date 2", e);
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    logger.debug("erreur dans de traitement d'une requete dans list", e);
+                }
+            }
+
+
+            ServletTool.actionLIST(request, Item.class, ATT_ITEM, DAOFactory.getInstance().getDaoItem());
+        }
 
         /**
          * *=================================================================================
@@ -256,12 +337,12 @@ public class ItemSrvl extends HttpServlet {
 
                     Date date2 = null;
                     try {
-                        date1 = fmt.parseDateTime(request.getParameter("date2")).toDate();
+                        date2 = fmt.parseDateTime(request.getParameter("date2")).toDate();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                     daoItem.initcriteria();
-                    daoItem.setDate1(date1); 
+                    daoItem.setDate1(date1);
                     daoItem.setDate2(date2);
                     daoItem.setWhere_clause_Flux(listF);
                     List<Item> itDuflux = daoItem.findCretaria();
@@ -269,6 +350,8 @@ public class ItemSrvl extends HttpServlet {
                     POJOCompteItem compteItem = new POJOCompteItem();
                     compteItem.setFlux(f);
                     compteItem.setItems(itDuflux);
+                    compteItem.setDate1(date1);
+                    compteItem.setDate2(date2);
                     compteItem.compte();
                     listeCompte.add(compteItem);
 
@@ -340,7 +423,8 @@ public class ItemSrvl extends HttpServlet {
             VUE = "/WEB-INF/itemXMLsync.jsp";
         } else if (vue.equals("hightchart")) {
             VUE = "/WEB-INF/itemHighchart.jsp";
-
+        } else if (vue.equals("grid")) {
+            VUE = "/WEB-INF/itemJSONGrid.jsp";
         }
 
         this.getServletContext().getRequestDispatcher(VUE).forward(request, response);

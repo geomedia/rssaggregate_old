@@ -30,29 +30,29 @@
         <!--Paramètre de la toolbox info du jquery IU-->
         <script>
             $(function() {
-            $(document).tooltip({
-            show: {
-            effect: false,
-            delay: 30
-            }
-            });
-            $("#hide-option").tooltip({
-            hide: {
-            effect: false,
-            delay: 70
-            }
-            });
-            $("#open-event").tooltip({
-            show: null,
-            position: {
-            my: "left top",
-            at: "left bottom"
-            },
-            open: function(event, ui) {
-            ui.tooltip.animate({top: ui.tooltip.position().top + 10}, "fast");
-            }
-            })
-            ;
+                $(document).tooltip({
+                    show: {
+                        effect: false,
+                        delay: 30
+                    }
+                });
+                $("#hide-option").tooltip({
+                    hide: {
+                        effect: false,
+                        delay: 70
+                    }
+                });
+                $("#open-event").tooltip({
+                    show: null,
+                    position: {
+                        my: "left top",
+                        at: "left bottom"
+                    },
+                    open: function(event, ui) {
+                        ui.tooltip.animate({top: ui.tooltip.position().top + 10}, "fast");
+                    }
+                })
+                        ;
             });
         </script>
     </head>
@@ -85,10 +85,10 @@
                     if (u != null) {
                         out.println(u.getMail());
                 %><a href="${rootpath}ident/logout">Deconnection</a><%
-                        if (u.getAdminstatut()) {
-                            request.setAttribute("admin", true);
-                        }
-                %> | <a href="${rootpath}user/mod?id=<% out.print(u.getID()); %>">Mon compte</a><%
+                    if (u.getAdminstatut()) {
+                        request.setAttribute("admin", true);
+                    }
+                %> | <a href="${rootpath}user/mod?id=<% out.print(u.getID());%>">Mon compte</a><%
                     } else {
                         out.print("deco");
                     }
@@ -113,10 +113,19 @@
         </header>
         <div style="clear: both"></div>
 
-            <nav id="topNav">  
-                <ul>  
-                    <li <c:if test="${navmenu=='item'}"> class="current_page_item"</c:if>><a href="${rootpath}item">Items</a></li>  
-                <li <c:if test="${navmenu=='flux'}"> class="current_page_item"</c:if>>  
+        <nav id="topNav">  
+            <ul>  
+                <li <c:if test="${navmenu=='item'}"> class="current_page_item"</c:if>><a href="${rootpath}item">Items</a></li>  
+
+                    <li <c:if test="${navmenu=='journaux'}"> class="current_page_item"</c:if>><a href="${rootpath}journaux">Journaux</a>
+                        <ul>
+                            <li><a href="${rootpath}journaux/recherche">Recherche</a></li>
+                        <c:if test="${admin == 'true'}"> <li><a href="${rootpath}journaux/add">Ajout</a></li></c:if>
+
+                        </ul> 
+                    </li>  
+
+                    <li <c:if test="${navmenu=='flux'}"> class="current_page_item"</c:if>>  
                     <a href="${rootpath}flux">Flux</a>
                     <ul>    
                         <li><a href="${rootpath}flux/recherche">Rechercher</a></li>  
@@ -125,13 +134,7 @@
                         <li><a href="${rootpath}flux/highchart">Récapitulatif de l'activité</a></li>
                     </ul>                  
                 </li>  
-                <li <c:if test="${navmenu=='journaux'}"> class="current_page_item"</c:if>><a href="${rootpath}journaux">Journaux</a>
-                        <ul>
-                            <li><a href="${rootpath}journaux/recherche">Recherche</a></li>
-                        <c:if test="${admin == 'true'}"> <li><a href="${rootpath}journaux/add">Ajout</a></li></c:if>
 
-                    </ul> 
-                </li>  
 
                 <li <c:if test="${navmenu=='incident'}"> class="current_page_item"</c:if>><a href="${rootpath}incidents">Incidents</a></li>  
 
@@ -153,23 +156,23 @@
 
                 </li>
 
-               <c:if test="${admin == 'true'}"> <li <c:if test="${navmenu=='slave'}"> class="current_page_item"</c:if>><a href="${rootpath}slave/recherche">Serveurs esclaves</a>
-                        <ul>
-                            <li><a href="${rootpath}slave/recherche">Recherche</a></li>
-                        <li><a href="${rootpath}slave/add">Ajouter</a></li>
-                        <li><a href="${rootpath}slave/importitem">Synch Manuelle</a></li>
-                    </ul>
-                   </li></c:if>
+                <c:if test="${admin == 'true'}"> <li <c:if test="${navmenu=='slave'}"> class="current_page_item"</c:if>><a href="${rootpath}slave/recherche">Serveurs esclaves</a>
+                            <ul>
+                                <li><a href="${rootpath}slave/recherche">Recherche</a></li>
+                            <li><a href="${rootpath}slave/add">Ajouter</a></li>
+                            <li><a href="${rootpath}slave/importitem">Synch Manuelle</a></li>
+                        </ul>
+                    </li></c:if>
 
                 <c:if test="${admin == 'true'}"><li <c:if test="${navmenu=='user'}"> class="current_page_item"</c:if>><a href="${rootpath}user/recherche">Utilisateurs</a>
-                        <ul>
-                            <li><a href="${rootpath}user/recherche">Recherche</a></li>
-                        <li><a href="${rootpath}user/add">Ajouter</a></li>
-                    </ul>
+                            <ul>
+                                <li><a href="${rootpath}user/recherche">Recherche</a></li>
+                            <li><a href="${rootpath}user/add">Ajouter</a></li>
+                        </ul>
                     </li></c:if>
 
 
-                    <c:if test="${admin == 'true'}"><li <c:if test="${navmenu=='config'}"> class="current_page_item"</c:if>><a href="${rootpath}config/read?id=1">Configuration</a></li></c:if>
+                <c:if test="${admin == 'true'}"><li <c:if test="${navmenu=='config'}"> class="current_page_item"</c:if>><a href="${rootpath}config/read?id=1">Configuration</a></li></c:if>
                 <li <c:if test="${navmenu=='aide'}"> class="current_page_item"</c:if>><a href="${rootpath}aide.jsp">Aide</a></li>  
             </ul>  
         </nav> 
@@ -183,26 +186,26 @@
         <script>
             (function($) {
 
-            //cache nav
-            var nav = $("#topNav");
+                //cache nav
+                var nav = $("#topNav");
 
-            //add indicators and hovers to submenu parents
-            nav.find("li").each(function() {
-            if ($(this).find("ul").length > 0) {
+                //add indicators and hovers to submenu parents
+                nav.find("li").each(function() {
+                    if ($(this).find("ul").length > 0) {
 
-            $("<span>").text("^").appendTo($(this).children(":first"));
+                        $("<span>").text("^").appendTo($(this).children(":first"));
 
-            //show subnav on hover
-            $(this).mouseenter(function() {
-            $(this).find("ul").stop(true, true).slideDown();
-            });
+                        //show subnav on hover
+                        $(this).mouseenter(function() {
+                            $(this).find("ul").stop(true, true).slideDown();
+                        });
 
-            //hide submenus on exit
-            $(this).mouseleave(function() {
-            $(this).find("ul").stop(true, true).slideUp();
-            });
-            }
-            });
+                        //hide submenus on exit
+                        $(this).mouseleave(function() {
+                            $(this).find("ul").stop(true, true).slideUp();
+                        });
+                    }
+                });
             })(jQuery);
         </script>
 

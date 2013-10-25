@@ -4,20 +4,38 @@
         <servlet-name>Index</servlet-name>
         <servlet-class>rssagregator.servlet.Index</servlet-class>
     </servlet>
+
+    
+<!--    <resource-env-ref>
+        <resource-env-ref-name>jms/ConnectionFactory</resource-env-ref-name>
+        <resource-env-ref-type>org.apache.activemq.ActiveMQConnectionFactory</resource-env-ref-type>   
+    </resource-env-ref>
+    
+    <resource-env-ref>
+        <resource-env-ref-name>jms/topic/MyTopicClem</resource-env-ref-name>
+        <resource-env-ref-type>org.apache.activemq.command.ActiveMQTopic</resource-env-ref-type>   
+    </resource-env-ref>-->
+    
+    
+    
+    <resource-env-ref>
+        <resource-env-ref-name>testlink</resource-env-ref-name>
+        <resource-env-ref-type>java.lang.String</resource-env-ref-type>
+    </resource-env-ref>
     
     
     <servlet>
-    <servlet-name>JmxMiniConsoleServlet</servlet-name>
-    <servlet-class>
-        org.jminix.console.servlet.MiniConsoleServlet
-    </servlet-class>
-</servlet> 
+        <servlet-name>JmxMiniConsoleServlet</servlet-name>
+        <servlet-class>
+            org.jminix.console.servlet.MiniConsoleServlet
+        </servlet-class>
+    </servlet> 
 
 
-<servlet-mapping>
-    <servlet-name>JmxMiniConsoleServlet</servlet-name>
-    <url-pattern>/jmx/*</url-pattern>
-</servlet-mapping> 
+    <servlet-mapping>
+        <servlet-name>JmxMiniConsoleServlet</servlet-name>
+        <url-pattern>/jmx/*</url-pattern>
+    </servlet-mapping> 
 
     <servlet-mapping>
         <servlet-name>Index</servlet-name>

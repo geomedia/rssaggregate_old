@@ -475,6 +475,11 @@ form{
     
 }
 
+.requis{
+    color: red;
+    font-weight: bolder;
+    font-size: x-large;
+}
 
 
 

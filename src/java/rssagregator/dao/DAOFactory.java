@@ -12,6 +12,7 @@ import javax.persistence.Persistence;
 import rssagregator.beans.Conf;
 import rssagregator.beans.Flux;
 import rssagregator.beans.FluxType;
+import rssagregator.beans.Item;
 import rssagregator.beans.Journal;
 import rssagregator.beans.ServeurSlave;
 import rssagregator.beans.UserAccount;
@@ -210,6 +211,9 @@ public class DAOFactory<T extends AbstrDao> {
         }
         else if (beansClass.equals(Conf.class)){
             dao = (T) daoConf;
+        }
+        else if(beansClass.equals(Item.class)){
+            dao =(T) daoItem;
         }
         
 

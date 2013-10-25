@@ -34,6 +34,8 @@ public abstract class AbstrForm {
     public static final String REG_EXP_ALPHANUM_FR = "[A-Za-zéèàê -]*";
     public static final String ERR_ALPHANUM_FR= "Seul les lettres espaces et tirret sont acceptés";
     public static final String ERR_NE_PEUT_ETRE_NULL= "Ce champs doit impérativement être complété";
+    public static final String ERR_URL_INCORRECTE= "La valeur saisie ne correspond pas à une url (http://site.com)";
+    
     
     
     

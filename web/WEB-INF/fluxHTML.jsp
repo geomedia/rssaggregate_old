@@ -3,6 +3,7 @@
     Document   : index
     Created on : 22 avr. 2013, 14:36:12
     Author     : clem
+Cette JSP est utilisée pour afficher les informations relatives aux flux a l'utilisateur sous forme de page HTML. Gestion des différentes actions de l'utilisateur
 --%>
 <%@page import="javax.el.ValueExpression"%>
 <%@page import="rssagregator.servlet.FluxSrvl"%>
@@ -60,7 +61,7 @@
 
 
                     <c:when test="${action=='recherche'}">
-                        <form method="POST" id="pagina">
+<!--                        <form method="POST" id="pagina">
                             <input type="hidden" id="firstResult" value="0"/>
 
                             <fieldset>
@@ -89,7 +90,7 @@
                                     </c:forEach>
                                 </select>
                                 <button type="button" id="afin">Affiner</button>
-                                <!--<input type="submit" value="Affiner" onclick="$('#vue').val('')" id="sub" />-->
+                                <input type="submit" value="Affiner" onclick="$('#vue').val('')" id="sub" />
 
                                 <select name="vue" id="vue" onchange="subExport()()">
                                     <option value="html">Exporter</option>
@@ -98,25 +99,160 @@
                                 <script>
 
                                     function subExport() {
-                                    if ($('#vue').val() == 'opml') {
+                                        if ($('#vue').val() == 'opml') {
 
-                                    $('#pagina').attr('target', '_blank');
-                                    $('#pagina').submit();
-                                    $('#pagina').attr('target', '');
-                                    $('#vue').val('html');
+                                            $('#pagina').attr('target', '_blank');
+                                            $('#pagina').submit();
+                                            $('#pagina').attr('target', '');
+                                            $('#vue').val('html');
 
 
-                                    }
+                                        }
                                     }
                                 </script>
                                 <button type="submit"  formaction="flux" formtarget="_blank" value="vue">Exporter</button>
                             </fieldset>
-                        </form>
+                        </form>-->
                         <script src="${rootpath}AjaxFluxDyn.js"></script>
 
+                        <script src="${rootpath}ress/jqgrid/js/i18n/grid.locale-fr.js" type="text/javascript"></script>
+                        <script src="${rootpath}ress/jqgrid/js/jquery.jqGrid.min.js" type="text/javascript"></script>
+
+                        <link rel="stylesheet" type="text/css" media="screen" href="css/ui-lightness/jquery-ui-1.7.1.custom.css" />
+                        <link rel="stylesheet" type="text/css" media="screen" href="${rootpath}ress/jqgrid/css/ui.jqgrid.css" />
+                        <link rel="stylesheet" type="text/css" media="screen" href="${rootpath}ress/jquery-ui-1.10.3.custom/css/base/jquery-ui.css" />
+                        <table id="list" width="600"><tr><td></td></tr></table> 
+                        <div id="pager"></div> 
+                        <script type="text/javascript">
+                                    /***
+                                     *  Utilisé par JQgrid pour formater le champ journal en un lien
+                                     * @param {type} cellvalue
+                                     * @param {type} options
+                                     * @param {type} rowObjcet
+                                     * @param {type} l4
+                                     * @param {type} l5
+                                     * @returns {String}
+                                     */
+                                    function myLinkFormatter(cellvalue, options, rowObjcet, l4, l5) {
+                                        // Lors du classement après recherche sur le client side, le rowObjet ne peut être lu de la même manière. La ligne suivant permet de pallier à ce problème
+                                        id = rowObjcet[0];
+                                        texteLien = rowObjcet[1];
+                                        if (rowObjcet[0] === undefined) {
+                                            id = rowObjcet['ID'];
+                                            texteLien = rowObjcet['nom'];
+                                        }
+                                        return '<a href = "/RSSAgregate/flux/read?id=' + id + '">' + texteLien + '</a>';
+                                    }
+
+                                    $(function() {
+                                        $("#list").jqGrid({
+                                            url: "${rootpath}flux/list?vue=grid",
+                                            loadonce: true,
+                                            datatype: "json",
+                                            mtype: "GET",
+                                            colNames: ["ID", 'nom', "Journal", "Type", "active", "created"],
+                                            colModel: [
+                                                {name: "ID", key: true, width: 55, hidden: true},
+                                                {name: "nom", width: 55, search: true, formatter: myLinkFormatter, searchoptions: {sopt: ['cn', 'eq']}},
+                                                {name: "journalLie", width: 90, searchoptions: {sopt: ['cn', 'eq']}},
+                                                {name: "typeFlux", title: 'Type', search: true, width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
+                                                {name: "active", width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
+                                                {name: "created", width: 80, align: "right", stype: 'select', editoptions: {value: {'': 'tous', 'autre': 'autre', 'quotidien': 'quotidien'}}},
+                                            ],
+                                            pager: "#pager",
+                                            rowNum: 10,
+                                            rowList: [10, 20, 30],
+                                            sortname: "invid",
+                                            sortorder: "desc",
+                                            viewrecords: true,
+                                            gridview: true,
+                                            autoencode: true,
+                                            caption: "Recherche parmis les flux",
+                                            sortable: true,
+                                            sorttype: 'text',
+                                            autowidth: true,
+                                            exptype: "csvstring",
+                                            root: "grid",
+                                            multiselect: true,
+//                                            scrollrows : true,
+                                            ident: "\t"
+//                                    filterToolbar: {searchOperators: true},
+//                                    search: {
+//                                        caption: "Search...",
+//                                        Find: "Find",
+//                                        Reset: "Reset",
+//                                        odata: ['equal', 'not equal', 'less', 'less or equal', 'greater', 'greater or equal', 'begins with', 'does not begin with', 'is in', 'is not in', 'ends with', 'does not end with', 'contains', 'does not contain'],
+//                                        groupOps: [{op: "AND", text: "all"}, {op: "OR", text: "any"}],
+//                                        matchText: " match",
+//                                        rulesText: " rules"
+//                                    }
+                                        }
+                                        );
+
+                                        optionsearch = {searchOperators: true, stringResult: true};
+//                                jQuery("#list").jqGrid('filterToolbar', {searchOperators: true});
+                                        jQuery("#list").filterToolbar(optionsearch);
+                                        jQuery("#list").navGrid('#pager', {edit: false, add: false, del: false, search: false})
+                                                .navButtonAdd('#pager', {
+                                            caption: "'Export To CSV",
+                                            buttonicon: "ui-icon-add",
+                                            onClickButton: function() {
+                                                opt = {exptype: "jsonstring"};
+                                                $("#list").jqGrid('excelExport', {tag: 'csv', url: '${rootpath}flux/list?vue=csv'});
+                                            },
+                                            position: "last"
+                                        })
+                                                .navButtonAdd('#pager',
+                                                {
+                                                    caption: "Supprimer",
+                                                    buttonicon: "ui-icon-add",
+                                                    onClickButton: function() {
+                                                        reponse = confirm('Vous vous apprétez à supprimer un flux. Toutes les items associées seront supprimée. Cette manipulation est irréverssible. Confirmez vous votre choix ?');
+                                                        if (reponse) {
+                                                            selRowId = $('#list').jqGrid('getGridParam', 'selarrrow');
+                                                            chaine = "";
+                                                            for (i = 0; i < selRowId.length; i++) {
+                                                                chaine += 'id=' + selRowId[i] + ',';
+                                                            }
+                                                            if (chaine.length > 2) {
+                                                                chaine = chaine.substr(0, chaine.length - 1);
+                                                            }
+                                                            url = ${rootpath} + 'flux/rem?' + chaine;
+                                                            location.href = url;
+                                                        }
+
+                                                    },
+                                                })
+                                                .navButtonAdd('#pager', {
+                                            caption: "Mise a jour",
+                                            buttonicon: "ui-icon-add",
+                                            onClickButton: function() {
+                                                alert('maj' + formatIdParamFromSelectedRow());
+                                                location.href = ${rootpath} + 'flux/maj?' + formatIdParamFromSelectedRow();
+                                            }
+                                        });
+                                    });
+
+                                    /***
+                                     * Parcours les items sélectionné par dans la grid et renvoi une chaine de caractère sous la forme id=nul,id=num2. Permet de formater les paramettres dans une url
+                                     * @returns {unresolved} */
+                                    function formatIdParamFromSelectedRow() {
+                                        selRowId = $('#list').jqGrid('getGridParam', 'selarrrow');
+                                        ch = "";
+                                        for (i = 0; i < selRowId.length; i++) {
+                                            ch += 'id=' + selRowId[i] + ',';
+                                        }
+                                        if (ch.length > 2) {
+                                            ch = ch.substr(0, ch.length - 1);
+                                        }
+                                        return ch;
+
+                                    }
+                        </script>
 
 
-                        <form id="formaction2">
+
+<!--                        <form id="formaction2">
                             <ul id="resudiv">
 
                             </ul>
@@ -129,36 +265,36 @@
                             <script>
                                 $('#bts').click(function() {
 
-                                if (this.value === '1') {
-                                this.textContent = 'Déselectionner tout';
-                                this.value = '0';
-                                $("#resudiv").find(':checkbox').prop('checked', false);
-                                }
-                                else if (this.value === '0') {
-                                this.textContent = 'Tout sélectionner';
-                                this.value = '1';
-                                $("#resudiv").find(':checkbox').prop('checked', true);
-                                }
+                                    if (this.value === '1') {
+                                        this.textContent = 'Déselectionner tout';
+                                        this.value = '0';
+                                        $("#resudiv").find(':checkbox').prop('checked', false);
+                                    }
+                                    else if (this.value === '0') {
+                                        this.textContent = 'Tout sélectionner';
+                                        this.value = '1';
+                                        $("#resudiv").find(':checkbox').prop('checked', true);
+                                    }
                                 });
                             </script>
                             <button type="button" onclick="actionsub();"> OK</button>
-                        </form>
+                        </form>-->
                         <script>
-                            //Petite fonction pour la soumission du formulaire permettant la mise à jour et la suppression en nombre
-                            function actionsub() {
-                            action = $('#act').val();
-                            if(action==='rem'){
-                            reponse = confirm('Vous vous apprétez à supprimer un flux. Toutes les items associées seront supprimée. Cette manipulation est irréverssible. Confirmez vous votre choix ?');
-                            if(reponse){
-                            $('#formaction2').attr('action', '${rootpath}flux/' + action);
-                            $('#formaction2').submit();
-                            }
-                            }
-                            else if(action==='maj'){
-                            $('#formaction2').attr('action', '${rootpath}flux/' + action);
-                            $('#formaction2').submit();
-                            }
-                            }
+                                //Petite fonction pour la soumission du formulaire permettant la mise à jour et la suppression en nombre
+                                function actionsub() {
+                                    action = $('#act').val();
+                                    if (action === 'rem') {
+                                        reponse = confirm('Vous vous apprétez à supprimer un flux. Toutes les items associées seront supprimée. Cette manipulation est irréverssible. Confirmez vous votre choix ?');
+                                        if (reponse) {
+                                            $('#formaction2').attr('action', '${rootpath}flux/' + action);
+                                            $('#formaction2').submit();
+                                        }
+                                    }
+                                    else if (action === 'maj') {
+                                        $('#formaction2').attr('action', '${rootpath}flux/' + action);
+                                        $('#formaction2').submit();
+                                    }
+                                }
 
                         </script>
                     </c:when>
@@ -173,16 +309,16 @@
                             <li><a href="${rootpath}flux/importcsv?id=${bean.ID}">Importer des items</a></li>
                             <script>
                                 $(document).ready(function() {
-                                $('#suppLink').on('click', function truc2(e) {
+                                    $('#suppLink').on('click', function truc2(e) {
 
-                                reponse = confirm('Vous vous apprétez à supprimer un flux. Toutes les items associées seront supprimée. Cette manipulation est irréverssible. Confirmez vous votre choix ?');
-                                if(reponse){
-                                return true;
-                                }else{
-                                e.preventDefault();
-                                return false;
-                                }
-                                });
+                                        reponse = confirm('Vous vous apprétez à supprimer un flux. Toutes les items associées seront supprimée. Cette manipulation est irréverssible. Confirmez vous votre choix ?');
+                                        if (reponse) {
+                                            return true;
+                                        } else {
+                                            e.preventDefault();
+                                            return false;
+                                        }
+                                    });
 
                                 });
 
@@ -194,15 +330,14 @@
                     </c:when> 
 
                     <c:when test="${action=='highchart'}">
-                        youpi
 
                         <script src="http://code.highcharts.com/highcharts.js"></script>
                         <script src="http://code.highcharts.com/modules/exporting.js"></script>
 
                         <script>
-                            $(function() {
-                            $(".datepicker").datepicker();
-                            });</script>
+                                $(function() {
+                                    $(".datepicker").datepicker({dateFormat: "dd/mm/yy"});
+                                });</script>
 
 
 
@@ -259,19 +394,17 @@
                                 <option>mois</option>
                             </select>
                             <input type="submit" />
-
-
                         </form>
 
                         <script src="${rootpath}dynListJournauxFLux.js"></script>
 
                         <div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
-                        <script>
-                            $.getJSON('http://localhost:8080/RSSAgregate/flux?vue=highchart', function(essence) {
-                            $('#container').highcharts(essence);
-                            });
-
-                        </script>
+                        <!--                        <script>
+                                                    $.getJSON('http://localhost:8080/RSSAgregate/flux?vue=highchart', function(essence) {
+                                                    $('#container').highcharts(essence);
+                                                    });
+                        
+                                                </script>-->
 
                         <script src="${rootpath}FluxRecapHighChart.js"></script>
 
@@ -316,7 +449,7 @@
                                 <select name="journalLie" id="journalLie">
                                     <option value="-1">Aucun</option>
                                     <c:forEach items="${listjournaux}" var="journal">
-                                        <option<c:if test="${journal.ID==bean.journalLie.ID}"> selected="selected"</c:if> value="${journal.ID}">${journal.nom}</option>
+                                        <option<c:if test="${journal.ID==bean.journalLie.ID}"> selected="selected"</c:if><c:if test="${journal.ID==jSelect.ID}"> selected="selected"</c:if> value="${journal.ID}">${journal.nom}</option>
                                     </c:forEach>
                                 </select>
 
@@ -449,69 +582,69 @@
                         ${bean.indiceQuartileNbrItemJour}ddd
                         <script>
 
-                            $(function() {
-                            $('#container').highcharts({
-                            chart: {
-                            type: 'boxplot'
-                            },
-                            title: {
-                            text: 'Highcharts Box Plot Example'
-                            },
-                            legend: {
-                            enabled: false
-                            },
-                            xAxis: {
-                            categories: ['1', '2', '3', '4', '5'],
-                            title: {
-                            text: 'Experiment No.'
-                            }
-                            },
-                            yAxis: {
-                            title: {
-                            text: 'Observations'
-                            },
-                            plotLines: [{
-                            value: 932,
-                            color: 'red',
-                            width: 1,
-                            label: {
-                            text: 'Theoretical mean: 932',
-                            align: 'center',
-                            style: {
-                            color: 'gray'
-                            }
-                            }
-                            }]
-                            },
-                            series: [{
-                            name: 'Observations',
-                            data: [
-                            [${bean.indiceMinimumNbrItemJour}, ${bean.indiceQuartileNbrItemJour}, ${bean.indiceMedianeNbrItemJour}, ${bean.indiceDecileNbrItemJour}, ${bean.indiceMaximumNbrItemJour}]
-                            ],
-                            tooltip: {
-                            headerFormat: '<em>Experiment No {point.key}</em><br/>'
-                            }
-                            }, {
-                            name: 'Outlier',
-                            color: Highcharts.getOptions().colors[0],
-                            type: 'scatter',
-                            data: [// x, y positions where 0 is the first category
-                            [0, 644],
-                            [4, 718],
-                            [4, 951],
-                            [4, 969]
-                            ],
-                            marker: {
-                            fillColor: 'white',
-                            lineWidth: 1,
-                            lineColor: Highcharts.getOptions().colors[0]
-                            },
-                            tooltip: {
-                            pointFormat: 'Observation: {point.y}'
-                            }
-                            }]
-                            });
-                            });
+                                $(function() {
+                                    $('#container').highcharts({
+                                        chart: {
+                                            type: 'boxplot'
+                                        },
+                                        title: {
+                                            text: 'Highcharts Box Plot Example'
+                                        },
+                                        legend: {
+                                            enabled: false
+                                        },
+                                        xAxis: {
+                                            categories: ['1', '2', '3', '4', '5'],
+                                            title: {
+                                                text: 'Experiment No.'
+                                            }
+                                        },
+                                        yAxis: {
+                                            title: {
+                                                text: 'Observations'
+                                            },
+                                            plotLines: [{
+                                                    value: 932,
+                                                    color: 'red',
+                                                    width: 1,
+                                                    label: {
+                                                        text: 'Theoretical mean: 932',
+                                                        align: 'center',
+                                                        style: {
+                                                            color: 'gray'
+                                                        }
+                                                    }
+                                                }]
+                                        },
+                                        series: [{
+                                                name: 'Observations',
+                                                data: [
+                                                    [${bean.indiceMinimumNbrItemJour}, ${bean.indiceQuartileNbrItemJour}, ${bean.indiceMedianeNbrItemJour}, ${bean.indiceDecileNbrItemJour}, ${bean.indiceMaximumNbrItemJour}]
+                                                ],
+                                                tooltip: {
+                                                    headerFormat: '<em>Experiment No {point.key}</em><br/>'
+                                                }
+                                            }, {
+                                                name: 'Outlier',
+                                                color: Highcharts.getOptions().colors[0],
+                                                type: 'scatter',
+                                                data: [// x, y positions where 0 is the first category
+                                                    [0, 644],
+                                                    [4, 718],
+                                                    [4, 951],
+                                                    [4, 969]
+                                                ],
+                                                marker: {
+                                                    fillColor: 'white',
+                                                    lineWidth: 1,
+                                                    lineColor: Highcharts.getOptions().colors[0]
+                                                },
+                                                tooltip: {
+                                                    pointFormat: 'Observation: {point.y}'
+                                                }
+                                            }]
+                                    });
+                                });
 
                         </script>
 

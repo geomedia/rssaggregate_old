@@ -13,11 +13,17 @@
     </persistence-unit>-->
     <persistence-unit name="RSSAgregatePU2" transaction-type="RESOURCE_LOCAL">
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-        <!--        <non-jta-data-source>postconf</non-jta-data-source>
-        -->
-        <class>rssagregator.Truc</class>
-        <class>rssagregator.services.ServiceSynchro</class>
+        <!--<non-jta-data-source>postconf</non-jta-data-source>-->
+        <!--<non-jta-data-source/>-->
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
+        <!--=============================================================================================================-->
+        <!--.................................PARAMETRES DE CONNECTION A POSTGRES SQL.....................................-->
+        <!--=============================================================================================================-->
+        <!--        <class>rssagregator.Truc</class>
+        <class>rssagregator.services.ServiceSynchro</class>-->
+        <class>rssagregator.beans.Flurssagregator.beans.Flux</class>
+    
         <properties>
             <property name="eclipselink.ddl-generation" value="create-tables"/>
             <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
@@ -26,9 +32,37 @@
             <property name="javax.persistence.jdbc.password" value="LGSw700S"/>
             <!--<property name="eclipselink.cache.shared.default" value="true"/>-->
             <!--<property name="eclipselink.cache.shared.Flux" value="true"/>-->
+            <!--=============================================================================================================-->
+            <!--...........................................CONFIG DU POOL DE CONNECTION......................................-->
+            <!--=============================================================================================================-->
+            <!--On utilise un pool interne-->
+            <property name="eclipselink.connection-pool.default.initial" value="1"/>
+            <property name="eclipselink.connection-pool.default.min" value="30"/>
+            <property name="eclipselink.connection-pool.default.max" value="40"/>
+            
+            
+            
+            
+            <!--=============================================================================================================-->
+            <!--.....Configuration des logs de Eclipse Link. Comme pour le reste de l'application, on va utiliser log4j.....-->
+            <!--=============================================================================================================-->
+       
+            <property name="eclipselink.logging.logger" value="org.eclipse.persistence.logging.CommonsLoggingSessionLog"/>
+            <property name="eclipselink.logging.level" value="WARNING"/>
+            
+            <!--==============================================================================================================-->
+            <!--Configuration du cache coordination-->
+            <!--==============================================================================================================-->
+
+   
+            
         </properties>
-        <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
+        
+ 
+
+
     </persistence-unit>
+
     <!--    <persistence-unit name="RSSAgregatePU3" transaction-type="RESOURCE_LOCAL">
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
         <exclude-unlisted-classes>false</exclude-unlisted-classes>

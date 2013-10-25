@@ -7,7 +7,7 @@ package rssagregator.servlet;
 import com.sun.syndication.io.FeedException;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.File; 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -73,7 +73,7 @@ public class FluxSrvl extends HttpServlet {
 
         response.setCharacterEncoding("UTF-8");
         request.setCharacterEncoding("UTF-8");
-        
+
 
         //Liste des clause servant à criteria, ces variables seront envoyé dans la dao par la suite
         Journal journalLie = null;
@@ -85,7 +85,7 @@ public class FluxSrvl extends HttpServlet {
 
         SecurityManager manager = System.getSecurityManager();
         System.out.println("SECUMANAGER : " + manager);
- 
+
 
         // Un simple attribut pour que le menu brille sur la navigation courante
         request.setAttribute("navmenu", "flux");
@@ -124,6 +124,20 @@ public class FluxSrvl extends HttpServlet {
             request.setAttribute("listtypeflux", dAOGenerique.findall());
             request.setAttribute("listcomportement", DAOFactory.getInstance().getDAOComportementCollecte().findall());
             // GESTION DU BIND ET DE L'enregistremnet
+
+            // On récupère la présélection du journal (utile pour ajouter un flux directement depuis la page journal
+            try {
+                Journal jSelect = (Journal) DAOFactory.getInstance().getDaoJournal().find(new Long(request.getParameter("journal-id")));
+                request.setAttribute("jSelect", jSelect);
+                System.out.println("On a selection le journa;l " + jSelect);
+            } catch (Exception e) {
+                System.out.println("ERRRRR" + e);
+                logger.debug("err recup journal ", e);
+            }
+
+
+
+
             ServletTool.actionADD(request, ATT_OBJ, ATT_FORM, Flux.class, true);
 
             //----------------------------------------------------ACTION : MODIFICATION----------------------------------------------------
@@ -159,45 +173,60 @@ public class FluxSrvl extends HttpServlet {
         } // Si l'action est liste, on récupère la liste des flux
         //-------------------------------------------------------- ACTION LIST --------------------------------------------------------
         else if (action.equals("list")) {
-            // On restreint la liste des flux affiché
-            List<Flux> list = null;
-            // Restriction en fonction du journal
+            //            // Restriction en fonction du journal
             try {
                 Long idJournal = new Long(request.getParameter("journalid"));
                 request.setAttribute("journalid", idJournal);
                 journalLie = (Journal) daoJournal.find(idJournal);
+                daoFlux.setCriteriaJournalLie(journalLie);
+                
             } catch (Exception e) {
                 logger.debug(e);
             }
-            //On récupère le nombre max d'item
-            Integer nbItem = daoFlux.findNbMax(journalLie);
-            request.setAttribute("nbitem", nbItem);
-            System.out.println("nbitem" + nbItem);
-
-
-            // On récupère le nombre d'item par page
-            try {
-                itPrPage = new Integer(request.getParameter("itPrPage"));
-            } catch (Exception e) {
-                itPrPage = 30;
-            }
-            request.setAttribute("itPrPage", itPrPage);
-
-            //On restreint les items à trouver dans la recherche
-            try {
-                firstResult = new Integer(request.getParameter("firstResult"));
-                request.setAttribute("firstResult", firstResult);
-            } catch (Exception e) {
-                firstResult = 0;
-                System.out.println("YYY" + request.getParameter("firstResult"));
-                System.out.println("" + e);
-            }
-
-            list = daoFlux.findCretaria(journalLie, order_by, order_desc, firstResult, itPrPage, null, null);
-
-            request.setAttribute(ATT_LISTOBJ, list);
+            
+            ServletTool.actionLIST(request, Flux.class, null, daoFlux);
+            System.out.println("-->--> LIST ACTION");
+//            // On restreint la liste des flux affiché
+//            List<Flux> list = null;
+//            // Restriction en fonction du journal
+//            try {
+//                Long idJournal = new Long(request.getParameter("journalid"));
+//                request.setAttribute("journalid", idJournal);
+//                journalLie = (Journal) daoJournal.find(idJournal);
+//            } catch (Exception e) {
+//                logger.debug(e);
+//            }
+//            //On récupère le nombre max d'item
+//            Integer nbItem = daoFlux.findNbMax(journalLie);
+//            request.setAttribute("nbitem", nbItem);
+//            System.out.println("nbitem" + nbItem);
+//
+//
+//            // On récupère le nombre d'item par page
+//            try {
+//                itPrPage = new Integer(request.getParameter("itPrPage"));
+//            } catch (Exception e) {
+//                itPrPage = 30;
+//            }
+//            request.setAttribute("itPrPage", itPrPage);
+//
+//            //On restreint les items à trouver dans la recherche
+//            try {
+//                firstResult = new Integer(request.getParameter("firstResult"));
+//                request.setAttribute("firstResult", firstResult);
+//            } catch (Exception e) {
+//                firstResult = 0;
+//                System.out.println("YYY" + request.getParameter("firstResult"));
+//                System.out.println("" + e);
+//            }
+//
+//            list = daoFlux.findCretaria(journalLie, order_by, order_desc, firstResult, itPrPage, null, null);
+//            System.out.println("LIST FLUX SIZE : " + list);
+//            request.setAttribute(ATT_LISTOBJ, list);
             //-----------------------------------------------------ACTION REMOVE ---------------------------------------
 
+            
+            
         } else if (action.equals("rem")) {
             // On tente de supprimer. Si une exeption est levée pendant la suppression. On redirige l'utilisateur différement
             try {
@@ -325,12 +354,17 @@ public class FluxSrvl extends HttpServlet {
         } else if (vue.equals("fluxXMLsync")) {
             VUE = "/WEB-INF/fluxXMLsync.jsp";
             System.out.println("coucou");
-        } 
-        else if(vue.equals("jsonform")){
+        } else if (vue.equals("jsonform")) {
             VUE = "/WEB-INF/jsonform.jsp";
-        }
-        else if(vue.equals("highchart")){
+        } else if (vue.equals("highchart")) {
             VUE = "/WEB-INF/highchartFlux.jsp";
+        }
+        else if(vue.equals("grid")){
+            VUE = "/WEB-INF/fluxJSONGrid.jsp";
+            System.out.println("GRID VUEE");
+        }
+        else if(vue.equals("csv")){
+            VUE = "/WEB-INF/fluxCSV.jsp";
         }
         else {
             response.setContentType("text/html;charset=UTF-8");

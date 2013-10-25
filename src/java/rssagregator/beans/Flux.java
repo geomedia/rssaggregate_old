@@ -36,6 +36,9 @@ import org.eclipse.persistence.annotations.Cache;
 import org.eclipse.persistence.annotations.CacheCoordinationType;
 import org.eclipse.persistence.annotations.CacheType;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
+import org.eclipse.persistence.annotations.HashPartitioning;
+import org.eclipse.persistence.annotations.Partitioned;
+import org.eclipse.persistence.annotations.ReplicationPartitioning;
 import org.eclipse.persistence.config.CacheIsolationType;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
@@ -82,6 +85,7 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
 //        this.mediatorFlux = MediatorCollecteAction.getDefaultCollectAction();
         this.incidentsLie = new ArrayList<CollecteIncident>();
         this.periodeCaptations = new ArrayList<FluxPeriodeCaptation>();
+        
 
         this.setChanged();
     }

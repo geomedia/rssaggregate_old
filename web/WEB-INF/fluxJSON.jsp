@@ -5,7 +5,7 @@
 <%@page import="java.util.List"%>
 <%
     JSONArray array = new JSONArray();
-    List<Flux> listFlux = (List<Flux>) request.getAttribute("listflux");
+    List<Flux> listFlux = (List<Flux>) request.getAttribute("items");
     System.out.println("List SiZe : " + listFlux.size());
     int i;
     for (i = 0; i < listFlux.size(); i++) {

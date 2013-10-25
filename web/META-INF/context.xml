@@ -1,13 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Context antiJARLocking="true" path="/RSSAgregate">
+    
   <Resource auth="Container" driverClassName="org.postgresql.Driver" maxActive="20" maxIdle="10" maxWait="-1" name="postgrebaserss" password="LGSw700S" type="javax.sql.DataSource" url="jdbc:postgresql://localhost/baserss" username="clem"/>
   <Resource auth="Container" driverClassName="org.postgresql.Driver" maxActive="20" maxIdle="10" maxWait="-1" name="postgresqlClem" password="LGSw700S" type="javax.sql.DataSource" url="jdbc:postgresql://localhost/baserss" username="clem"/>
   <Resource auth="Container" driverClassName="org.postgresql.Driver" maxActive="20" maxIdle="10" maxWait="-1" name="postconf" password="LGSw700S" type="javax.sql.DataSource" url="jdbc:postgresql://localhost/baserss" username="clem"/>
   <Resource auth="Container" driverClassName="com.mysql.jdbc.Driver" maxActive="20" maxIdle="10" maxWait="-1" name="trucMySQL" password="LGSw700S" type="javax.sql.DataSource" url="jdbc:mysql://localhost:3306/test?zeroDateTimeBehavior=convertToNull" username="root"/>
+  
+  
+  
+  <!--Les ressources JMS utilisées pour la synchronisation de EclipseLink-->
+  <Resource auth="Container"
+          name="jms/ConnectionFactoryC"
+          type="org.apache.activemq.ActiveMQConnectionFactory"
+          description="JMS Connection Factory"
+          factory="org.apache.activemq.jndi.JNDIReferenceFactory"
+          brokerURL="tcp://172.17.201.17:61616"
+          brokerName="MyActiveMQBroker"/>
+ 
+<Resource name="jms/topic/MyTopicC"
+        auth="Container"
+        type="org.apache.activemq.command.ActiveMQTopic"
+        factory="org.apache.activemq.jndi.JNDIReferenceFactory"
+        physicalName="MY.TEST.FOO"/>
+  
+  
+
+<!--  <ResourceLink 
+                        name="testlink"
+                        global="testGlobal"
+                        type="java.lang.String" />-->
+  
+<!--        <ResourceLink
+         name="jms/ConnectionFactory"
+         global="jms/ConnectionFactoryGlobal"
+         type="javax.jms.TopicConnectionFactory" />
+        
+        <ResourceLink name="jms/topic/MyTopicClem"
+                    global="jms/topic/MyTopicClemGlobal"
+                    type="org.apache.activemq.command.ActiveMQTopic" />-->
+        
+        
+        
+        
+        
+
 
   
   <!--Les trois paramettres suivant correspondent au client ActiveMq JMS-->
-<Resource
+<!--<Resource
 name="jms/ConnectionFactory"
 auth="Container"
 type="org.apache.activemq.ActiveMQConnectionFactory"
@@ -23,12 +63,12 @@ type="org.apache.activemq.command.ActiveMQTopic"
 factory="org.apache.activemq.jndi.JNDIReferenceFactory"
 physicalName="APP.JMS.TOPIC"/>
 
-<Resource
-name="jms/queue/MyQueue"
-auth="Container"
-type="org.apache.activemq.command.ActiveMQQueue"
-factory="org.apache.activemq.jndi.JNDIReferenceFactory"
-physicalName="APP.JMS.QUEUE"/>
+    <Resource
+    name="jms/queue/MyQueue"
+    auth="Container"
+    type="org.apache.activemq.command.ActiveMQQueue"
+    factory="org.apache.activemq.jndi.JNDIReferenceFactory"
+    physicalName="APP.JMS.QUEUE"/>-->
   
 
 </Context>
