@@ -298,7 +298,7 @@ public abstract class AbstrDao<T> {
         if (retour != null && retour instanceof Long && (Long) retour >= 0) {
             EntityTransaction tr = em.getTransaction();
             tr.begin();
-            em.merge(obj);
+            em.merge(obj); 
             try {
                 // Si il s'agit d'un beans devant être synchronisé On lance la diff
                 if (BeanSynchronise.class.isAssignableFrom(obj.getClass())) {
