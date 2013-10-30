@@ -16,6 +16,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
+import javax.persistence.RollbackException;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -38,9 +39,9 @@ public abstract class AbstrDao<T> {
 
     protected EntityManager em;
     protected EntityManagerFactory emf;
+//    protected EntityTransaction tr;
 //    protected List<SearchFilter> criteriaSearchFilter = new ArrayList<SearchFilter>();
     protected SearchFiltersList criteriaSearchFilters = new SearchFiltersList();
-    
     protected String criteriaSidx; // La colonne sur laquel il faut ordonner les resultat
     protected String criteriaSord; // le sens de l'ordre asc desc
     protected Integer criteriaStartRow; //Premier enregistrement permettant de construire la limite
@@ -76,19 +77,19 @@ public abstract class AbstrDao<T> {
      * @throws Exception
      */
     public void creer(Object obj) throws Exception {
-        EntityTransaction tr = em.getTransaction();
-        tr.begin();
+//        EntityTransaction tr = em.getTransaction();
+//        tr.begin();
         em.persist(obj);
-        try {
-            if (BeanSynchronise.class.isAssignableFrom(obj.getClass())) {
-                ServiceSynchro.getInstance().diffuser(obj, "add");
-            }
-//            tr.commit();
-        } catch (Exception e) {
-            logger.error("Echec de la suppression du beans : " + e);
-//            tr.rollback();
-            throw e;
-        }
+//        try {  ---> Effectuer la synchro est maintenant dans la couche service
+////            if (BeanSynchronise.class.isAssignableFrom(obj.getClass())) {
+////                ServiceSynchro.getInstance().diffuser(obj, "add");
+////            }
+////            tr.commit();
+//        } catch (Exception e) {
+//            logger.error("Echec de la suppression du beans : " + e);
+////            tr.rollback();
+//            throw e;
+//        }
     }
 
     /**
@@ -109,13 +110,13 @@ public abstract class AbstrDao<T> {
         if (criteriaSearchFilters != null && !criteriaSearchFilters.getFilters().isEmpty()) {
             System.out.println("---> criteria search filter");
             for (int i = 0; i < criteriaSearchFilters.getFilters().size(); i++) {
-                
-          
+
+
                 SearchFilter searchFilter = criteriaSearchFilters.getFilters().get(i);
-                if(searchFilter.getData()== null || searchFilter.getField()==null || searchFilter.getOp()==null || searchFilter.getType()== null){
+                if (searchFilter.getData() == null || searchFilter.getField() == null || searchFilter.getOp() == null || searchFilter.getType() == null) {
                     continue;
                 }
-                      System.out.println("OPERATOR : " + searchFilter.getOp());
+                System.out.println("OPERATOR : " + searchFilter.getOp());
                 if (searchFilter.getOp().equals("eq")) {
                     if (searchFilter.getType() != null && searchFilter.getType().equals(String.class)) {
                         listWhere.add(cb.and(cb.equal(cb.lower(root.get(searchFilter.getField())), searchFilter.getData().toString().toLowerCase())));
@@ -135,23 +136,23 @@ public abstract class AbstrDao<T> {
                     //----------> OPERATEUR IN
                 } else if (searchFilter.getOp().equals("in")) {
                     // ---> Si la data du filtre est une liste
-                    if(searchFilter.getType().isAssignableFrom(List.class)){
+                    if (searchFilter.getType().isAssignableFrom(List.class)) {
                         try {
                             //Il faut savoir si la jointure est nécessaire
-                           Class c = classAssocie.getDeclaredField(searchFilter.getField()).getType();
-                           // Si le champs concerné dan la classe métier est une liste, alors on va effectuer une jointure
-                           if(List.class.isAssignableFrom(c)){
-                               Join joinFlux = root.join(searchFilter.getField());
-                               List lf = (List) searchFilter.getData();
-                               listWhere.add(joinFlux.in(lf));
-                           }
+                            Class c = classAssocie.getDeclaredField(searchFilter.getField()).getType();
+                            // Si le champs concerné dan la classe métier est une liste, alors on va effectuer une jointure
+                            if (List.class.isAssignableFrom(c)) {
+                                Join joinFlux = root.join(searchFilter.getField());
+                                List lf = (List) searchFilter.getData();
+                                listWhere.add(joinFlux.in(lf));
+                            }
                         } catch (NoSuchFieldException ex) {
                             Logger.getLogger(AbstrDao.class.getName()).log(Level.SEVERE, null, ex);
                         } catch (SecurityException ex) {
                             Logger.getLogger(AbstrDao.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
-                        
+
 //                    }
                     //Construction 
 //                    Collection<String> coll = new ArrayList<String>();
@@ -162,22 +163,20 @@ public abstract class AbstrDao<T> {
 //                    }
 //
 //                    listWhere.add(cb.and(root.get(searchFilter.getField()).in(coll)));
-                }
-                //Opérateur supérieur a
-                else if(searchFilter.getOp().equals("gt")){
+                } //Opérateur supérieur a
+                else if (searchFilter.getOp().equals("gt")) {
                     System.out.println("-----Opérator gt");
-                    if(searchFilter.getType().equals(Date.class)){
-                         System.out.println("----------CRITERE DE DATE GREATER");
-                       Date d = (Date) searchFilter.getData();
-                        listWhere.add(cb.and(cb.greaterThan(root.get(searchFilter.getField()), d) ));
+                    if (searchFilter.getType().equals(Date.class)) {
+                        System.out.println("----------CRITERE DE DATE GREATER");
+                        Date d = (Date) searchFilter.getData();
+                        listWhere.add(cb.and(cb.greaterThan(root.get(searchFilter.getField()), d)));
                     }
-                }
-                else if(searchFilter.getOp().equals("lt")){
-                     if(searchFilter.getType().equals(Date.class)){
-                          System.out.println("----------CRITERE DE DATE LESS");
-                         Date d = (Date) searchFilter.getData();
-                         listWhere.add(cb.and(cb.lessThan(root.get(searchFilter.getField()), d) ));
-                     }
+                } else if (searchFilter.getOp().equals("lt")) {
+                    if (searchFilter.getType().equals(Date.class)) {
+                        System.out.println("----------CRITERE DE DATE LESS");
+                        Date d = (Date) searchFilter.getData();
+                        listWhere.add(cb.and(cb.lessThan(root.get(searchFilter.getField()), d)));
+                    }
                 }
             }
         }
@@ -223,7 +222,6 @@ public abstract class AbstrDao<T> {
             return tq;
         }
     }
-        
 
     /**
      * *
@@ -296,9 +294,9 @@ public abstract class AbstrDao<T> {
         Method getter = obj.getClass().getMethod("getID");
         Object retour = getter.invoke(obj);
         if (retour != null && retour instanceof Long && (Long) retour >= 0) {
-            EntityTransaction tr = em.getTransaction();
-            tr.begin();
-            em.merge(obj); 
+//            EntityTransaction tr = em.getTransaction();
+//            tr.begin();
+            em.merge(obj);
             try {
                 // Si il s'agit d'un beans devant être synchronisé On lance la diff
                 if (BeanSynchronise.class.isAssignableFrom(obj.getClass())) {
@@ -308,7 +306,7 @@ public abstract class AbstrDao<T> {
                 //En cas d'échec de la synchronisation, on rollback la modification.
             } catch (Exception e) {
                 logger.error("erreur lors de la modification d'un beans : " + e + "\n trace : " + e.getStackTrace());
-                tr.rollback();
+//                tr.rollback();
                 throw e;
             }
         }
@@ -340,19 +338,22 @@ public abstract class AbstrDao<T> {
      * @param obj le bean à supprimé de la base de données
      */
     public void remove(Object obj) throws Exception {
-        EntityTransaction tr = em.getTransaction();
-        tr.begin();
-        em.remove(em.merge(obj));
-        try {
-            if (BeanSynchronise.class.isAssignableFrom(obj.getClass())) {
-                ServiceSynchro.getInstance().diffuser(obj, "rem");
-            }
-            tr.commit();
-        } catch (Exception e) {
+//        EntityTransaction tr = em.getTransaction();
+//        tr.begin();
 
-            tr.rollback();
-            logger.error("Erreur lors de la suppression du beans : " + e);
-        }
+        em.remove(em.merge(obj));
+       
+
+//        try {
+//            if (BeanSynchronise.class.isAssignableFrom(obj.getClass())) {
+//                ServiceSynchro.getInstance().diffuser(obj, "rem");
+//            }
+//            tr.commit();
+//        } catch (Exception e) {
+//
+////            tr.rollback();
+//            logger.error("Erreur lors de la suppression du beans : " + e);
+//        }
     }
 
     /**
@@ -413,7 +414,6 @@ public abstract class AbstrDao<T> {
 //    public void setCriteriaSearchFilter(List<SearchFilter> criteriaSearchFilter) {
 //        this.criteriaSearchFilter = criteriaSearchFilter;
 //    }
-
     public String getCriteriaSidx() {
         return criteriaSidx;
     }
@@ -461,6 +461,42 @@ public abstract class AbstrDao<T> {
     public void setCriteriaSearchFilters(SearchFiltersList criteriaSearchFilters) {
         this.criteriaSearchFilters = criteriaSearchFilters;
     }
+
+    /**
+     * *
+     * Commiter les modif de la dao. Au départ, on commitait dans chaque méthode de dao. Mais il faut parfois effectuer
+     * plusieurs action et commiter (ou ne pas) a la fin. Le commit doit ainsi être emblobant
+     *
+     * @throws IllegalStateException
+     * @throws RollbackException
+     */
+    public void commit() throws IllegalStateException, RollbackException {
+        if (em.getTransaction().isActive()) {
+            em.getTransaction().commit();
+        }
+//        em.getTransaction().commit();
+    }
+
+    public void beginTransaction() {
+//        tr = em.getTransaction();
+        em.getTransaction().begin();
+    }
+
+    public void roolbackTransaction() {
+        if (em.getTransaction().isActive()) {
+            em.getTransaction().rollback();
+        }
+    }
+
+//    public EntityTransaction getTr() {
+//        return tr;
+//    }
+//
+//    public void setTr(EntityTransaction tr) {
+//        this.tr = tr;
+//    }
+    
+    
     
     
     

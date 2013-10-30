@@ -160,7 +160,8 @@ public class TacheSynchroRecupItem extends AbstrTacheSchedule<TacheSynchroRecupI
                         //Les items récupérée depuis le serveur esclave doivent être considérée comme nouvelle. Il ne faut ainsi pas s'intéresser à l'ID de cette item (id qui est propre au serveur escalve)
                         item.setID(null);
                         //On enregistre le nouvel item
-                        daoItem.enregistrement(item, flux);
+//                        daoItem.enregistrement(item, flux);
+                        ServiceCollecteur.getInstance().ajouterItemAuFlux(flux, item);
                     }
                     return this;
                 }

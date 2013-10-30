@@ -60,7 +60,7 @@ public class Journal implements Serializable, BeanSynchronise {
     /**
      * Un journal possède plusieurs flux. La suppression du journal entraine la suppression des flux par cascade.
      */
-    @OneToMany(mappedBy = "journalLie", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE, CascadeType.DETACH})
+    @OneToMany(mappedBy = "journalLie", fetch = FetchType.EAGER, cascade = {CascadeType.DETACH})
     private List<Flux> fluxLie;
     /**
      * La page d'accueil du journal. Cette variable est informative. Exemple http://www.lemonde.fr

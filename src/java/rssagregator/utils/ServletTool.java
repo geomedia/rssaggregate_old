@@ -19,12 +19,13 @@ import org.json.simple.parser.ParseException;
 import rssagregator.beans.AbstrObservableBeans;
 import rssagregator.beans.Conf;
 import rssagregator.beans.Flux;
-import rssagregator.beans.Journal;
 import rssagregator.beans.form.AbstrForm;
 import rssagregator.beans.form.FORMFactory;
 import rssagregator.dao.AbstrDao;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.SearchFilter;
+import rssagregator.services.crud.AbstrServiceCRUD;
+import rssagregator.services.crud.ServiceCRUDFactory;
 import rssagregator.services.ServiceSynchro;
 import rssagregator.servlet.JournauxSrvl;
 
@@ -136,6 +137,44 @@ public class ServletTool {
     public static List getListFluxFromRequest(HttpServletRequest request, AbstrDao dao) throws NumberFormatException, NoResultException {
         List<Object> listFlux = new ArrayList<Object>();
         String[] tabIdf = request.getParameterValues("id");
+        System.out.println("°à°+====");
+
+        //Il y a plein de façon de passer des ID
+        Boolean err = false;
+        //1°. Si on a qu'un paramettre avec un chiffre seul
+        if (tabIdf.length == 1) {
+            try {
+                Long intVal = new Long(tabIdf[0]);
+                Object o = dao.find(intVal);
+                listFlux.add(o);
+                System.out.println("Pouet");
+                return listFlux;
+            } catch (Exception e) {
+                err = true;
+            }
+        }
+
+        // Si cette facon a échoué. Si on trouve des virgule dans une seule chaine
+        if (tabIdf.length == 1 && tabIdf[0].matches(".*,.*")) {
+            err = false;
+            listFlux = new ArrayList<Object>();
+            String[] split = tabIdf[0].split(",");
+            for (int i = 0; i < split.length; i++) {
+                String string = split[i];
+                try {
+                    Long intVal = new Long(string);
+                    Object o = dao.find(intVal);
+                    listFlux.add(o);
+                } catch (Exception e) {
+                    err = true;
+                }
+            }
+            if (!err) {
+                return listFlux;
+            }
+        }
+
+
         if (tabIdf != null && tabIdf.length > 0) {
             int i;
             for (i = 0; i < tabIdf.length; i++) {
@@ -192,10 +231,10 @@ public class ServletTool {
                     System.out.println("field : " + field);
                     System.out.println("op : " + op);
                     System.out.println("data : " + data);
-                    
+
                     SearchFilter filt = new SearchFilter();
-             
-                    
+
+
                     filt.setData(data);
                     filt.setField(field);
                     filt.setOp(op);
@@ -203,14 +242,14 @@ public class ServletTool {
                     try {
                         System.out.println("On tente de trouver le type");
                         filt.setType(beansClass.getDeclaredField(field).getType());
-                        
+
                     } catch (NoSuchFieldException ex) {
                         Logger.getLogger(ServletTool.class.getName()).log(Level.SEVERE, null, ex);
                     } catch (SecurityException ex) {
                         Logger.getLogger(ServletTool.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                    
-                    
+
+
                     dao.getCriteriaSearchFilters().getFilters().add(filt);
                 }
 
@@ -219,97 +258,97 @@ public class ServletTool {
             }
         }
 
-            //Compte du nombre total de résultat
-            Integer count = null;
-            try {
-                count = dao.cptCriteria();
-                request.setAttribute("count", count);
-            } catch (Exception e) {
-                logger.debug("err count", e);
-            }
+        //Compte du nombre total de résultat
+        Integer count = null;
+        try {
+            count = dao.cptCriteria();
+            request.setAttribute("count", count);
+        } catch (Exception e) {
+            logger.debug("err count", e);
+        }
 
 
-            // Juste un bloc de test permettant d'afficher les paramettre de la dequete pour faire du debug
-            Map<String, String[]> map = request.getParameterMap();
-            for (Map.Entry<String, String[]> entry : map.entrySet()) {
-                String string = entry.getKey();
-                String[] strings = entry.getValue();
-                System.out.println("-- key : " + string + " // value : " + strings[0] + " size " + strings.length);
-            }
+        // Juste un bloc de test permettant d'afficher les paramettre de la dequete pour faire du debug
+        Map<String, String[]> map = request.getParameterMap();
+        for (Map.Entry<String, String[]> entry : map.entrySet()) {
+            String string = entry.getKey();
+            String[] strings = entry.getValue();
+            System.out.println("-- key : " + string + " // value : " + strings[0] + " size " + strings.length);
+        }
 
-            System.out.println("AV ROW");
-            // ROW
-            if (request.getParameter("vue") != null && !request.getParameter("vue").equals("csv")) {
-                Integer limit = null;
-                if (request.getParameter("rows") != null && !request.getParameter("rows").isEmpty()) {
-                    try {
-                        limit = new Integer(request.getParameter("rows"));
-                        request.setAttribute("rows", limit);
-                        dao.setCriteriaRow(limit);
-                    } catch (Exception e) {
-                    }
-                } else {
-                }
-                System.out.println("°1");
-
-                //-----PAGE
-                Integer page = null;
-                if (request.getParameter("page") != null && !request.getParameter("page").isEmpty()) {
-                    System.out.println("°°°°°°°°°))");
-                    try {
-                        page = new Integer(request.getParameter("page"));
-
-                        request.setAttribute("page", new Integer(request.getParameter("page")));
-                        Integer startRows = limit * page - limit;
-                        dao.setCriteriaStartRow(startRows);
-
-                        Double totalPagedbl;
-                        Integer totalPage = null;
-                        if (count != null && limit != null && count > 0 && limit > 0) {
-                            totalPagedbl = Math.ceil(count.doubleValue() / limit.doubleValue());
-                            totalPage = totalPagedbl.intValue();
-                            System.out.println("--->> TOTAL PAGE : " + totalPage);
-
-                            request.setAttribute("total", totalPage);
-                        } else {
-                            totalPage = 1;
-                            request.setAttribute("total", totalPage);
-                        }
-                    } catch (Exception e) {
-                        logger.debug("Erreur", e);
-                    }
-                } else {
-                    request.setAttribute("page", new Integer(1));
-                }
-            }
-
-            // Traitement de l'ordre 
-            if (request.getParameter("sidx") != null && !request.getParameter("sidx").isEmpty()) {
+        System.out.println("AV ROW");
+        // ROW
+        if (request.getParameter("vue") != null && !request.getParameter("vue").equals("csv")) {
+            Integer limit = null;
+            if (request.getParameter("rows") != null && !request.getParameter("rows").isEmpty()) {
                 try {
-                    request.setAttribute("sidx", request.getParameter("sidx"));
-                    dao.setCriteriaSidx(request.getParameter("sidx"));
+                    limit = new Integer(request.getParameter("rows"));
+                    request.setAttribute("rows", limit);
+                    dao.setCriteriaRow(limit);
                 } catch (Exception e) {
                 }
+            } else {
             }
+            System.out.println("°1");
 
-            if (request.getParameter("sord") != null && !request.getParameter("sord").isEmpty()) {
-                dao.setCriteriaSord(request.getParameter("sord"));
+            //-----PAGE
+            Integer page = null;
+            if (request.getParameter("page") != null && !request.getParameter("page").isEmpty()) {
+                System.out.println("°°°°°°°°°))");
+                try {
+                    page = new Integer(request.getParameter("page"));
+
+                    request.setAttribute("page", new Integer(request.getParameter("page")));
+                    Integer startRows = limit * page - limit;
+                    dao.setCriteriaStartRow(startRows);
+
+                    Double totalPagedbl;
+                    Integer totalPage = null;
+                    if (count != null && limit != null && count > 0 && limit > 0) {
+                        totalPagedbl = Math.ceil(count.doubleValue() / limit.doubleValue());
+                        totalPage = totalPagedbl.intValue();
+                        System.out.println("--->> TOTAL PAGE : " + totalPage);
+
+                        request.setAttribute("total", totalPage);
+                    } else {
+                        totalPage = 1;
+                        request.setAttribute("total", totalPage);
+                    }
+                } catch (Exception e) {
+                    logger.debug("Erreur", e);
+                }
+            } else {
+                request.setAttribute("page", new Integer(1));
             }
+        }
 
-
-            if (request.getParameter("sord") != null && !request.getParameter("sord").isEmpty()) {
-                request.setAttribute("sord", request.getParameter("sord"));
+        // Traitement de l'ordre 
+        if (request.getParameter("sidx") != null && !request.getParameter("sidx").isEmpty()) {
+            try {
+                request.setAttribute("sidx", request.getParameter("sidx"));
+                dao.setCriteriaSidx(request.getParameter("sidx"));
+            } catch (Exception e) {
             }
+        }
+
+        if (request.getParameter("sord") != null && !request.getParameter("sord").isEmpty()) {
+            dao.setCriteriaSord(request.getParameter("sord"));
+        }
 
 
-                        // On utilise la dao pour effectuer la sélection
-            List<Object> items = dao.findCriteria();
-            request.setAttribute("items", items);
+        if (request.getParameter("sord") != null && !request.getParameter("sord").isEmpty()) {
+            request.setAttribute("sord", request.getParameter("sord"));
+        }
 
-            Integer records = dao.cptCriteria();
-            System.out.println("RECORDS : " + records);
-            request.setAttribute("records", records);
-        
+
+        // On utilise la dao pour effectuer la sélection
+        List<Object> items = dao.findCriteria();
+        request.setAttribute("items", items);
+
+        Integer records = dao.cptCriteria();
+        System.out.println("RECORDS : " + records);
+        request.setAttribute("records", records);
+
     }
 
     /**
@@ -390,7 +429,9 @@ public class ServletTool {
                         Flux ff = (Flux) bean;
                     }
 
+                    dao.beginTransaction();
                     dao.modifier(bean);
+                    dao.commit();
 
                     if (bean instanceof Flux) {
                         Flux ff = (Flux) bean;
@@ -452,9 +493,14 @@ public class ServletTool {
                 form.validate(request);
                 request.setAttribute(beansnameJSP, o);
                 if (form.getValide()) {
+                    //Récupération du service
+
                     o = form.bind(request, o, beansClass);
-                    dao.creer(o);
-                    System.out.println("3");
+                    AbstrServiceCRUD serviceCRUD = ServiceCRUDFactory.getInstance().getServiceFor(o.getClass());
+                    serviceCRUD.ajouter(o);
+//                    dao.beginTransaction();
+//                    dao.creer(o);
+//                    dao.commit();
                     if (notifiObserver && AbstrObservableBeans.class.isAssignableFrom(o.getClass())) {
                         AbstrObservableBeans aob = (AbstrObservableBeans) o;
                         aob.enregistrerAupresdesService();
@@ -477,6 +523,7 @@ public class ServletTool {
         }
     }
 
+    @Deprecated
     public static void actionADD2(HttpServletRequest request, String beansnameJSP, String formNameJSP, Class beansClass, Boolean notifiObserver) {
         String srlvtname = (String) request.getAttribute("srlvtname");
         System.out.println("--->>>>>> ADD ");
@@ -516,26 +563,35 @@ public class ServletTool {
     public static void actionREM(HttpServletRequest request, Class beansClass, Boolean notifiObserver) {
         String srlvtname = (String) request.getAttribute("srlvtname");
         AbstrDao dao = DAOFactory.getInstance().getDaoFromType(beansClass);
-        String id;
+
 
         // On doit récupérer le beans
         try {
             Object o = dao.find(new Long(request.getParameter("id")));
-            //On tente la suppression
 
-            dao.remove(o);
-            if (notifiObserver && beansClass.isAssignableFrom(AbstrObservableBeans.class)) {
-                AbstrObservableBeans aob = (AbstrObservableBeans) o;
-                aob.enregistrerAupresdesService();
-                aob.forceChangeStatut();
-                aob.notifyObservers("rem");
+            if (o == null) {
+                throw new NoResultException("Pas de résultat");
             }
+            AbstrServiceCRUD serviceCRUD = ServiceCRUDFactory.getInstance().getServiceFor(o.getClass());
+            //On tente la suppression
+            serviceCRUD.supprimer(o);
+
+//            dao.remove(o);
+//            dao.commit();
+//            if (notifiObserver && beansClass.isAssignableFrom(AbstrObservableBeans.class)) {
+//                AbstrObservableBeans aob = (AbstrObservableBeans) o;
+//                aob.enregistrerAupresdesService();
+//                aob.forceChangeStatut();
+//                aob.notifyObservers("rem");
+//            }
             redir(request, srlvtname + "/recherche", "Suppression éffectué ! : ", Boolean.FALSE);
 
         } catch (ArithmeticException e) {
-            redir(request, srlvtname + "/rem", "L'entitée demandée n'existe pas ! : ", Boolean.TRUE);
+            redir(request, srlvtname + "/rem", "L'entitée demandée n'existe pas ! ", Boolean.TRUE);
         } catch (NoResultException e) {
-            redir(request, srlvtname + "/rem", "L'entitée demandée n'existe pas ! : ", Boolean.TRUE);
+            redir(request, srlvtname + "/rem", "L'entitée demandée n'existe pas ! ", Boolean.TRUE);
+        } catch (NumberFormatException e) {
+            redir(request, srlvtname + "/rem", "L'entitée demandée n'existe pas ! ", Boolean.TRUE);
         } catch (Exception e) {
             redir(request, srlvtname + "/rem", "Erreur lors du traitement  : " + e, Boolean.TRUE);
         }
@@ -543,5 +599,73 @@ public class ServletTool {
     }
 
     private ServletTool() {
+    }
+
+    /**
+     * *
+     *  Parcour la requête pour former une liste de Long au travers du paramettre id sous ses différentes formes. <ul>
+     * <li>id=1,105,6</li>
+     * <li>id=1&id=2</li>
+     * <li>id=1</li>
+     * </ul>
+     * @param request
+     * @return Une liste de Long contenant les id trouvé.
+     * @throws NoResultException
+     */
+    public static List<Long> parseidFromRequest(HttpServletRequest request) throws NoResultException {
+//throw new NoResultException("gnagna");
+        List<Long> listId = new ArrayList<Long>();
+
+            String[] tabIdf = request.getParameterValues("id");
+
+        if(tabIdf==null){
+            throw new NoResultException("Pas de paramettre ID");
+        }
+
+        //Il y a plein de façon de passer des ID
+        Boolean err = false;
+        //1°. Si on a qu'un paramettre avec un chiffre seul
+        if (tabIdf.length == 1 && !tabIdf[0].isEmpty()) {
+            try {
+                Long intVal = new Long(tabIdf[0]);
+                listId.add(intVal);
+                return listId;
+            } catch (Exception e) {
+            }
+        }
+        // Si cette facon a échoué. Si on trouve des virgule dans une seule chaine
+        if (tabIdf.length == 1 && tabIdf[0].matches(".*,.*")) {
+            err = false;
+            String[] split = tabIdf[0].split(",");
+            for (int i = 0; i < split.length; i++) {
+                String string = split[i];
+                try {
+                    Long intVal = new Long(string);
+                    listId.add(intVal);
+                } catch (Exception e) {
+                    err = true;
+                }
+            }
+            if (!err) {
+                return listId;
+            }
+        }
+
+        if (tabIdf != null && tabIdf.length > 0) {
+            int i;
+            listId = new ArrayList<Long>();
+            for (i = 0; i < tabIdf.length; i++) {
+                try {
+                    Long id = new Long(tabIdf[i]);
+                    listId.add(id);
+                } catch (Exception e) {
+                    err = true;
+                }
+            }
+            if (!err) {
+                return listId;
+            }
+        }
+        throw new NoResultException("Impossible de parser les ID");
     }
 }

@@ -18,7 +18,9 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import org.apache.poi.util.Beta;
 import org.eclipse.persistence.annotations.Cache;
+import org.eclipse.persistence.annotations.CacheCoordinationType;
 import org.eclipse.persistence.annotations.CacheType;
+import org.eclipse.persistence.config.CacheIsolationType;
 import rssagregator.services.ServiceSynchro;
 
 /**
@@ -33,7 +35,7 @@ import rssagregator.services.ServiceSynchro;
 @Entity
 @Table(name = "item")
 @Cacheable(value = true)
-@Cache(size = 5000, type = CacheType.CACHE, shared = true)
+@Cache(type = CacheType.CACHE, coordinationType = CacheCoordinationType.SEND_NEW_OBJECTS_WITH_CHANGES, isolation = CacheIsolationType.SHARED, shared = true)
 public class Item implements Serializable, Comparable<Item> {
 
     @Id

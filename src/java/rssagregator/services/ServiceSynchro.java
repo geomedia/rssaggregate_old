@@ -793,11 +793,5 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
         }
 
         return true;
-//        if (c.getMaster() && c.getServeurSlave().size() > 0) {
-//            return true;
-//        } else {
-//            return false;
-//        }
-//    }
     }
 }

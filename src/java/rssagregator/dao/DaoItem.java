@@ -7,6 +7,7 @@ package rssagregator.dao;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -20,6 +21,8 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import org.eclipse.persistence.config.CacheUsage;
+import org.eclipse.persistence.config.QueryHints;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -340,19 +343,47 @@ public class DaoItem extends AbstrDao {
      * @param fl
      * @param i
      */
-    public Set<String> findLastHash(Flux fl, int i) {
+    public Set<String> findLastHash(Flux fl, int i, Boolean onCache) {
+
+        
 
 //        em = dAOFactory.getEntityManager();
-        Query query = em.createQuery(REQ_FIND_HASH);
+        Query query = em.createQuery("SELECT item FROM Item item JOIN item.listFlux fl WHERE fl.ID=:idfl ORDER BY item.ID DESC");
+        
+        if(onCache){
+//            query.setHint("eclipselink.cache-usage", "CheckCacheOnly");
+            query.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheOnly);
+//            query.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheOnly); - See more at: http://eclipse.org/eclipselink/documentation/2.4/jpa/extensions/q_cacheusage.htm#sthash.BI9rLocd.dpuf
+        }
+        
         query.setParameter("idfl", fl.getID());
 //        query.setParameter("lim", i);
         query.setFirstResult(0);
         query.setMaxResults(i);
 
-        List<String> resu = query.getResultList();
-        Set<String> retu = new LinkedHashSet<String>(resu);
+        List<Item> resu = query.getResultList();
+        System.out.println("==================================");
+        System.out.println("NOMBRE D'item : " + resu.size());
+        System.out.println("==================================");
+        Set<String> setHash = new HashSet<String>();
+        
+        for (int j = 0; j < resu.size(); j++) {
+            Item string = resu.get(j);
+            System.out.println("TYPE RESU : " + string.getClass());
+            setHash.add(string.getHashContenu());
+            
+        }
+        
+        
+//        Set<String> retu = new LinkedHashSet<String>(resu);
+//        
+//        for (int j = 0; j < resu.size(); j++) {
+//            String string = resu.get(j);
+//            System.out.println("RESUU : " + string);
+//            
+//        }
 
-        return retu;
+        return setHash;
 //        int j;
 //         
 //        for (j=0; j<resu.size(); j++){
@@ -453,51 +484,52 @@ public class DaoItem extends AbstrDao {
      * @param item : item devant être enregistré
      * @param flux : flux devant être associé à l'item
      */
-    public synchronized void enregistrement(Item item, Flux flux) {
-        Boolean err = false;
-
-        // Si l'item est nouvelle (elle n'a pas d'id)
-        if (item.getID() != null) {
-            err = true;
-        }
-
-
-        if (!err) {
-            try {
-                EntityTransaction tr = em.getTransaction();
-                tr.begin();
-                em.persist(item);
-                tr.commit();
-                // Si le commit s'est bien déroulé, on ajoute l'emprunte au lastEmprunte qui permet le dédoublonnage du Flux 
-                flux.getLastEmpruntes().add(item.getHashContenu());
-
-
-            } catch (EntityExistsException existexeption) { // En cas d'erreur, on se rend compte qu'une item possédant le hash existe déjà
-                err = true;
-            } catch (RollbackException e) {
-                err = true;
-            } catch (Exception e) {
-                System.out.println("ERR");
-            }
-        }
-
-        if (err) {
-            Item it = findByHash(item.getHashContenu());
-            logger.debug("item : " + it);
-            logger.debug("flux : " + flux);
-            it.getListFlux().add(flux);
-            logger.debug("Item déjà existente lors de l'enregistrement");
-            try {
-                em.getTransaction().begin();
-                em.merge(it);
-                em.getTransaction().commit();
-                flux.getLastEmpruntes().add(item.getHashContenu());
-
-            } catch (Exception e) {
-                logger.error("ERREURR" + e);
-            }
-        }
-    }
+    @Deprecated
+//    public synchronized void enregistrement(Item item, Flux flux) {
+//        Boolean err = false;
+//
+//        // Si l'item est nouvelle (elle n'a pas d'id)
+//        if (item.getID() != null) {
+//            err = true;
+//        }
+//
+//
+//        if (!err) {
+//            try {
+//                EntityTransaction tr = em.getTransaction();
+//                tr.begin();
+//                em.persist(item);
+//                tr.commit();
+//                // Si le commit s'est bien déroulé, on ajoute l'emprunte au lastEmprunte qui permet le dédoublonnage du Flux 
+//                flux.getLastEmpruntes().add(item.getHashContenu());
+//
+//
+//            } catch (EntityExistsException existexeption) { // En cas d'erreur, on se rend compte qu'une item possédant le hash existe déjà
+//                err = true;
+//            } catch (RollbackException e) {
+//                err = true;
+//            } catch (Exception e) {
+//                System.out.println("ERR");
+//            }
+//        }
+//
+//        if (err) {
+//            Item it = findByHash(item.getHashContenu());
+//            logger.debug("item : " + it);
+//            logger.debug("flux : " + flux);
+//            it.getListFlux().add(flux);
+//            logger.debug("Item déjà existente lors de l'enregistrement");
+//            try {
+//                em.getTransaction().begin();
+//                em.merge(it);
+//                em.getTransaction().commit();
+//                flux.getLastEmpruntes().add(item.getHashContenu());
+//
+//            } catch (Exception e) {
+//                logger.error("ERREURR" + e);
+//            }
+//        }
+//    }
 
     /**
      * *
@@ -531,16 +563,30 @@ public class DaoItem extends AbstrDao {
         date1 = null;
         date2 = null;
     }
-    
-    
-    /***
-     * Commiter les modif de la dao
-     * @throws IllegalStateException
-     * @throws RollbackException 
+
+//    /***
+//     * Commiter les modif de la dao
+//     * @throws IllegalStateException
+//     * @throws RollbackException 
+//     */
+//    public void commit() throws IllegalStateException, RollbackException{
+//        em.getTransaction().commit();
+//    }
+    /**
+     * *
+     * Simple méthode permettant de retrouver la liste complete des items d'un flux sans aucune limites. A utiliser avec
+     * modération, le nombre peut être important. Utilisé lors de la suppression des flux, le service a besoin de
+     * parcourir toutes les items du flux
+     *
+     * @param f
+     * @return
      */
-    public void commit() throws IllegalStateException, RollbackException{
-        em.getTransaction().commit();
+    public List<Item> itemLieAuFlux(Flux f) {
+        System.out.println("DEBUT REQ");
+        Query query = em.createQuery("SELECT i FROM Item i JOIN i.listFlux fl WHERE fl.ID=:idfl");
+        System.out.println("FIN REQ");
+        query.setParameter("idfl", f.getID());
+        List<Item> resu = query.getResultList();
+        return resu;
     }
-    
-    
 }

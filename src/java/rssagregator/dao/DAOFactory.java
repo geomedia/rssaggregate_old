@@ -37,15 +37,16 @@ import rssagregator.services.AbstrTacheSchedule;
 public class DAOFactory<T extends AbstrDao> {
 
     protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DAOFactory.class);
-    private static DaoItem daoItem;
+   
     protected String PERSISTENCE_UNIT_NAME = "RSSAgregatePU2";
     private static DAOFactory instance = new DAOFactory();
     public List<EntityManager> listEm = new ArrayList<EntityManager>();
     EntityManager em;
 //    private DaoFlux daoflux = new DaoFlux(this);
 //    private DAOConf daoConf = new DAOConf(this);
-    private DaoFlux daoflux;
+//    private DaoFlux daoflux;
     private DAOConf daoConf;
+//     private static DaoItem daoItem;
     EntityManagerFactory emf;
     
 
@@ -61,19 +62,23 @@ public class DAOFactory<T extends AbstrDao> {
         em = emf.createEntityManager();
 
         // Attention aux singleton et au multi threading
-        daoItem = new DaoItem(this);
-        daoflux = new DaoFlux(this);
+//        daoItem = new DaoItem(this);
+//        daoflux = new DaoFlux(this);
         daoConf = new DAOConf(this);
     }
 
     public DaoFlux getDAOFlux() {
-//        DaoFlux daoFlux = new DaoFlux(this);
-        // La daoflux est une instance unique
-        if (daoflux == null) {
-            daoflux = new DaoFlux(this);
-        }
 
-        return daoflux;
+//         La daoflux est une instance unique
+//        if (daoflux == null) {
+//            daoflux = new DaoFlux(this);
+//        }
+////
+//        return daoflux;
+        //        DaoFlux daoFlux = new DaoFlux(this);
+        DaoFlux daof = new DaoFlux(this);
+        daof.setClassAssocie(Flux.class);
+        return daof;
 //        return daoFlux;
     }
 
@@ -92,11 +97,15 @@ public class DAOFactory<T extends AbstrDao> {
 
     public DaoItem getDaoItem() {
 
-        if (daoItem == null) {
-            daoItem = new DaoItem(this);
-        }
-//        DaoItem daoItem = new DaoItem(this);
-        return daoItem;
+//        if (daoItem == null) {
+//            daoItem = new DaoItem(this);
+//        }
+////        DaoItem daoItem = new DaoItem(this);
+//        return daoItem;
+        
+        DaoItem dao = new DaoItem(this);
+        dao.setClassAssocie(Item.class);
+        return dao;
     }
 
     public DAOServeurSlave getDAOServeurSlave() {
@@ -138,6 +147,7 @@ public class DAOFactory<T extends AbstrDao> {
 //        }
         // Maintenant on instancie pour chaque DAO un EntityManager. C'est le cache du persist unit qui doit permettre le stockage générale des objet comme flux en mémoire pas l'entity manager
         em = emf.createEntityManager();
+        
         return this.em;
     }
 
@@ -213,7 +223,7 @@ public class DAOFactory<T extends AbstrDao> {
             dao = (T) daoConf;
         }
         else if(beansClass.equals(Item.class)){
-            dao =(T) daoItem;
+            dao =(T) getDaoItem();
         }
         
 

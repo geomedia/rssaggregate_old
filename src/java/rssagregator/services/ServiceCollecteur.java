@@ -4,6 +4,8 @@
  */
 package rssagregator.services;
 
+import rssagregator.services.crud.AbstrServiceCRUD;
+import rssagregator.services.crud.ServiceCRUDFactory;
 import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.ParsingFeedException;
 import java.net.UnknownHostException;
@@ -18,6 +20,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.persistence.TransactionRequiredException;
 import javax.xml.ws.http.HTTPException;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
@@ -29,8 +32,10 @@ import rssagregator.beans.incident.AnomalieCollecte;
 import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.beans.incident.Incidable;
 import rssagregator.beans.incident.IncidentFactory;
+import rssagregator.dao.CacheHashFlux;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DAOIncident;
+import rssagregator.dao.DaoFlux;
 import rssagregator.dao.DaoItem;
 
 /**
@@ -45,6 +50,7 @@ public class ServiceCollecteur extends AbstrService {
     org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(ServiceCollecteur.class);
 //    ListeFluxCollecte fluxCollecte; On le récupère maintenant directement depuis le singleton de collecte
     private static ServiceCollecteur instance = new ServiceCollecteur();
+    private CacheHashFlux cacheHashFlux = CacheHashFlux.getInstance();
 
     /**
      * *
@@ -56,6 +62,7 @@ public class ServiceCollecteur extends AbstrService {
             ThreadFactoryPrioitaire factoryPrioitaire = new ThreadFactoryPrioitaire();
             // Le nombre de thread doit être relevé dans la conf. 
             poolPrioritaire = Executors.newFixedThreadPool(5);
+            cacheHashFlux.ChargerLesHashdesFluxdepuisBDD();
         } catch (ArithmeticException e) {
             logger.error("Impossible de charger le nombre de Thread pour ce service. Vérifier la conf", e);
         } catch (Exception e) {
@@ -536,16 +543,26 @@ public class ServiceCollecteur extends AbstrService {
                 //...............................Enregistrment de l'incident
                 //=================================================================================================
 
-                DAOIncident dao = (DAOIncident) DAOFactory.getInstance().getDAOFromTask(tache);
+//                DAOIncident dao = (DAOIncident) DAOFactory.getInstance().getDAOFromTask(tache);
                 try {
                     logger.debug("avant enregistrement");
+                    AbstrServiceCRUD serviceCRUD = ServiceCRUDFactory.getInstance().getServiceFor(si.getClass());
                     if (si.getID() == null) {
                         logger.debug("Creation d'un incident");
-                        dao.creer(si);
-                        fluxConcerne.getIncidentsLie().add(si);
+
+                        // On récupère le service 
+                        serviceCRUD.ajouter(si);
+//                        dao.beginTransaction();
+//                        dao.creer(si);
+//                        dao.commit();
+                        fluxConcerne.getIncidentsLie().add(si); //TODO : cet ajout ne semble pas nécessaire. SInon il doit être fait dans un serviceCRUD. A voir
                     } else {
                         logger.debug("MAJ d'un incident");
-                        dao.modifier(si);
+                        serviceCRUD.modifier(si);
+
+//                        dao.beginTransaction();
+//                        dao.modifier(si);
+//                        dao.commit();
                     }
                 } catch (Exception ex) {
                     logger.error("Erreur lors de la création de l'incident : " + si, ex);
@@ -569,8 +586,10 @@ public class ServiceCollecteur extends AbstrService {
                     CollecteIncident collecteIncident = listIncid.get(i);
                     collecteIncident.setDateFin(new Date());
                     DAOIncident<CollecteIncident> dao = (DAOIncident<CollecteIncident>) DAOFactory.getInstance().getDAOFromTask(tache);
+                    AbstrServiceCRUD serviceCRUD = ServiceCRUDFactory.getInstance().getServiceFor(collecteIncident.getClass());
                     try {
-                        dao.modifier(collecteIncident);
+                        serviceCRUD.modifier(collecteIncident);
+//                        dao.modifier(collecteIncident);
                     } catch (Exception ex) {
                         logger.error("Erreur la modification de l'incident : " + collecteIncident, ex);
 //                        Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
@@ -584,13 +603,14 @@ public class ServiceCollecteur extends AbstrService {
      * *
      * Cette méthode permet d'ajouter un item à un flux. Si l'item est déja présente dans la base de donnée, le service
      * crée un liaison vers cette item. Sinon il la crée. La méthode est synchronisé afin que plusieurs thread
-     * n'ajoutent pas en même temps des items
+     * n'ajoutent pas en même temps des items.
      *
      * @param flux Le flux pour lequel il faut ajouter une item
      * @param item L'item devant être ajouté
-      */
+     */
     public synchronized void ajouterItemAuFlux(Flux flux, Item item) {
         DaoItem dao = DAOFactory.getInstance().getDaoItem();
+        dao.beginTransaction();
 
         // On commence par ajouter l'item au flux si ce n'est pas déjà le cas
         List<Flux> lf = item.getListFlux();
@@ -644,20 +664,106 @@ public class ServiceCollecteur extends AbstrService {
         if (!err) {
             try {
                 dao.commit(); // On commit
-                flux.getLastEmpruntes().add(item.getHashContenu());    // On ajoute le hash aux hash en mémoire
+                System.out.println("FIN DE COMMIT");
+                DaoFlux daoFluf = DAOFactory.getInstance().getDAOFlux();
+//                daoFluf.ajouterEmprunte(flux, item.getHashContenu());
+//                flux.getLastEmpruntes().add(item.getHashContenu());    // On ajoute le hash aux hash en mémoire
+                cacheHashFlux.addHash(flux, item.getHashContenu());
             } catch (Exception e) {
                 logger.debug("erreur lors du commit", e);
             }
         }
-
-
         // Il faudra trouver qqchose en cas a nouveau d'erreur exemple la base de de donnée ne répond pas.
 
+//        item.getListFlux().add(flux);
+    }
 
-        item.getListFlux().add(flux);
+    /**
+     * *
+     * Méthode permettant de supprimer le flux. L'ensemble des items du flux sont parcourues. Si les items sont seules,
+     * elle sont supprimées. Si elles appartiennent à un autre flux, on retire le flux de l'item, puis on modifie
+     * l'item.
+     *
+     * @param flux
+     */
+    @Deprecated //----> C'est maintenant dans le service CRUD
+    public void removeFluxWithItem(Flux flux) throws Exception {
+
+        DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
+        daoItem.beginTransaction();
+        Boolean err = false;
 
 
+        List<Item> items = daoItem.itemLieAuFlux(flux);
 
+        int i;
+        for (i = 0; i < items.size(); i++) {
+            Item item = items.get(i);
+
+            //Supppression des items qui vont devenir orphelines
+            if (item.getListFlux().size() < 2) {
+                // On supprimer la relation 
+                item.getListFlux().clear();
+                try {
+                    daoItem.modifier(item);
+                    daoItem.remove(item);
+                } catch (Exception e) {
+                    err = true;
+                    logger.debug("Erreur lors de la suppression", e);
+                }
+
+            } else { // Sinon on détach le flux
+                item.getListFlux().remove(flux);
+
+                try {
+                    daoItem.modifier(item);
+                } catch (Exception ex) {
+                    err = true;
+                    logger.debug("Erreur lors de la modification", ex);
+                }
+            }
+        }
+        // On va supprimer le flux si la procédure de suppression des items s'est déroulée correctement
+        flux.setItem(new ArrayList<Item>());
+
+        DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
+        daoFlux.beginTransaction();
+
+        try {
+            daoFlux.remove(flux);
+        } catch (IllegalArgumentException ex) {
+            err = true;
+            Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (TransactionRequiredException ex) {
+            err = true;
+            Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            err = true;
+            Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        // Tous le monde est OK, Alors on commit
+        if (!err) {
+            System.out.println("COMMIT");
+            try {
+                daoItem.commit();
+                System.out.println("1");
+            } catch (Exception e) {
+                logger.debug("Erreur lors du comit de l'item", e);
+            }
+
+
+            try {
+                daoFlux.commit();
+                cacheHashFlux.removeFlux(flux);
+                System.out.println("2");
+            } catch (Exception e) {
+                logger.debug("erreur", e);
+            }
+
+        } else {
+            throw new Exception("Erreur lors de la suppression");
+        }
     }
 
     @Override
@@ -666,5 +772,13 @@ public class ServiceCollecteur extends AbstrService {
             this.poolPrioritaire.shutdownNow();
         }
         super.stopService();
+    }
+
+    public CacheHashFlux getCacheHashFlux() {
+        return cacheHashFlux;
+    }
+
+    public void setCacheHashFlux(CacheHashFlux cacheHashFlux) {
+        this.cacheHashFlux = cacheHashFlux;
     }
 }

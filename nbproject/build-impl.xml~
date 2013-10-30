@@ -638,6 +638,10 @@ or ant -Dj2ee.platform.classpath=&lt;server_classpath&gt; (where no properties f
             </sequential>
         </macrodef>
     </target>
+    
+    
+    
+    
     <target depends="-init-macrodef-junit-debug-impl" if="${junit.available}" name="-init-macrodef-test-debug-junit">
         <macrodef name="test-debug" uri="http://www.netbeans.org/ns/web-project/2">
             <attribute default="${includes}" name="includes"/>
@@ -952,30 +956,6 @@ exists or setup the property manually. For example like this:
     <!--
                 DIST BUILDING SECTION
             -->
-            
-            <target name="-post-jar" description="New task definition for EclipseLink static weaving"> 
-    <taskdef name="weave" classname="org.eclipse.persistence.tools.weaving.jpa.StaticWeaveAntTask"/> 
-</target> 
-<target name="weaving" description="perform weaving" depends="-post-jar"> 
-    <weave  source="${dist.jar}\MyProject.jar" 
-            target="${dist.jar}\MyProject_Weaved.jar" 
-            persistenceinfo="${dist.jar}..\..\MyProjectEE\MyProject-ejb\build\classes\META-INF\persistence.xml" 
-            loglevel="FINER"> 
-        <classpath> 
-            <pathelement path="${dist.jar}\lib\eclipselink-2.3.0.jar"/> 
-            <pathelement path="${dist.jar}\lib\javaee-api-6.0.jar"/> 
-            <pathelement path="${dist.jar}\lib\jasypt-1.9.0.jar"/> 
-            <pathelement path="${dist.jar}\lib\javax.persistence-2.0.jar"/> 
-            <pathelement path="${dist.jar}\lib\org.eclipse.persistence.jpa.jpql_1.0.0.jar"/> 
-            <pathelement path="${dist.jar}\lib\joda-time-2.1.jar"/> 
-            <pathelement path="${dist.jar}\lib\jms.jar"/> 
-        </classpath> 
-    </weave> 
-</target> 
-            
-            
-            
-            
     <target name="-pre-dist">
         <!-- Empty placeholder for easier customization. -->
         <!-- You can override this target in the ../build.xml file. -->

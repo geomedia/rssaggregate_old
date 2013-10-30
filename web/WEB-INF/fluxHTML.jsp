@@ -210,14 +210,15 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
                                                         reponse = confirm('Vous vous apprétez à supprimer un flux. Toutes les items associées seront supprimée. Cette manipulation est irréverssible. Confirmez vous votre choix ?');
                                                         if (reponse) {
                                                             selRowId = $('#list').jqGrid('getGridParam', 'selarrrow');
-                                                            chaine = "";
-                                                            for (i = 0; i < selRowId.length; i++) {
-                                                                chaine += 'id=' + selRowId[i] + ',';
-                                                            }
-                                                            if (chaine.length > 2) {
-                                                                chaine = chaine.substr(0, chaine.length - 1);
-                                                            }
-                                                            url = ${rootpath} + 'flux/rem?' + chaine;
+                                                            //chaine = "";
+                                                            //for (i = 0; i < selRowId.length; i++) {
+                                                            //    chaine += 'id=' + selRowId[i] + ',';
+                                                            //}
+                                                            //if (chaine.length > 2) {
+                                                            //    chaine = chaine.substr(0, chaine.length - 1);
+                                                            //}
+                                                            //url = ${rootpath} + 'flux/rem?' + chaine;
+                                                            url = ${rootpath} + 'flux/rem?id='+ selRowId;
                                                             location.href = url;
                                                         }
 
@@ -239,12 +240,15 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
                                     function formatIdParamFromSelectedRow() {
                                         selRowId = $('#list').jqGrid('getGridParam', 'selarrrow');
                                         ch = "";
+                                        
                                         for (i = 0; i < selRowId.length; i++) {
-                                            ch += 'id=' + selRowId[i] + ',';
+                                            ch += 'id=' + selRowId[i] + ',aa';
                                         }
                                         if (ch.length > 2) {
                                             ch = ch.substr(0, ch.length - 1);
                                         }
+                                        <!--alert(selRowId);-->
+                                        return 'id='+selRowId;
                                         return ch;
 
                                     }

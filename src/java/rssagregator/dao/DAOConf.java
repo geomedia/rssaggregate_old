@@ -313,7 +313,9 @@ public class DAOConf extends AbstrDao {
         // Si, on n'a pas trouvé dans la base de données
         if (uBdd == null) {
             logger.debug("Création du compte root dans la BDD");
+            daou.beginTransaction();
             daou.creer(u);
+            daou.commit();
         } //Si les deux ne sont pas egaux en conten u
         else if (!uBdd.equals(u)) {
             logger.debug("Mise à jour du compte root dans la BDD");

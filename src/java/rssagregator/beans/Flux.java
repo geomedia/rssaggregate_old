@@ -7,7 +7,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
-import java.lang.management.ManagementFactory;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
@@ -16,7 +15,7 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
-import javax.management.MBeanServer;
+import javax.annotation.PostConstruct;
 import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -29,6 +28,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.QueryHint;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.Transient;
@@ -36,10 +36,11 @@ import org.eclipse.persistence.annotations.Cache;
 import org.eclipse.persistence.annotations.CacheCoordinationType;
 import org.eclipse.persistence.annotations.CacheType;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
-import org.eclipse.persistence.annotations.HashPartitioning;
-import org.eclipse.persistence.annotations.Partitioned;
-import org.eclipse.persistence.annotations.ReplicationPartitioning;
+import org.eclipse.persistence.annotations.CloneCopyPolicy;
 import org.eclipse.persistence.config.CacheIsolationType;
+import org.eclipse.persistence.descriptors.ClassDescriptor;
+import org.eclipse.persistence.descriptors.DescriptorEvent;
+import org.eclipse.persistence.descriptors.DescriptorEventAdapter;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import rssagregator.beans.exception.DonneeInterneCoherente;
@@ -47,6 +48,7 @@ import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.beans.traitement.MediatorCollecteAction;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoFlux;
+import rssagregator.dao.DaoItem;
 import rssagregator.services.ServiceCollecteur;
 import rssagregator.services.TacheCalculQualiteFlux;
 import rssagregator.services.TacheRecupCallable;
@@ -64,14 +66,16 @@ import rssagregator.services.TacheVerifComportementFLux;
  * </ul>
  */
 @Entity()
+//@EntityListeners( value = {Test.class})
+@CloneCopyPolicy(workingCopyMethod = "clone", method = "clone")
 @Table(name = "flux")
 @Cacheable(value = true)
 @Cache(type = CacheType.FULL, coordinationType = CacheCoordinationType.SEND_NEW_OBJECTS_WITH_CHANGES, isolation = CacheIsolationType.SHARED)
-public class Flux extends AbstrObservableBeans implements Observer, Serializable, BeanSynchronise, FluxMBean {
+public class Flux extends AbstrObservableBeans implements Observer, Serializable, BeanSynchronise, Cloneable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long ID;
+    private Long ID; 
 
     public Flux() {
         propertyChangeSupport = new PropertyChangeSupport(this);
@@ -156,7 +160,7 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
      * de requetes dans la base de données. On ne persiste pas dans la base de donnée (TRANSISIENT NORMAL)
      */
     @Transient
-    private transient Set<String> lastEmpruntes;
+    private Set<String> lastEmpruntes;
     /**
      * L'objet Callable qui permet d'être lancé pour effectuer la récupération du flux. Cet objet doit être ajouté dans
      * le pool de thread du service de récupération. Il n'est pas persisté
@@ -220,7 +224,7 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
      * Un flux peut appratenir à un journal. Un journal peut contenir plusieurs flux
      */
 // On veut que le flux ne puisse pas créer de journaux mais simplment se lier. Ce n'est pas à la dao du flux de de créer des journaux.
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
     private Journal journalLie;
     /**
      * Le mediator flux permet d'assigner un flux un comportement de collecte. Un médiator est une configuration de
@@ -398,14 +402,16 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
         this.mediatorFluxAction = mediatorFluxAction;
     }
 
-    @Override
+
     public String getUrl() {
         return url;
     }
+    
+    
 
     public void setUrl(String url) {
         this.url = url;
-          MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+//          MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
  
 //        try {
 //
@@ -449,7 +455,12 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
         this.htmlUrl = urlRubrique;
     }
 
+    
     public Set<String> getLastEmpruntes() {
+//        System.out.println("LAST EMPRUNTE");
+//        DaoItem dao = DAOFactory.getInstance().getDaoItem();
+//        Set<String> hash = dao.findLastHash(this, 100);
+//        this.lastEmpruntes = hash;
         return lastEmpruntes;
     }
 
@@ -536,7 +547,7 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
         return periodeCaptations;
     }
 
-    @Override
+ 
     public String getInfoCollecte() {
         return infoCollecte;
     }
@@ -591,7 +602,7 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
         this.erreurDerniereLevee = erreurDerniereLevee;
     }
 
-    @Override
+
     public Long getID() {
         return ID;
     }
@@ -881,6 +892,24 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
         }
     }
 
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        System.out.println("-->> CLONE USE");
+        Flux clone = (Flux) super.clone();
+        
+//        LinkedHashSet lastEmpruntestmp = (LinkedHashSet)this.lastEmpruntes;
+//        clone.lastEmpruntes = (Set<String>) lastEmpruntestmp.clone();
+//        System.out.println("Tailler du last : " + clone.lastEmpruntes.size());
+        return clone;
+     
+//        return super.clone(); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+
+    
+    
+    
+
     /**
      * Lors de l'activation désactivation ou du changement de comportement, ce lisner est chargé de modifier des
      * paramètres du FLUX
@@ -979,5 +1008,34 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
                 }
             }
         }
+    }
+    
+    public class Test extends DescriptorEventAdapter{
+
+        public Test() {
+        }
+        
+
+        @Override
+        public void postClone(DescriptorEvent event) {
+//            super.postClone(event); //To change body of generated methods, choose Tools | Templates.
+            Object source = event.getSource();
+            System.out.println("POSTCLONE SOURCE : " + source);
+        }
+
+        @Override
+        public void postMerge(DescriptorEvent event) {
+//            super.postMerge(event); //To change body of generated methods, choose Tools | Templates.
+            Object source = event.getSource();
+            System.out.println("--> POST MERGE SOURCE : " + source);
+                    
+        }
+        
+        
+    }
+    
+    
+    public class CutoClem extends ClassDescriptor{
+        
     }
 }

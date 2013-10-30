@@ -7,7 +7,11 @@ package rssagregator.dao;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.persistence.PostLoad;
 import javax.persistence.Query;
 import javax.persistence.TransactionRequiredException;
 import javax.persistence.TypedQuery;
@@ -21,6 +25,8 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Predicate;
+import org.eclipse.persistence.config.CacheUsage;
+import org.eclipse.persistence.config.QueryHints;
 
 /**
  *
@@ -44,6 +50,9 @@ public class DaoFlux extends AbstrDao {
         em = dAOFactory.getEntityManager();
         this.classAssocie = Flux.class;
         this.dAOFactory = dAOFactory;
+        em.setProperty("javax.persistence.cache.storeMode", "CheckCacheOnly");
+//        "eclipselink.cache-usage", "CheckCacheOnly");
+
     }
 
 //    /**
@@ -68,49 +77,48 @@ public class DaoFlux extends AbstrDao {
      *
      * @param flux
      */
-    public void remove(Flux flux) throws IllegalArgumentException, TransactionRequiredException, Exception {
-
-//        em.refresh(flux);
-//        
-//        System.out.println("=====================");
-//        List<FluxIncident> listI = flux.getIncidentsLie();
-//        for (int i = 0; i < listI.size(); i++) {
-//            CollecteIncident fluxIncident = listI.get(i);
-//            System.out.println("INCIDEBNT : " + fluxIncident);
+//    public void remove(Flux flux) throws IllegalArgumentException, TransactionRequiredException, Exception {
+//
+////        em.refresh(flux);
+////        
+////        System.out.println("=====================");
+////        List<FluxIncident> listI = flux.getIncidentsLie();
+////        for (int i = 0; i < listI.size(); i++) {
+////            CollecteIncident fluxIncident = listI.get(i);
+////            System.out.println("INCIDEBNT : " + fluxIncident);
+////        }
+////        System.out.println("=====================");
+//
+//
+//        // On doit suppimer les items liées si il sont orphelin. Une cascade classique de l'ORM ne peut convenir 
+//        DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
+//        List<Item> items = daoItem.findByFlux(flux.getID());
+//
+//        int i;
+//        for (i = 0; i < items.size(); i++) {
+//            //Supppression des items qui vont devenir orphelines
+//            if (items.get(i).getListFlux().size() < 2) {
+//
+//                // On supprimer la relation 
+//                items.get(i).getListFlux().clear();
+//                daoItem.modifier(items.get(i));
+//                daoItem.remove(items.get(i));
+//            } else { // Sinon on détach le flux
+//                items.get(i).getListFlux().remove(flux);
+//                daoItem.modifier(items.get(i));
+//            }
 //        }
-//        System.out.println("=====================");
-
-
-        // On doit suppimer les items liées si il sont orphelin. Une cascade classique de l'ORM ne peut convenir 
-        DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
-        List<Item> items = daoItem.findByFlux(flux.getID());
-
-        int i;
-        for (i = 0; i < items.size(); i++) {
-            //Supppression des items qui vont devenir orphelines
-            if (items.get(i).getListFlux().size() < 2) {
-
-                // On supprimer la relation 
-                items.get(i).getListFlux().clear();
-                daoItem.modifier(items.get(i));
-                daoItem.remove(items.get(i));
-            } else { // Sinon on détach le flux
-                items.get(i).getListFlux().remove(flux);
-                daoItem.modifier(items.get(i));
-            }
-        }
-
-        // On supprime la liste de flux du flux
-        flux.setItem(new ArrayList<Item>());
-
-        //On supprime le flux
-        super.remove(flux);
-//        em.getTransaction().begin();
-//        em.remove(em.merge(flux));
-//        em.getTransaction().commit();
-
-    }
-
+//
+//        // On supprime la liste de flux du flux
+//        flux.setItem(new ArrayList<Item>());
+//
+//        //On supprime le flux
+//        super.remove(flux);
+////        em.getTransaction().begin();
+////        em.remove(em.merge(flux));
+////        em.getTransaction().commit();
+//
+//    }
     /**
      * *
      * Permet de récupérer la liste complete des flux. Pour éviter d'éffectuer milles fois la même requête, il est
@@ -171,8 +179,21 @@ public class DaoFlux extends AbstrDao {
 
             // Pour chaque flux, on va charger les 100 dernier hash 
             DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
-            Set<String> dernierHash = daoItem.findLastHash(fl, 100);
+            Set<String> dernierHash = daoItem.findLastHash(fl, 100, false);
             fl.setLastEmpruntes(dernierHash);
+            try {
+                Flux cloneTest = (Flux) fl.clone();
+                System.out.println("LAST EMPRUNTE DU CLONE  : " + cloneTest.getLastEmpruntes().size());
+            } catch (CloneNotSupportedException ex) {
+                Logger.getLogger(DaoFlux.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            try {
+                daoFlux.modifier(fl);
+                System.out.println("---> TAILLER DU LAST APRES MERGE : " + fl.getLastEmpruntes().size());
+            } catch (Exception ex) {
+                Logger.getLogger(DaoFlux.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
 
 
             //On enregistre le flux à ses services
@@ -263,16 +284,24 @@ public class DaoFlux extends AbstrDao {
      * @return Une liste de flux résultat de la recherche
      */
     public List<Flux> findFluxParJournaux(Journal j) {
-        List<Flux> listFlux = findAllFlux(Boolean.FALSE);
-        int i;
-        List<Flux> retourList = new ArrayList<Flux>();
-        for (i = 0; i < listFlux.size(); i++) {
-
-            if (listFlux.get(i).getJournalLie().equals(j)) {
-                retourList.add(listFlux.get(i));
-            }
-        }
-        return retourList;
+        
+        String req = "SELECT f FROM Flux f JOIN f.journalLie j where j.ID=:journalid";
+        Query query = em.createQuery(req);
+        query.setParameter("journalid", j.getID());
+       return  query.getResultList();
+       
+       
+       
+//        List<Flux> listFlux = findAllFlux(Boolean.FALSE);
+//        int i;
+//        List<Flux> retourList = new ArrayList<Flux>();
+//        for (i = 0; i < listFlux.size(); i++) {
+//
+//            if (listFlux.get(i).getJournalLie().equals(j)) {
+//                retourList.add(listFlux.get(i));
+//            }
+//        }
+//        return retourList;
     }
 
     @Override
@@ -478,6 +507,46 @@ public class DaoFlux extends AbstrDao {
     public void setCriteriaJournalLie(Journal criteriaJournalLie) {
         this.criteriaJournalLie = criteriaJournalLie;
     }
-
-
+    
+    
+    public void testCache(){
+        
+        String req = "SELECT f FROM Flux f";
+        Query query = em.createQuery(req);
+        query.setHint(QueryHints.CACHE_USAGE, CacheUsage.NoCache);
+        query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+        List resu = query.getResultList();
+        System.out.println("RESU 1 : " + resu.size());
+        
+        for (int i = 0; i < resu.size(); i++) {
+            Flux object = (Flux) resu.get(i);
+            System.out.println("COUNTAIN " + em.contains(object));
+            System.out.println("CACHE 2 : " + em.getEntityManagerFactory().getCache().contains(Flux.class, object.getID()));
+            
+            System.out.println("ID : " + object.getID());
+        }
+        
+        
+        String req2 = "SELECT f FROM Flux f where f.ID is not null";
+        Query query2 = em.createQuery(req2);
+//        query2.setParameter("id", new Long(160))
+        query2.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheOnly);
+        List resu2 = query2.getResultList();
+        System.out.println("NBR RESU : " + resu2.size());
+    }
+    
+//    /***
+//     * Retourne les dernier hash concervé en mémoire pour le flux envoyé en argument
+//     * @param fl
+//     * @return 
+//     */
+//    public Set<String> getLastHash(Flux fl){
+//        CacheHashFlux cache = CacheHashFlux.getInstance();
+//       return cache.returnLashHash(fl);
+//    }
+//    
+//    public void ajouterEmprunte(Flux flux , String emprunte){
+//         CacheHashFlux cache = CacheHashFlux.getInstance();
+//         cache.addHash(flux, emprunte);
+//    }
 }

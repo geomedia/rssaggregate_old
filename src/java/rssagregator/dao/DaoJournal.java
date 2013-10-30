@@ -91,39 +91,39 @@ public class DaoJournal extends AbstrDao {
     //        em.remove(em.merge(object));
     //        em.getTransaction().commit();
     //    }
-    @Override
-    public void remove(Object obj) throws Exception {
-
-        // Il faut supprimer tous les flux lié au journal. (Une simple cascade risquerait de laisser des items orphelines car on ne peut pas cascader en delete sur la list des item d'un flux)
-
-        Journal journal = (Journal) obj;
-        List<Flux> listflux = journal.getFluxLie();
-        DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
-        System.out.println("NOMBRE DE JOURNAUX AU MOMENT DU DELET : " + listflux.size());
-        int i;
-        for (i = 0; i < listflux.size(); i++) {
-            daoFlux.remove(listflux.get(i));
-            // On désactive le flux pour que l'objet cesse d'être ajouté au collecteur
-            listflux.get(i).setActive(false);
-
-            System.out.println("SUPPRESSION D'UN FLUX A PARTIR DU JOURNAL");
-
-
-        }
-        ServiceCollecteur.getInstance().update(null, "reload all");
-//        DAOFactory.getInstance().getDAOFlux().forceNotifyObserver();
-//        DAOFactory.getInstance().getDAOFlux().notifyObservers();
-
-        journal.setFluxLie(new ArrayList<Flux>());
-        super.remove(obj);
-//        em = DAOFactory.getInstance().getEntityManager();
-//        em.getTransaction().begin();
-//        em.remove(em.merge(obj));
-//        em.getTransaction().commit();
-//        super.remove(obj); //To change body of generated methods, choose Tools | Templates.
-
-
-    }
+//    @Override
+//    public void remove(Object obj) throws Exception {
+//
+//        // Il faut supprimer tous les flux lié au journal. (Une simple cascade risquerait de laisser des items orphelines car on ne peut pas cascader en delete sur la list des item d'un flux)
+//
+//        Journal journal = (Journal) obj;
+//        List<Flux> listflux = journal.getFluxLie();
+//        DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
+//        System.out.println("NOMBRE DE JOURNAUX AU MOMENT DU DELET : " + listflux.size());
+//        int i;
+//        for (i = 0; i < listflux.size(); i++) {
+//            daoFlux.remove(listflux.get(i));
+//            // On désactive le flux pour que l'objet cesse d'être ajouté au collecteur
+//            listflux.get(i).setActive(false);
+//
+//            System.out.println("SUPPRESSION D'UN FLUX A PARTIR DU JOURNAL");
+//
+//
+//        }
+//        ServiceCollecteur.getInstance().update(null, "reload all");
+////        DAOFactory.getInstance().getDAOFlux().forceNotifyObserver();
+////        DAOFactory.getInstance().getDAOFlux().notifyObservers();
+//
+//        journal.setFluxLie(new ArrayList<Flux>());
+//        super.remove(obj);
+////        em = DAOFactory.getInstance().getEntityManager();
+////        em.getTransaction().begin();
+////        em.remove(em.merge(obj));
+////        em.getTransaction().commit();
+////        super.remove(obj); //To change body of generated methods, choose Tools | Templates.
+//
+//
+//    }
 
     /**
      * *

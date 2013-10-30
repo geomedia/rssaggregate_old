@@ -14,6 +14,7 @@ import rssagregator.beans.FluxPeriodeCaptation;
 import rssagregator.beans.Item;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoItem;
+import rssagregator.services.ServiceCollecteur;
 
 @Entity(name = "Dedoubloneur")
 public class Dedoubloneur extends AbstrDedoublonneur {
@@ -51,18 +52,22 @@ public class Dedoubloneur extends AbstrDedoublonneur {
          * Dans ce premier bloc on va comparer les hash des dernière items à ces hash en mémoire (temps d'accès beaucoup
          * plus rapide que la BDD)
          */
-        Set<String> listLastEmprunte = flux.getLastEmpruntes();
-        for (Iterator<String> it = listLastEmprunte.iterator(); it.hasNext();) {
-            String hashMemoire = it.next();
-            // On parcours toutes les items capturée.
-            for (Iterator<Item> it1 = listItemCapture.iterator(); it1.hasNext();) {
-                Item itemCapture = it1.next();
-                if (itemCapture.getHashContenu().equals(hashMemoire)) {
-                    it1.remove();
-                    compteCapture[1]++;
+//        Set<String> listLastEmprunte = flux.getLastEmpruntes();
+        Set<String> listLastEmprunte = ServiceCollecteur.getInstance().getCacheHashFlux().returnLashHash(flux);
+        if (listLastEmprunte != null) {
+            for (Iterator<String> it = listLastEmprunte.iterator(); it.hasNext();) {
+                String hashMemoire = it.next();
+                // On parcours toutes les items capturée.
+                for (Iterator<Item> it1 = listItemCapture.iterator(); it1.hasNext();) {
+                    Item itemCapture = it1.next();
+                    if (itemCapture.getHashContenu().equals(hashMemoire)) {
+                        it1.remove();
+                        compteCapture[1]++;
+                    }
                 }
             }
         }
+
 
         //==========================================================================================
         //. . . . . . . . . . . . . . . . DEDOUBLONNAGE BDD
@@ -109,6 +114,8 @@ public class Dedoubloneur extends AbstrDedoublonneur {
                                 compteCapture[2]++;
                                 it.remove();
                                 trouve = true;
+                                continue;
+
                             }
                         }
                         //---------> AJOUT D'UNE LIAISON POUR L'ITEM TROUVÉ DANS LA BASE DE DONNÉE
@@ -176,9 +183,8 @@ public class Dedoubloneur extends AbstrDedoublonneur {
                                         //Si l'item a besoin d'être liée
                                         if (!itemBDDAncienHash.getListFlux().contains(flux)) {
                                             it.set(itemBDDAncienHash);
-                                        }
-                                        //Sinon on la retire
-                                        else{
+                                        } //Sinon on la retire
+                                        else {
                                             it.remove();
                                         }
 //                                        item = itemBDDAncienHash;

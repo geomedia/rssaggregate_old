@@ -38,7 +38,10 @@ import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DAOGenerique;
 import rssagregator.dao.DaoFlux;
 import rssagregator.dao.DaoJournal;
+import rssagregator.services.crud.AbstrServiceCRUD;
+import rssagregator.services.crud.ServiceCRUDFactory;
 import rssagregator.services.ServiceCollecteur;
+import rssagregator.services.crud.ServiceCRUDFlux;
 import rssagregator.utils.ServletTool;
 
 /**
@@ -135,9 +138,6 @@ public class FluxSrvl extends HttpServlet {
                 logger.debug("err recup journal ", e);
             }
 
-
-
-
             ServletTool.actionADD(request, ATT_OBJ, ATT_FORM, Flux.class, true);
 
             //----------------------------------------------------ACTION : MODIFICATION----------------------------------------------------
@@ -157,7 +157,13 @@ public class FluxSrvl extends HttpServlet {
             //Récupération d'une liste de flux
             List<Flux> listFlux = new ArrayList<Flux>();
             try {
-                listFlux = ServletTool.getListFluxFromRequest(request, daoFlux);
+                listFlux = new ArrayList<Flux>();
+                List<Long> listId = ServletTool.parseidFromRequest(request);
+                for (int i = 0; i < listId.size(); i++) {
+                    Long long1 = listId.get(i);
+                    listFlux.add((Flux)daoFlux.find(long1));
+                }
+                
                 ServiceCollecteur.getInstance().majManuellAll(listFlux);
                 request.setAttribute(ATT_LISTOBJ, listFlux);
 
@@ -231,7 +237,16 @@ public class FluxSrvl extends HttpServlet {
             // On tente de supprimer. Si une exeption est levée pendant la suppression. On redirige l'utilisateur différement
             try {
                 List<Flux> listFlux = ServletTool.getListFluxFromRequest(request, daoFlux);
-                daoFlux.removeall(listFlux);
+                ServiceCRUDFlux service = (ServiceCRUDFlux) ServiceCRUDFactory.getInstance().getServiceFor(Flux.class);
+                service.SupprimerListFlux(listFlux, true, null);
+                
+//                for (int i = 0; i < listFlux.size(); i++) {
+//                    Flux flux1 = listFlux.get(i);
+////                    ServiceCollecteur.getInstance().removeFluxWithItem(flux1);
+//                    AbstrServiceCRUD service = ServiceCRUDFactory.getInstance().getServiceFor(flux1);
+//                    service.supprimer(flux1);
+//                }
+//                daoFlux.removeall(listFlux);
                 ServletTool.redir(request, "flux", "Suppression du flux effecué.", false);
             } catch (NoResultException e) {
                 ServletTool.redir(request, "flux", "Vous demandez a supprimer des flux qui n'existent pas.", true);

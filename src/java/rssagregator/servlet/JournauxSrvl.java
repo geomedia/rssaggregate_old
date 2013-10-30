@@ -268,7 +268,8 @@ public class JournauxSrvl extends HttpServlet {
 
         //---------------------------------ACTION ADD ---------------------------------------------------
         if (action.equals("add")) {
-            ServletTool.actionADD2(request, ATT_JOURNAL, ATT_FORM, Journal.class, Boolean.TRUE);
+//            ServletTool.actionADD2(request, ATT_JOURNAL, ATT_FORM, Journal.class, Boolean.TRUE);
+            ServletTool.actionADD(request, ATT_JOURNAL, ATT_FORM, Journal.class, Boolean.TRUE);
 
         } //-----------------------------------ACTION MOD ---------------------------------------------------
         else if (action.equals("mod")) {
