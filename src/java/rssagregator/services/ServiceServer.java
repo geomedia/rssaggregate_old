@@ -243,72 +243,77 @@ public class ServiceServer extends AbstrService {
                     executorService.schedule(cast, 15, TimeUnit.SECONDS);
                 }
             }  
-            gererIncident((AbstrTacheSchedule) o);
+//            gererIncident((AbstrTacheSchedule) o);
         }
 
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
+    @Deprecated
     protected void gererIncident(AbstrTacheSchedule tache) {
 
-        //================================================================================================
-        //                      INSTANCIATION OU RECUPERATION D'INCIDENT
-        //================================================================================================
-        ServerIncident si = null;
-
-        if (tache.getClass().equals(TacheStillAlive.class)) {
-            TacheStillAlive cast = (TacheStillAlive) tache;
-            if (cast.getRupture()) {
-                IncidentFactory<AliveIncident> factory = new IncidentFactory<AliveIncident>();
-                try {
-                    si = factory.createIncidentFromTask(tache, "erreur");
-                } catch (InstantiationException ex) {
-                    Logger.getLogger(ServiceServer.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (IllegalAccessException ex) {
-                    Logger.getLogger(ServiceServer.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (UnIncidableException ex) {
-                    Logger.getLogger(ServiceServer.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        }
-
-        //=================================================================================================
-        // ..................... GESTION DES INCIDENTS
-        //=================================================================================================
-        if (si != null) {
-            logger.debug("--------------UN NOUVEL INCIDENT : "+ si.getClass() +"------------->");
-            if (tache.getClass().equals(TacheStillAlive.class)) {
-                logger.debug("INCIDENT TacheStillAlive");
-                TacheStillAlive cast = (TacheStillAlive) tache;
-                si.setDateDebut(cast.getDebutRupture());
-                si.setDateFin(cast.getFinRupture());
-                si.setMessageEreur("Il semble que le serveur ait arrété de fonctionner durant la période");
-                si.setNotificationImperative(true); // Cet incident doit impérativement être notifié même si il est clos.
-                logger.debug("fin gestion");
-            }
-            //=================================================================================================
-            //...............................Enregistrment de l'incident
-            //=================================================================================================
-            DAOIncident dao = (DAOIncident) DAOFactory.getInstance().getDAOFromTask(tache);
-            
-            if(si.getID()!=null){
-                logger.debug("ID NULL On va modifier");
-                try {
-                    dao.modifier(si);
-                } catch (Exception ex) {
-                    Logger.getLogger(ServiceServer.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-            else{
-                logger.debug("ID NULL On va créer");
-                try {
-                    dao.creer(si);
-                } catch (Exception ex) {
-                    Logger.getLogger(ServiceServer.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        }
+//        //================================================================================================
+//        //                      INSTANCIATION OU RECUPERATION D'INCIDENT
+//        //================================================================================================
+//        ServerIncident si = null;
+//
+//        if (tache.getClass().equals(TacheStillAlive.class)) {
+//            TacheStillAlive cast = (TacheStillAlive) tache;
+//            if (cast.getRupture()) {
+//                IncidentFactory<AliveIncident> factory = new IncidentFactory<AliveIncident>();
+//                try {
+//                    si = factory.createIncidentFromTask(tache, "erreur");
+//                } catch (InstantiationException ex) {
+//                    Logger.getLogger(ServiceServer.class.getName()).log(Level.SEVERE, null, ex);
+//                } catch (IllegalAccessException ex) {
+//                    Logger.getLogger(ServiceServer.class.getName()).log(Level.SEVERE, null, ex);
+//                } catch (UnIncidableException ex) {
+//                    Logger.getLogger(ServiceServer.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//            }
+//        }
+//
+//        //=================================================================================================
+//        // ..................... GESTION DES INCIDENTS
+//        //=================================================================================================
+//        if (si != null) {
+//            logger.debug("--------------UN NOUVEL INCIDENT : "+ si.getClass() +"------------->");
+//            if (tache.getClass().equals(TacheStillAlive.class)) {
+//                logger.debug("INCIDENT TacheStillAlive");
+//                TacheStillAlive cast = (TacheStillAlive) tache;
+//                si.setDateDebut(cast.getDebutRupture());
+//                si.setDateFin(cast.getFinRupture());
+//                si.setMessageEreur("Il semble que le serveur ait arrété de fonctionner durant la période");
+//                si.setNotificationImperative(true); // Cet incident doit impérativement être notifié même si il est clos.
+//                logger.debug("fin gestion");
+//            }
+//            //=================================================================================================
+//            //...............................Enregistrment de l'incident
+//            //=================================================================================================
+//            DAOIncident dao = (DAOIncident) DAOFactory.getInstance().getDAOFromTask(tache);
+//            
+//            if(si.getID()!=null){
+//                logger.debug("ID NULL On va modifier");
+//                try {
+//                    dao.beginTransaction();
+//                    dao.modifier(si);
+//                    dao.commit();
+//                } catch (Exception ex) {
+//                    Logger.getLogger(ServiceServer.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//            }
+//            else{
+//                logger.debug("ID NULL On va créer");
+//                try {
+//                    dao.beginTransaction();
+//                    dao.creer(si);
+//                    dao.commit();
+//                } catch (Exception ex) {
+//                    Logger.getLogger(ServiceServer.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//            }
+//        }
 
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

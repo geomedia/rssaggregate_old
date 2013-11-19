@@ -48,6 +48,8 @@ public class RomeParse extends AbstrParseur implements Cloneable {
 
 
         XmlReader reader = new XmlReader(xmlIS);
+
+       
                 
         SyndFeedInput feedInput = new SyndFeedInput();
 
@@ -55,14 +57,19 @@ public class RomeParse extends AbstrParseur implements Cloneable {
         feedInput.setXmlHealerOn(true);
 
         SyndFeed feed = feedInput.build(reader);
+        
+
 //        String result = "";
 
         for (Iterator i = feed.getEntries().iterator(); i.hasNext();) {
             // Création d'un nouveau beans Item
             Item new_item = new Item();
+            
 
             SyndEntry entry = (SyndEntry) i.next();
+            
 
+            
             if (entry.getTitle() != null) {
 //                result += "Title : " + entry.getTitle() + "\n";
                 new_item.setTitre(entry.getTitle());

@@ -34,12 +34,12 @@ import rssagregator.services.ServiceSynchro;
  */
 @Entity
 @Table(name = "item")
-@Cacheable(value = true)
-@Cache(type = CacheType.CACHE, coordinationType = CacheCoordinationType.SEND_NEW_OBJECTS_WITH_CHANGES, isolation = CacheIsolationType.SHARED, shared = true)
+//@Cacheable(value = true)
+//@Cache(type = CacheType.CACHE, coordinationType = CacheCoordinationType.SEND_NEW_OBJECTS_WITH_CHANGES, isolation = CacheIsolationType.SHARED, shared = true)
 public class Item implements Serializable, Comparable<Item> {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.TABLE)
     private Long ID;
     /**
      * *

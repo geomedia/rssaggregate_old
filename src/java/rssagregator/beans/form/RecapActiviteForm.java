@@ -21,6 +21,7 @@ import rssagregator.dao.DaoItem;
  * L'affichage du récapitulatif de l'activité est a refaire. Cette class va surement subir des modifications
  * @author clem
  */
+@Deprecated
 public class RecapActiviteForm extends AbstrForm {
 //TODO : Refaire la visualisation de l'activité. Le formulaire sera surement à modifier.
     protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DaoItem.class);

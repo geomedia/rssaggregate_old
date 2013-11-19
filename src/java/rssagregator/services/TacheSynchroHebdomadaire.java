@@ -12,12 +12,12 @@ import rssagregator.beans.ServeurSlave;
 import rssagregator.dao.DAOFactory;
 
 /**
- * Cette tache est lancée toutes les semaines afin de récupérérer sur les
- * serveurs esclaves les items collectées qui manqueraient sur le serveur maitre
+ * Cette tache est lancée toutes les semaines afin de récupérérer sur les serveurs esclaves les items collectées qui
+ * manqueraient sur le serveur maitre
  *
  * @author clem
  */
-public class TacheSynchroHebdomadaire extends AbstrTacheSchedule<TacheSynchroHebdomadaire> {
+public class TacheSynchroHebdomadaire extends TacheImpl<TacheSynchroHebdomadaire> {
 
     public TacheSynchroHebdomadaire(Observer s) {
         super(s);
@@ -25,12 +25,8 @@ public class TacheSynchroHebdomadaire extends AbstrTacheSchedule<TacheSynchroHeb
     }
 
     public TacheSynchroHebdomadaire() {
-    super();
+        super();
     }
-    
-    
-    
-    
     /**
      * *
      * Un flag utilisé dans le call;
@@ -39,38 +35,56 @@ public class TacheSynchroHebdomadaire extends AbstrTacheSchedule<TacheSynchroHeb
     private List<TacheSynchroRecupItem> synchroSlave;
 
     @Override
-    public TacheSynchroHebdomadaire call() throws Exception {
-this.exeption = null;
-        try {
-            synchroSlave = new ArrayList<TacheSynchroRecupItem>();
-            
+    protected void callCorps() throws Exception {
+        synchroSlave = new ArrayList<TacheSynchroRecupItem>();
+        // Pour chaque serveur slave
+        List<ServeurSlave> listSlave = DAOFactory.getInstance().getDAOConf().getConfCourante().getServeurSlave(); // Pour chaque serveur esclave
+        for (int i = 0; i < listSlave.size(); i++) {
+            ServeurSlave serveurSlave = listSlave.get(i);
+            TacheSynchroRecupItem t = new TacheSynchroRecupItem(ServiceSynchro.getInstance());
+            t.setServeurSlave(serveurSlave);
+            synchroSlave.add(t);
+            Future<TacheSynchroRecupItem> futur = ServiceSynchro.getInstance().getExecutorService().submit(t);
+            TacheSynchroRecupItem recupItem = futur.get();
 
-            // Pour chaque serveur slave
-            List<ServeurSlave> listSlave = DAOFactory.getInstance().getDAOConf().getConfCourante().getServeurSlave(); // Pour chaque serveur esclave
-            for (int i = 0; i < listSlave.size(); i++) {
-                ServeurSlave serveurSlave = listSlave.get(i);
-                TacheSynchroRecupItem t = new TacheSynchroRecupItem(ServiceSynchro.getInstance());
-                t.setServeurSlave(serveurSlave);
-                synchroSlave.add(t);
-                Future<TacheSynchroRecupItem> futur = ServiceSynchro.getInstance().getExecutorService().submit(t);
-                TacheSynchroRecupItem recupItem = futur.get();
-
-                if (recupItem.getExeption() != null) {
-                    erreur = true;
-                }
+            if (recupItem.getExeption() != null) {
+                erreur = true;
             }
-
-        } catch (Exception e) {
-        } finally {
-            if (erreur) {
-                this.exeption = new Exception("Des erreurs se sont produitent lors de la Synchronisation hebdomadaire");
-            }
-            return this;
         }
-
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+//    @Override
+//    public TacheSynchroHebdomadaire call() throws Exception {
+//        this.exeption = null;
+//        try {
+//            synchroSlave = new ArrayList<TacheSynchroRecupItem>();
+//
+//
+//            // Pour chaque serveur slave
+//            List<ServeurSlave> listSlave = DAOFactory.getInstance().getDAOConf().getConfCourante().getServeurSlave(); // Pour chaque serveur esclave
+//            for (int i = 0; i < listSlave.size(); i++) {
+//                ServeurSlave serveurSlave = listSlave.get(i);
+//                TacheSynchroRecupItem t = new TacheSynchroRecupItem(ServiceSynchro.getInstance());
+//                t.setServeurSlave(serveurSlave);
+//                synchroSlave.add(t);
+//                Future<TacheSynchroRecupItem> futur = ServiceSynchro.getInstance().getExecutorService().submit(t);
+//                TacheSynchroRecupItem recupItem = futur.get();
+//
+//                if (recupItem.getExeption() != null) {
+//                    erreur = true;
+//                }
+//            }
+//
+//        } catch (Exception e) {
+//        } finally {
+//            if (erreur) {
+//                this.exeption = new Exception("Des erreurs se sont produitent lors de la Synchronisation hebdomadaire");
+//            }
+//            return this;
+//        }
+//
+////        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//    }
     public Boolean getErreur() {
         return erreur;
     }
@@ -86,7 +100,4 @@ this.exeption = null;
     public void setSynchroSlave(List<TacheSynchroRecupItem> synchroSlave) {
         this.synchroSlave = synchroSlave;
     }
-    
-    
-    
 }

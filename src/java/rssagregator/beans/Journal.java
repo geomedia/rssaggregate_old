@@ -12,7 +12,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import org.apache.poi.util.Beta;
+import rssagregator.beans.traitement.MediatorCollecteAction;
+import rssagregator.services.TacheDecouverteAjoutFlux;
 
 /**
  * Un journal : Le monde, le Figaro... Chaque journal est instancier dans un objet. Un journal peut contenir plusieurs
@@ -21,11 +24,11 @@ import org.apache.poi.util.Beta;
  */
 @Entity
 //@Customizer(JournalEntityLisner.class) 
-@Cacheable(value = false)
+//@Cacheable(value = false)
 public class Journal implements Serializable, BeanSynchronise {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.TABLE)
     private Long ID;
 //    @Version
 //    private Integer version;
@@ -73,6 +76,26 @@ public class Journal implements Serializable, BeanSynchronise {
      */
     @Column(name = "urlHtmlRecapFlux", length = 2000)
     private String urlHtmlRecapFlux;
+    
+    
+    /***
+     * Boolean permettant de renseigner si oui ou non la liste des flux appratenant au journal doit être périodiquement mise à jour en se basant sur la tache {@link TacheDecouverteAjoutFlux}
+     */
+    @Column(name = "autoUpdateFlux")
+    private Boolean autoUpdateFlux;
+    
+    
+    /***
+     * Détermine par la tache automatique {@link TacheDecouverteAjoutFlux} doivent êter activé ou non
+     */
+    @Column(name = "activerFluxDecouvert")
+    private Boolean activerFluxDecouvert;
+    
+    
+    private Integer periodiciteDecouverte;
+    
+    
+    
     /**
      * *
      * Un champs texte permettant aux administrateurs de saisir des informations sur le journal. Ce champs texte permet
@@ -86,6 +109,13 @@ public class Journal implements Serializable, BeanSynchronise {
      */
     @Column(name = "typeJournal", nullable = false)
     private String typeJournal;
+    
+    
+    
+    
+    @OneToOne
+    private MediatorCollecteAction comportementParDefaultDesFlux;
+    
 
     /**
      * Get the value of typeJournal
@@ -181,6 +211,45 @@ public class Journal implements Serializable, BeanSynchronise {
     public void setUrlAccueil(String urlAccueil) {
         this.urlAccueil = urlAccueil;
     }
+
+    public MediatorCollecteAction getComportementParDefaultDesFlux() {
+        return comportementParDefaultDesFlux;
+    }
+
+    public void setComportementParDefaultDesFlux(MediatorCollecteAction comportementParDefaultDesFlux) {
+        this.comportementParDefaultDesFlux = comportementParDefaultDesFlux;
+    }
+
+    public Boolean getAutoUpdateFlux() {
+        return autoUpdateFlux;
+    }
+
+    public void setAutoUpdateFlux(Boolean autoUpdateFlux) {
+        this.autoUpdateFlux = autoUpdateFlux;
+    }
+
+    public Boolean getActiverFluxDecouvert() {
+        return activerFluxDecouvert;
+    }
+
+    public void setActiverFluxDecouvert(Boolean activerFluxDecouvert) {
+        this.activerFluxDecouvert = activerFluxDecouvert;
+    }
+
+    public Integer getPeriodiciteDecouverte() {
+        return periodiciteDecouverte;
+    }
+
+    public void setPeriodiciteDecouverte(Integer periodiciteDecouverte) {
+        this.periodiciteDecouverte = periodiciteDecouverte;
+    }
+    
+    
+    
+    
+    
+    
+    
 
 //    @Override
 //    /***

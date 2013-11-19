@@ -82,26 +82,28 @@ public class IncidentFactory<T extends AbstrIncident> {
     /**
      * *
      * Cette méthode permet de gérer la configuration d'un incident. Elle est utilisée par les deux méthodes permettant
-     * d'obtenir un indident.
+     * d'obtenir un indident. Elle complete les champs date de début nombre de tentative ainsi que message (en utilisant
+     * le message envoyé en argument).
      *
-     * @param incid
-     * @param message : le message qui doit être délivré.
+     * @param incid : l'incident qu'il faut configurer
+     * @param message : le message qui doit êter inscrit dans l'incident.
      * @param tw L'exception java a l'origine de l'incident
      */
     private static void configurerIncident(AbstrIncident incid, String message, Throwable tw) {
-        incid.setMessageEreur(message);
-        incid.setNombreTentativeEnEchec(1);
-        incid.setDateDebut(new Date());
-        
-        
-        if(incid.getClass().equals(MailIncident.class)){
-            incid.setNotificationImperative(false);
+        if (message != null && !message.isEmpty()) {
+            incid.setMessageEreur(message);
         }
-        else{
+        incid.setNombreTentativeEnEchec(1); // L'incident vient d'être créé, il faut donc 1 en nombre de tentative en échec
+        
+        incid.setDateDebut(new Date()); 
+
+        if (incid.getClass().equals(MailIncident.class)) {
+            incid.setNotificationImperative(false);
+        } else {
             incid.setNotificationImperative(true);
         }
-        
-        if(tw != null){
+
+        if (tw != null) {
             incid.setLogErreur(tw.toString());
         }
     }

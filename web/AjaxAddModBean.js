@@ -7,6 +7,11 @@
 $(document).ready(function() {
     $('#beanForm').on('submit', function() {
 
+        $('#dia').remove();
+        $('nav').append('<div id="dia" title="Information sur le traitement"><p><strong>Oppération en cours</strong></p></div>');
+        $('#dia').dialog({minHeight: 300, minWidth: 400, closeText: "hide", show: "fade", dialogClass: "alert"});
+
+
         $.ajax({
             url: $(this).attr('action'), // le nom du fichier indiqué dans le formulaire
             type: $(this).attr('method'), // la méthode indiquée dans le formulaire (get ou post)
@@ -26,8 +31,10 @@ $(document).ready(function() {
                     if (opOk) {
                         var redirUrl = html['redirUrl'];
 //                    alert("Action réussie. Vous allez être redirigé vers  : " + redirUrl);
+                        $('#dia').empty();
+                        $('#dia').append('<p><strong>Oppération effectué</strong></p><p>Vous allez être redirigé dans 3 secondes à l\'adresse <a href="' + redirUrl + '">' + redirUrl + '</a></p>');
 
-                        $('nav').append('<div id="dia" title="tttitre"><p><strong>Oppération effectué</strong></p><p>Vous allez être redirigé dans 3 secondes à l\'adresse <a href="' + redirUrl + '">' + redirUrl + '</a></p></div>');
+//                        $('nav').append('<div id="dia" title="tttitre"><p><strong>Oppération effectué</strong></p><p>Vous allez être redirigé dans 3 secondes à l\'adresse <a href="' + redirUrl + '">' + redirUrl + '</a></p></div>');
                         $('#dia').dialog({minHeight: 300, minWidth: 400, closeText: "hide", show: "fade", dialogClass: "alert"});
 //                    $('#page').empty();
 //            setTimeout("location.href = 'http://zouzou}';",3000);
@@ -39,8 +46,17 @@ $(document).ready(function() {
                     }
                 }
                 else {
-
-                    alert('Erreur lors de la saisie');
+                    $('#dia').empty()
+                    $('#dia').append("Erreur lors de la saisie");
+                    $('#dia').dialog({
+                        modal: true,
+                        buttons: {
+                            Ok: function() {
+                                $(this).dialog("close");
+                            }
+                        }
+                    });
+//                    alert('Erreur lors de la saisie');
                     var errTab = html['erreurs'];
                     i = 0;
                     for (i = 0; i < errTab.length; i++) {

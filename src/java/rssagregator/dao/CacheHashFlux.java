@@ -7,9 +7,12 @@ package rssagregator.dao;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import rssagregator.beans.Flux;
 import rssagregator.services.ServiceCollecteur;
 
@@ -21,7 +24,10 @@ import rssagregator.services.ServiceCollecteur;
 public class CacheHashFlux {
 
     static CacheHashFlux instance = new CacheHashFlux();
-    Map<Flux, Set<String>> cacheHash = new HashMap<Flux, Set<String>>();
+    Map<Flux, Set<String>> cacheHash = new HashMap<Flux, Set<String>>(); // Le type Lincked hash map permet de concerver l'ordre d'ajout. Utile quand on veut supprimer les x premier (mais peut être mauvais en terme de capacité
+
+    protected CacheHashFlux() {
+    }
 
     public static CacheHashFlux getInstance() {
         if (instance == null) {
@@ -38,7 +44,9 @@ public class CacheHashFlux {
     public void ChargerLesHashdesFluxdepuisBDD() {
 
         DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
-        List<Flux> listflux = daoFlux.findAllFlux(Boolean.TRUE);
+//        List<Flux> listflux = daoFlux.findAllFlux(Boolean.TRUE);
+        List<Flux> listflux = daoFlux.findall();
+        
         DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
         for (int i = 0; i < listflux.size(); i++) {
             Flux flux = listflux.get(i);
@@ -68,6 +76,20 @@ public class CacheHashFlux {
         }
         return null;
     }
+    
+        public synchronized Integer returnNbrHash(Flux flux) {
+              if (flux != null && flux.getID() != null) {
+            for (Map.Entry<Flux, Set<String>> entry : cacheHash.entrySet()) {
+                Flux flux1 = entry.getKey();
+                if (flux1.getID().equals(flux.getID())) {
+                    Set<String> string = entry.getValue();
+                    return string.size();
+                }
+            }
+        }
+        return null;
+        }
+    
 
     /**
      * *
@@ -90,7 +112,7 @@ public class CacheHashFlux {
             }
             //Si on n'a pas trouvé le flux, il faut l'ajouter
             if (!trouve) {
-                Set<String> newHash = new HashSet<String>();
+                Set<String> newHash = new LinkedHashSet<String>();
                 newHash.add(hash);
                 cacheHash.put(flux, newHash);
             }
@@ -154,6 +176,32 @@ public class CacheHashFlux {
 
     /**
      * *
+     * Supprimer le nombre x de hash pour le flux envoyé en argument. Les hash supprimés sont les plus anciens
+     *
+     * @param x : le nombre de hash à supprimer
+     * @param flux Le flux pour lequel il faut supprimer les x hash
+     */
+    public synchronized void removeXHash(Integer x, Flux flux) {
+        if (x != null && flux != null && flux.getID() != null && flux.getID() >= 0 && x > 0) {
+            for (Map.Entry<Flux, Set<String>> entry : cacheHash.entrySet()) {
+                Flux flux1 = entry.getKey();
+                Set<String> set = entry.getValue();
+                if (flux1.getID().equals(flux.getID())) {
+                    Iterator it = set.iterator();
+                    if (x > set.size()) {
+                        x = set.size();
+                    }
+                    for (int i = 0; i < x; i++) {
+                        it.next();
+                        it.remove();
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * *
      * Supprime le flux donnée du cache
      *
      * @param flux
@@ -162,26 +210,26 @@ public class CacheHashFlux {
     public synchronized Boolean removeFlux(Flux flux) {
         if (flux != null && flux.getID() != null && flux.getID() >= 0) {
             System.out.println("IF");
-            
+
             for (Map.Entry<Flux, Set<String>> entry : cacheHash.entrySet()) {
                 System.out.println("FOR");
                 Flux flux1 = entry.getKey();
-                                Set<String> set = entry.getValue();
-                if(flux1.getID().equals(flux.getID())){
-                     try {
-                    System.out.println("try");
-                    cacheHash.remove(flux);
-                    return true;
-                } catch (Exception e) {
-                    return false;
-                }
+                Set<String> set = entry.getValue();
+                if (flux1.getID().equals(flux.getID())) {
+                    try {
+                        System.out.println("try");
+                        cacheHash.remove(flux);
+                        return true;
+                    } catch (Exception e) {
+                        return false;
+                    }
                 }
 
-                
+
             }
             if (cacheHash.containsKey(flux)) {
                 System.out.println("Contain");
-               
+
             }
         }
         return false;
@@ -189,6 +237,4 @@ public class CacheHashFlux {
 
     public static void main(String[] args) {
     }
-    
-    
 }

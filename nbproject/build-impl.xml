@@ -952,30 +952,6 @@ exists or setup the property manually. For example like this:
     <!--
                 DIST BUILDING SECTION
             -->
-            
-            <target name="-post-jar" description="New task definition for EclipseLink static weaving"> 
-    <taskdef name="weave" classname="org.eclipse.persistence.tools.weaving.jpa.StaticWeaveAntTask"/> 
-</target> 
-<target name="weaving" description="perform weaving" depends="-post-jar"> 
-    <weave  source="${dist.jar}\MyProject.jar" 
-            target="${dist.jar}\MyProject_Weaved.jar" 
-            persistenceinfo="${dist.jar}..\..\MyProjectEE\MyProject-ejb\build\classes\META-INF\persistence.xml" 
-            loglevel="FINER"> 
-        <classpath> 
-            <pathelement path="${dist.jar}\lib\eclipselink-2.3.0.jar"/> 
-            <pathelement path="${dist.jar}\lib\javaee-api-6.0.jar"/> 
-            <pathelement path="${dist.jar}\lib\jasypt-1.9.0.jar"/> 
-            <pathelement path="${dist.jar}\lib\javax.persistence-2.0.jar"/> 
-            <pathelement path="${dist.jar}\lib\org.eclipse.persistence.jpa.jpql_1.0.0.jar"/> 
-            <pathelement path="${dist.jar}\lib\joda-time-2.1.jar"/> 
-            <pathelement path="${dist.jar}\lib\jms.jar"/> 
-        </classpath> 
-    </weave> 
-</target> 
-            
-            
-            
-            
     <target name="-pre-dist">
         <!-- Empty placeholder for easier customization. -->
         <!-- You can override this target in the ../build.xml file. -->
@@ -1029,6 +1005,9 @@ exists or setup the property manually. For example like this:
         <copyfiles files="${libs.JMinix1.1.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${libs.JavaMelody.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${file.reference.activemq-client-5.9-SNAPSHOT.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${libs.Jsoup.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${libs.Jackson.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${libs.Velocity.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <mkdir dir="${build.web.dir}/META-INF"/>
         <manifest file="${build.web.dir}/META-INF/MANIFEST.MF" mode="update"/>
     </target>
@@ -1052,6 +1031,9 @@ exists or setup the property manually. For example like this:
         <copyfiles files="${libs.JMinix1.1.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${libs.JavaMelody.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${file.reference.activemq-client-5.9-SNAPSHOT.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
+        <copyfiles files="${libs.Jsoup.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
+        <copyfiles files="${libs.Jackson.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
+        <copyfiles files="${libs.Velocity.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
     </target>
     <target depends="init" if="dist.ear.dir" name="-clean-webinf-lib">
         <delete dir="${build.web.dir}/WEB-INF/lib"/>

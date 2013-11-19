@@ -13,10 +13,6 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.Temporal;
 import javax.persistence.Transient;
-import org.eclipse.persistence.annotations.Cache;
-import org.eclipse.persistence.annotations.CacheCoordinationType;
-import org.eclipse.persistence.annotations.CacheType;
-import org.eclipse.persistence.config.CacheIsolationType;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import rssagregator.beans.Conf;
@@ -30,14 +26,16 @@ import rssagregator.services.TacheAlerteMail;
  *
  * @author clem
  */
-@Cacheable(value = true)
+//@Cacheable(value = true)
 //@Cache(shared = true)
 @Entity(name = "i_superclass")
 //@MappedSuperclass()
-@Cache(size = 100, type = CacheType.CACHE, isolation = CacheIsolationType.SHARED, coordinationType = CacheCoordinationType.SEND_NEW_OBJECTS_WITH_CHANGES)
+//@Cache(size = 100, type = CacheType.CACHE, isolation = CacheIsolationType.SHARED, coordinationType = CacheCoordinationType.SEND_NEW_OBJECTS_WITH_CHANGES)
 @Inheritance(strategy = InheritanceType.JOINED) // Peu de champs supplémentaires dans les autres entités, on va conserver la stratégie la plus simple
-public class AbstrIncident implements Serializable {
+public abstract class AbstrIncident implements Serializable {
 
+       public static final String desc = "ddd";
+    
     /**
      * *
      * Constructeur par défaut d'un incident. IL FAUT PASSER PAR LA FACTORY {@link IncidentFactory} POUR INSTANCIER UN INCIDENT
@@ -87,7 +85,6 @@ public class AbstrIncident implements Serializable {
     /**
      * *
      * N'EST PLUS UTILISÉ !
-     *
      * @deprecated
      */
     @Deprecated
@@ -121,6 +118,8 @@ public class AbstrIncident implements Serializable {
      */
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     protected Date dateFin;
+    
+    
     /**
      * *
      * Permet de déterminer si un incident doit ou non être notifié par la tache {@link TacheAlerteMail}
@@ -343,4 +342,20 @@ public class AbstrIncident implements Serializable {
     public Boolean doitEtreNotifieParMail() {
         return true;
     }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName();
+    }
+    
+    /***
+     * Retourne une description du type de l'incident.
+     * @return 
+     */
+        public String incidDesc(){
+            return desc;
+        };
+    
+    
+    
 }

@@ -82,7 +82,7 @@ public class ConfigSrvl extends HttpServlet {
 
 
         Conf confcourante = null;
-        ConfForm form = new ConfForm();
+//        ConfForm form = new ConfForm();
         DAOConf daoConf = DAOFactory.getInstance().getDAOConf();
 
         confcourante = DAOFactory.getInstance().getDAOConf().getConfCourante();

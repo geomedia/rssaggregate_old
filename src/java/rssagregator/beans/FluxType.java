@@ -21,7 +21,7 @@ import org.eclipse.persistence.annotations.CascadeOnDelete;
  */
 
 @Entity
-@Cacheable(value = false)
+//@Cacheable(value = false)
 public class FluxType implements Serializable, BeanSynchronise {
 
     @Id

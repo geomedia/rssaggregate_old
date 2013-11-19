@@ -30,7 +30,13 @@ public class ConfForm extends AbstrForm {
     private List<ServeurSlave> serveurSlave;
     private String hostMaster;
     private Integer purgeDuration;
+
     //-------------------------------------
+    protected ConfForm() {
+    }
+    
+    
+    
 
     @Override
     public Object bind(HttpServletRequest request, Object objEntre, Class type) {

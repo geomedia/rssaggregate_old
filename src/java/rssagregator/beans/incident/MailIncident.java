@@ -19,6 +19,8 @@ import rssagregator.services.TacheEnvoyerMail;
 @Entity(name = "i_mailincident")
 public class MailIncident extends AbstrIncident implements Serializable {
 
+       public static final String desc = "Incident survenue lors de l'envoie d'un mail.";
+    
     protected MailIncident() {
     }
 
@@ -110,6 +112,9 @@ public class MailIncident extends AbstrIncident implements Serializable {
     public Boolean doitEtreNotifieParMail() {
         return false;
     }
+
+
+ 
     
     
 }

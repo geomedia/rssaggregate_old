@@ -7,10 +7,12 @@ package rssagregator.dao;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.EmptyStackException;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
@@ -21,13 +23,18 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import org.apache.taglibs.standard.tag.common.core.NullAttributeException;
 import org.eclipse.persistence.config.CacheUsage;
 import org.eclipse.persistence.config.QueryHints;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import rssagregator.beans.Flux;
+import rssagregator.beans.FluxPeriodeCaptation;
 import rssagregator.beans.Item;
+import rssagregator.beans.Journal;
+import rssagregator.beans.exception.ArgumentIncorrect;
+import rssagregator.beans.exception.IncompleteBeanExeption;
 
 /**
  * La DAO permettabt d'échanger des items avec la base de données SQL.
@@ -310,7 +317,9 @@ public class DaoItem extends AbstrDao {
 //        }
 // TODO : C'est laid de faire des requete mon préparée en plein milieu du code. Mais on n'arive pas a préparer une requete basée su une liste de string
 //        Query query = em.createQuery("SELECT item FROM Item item JOIN item.listFlux flux where item.hashContenu IN ("+hashParamSQL+") AND flux.ID=:fluxid");
+        System.out.println(hashParamSQL);
         Query query = em.createQuery("SELECT item FROM Item item LEFT JOIN fetch item.listFlux WHERE item.hashContenu IN (" + hashParamSQL + ")");
+//        Query query = em.createQuery("SELECT i FROM Item i WHERE i.hashContenu IN (" + hashParamSQL + ")");
         //LEFT JOIN FETCH item.listFlux
 
 
@@ -344,53 +353,28 @@ public class DaoItem extends AbstrDao {
      * @param i
      */
     public Set<String> findLastHash(Flux fl, int i, Boolean onCache) {
-
-        
-
-//        em = dAOFactory.getEntityManager();
         Query query = em.createQuery("SELECT item FROM Item item JOIN item.listFlux fl WHERE fl.ID=:idfl ORDER BY item.ID DESC");
-        
-        if(onCache){
+
+        if (onCache) {
 //            query.setHint("eclipselink.cache-usage", "CheckCacheOnly");
             query.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheOnly);
 //            query.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheOnly); - See more at: http://eclipse.org/eclipselink/documentation/2.4/jpa/extensions/q_cacheusage.htm#sthash.BI9rLocd.dpuf
         }
-        
+
         query.setParameter("idfl", fl.getID());
-//        query.setParameter("lim", i);
         query.setFirstResult(0);
         query.setMaxResults(i);
 
         List<Item> resu = query.getResultList();
-        System.out.println("==================================");
-        System.out.println("NOMBRE D'item : " + resu.size());
-        System.out.println("==================================");
-        Set<String> setHash = new HashSet<String>();
-        
-        for (int j = 0; j < resu.size(); j++) {
-            Item string = resu.get(j);
-            System.out.println("TYPE RESU : " + string.getClass());
-            setHash.add(string.getHashContenu());
-            
+
+        Set<String> setHash = new LinkedHashSet<String>();
+
+        for (int j = resu.size() - 1; j >= 0; j--) {
+            Item item = resu.get(j);
+            setHash.add(item.getHashContenu());
         }
-        
-        
-//        Set<String> retu = new LinkedHashSet<String>(resu);
-//        
-//        for (int j = 0; j < resu.size(); j++) {
-//            String string = resu.get(j);
-//            System.out.println("RESUU : " + string);
-//            
-//        }
 
         return setHash;
-//        int j;
-//         
-//        for (j=0; j<resu.size(); j++){
-//            System.out.println("hash depart : " + resu.get(j));
-//            
-//        }        
-
     }
 
     public String getOrder_by() {
@@ -588,5 +572,68 @@ public class DaoItem extends AbstrDao {
         query.setParameter("idfl", f.getID());
         List<Item> resu = query.getResultList();
         return resu;
+    }
+
+    public List<Item> itemCaptureParleFluxDurantlaDernierePeriodeCollecte(Flux flux) throws ArgumentIncorrect, IncompleteBeanExeption {
+
+        if(flux==null){
+            throw new ArgumentIncorrect("Le flux envoyé en argument est null");
+        }
+        
+        
+        // Le flux doit être activé et posséder une période de collecte
+
+        List resu = null;
+        FluxPeriodeCaptation last = flux.returnDerniereFluxPeriodeCaptation();
+        System.out.println("LAST : " + last);
+        if(last==null){
+            throw new IncompleteBeanExeption("Impossible de retrouver la dernière période de captation du flux");
+        }
+        
+        if (last != null) {
+
+            String req = "SELECT i FROM Item i JOIN i.listFlux f, f.periodeCaptations p WHERE p.ID=:idP";
+            Query query = em.createQuery(req);
+            query.setParameter("idP", last.getID());
+            resu = query.getResultList();
+
+        }
+   
+        return resu;
+    }
+
+    /**
+     * *
+     * Retourne la liste des item possédant le titre envoyé en arguement et étant lié a un flux appartenant au journal
+     * mentionné
+     *
+     * @param titre
+     * @param journal
+     * @throws NullPointerException Si le journal ou le titre son null
+     * @throws ArgumentIncorrect Si le tite envoyé est vide ou si le journal n'a pas d'id.
+     * @return
+     */
+    public List<Item> findItemPossedantTitreAppartenantAuJournal(String titre, Journal journal) throws NullPointerException, ArgumentIncorrect {
+        if (journal == null) {
+            throw new NullPointerException("journal null");
+        }
+
+        if (titre == null) {
+            throw new NullPointerException("titre null");
+        }
+
+        if (titre.isEmpty()) {
+            throw new ArgumentIncorrect("Le titre envoyé est vide");
+        }
+
+        if (journal.getID() == null) {
+            throw new ArgumentIncorrect("Le journal envoyé n'a pas d'ID");
+        }
+
+        Query query = em.createQuery("SELECT i From Item i JOIN  i.listFlux f, f.journalLie j WHERE j.ID=:idJ AND i.titre LIKE(:titre)");
+        query.setParameter("idJ", journal.getID());
+        query.setParameter("titre", titre);
+
+        return query.getResultList();
     }
 }

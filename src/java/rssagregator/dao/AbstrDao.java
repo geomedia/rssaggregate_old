@@ -4,17 +4,14 @@
  */
 package rssagregator.dao;
 
-import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 import javax.persistence.RollbackException;
 import javax.persistence.TypedQuery;
@@ -25,7 +22,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.apache.poi.util.Beta;
 import rssagregator.beans.BeanSynchronise;
-import rssagregator.beans.Flux;
 import rssagregator.beans.Journal;
 import rssagregator.services.ServiceSynchro;
 
@@ -42,11 +38,11 @@ public abstract class AbstrDao<T> {
 //    protected EntityTransaction tr;
 //    protected List<SearchFilter> criteriaSearchFilter = new ArrayList<SearchFilter>();
     protected SearchFiltersList criteriaSearchFilters = new SearchFiltersList();
-    protected String criteriaSidx; // La colonne sur laquel il faut ordonner les resultat
-    protected String criteriaSord; // le sens de l'ordre asc desc
-    protected Integer criteriaStartRow; //Premier enregistrement permettant de construire la limite
-    protected Integer criteriaPage;  // Utile pour la dao ?
-    protected Integer criteriaRow; // Nombre d'enregistrement pour construire la limite (second paramettre de la limite).
+//    protected String criteriaSidx; // La colonne sur laquel il faut ordonner les resultat
+//    protected String criteriaSord; // le sens de l'ordre asc desc
+//    protected Integer criteriaStartRow; //Premier enregistrement permettant de construire la limite
+//    protected Integer criteriaPage;  // Utile pour la dao ?
+//    protected Integer criteriaRow; // Nombre d'enregistrement pour construire la limite (second paramettre de la limite).
     /**
      * *
      * La persistence Unit définie dans la config d'Eclipse link. Voir le fichier persistence.xml
@@ -101,14 +97,17 @@ public abstract class AbstrDao<T> {
      * @return
      */
     protected TypedQuery gestionCriteria(Boolean count) {
+        System.out.println("");
         CriteriaBuilder cb = em.getCriteriaBuilder();
         List<Predicate> listWhere = new ArrayList<Predicate>();
         System.out.println("GESTION CRITERIA");
+        System.out.println("NOMBRE CRITERE : " + this.criteriaSearchFilters.getFilters().size());
+        
 
         CriteriaQuery cq = cb.createQuery(classAssocie);
         Root root = cq.from(classAssocie);
         if (criteriaSearchFilters != null && !criteriaSearchFilters.getFilters().isEmpty()) {
-            System.out.println("---> criteria search filter");
+           
             for (int i = 0; i < criteriaSearchFilters.getFilters().size(); i++) {
 
 
@@ -118,6 +117,7 @@ public abstract class AbstrDao<T> {
                 }
                 System.out.println("OPERATOR : " + searchFilter.getOp());
                 if (searchFilter.getOp().equals("eq")) {
+                    
                     if (searchFilter.getType() != null && searchFilter.getType().equals(String.class)) {
                         listWhere.add(cb.and(cb.equal(cb.lower(root.get(searchFilter.getField())), searchFilter.getData().toString().toLowerCase())));
                     } else if (searchFilter.getType() != null && searchFilter.getType().equals(Long.class)) {
@@ -126,8 +126,6 @@ public abstract class AbstrDao<T> {
                         } catch (Exception e) {
                         }
                     }
-
-
                 } else if (searchFilter.getOp().equals("cn")) {
                     if (searchFilter.getType() != null && searchFilter.getType().equals(String.class)) {
                         listWhere.add(cb.and(cb.like(cb.lower(root.get(searchFilter.getField())), "%" + searchFilter.getData().toString().toLowerCase() + "%")));
@@ -142,6 +140,7 @@ public abstract class AbstrDao<T> {
                             Class c = classAssocie.getDeclaredField(searchFilter.getField()).getType();
                             // Si le champs concerné dan la classe métier est une liste, alors on va effectuer une jointure
                             if (List.class.isAssignableFrom(c)) {
+                                System.out.println("--------> JOINTURE DAO");
                                 Join joinFlux = root.join(searchFilter.getField());
                                 List lf = (List) searchFilter.getData();
                                 listWhere.add(joinFlux.in(lf));
@@ -184,12 +183,12 @@ public abstract class AbstrDao<T> {
 
         //---------Gestion de l'ordre.
         if (!count) {
-            if (criteriaSidx != null && !criteriaSidx.isEmpty() && !criteriaSidx.equals("invid") && criteriaSord != null && (criteriaSord.toLowerCase().equals("asc") || criteriaSord.toLowerCase().equals("desc"))) {
-                System.out.println("--> criteria sidx : " + criteriaSidx);
-                if (criteriaSord.toLowerCase().equals("desc")) {
-                    cq.orderBy(cb.desc(root.get(criteriaSidx)));
-                } else if (criteriaSord.toLowerCase().equals("asc")) {
-                    cq.orderBy(cb.asc(root.get(criteriaSidx)));
+            if (criteriaSearchFilters.criteriaSidx != null && !criteriaSearchFilters.criteriaSidx.isEmpty() && !criteriaSearchFilters.criteriaSidx.equals("invid") && criteriaSearchFilters.criteriaSord != null && (criteriaSearchFilters.criteriaSord.toLowerCase().equals("asc") || criteriaSearchFilters.criteriaSord.toLowerCase().equals("desc"))) {
+                System.out.println("--> criteria sidx : " + criteriaSearchFilters.criteriaSidx);
+                if (criteriaSearchFilters.criteriaSord.toLowerCase().equals("desc")) {
+                    cq.orderBy(cb.desc(root.get(criteriaSearchFilters.criteriaSidx)));
+                } else if (criteriaSearchFilters.criteriaSord.toLowerCase().equals("asc")) {
+                    cq.orderBy(cb.asc(root.get(criteriaSearchFilters.criteriaSidx)));
                 }
             }
         }
@@ -248,12 +247,13 @@ public abstract class AbstrDao<T> {
     public List<T> findCriteria() {
         TypedQuery<T> tq = gestionCriteria(false);
 
-        if (criteriaStartRow != null && criteriaRow != null) {
-            tq.setMaxResults(criteriaRow);
-            tq.setFirstResult(criteriaStartRow);
+        if (criteriaSearchFilters.criteriaStartRow != null &&  criteriaSearchFilters.criteriaRow != null) {
+            tq.setMaxResults(criteriaSearchFilters.criteriaRow);
+            tq.setFirstResult(criteriaSearchFilters.criteriaStartRow);
         } else {
         }
         List<T> listResu = tq.getResultList();
+
         System.out.println("-@@" + tq.getMaxResults());
         System.out.println("--> List resu size : " + listResu.size());
         return listResu;
@@ -414,45 +414,45 @@ public abstract class AbstrDao<T> {
 //    public void setCriteriaSearchFilter(List<SearchFilter> criteriaSearchFilter) {
 //        this.criteriaSearchFilter = criteriaSearchFilter;
 //    }
-    public String getCriteriaSidx() {
-        return criteriaSidx;
-    }
-
-    public void setCriteriaSidx(String criteriaSidx) {
-        this.criteriaSidx = criteriaSidx;
-    }
-
-    public String getCriteriaSord() {
-        return criteriaSord;
-    }
-
-    public void setCriteriaSord(String criteriaSord) {
-        this.criteriaSord = criteriaSord;
-    }
-
-    public Integer getCriteriaStartRow() {
-        return criteriaStartRow;
-    }
-
-    public void setCriteriaStartRow(Integer criteriaStartRow) {
-        this.criteriaStartRow = criteriaStartRow;
-    }
-
-    public Integer getCriteriaPage() {
-        return criteriaPage;
-    }
-
-    public void setCriteriaPage(Integer criteriaPage) {
-        this.criteriaPage = criteriaPage;
-    }
-
-    public Integer getCriteriaRow() {
-        return criteriaRow;
-    }
-
-    public void setCriteriaRow(Integer criteriaRow) {
-        this.criteriaRow = criteriaRow;
-    }
+//    public String getCriteriaSidx() {
+//        return criteriaSidx;
+//    }
+//
+//    public void setCriteriaSidx(String criteriaSidx) {
+//        this.criteriaSidx = criteriaSidx;
+//    }
+//
+//    public String getCriteriaSord() {
+//        return criteriaSord;
+//    }
+//
+//    public void setCriteriaSord(String criteriaSord) {
+//        this.criteriaSord = criteriaSord;
+//    }
+//
+//    public Integer getCriteriaStartRow() {
+//        return criteriaStartRow;
+//    }
+//
+//    public void setCriteriaStartRow(Integer criteriaStartRow) {
+//        this.criteriaStartRow = criteriaStartRow;
+//    }
+//
+//    public Integer getCriteriaPage() {
+//        return criteriaPage;
+//    }
+//
+//    public void setCriteriaPage(Integer criteriaPage) {
+//        this.criteriaPage = criteriaPage;
+//    }
+//
+//    public Integer getCriteriaRow() {
+//        return criteriaRow;
+//    }
+//
+//    public void setCriteriaRow(Integer criteriaRow) {
+//        this.criteriaRow = criteriaRow;
+//    }
 
     public SearchFiltersList getCriteriaSearchFilters() {
         return criteriaSearchFilters;
@@ -495,9 +495,6 @@ public abstract class AbstrDao<T> {
 //    public void setTr(EntityTransaction tr) {
 //        this.tr = tr;
 //    }
-    
-    
-    
     
     
 }

@@ -9,10 +9,10 @@ function paginsubmit(bt) {
     // On supprimer la liste 1 des journaux
     $('#firstResult').val(bt.value);
 
-
     $('#afin').click();
 //            $('#pagina').submit();
 }
+
 
 
 
@@ -26,11 +26,19 @@ $(document).ready(function() {
 
         // Récupération des paramettre de la requete
         var $fluxSelection2 = $('#fluxSelection2');
-        options = $('#fluxSelection2 option');
+        options = $('#fluxSelection2 li');
 
         //on force la sélection dans la liste 2 afin de pouvoir utiliser la fonction val() sur ce composant html
+
+
+        idFlux = {
+            field: "listFlux",
+            op: "in",
+            data: []
+        };
+
         for (i = 0; i < options.length; i++) {
-            options[i].setAttribute('selected', 'true');
+            idFlux['data'].push(options[i]['value']);
         }
 
         $resudiv.empty(); // on vide la liste des départements
@@ -43,27 +51,8 @@ $(document).ready(function() {
         $date1 = $('#date1');
 
 
-
-
         // Récupération des flux sélectionne
-        champSpe = [];
-        
-        idFlux = {
-                field: "idFlux",
-                op: "in",
-                data: []
-            };
-            
-        for (i = 0; i < $fluxSelection2.val().length; i++) {
-            alert($fluxSelection2.val()[i]);
-            idFlux['data'].push($fluxSelection2.val()[i]);
-//            idFlux = {
-//                field: "idFlux",
-//                op: "in",
-//                data: $fluxSelection2.val()[i]
-//            };
-            
-        }
+        champSpe = []; // Variable permettant de récupérer les champs spéciaux
         champSpe.push(idFlux);
 
 
@@ -81,7 +70,6 @@ $(document).ready(function() {
             data: $date2.val()
         };
         champSpe.push(d2);
-        alert($date1);
         champSpe.push(d1);
 //            param = param.substr(1, param.length);
 
@@ -92,32 +80,12 @@ $(document).ready(function() {
                 {
                     "caption": "truc modif",
                     "groupOp": "AND",
-                    "rules": [
-//                        {"spefield": "idFlux", "op": "in", "data": "13940"},
-//                        {"field": "invdate", "op": "le", "data": "2007-10-20"},
-//                        {"field": "name", "op": "bw", "data": "Client 3"}
-                    ],
+                    "rules": [],
                     spefield: champSpe
                 };
 
-//    alert($('#list').getGridParam()['caption']);
-//    jQuery('#list').jqGrid('clearGridData');
-//        jQuery("#list").searchGrid({multipleSearch:true, sFilter: 'zouzouzou'});
         $("#list").jqGrid('setGridParam', {data: [], postData: {filters: JSON.stringify(filters)}});
-//        jQuery("#list").searchGrid(optionsSearch);
-//        jQuery('#list').setPostData({filters: filters});
         $("#list").jqGrid().trigger("reloadGrid");
-//         alert($('#list').getGridParam()['caption']);
-
-
-//    $('#list').jqGrid().setGridParam(
-//            {postData: filters}
-//            ).trigger.('reloadGrid');
-//                alert('exe');
-
-
-
-
 
 
 //-----------------------------------------------------------------

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.persistence.EntityManager;
 import javax.persistence.TransactionRequiredException;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
@@ -27,6 +28,34 @@ public class ServiceCRUDJournal extends ServiceCRUDBeansSynchro {
 
     protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(ServiceCRUDBeansSynchro.class);
 
+    @Override
+    public void ajouter(Object obj) throws Exception {
+        super.ajouter(obj); //To change body of generated methods, choose Tools | Templates.
+
+        Journal cast = (Journal) obj;
+        ServiceCollecteur.getInstance().enregistrerJournalAupresduService(cast);
+
+    }
+
+    @Override
+    public void modifier(Object obj) throws Exception {
+        super.modifier(obj); //To change body of generated methods, choose Tools | Templates.
+
+        Journal cast = (Journal) obj;
+        ServiceCollecteur.getInstance().enregistrerJournalAupresduService(cast);
+
+    }
+
+    @Override
+    public void modifier(Object obj, EntityManager em) throws Exception {
+        super.modifier(obj, em); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void ajouter(Object obj, EntityManager em) throws Exception {
+        super.ajouter(obj, em); //To change body of generated methods, choose Tools | Templates.
+    }
+
     /**
      * *
      * Lors de la supression d'un journal, On supprimer tous les flux liée au journal ainsi que toutes les items liés au
@@ -34,18 +63,17 @@ public class ServiceCRUDJournal extends ServiceCRUDBeansSynchro {
      *
      * @param obj Le journal a supprimer
      * @throws NullPointerException : Si l'objet envoyé est null
-     * @throws  ClassCastException : Si l'objet envoyé n'est pas un journal
+     * @throws ClassCastException : Si l'objet envoyé n'est pas un journal
      * @throws Exception : toute autre exception
      */
     @Override
-    public void supprimer(Object obj) throws NullPointerException,ClassCastException, Exception {
+    public void supprimer(Object obj) throws NullPointerException, ClassCastException, Exception {
         System.out.println("========================");
         System.out.println("--------> SUP JOURNAL");
         System.out.println("======================");
         if (obj == null) {
             throw new NullPointerException("Le journal envoyé en argument est null");
-        }
-        else if(!obj.getClass().equals(Journal.class)){
+        } else if (!obj.getClass().equals(Journal.class)) {
             throw new ClassCastException("L'objet envoyé n'est pas un Journal");
         }
 

@@ -1,0 +1,100 @@
+## Velocity Template.
+##  Template utilisé par la TacheAlerteMail pour mettre en forme le mail a envoyer au administrateurs
+
+
+
+
+#set( $s = "A String" )
+##$s.getClass().forName("java.util.ArrayList").isAssignableFrom($s.getClass())
+
+
+    <!DOCTYPE html>
+    <html>
+        <head>
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        </head>
+
+    <body>
+<h1>$titreMail</h1>
+<p>$descMail</p>
+
+
+
+          <h2>Notification d'évènement</h2>
+          <p> Les évènements n'empèche pas l'aggrégateur de fonctionner. Ils permettent de notifier aux administrateur des relevées de valeurs anormales ou des ajouts de données demandant la un controle à postériori. Exemple : chutes ou hausse anormales du nombre d'items capturées pour un flux (Anomalie de Collecte), ajout de nouveaux flux automatique pour un journal </p>
+        <ul>
+       #set( $vide = true )
+
+            #foreach( $incid in $incidents )
+                #if( $s.getClass().forName("rssagregator.beans.incident.Notification").isAssignableFrom($incid.getClass()))
+                        <li>
+
+                    <h3>-- $incid.toString()</h3>
+                    #if( $s.getClass().forName("rssagregator.beans.incident.CollecteIncident").isAssignableFrom($incid.getClass()))
+                    <p><strong>Flux : </strong><a href="$incid.getFluxLie().getReadURL()"> $incid.getFluxLie()</p>
+                    #end
+
+                    ##Affichage des Anomalies de collecte
+                     #if( $s.getClass().forName("rssagregator.beans.incident.AnomalieCollecte").isAssignableFrom($incid.getClass()))
+                        <p>Jour : $dateTool.format('full_date', $incid.dateDebut) </p>
+                        <p>Nombre d'item pour ce jour : $incid.nombreCaptureConstate</p>
+                        <p>Moyenne des item collecté pendant la période de capture : $incid.moyenneDesCapture</p>
+                        <p>Début de la période de capture : $dateTool.format('full_date', $incid.getFluxLie().returnDerniereFluxPeriodeCaptation().dateDebut)<p>
+                        #if($incid.getFluxLie().returnDerniereFluxPeriodeCaptation().datefin)
+                            <p>Fin de la période: $dateTool.format('full_date', $incid.getFluxLie().returnDerniereFluxPeriodeCaptation().datefin)<p>
+                        #else
+                             <p>Fin de la période:Capture en cours<p>
+                        #end
+                        <p>Seuil max toléré : $incid.returnSeuilMaxTolere()</p>
+                        <p>Seuil min toléré : $incid.returnSeuilMinTolere()</p>
+                        
+
+                     #end
+
+
+                    <p><strong>Erreur : </strong> $incid.getMessageEreur()</p>
+                     <p><a href="$incid.getUrlAdmin()">Détail sur l'incident</a></p>
+
+
+                    #set( $vide = false )
+                    </li>
+               #end
+             #end
+
+            #if($vide)
+                <li>Aucun</li>
+            #end
+
+
+         </ul>
+
+
+
+      
+        <h2>Incidents</h2>
+        <p>Les incidents sont des erreurs survenues lors de la collecte lorsque par exemple un flux n'a pas pu être collecté (erreur d'url, serveur injoignable...). Sous ce titre vous trouverez aussi les incidents de serveurs, exemple perte de connection JMS</p>
+        <ul>
+        #set( $vide = true )
+        #foreach( $incid in $incidents )
+            #if( !$s.getClass().forName("rssagregator.beans.incident.Notification").isAssignableFrom($incid.getClass()))
+                <li>
+                    <h3 title="$incid.incidDesc()">$incid.toString()</h3>
+                        #if( $s.getClass().forName("rssagregator.beans.incident.CollecteIncident").isAssignableFrom($incid.getClass()))
+                               <p><strong>Flux : </strong> $incid.getFluxLie()</p>
+                        #end
+                        <p><strong>Erreur : </strong> $incid.getMessageEreur()</p>
+                        <p><strong>Log Erreur : </strong> $incid.getLogErreur()</p>
+                        <p><a href="$incid.getUrlAdmin()">Détail</a></p>
+
+                </li>
+                #set( $vide = false )
+            #end
+        #end
+        
+        #if($vide)
+            <li>Aucun</li>
+        #end
+
+        </ul>
+    </body>
+</html>

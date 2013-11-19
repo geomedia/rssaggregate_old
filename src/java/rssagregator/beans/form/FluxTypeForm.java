@@ -21,8 +21,13 @@ public class FluxTypeForm extends AbstrForm {
     //Les variables devant être récupérée dans la requête
     private String denomination;
     private String description;
-    //---------------------------------------
 
+    //---------------------------------------
+    protected FluxTypeForm() {
+    }
+
+    
+    
     @Override
     public Boolean validate(HttpServletRequest request) {
         String s;

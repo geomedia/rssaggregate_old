@@ -61,58 +61,58 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
 
 
                     <c:when test="${action=='recherche'}">
-<!--                        <form method="POST" id="pagina">
-                            <input type="hidden" id="firstResult" value="0"/>
+                        <!--                        <form method="POST" id="pagina">
+                                                    <input type="hidden" id="firstResult" value="0"/>
+                        
+                                                    <fieldset>
+                                                        <legend>Pages : </legend>
+                        <%--<c:import url="/WEB-INF/paginator.jsp" />--%>
+                        <div>
+                            <span id="btPaginDiv"></span>
+                        </div>
 
-                            <fieldset>
-                                <legend>Pages : </legend>
-                                <%--<c:import url="/WEB-INF/paginator.jsp" />--%>
-                                <div>
-                                    <span id="btPaginDiv"></span>
-                                </div>
+                        <label>Flux par page</label>
+                        <select id="itPrPage" name="itPrPage" onChange="$('#afin').click();"> 
+                        <c:forEach var="i" begin="10" end="150" step="20">
+                            <option value="${i}" <c:if test="${itPrPage==i}"> selected="selected"</c:if>>${i}</option>
+                        </c:forEach>
+                    </select> 
 
-                                <label>Flux par page</label>
-                                <select id="itPrPage" name="itPrPage" onChange="$('#afin').click();"> 
-                                    <c:forEach var="i" begin="10" end="150" step="20">
-                                        <option value="${i}" <c:if test="${itPrPage==i}"> selected="selected"</c:if>>${i}</option>
-                                    </c:forEach>
-                                </select> 
+                </fieldset>
 
-                            </fieldset>
+                <fieldset>
+                    <legend>Affiner la recherche</legend>
+                    <label>Appartenant au journal : </label>
+                    <select name="journalid" id="journalid">
+                        <option value="">TOUS</option>
+                        <c:forEach items="${listjournaux}" var="j">
+                            <option value="${j.ID}" <c:if test="${j.ID==journalid}"> selected="selected"</c:if>>${j.nom}</option>    
+                        </c:forEach>
+                    </select>
+                    <button type="button" id="afin">Affiner</button>
+                    <input type="submit" value="Affiner" onclick="$('#vue').val('')" id="sub" />
 
-                            <fieldset>
-                                <legend>Affiner la recherche</legend>
-                                <label>Appartenant au journal : </label>
-                                <select name="journalid" id="journalid">
-                                    <option value="">TOUS</option>
-                                    <c:forEach items="${listjournaux}" var="j">
-                                        <option value="${j.ID}" <c:if test="${j.ID==journalid}"> selected="selected"</c:if>>${j.nom}</option>    
-                                    </c:forEach>
-                                </select>
-                                <button type="button" id="afin">Affiner</button>
-                                <input type="submit" value="Affiner" onclick="$('#vue').val('')" id="sub" />
+                    <select name="vue" id="vue" onchange="subExport()()">
+                        <option value="html">Exporter</option>
+                        <option value="opml">opml</option>
+                    </select>
+                    <script>
 
-                                <select name="vue" id="vue" onchange="subExport()()">
-                                    <option value="html">Exporter</option>
-                                    <option value="opml">opml</option>
-                                </select>
-                                <script>
+                        function subExport() {
+                            if ($('#vue').val() == 'opml') {
 
-                                    function subExport() {
-                                        if ($('#vue').val() == 'opml') {
-
-                                            $('#pagina').attr('target', '_blank');
-                                            $('#pagina').submit();
-                                            $('#pagina').attr('target', '');
-                                            $('#vue').val('html');
+                                $('#pagina').attr('target', '_blank');
+                                $('#pagina').submit();
+                                $('#pagina').attr('target', '');
+                                $('#vue').val('html');
 
 
-                                        }
-                                    }
-                                </script>
-                                <button type="submit"  formaction="flux" formtarget="_blank" value="vue">Exporter</button>
-                            </fieldset>
-                        </form>-->
+                            }
+                        }
+                    </script>
+                    <button type="submit"  formaction="flux" formtarget="_blank" value="vue">Exporter</button>
+                </fieldset>
+            </form>-->
                         <script src="${rootpath}AjaxFluxDyn.js"></script>
 
                         <script src="${rootpath}ress/jqgrid/js/i18n/grid.locale-fr.js" type="text/javascript"></script>
@@ -133,35 +133,35 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
                                      * @param {type} l5
                                      * @returns {String}
                                      */
-                                    function myLinkFormatter(cellvalue, options, rowObjcet, l4, l5) {
-                                        // Lors du classement après recherche sur le client side, le rowObjet ne peut être lu de la même manière. La ligne suivant permet de pallier à ce problème
-                                        id = rowObjcet[0];
-                                        texteLien = rowObjcet[1];
-                                        if (rowObjcet[0] === undefined) {
+                                            function myLinkFormatter(cellvalue, options, rowObjcet, l4, l5) {
+                                            // Lors du classement après recherche sur le client side, le rowObjet ne peut être lu de la même manière. La ligne suivant permet de pallier à ce problème
+                                            id = rowObjcet[0];
+                                                    texteLien = rowObjcet[1];
+                                                    if (rowObjcet[0] === undefined) {
                                             id = rowObjcet['ID'];
-                                            texteLien = rowObjcet['nom'];
-                                        }
-                                        return '<a href = "/RSSAgregate/flux/read?id=' + id + '">' + texteLien + '</a>';
-                                    }
+                                                    texteLien = rowObjcet['nom'];
+                                            }
+                                            return '<a href = "/RSSAgregate/flux/read?id=' + id + '">' + texteLien + '</a>';
+                                            }
 
                                     $(function() {
-                                        $("#list").jqGrid({
-                                            url: "${rootpath}flux/list?vue=grid",
+                                    $("#list").jqGrid({
+                                    url: "${rootpath}flux/list?vue=grid",
                                             loadonce: true,
                                             datatype: "json",
                                             mtype: "GET",
                                             colNames: ["ID", 'nom', "Journal", "Type", "active", "created"],
                                             colModel: [
-                                                {name: "ID", key: true, width: 55, hidden: true},
-                                                {name: "nom", width: 55, search: true, formatter: myLinkFormatter, searchoptions: {sopt: ['cn', 'eq']}},
-                                                {name: "journalLie", width: 90, searchoptions: {sopt: ['cn', 'eq']}},
-                                                {name: "typeFlux", title: 'Type', search: true, width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
-                                                {name: "active", width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
-                                                {name: "created", width: 80, align: "right", stype: 'select', editoptions: {value: {'': 'tous', 'autre': 'autre', 'quotidien': 'quotidien'}}},
-                                            ],
+                                    {name: "ID", key: true, width: 55, hidden: true},
+                                    {name: "nom", width: 55, search: true, formatter: myLinkFormatter, searchoptions: {sopt: ['cn', 'eq']}},
+                                    {name: "journalLie", width: 90, searchoptions: {sopt: ['cn', 'eq']}},
+                                    {name: "typeFlux", title: 'Type', search: true, width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
+                                    {name: "active", width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
+                                    {name: "created", width: 80, align: "right", stype: 'select', editoptions: {value: {'': 'tous', 'autre': 'autre', 'quotidien': 'quotidien'}}},
+                                    ],
                                             pager: "#pager",
                                             rowNum: 10,
-                                            rowList: [10, 20, 30],
+                                            rowList: [30, 50, 100, 150, 300, 500],
                                             sortname: "invid",
                                             sortorder: "desc",
                                             viewrecords: true,
@@ -186,119 +186,116 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
 //                                        matchText: " match",
 //                                        rulesText: " rules"
 //                                    }
-                                        }
-                                        );
-
-                                        optionsearch = {searchOperators: true, stringResult: true};
-//                                jQuery("#list").jqGrid('filterToolbar', {searchOperators: true});
-                                        jQuery("#list").filterToolbar(optionsearch);
-                                        jQuery("#list").navGrid('#pager', {edit: false, add: false, del: false, search: false})
-                                                .navButtonAdd('#pager', {
-                                            caption: "'Export To CSV",
-                                            buttonicon: "ui-icon-add",
-                                            onClickButton: function() {
-                                                opt = {exptype: "jsonstring"};
-                                                $("#list").jqGrid('excelExport', {tag: 'csv', url: '${rootpath}flux/list?vue=csv'});
-                                            },
-                                            position: "last"
-                                        })
-                                                .navButtonAdd('#pager',
-                                                {
-                                                    caption: "Supprimer",
-                                                    buttonicon: "ui-icon-add",
-                                                    onClickButton: function() {
-                                                        reponse = confirm('Vous vous apprétez à supprimer un flux. Toutes les items associées seront supprimée. Cette manipulation est irréverssible. Confirmez vous votre choix ?');
-                                                        if (reponse) {
-                                                            selRowId = $('#list').jqGrid('getGridParam', 'selarrrow');
-                                                            //chaine = "";
-                                                            //for (i = 0; i < selRowId.length; i++) {
-                                                            //    chaine += 'id=' + selRowId[i] + ',';
-                                                            //}
-                                                            //if (chaine.length > 2) {
-                                                            //    chaine = chaine.substr(0, chaine.length - 1);
-                                                            //}
-                                                            //url = ${rootpath} + 'flux/rem?' + chaine;
-                                                            url = ${rootpath} + 'flux/rem?id='+ selRowId;
-                                                            location.href = url;
-                                                        }
-
-                                                    },
-                                                })
-                                                .navButtonAdd('#pager', {
-                                            caption: "Mise a jour",
-                                            buttonicon: "ui-icon-add",
-                                            onClickButton: function() {
-                                                alert('maj' + formatIdParamFromSelectedRow());
-                                                location.href = ${rootpath} + 'flux/maj?' + formatIdParamFromSelectedRow();
-                                            }
-                                        });
-                                    });
-
-                                    /***
-                                     * Parcours les items sélectionné par dans la grid et renvoi une chaine de caractère sous la forme id=nul,id=num2. Permet de formater les paramettres dans une url
-                                     * @returns {unresolved} */
-                                    function formatIdParamFromSelectedRow() {
-                                        selRowId = $('#list').jqGrid('getGridParam', 'selarrrow');
-                                        ch = "";
-                                        
-                                        for (i = 0; i < selRowId.length; i++) {
-                                            ch += 'id=' + selRowId[i] + ',aa';
-                                        }
-                                        if (ch.length > 2) {
-                                            ch = ch.substr(0, ch.length - 1);
-                                        }
-                                        <!--alert(selRowId);-->
-                                        return 'id='+selRowId;
-                                        return ch;
-
                                     }
+                                    );
+                                            optionsearch = {searchOperators: true, stringResult: true};
+//                                jQuery("#list").jqGrid('filterToolbar', {searchOperators: true});
+                                            jQuery("#list").filterToolbar(optionsearch);
+                                            jQuery("#list").navGrid('#pager', {edit: false, add: false, del: false, search: false})
+                                            .navButtonAdd('#pager', {
+                                    caption: "'Export To CSV",
+                                            buttonicon: "ui-icon-add",
+                                            onClickButton: function() {
+                                    opt = {exptype: "jsonstring"};
+                                            $("#list").jqGrid('excelExport', {tag: 'csv', url: '${rootpath}flux/list?vue=csv'});
+                                    },
+                                            position: "last"
+                                    })
+                                            .navButtonAdd('#pager',
+                                    {
+                                    caption: "Supprimer",
+                                            buttonicon: "ui-icon-add",
+                                            onClickButton: function() {
+                                    reponse = confirm('Vous vous apprétez à supprimer un flux. Toutes les items associées seront supprimée. Cette manipulation est irréverssible. Confirmez vous votre choix ?');
+                                            if (reponse) {
+                                    selRowId = $('#list').jqGrid('getGridParam', 'selarrrow');
+                                            //chaine = "";
+                                            //for (i = 0; i < selRowId.length; i++) {
+                                            //    chaine += 'id=' + selRowId[i] + ',';
+                                            //}
+                                            //if (chaine.length > 2) {
+                                            //    chaine = chaine.substr(0, chaine.length - 1);
+                                            //}
+                                            //url = ${rootpath} + 'flux/rem?' + chaine;
+                                            url = ${rootpath} + 'flux/rem?id=' + selRowId;
+                                            location.href = url;
+                                    }
+
+                                    },
+                                    })
+                                            .navButtonAdd('#pager', {
+                                    caption: "Mise a jour",
+                                            buttonicon: "ui-icon-add",
+                                            onClickButton: function() {
+                                    alert('maj' + formatIdParamFromSelectedRow());
+                                            location.href = ${rootpath} + 'flux/maj?' + formatIdParamFromSelectedRow();
+                                    }
+                                    });
+                                    });
+                                            /***
+                                    * Parcours les items sélectionné par dans la grid et renvoi une chaine de caractère sous la forme id=nul,id=num2. Permet de formater les paramettres dans une url
+                                             * @returns {unresolved} */
+                                                    function formatIdParamFromSelectedRow() {
+                                                    selRowId = $('#list').jqGrid('getGridParam', 'selarrrow');
+                                                            ch = "";
+                                                            for (i = 0; i < selRowId.length; i++) {
+                                                    ch += 'id=' + selRowId[i] + ',aa';
+                                                    }
+                                                    if (ch.length > 2) {
+                                                    ch = ch.substr(0, ch.length - 1);
+                                                    }
+<!--alert(selRowId);-->
+                                return 'id=' + selRowId;
+                                return ch;
+
+                            }
                         </script>
 
 
 
-<!--                        <form id="formaction2">
-                            <ul id="resudiv">
-
-                            </ul>
-                            <button type="button" value="0" id="bts">Tout sélectionner</button>
-                            <select name="action" id="act">
-                                <option value="rem">Supprimer</option>
-                                <option value="maj">Mettre à jour</option>
-                            </select>
-
-                            <script>
-                                $('#bts').click(function() {
-
-                                    if (this.value === '1') {
-                                        this.textContent = 'Déselectionner tout';
-                                        this.value = '0';
-                                        $("#resudiv").find(':checkbox').prop('checked', false);
-                                    }
-                                    else if (this.value === '0') {
-                                        this.textContent = 'Tout sélectionner';
-                                        this.value = '1';
-                                        $("#resudiv").find(':checkbox').prop('checked', true);
-                                    }
-                                });
-                            </script>
-                            <button type="button" onclick="actionsub();"> OK</button>
-                        </form>-->
+                        <!--                        <form id="formaction2">
+                                                    <ul id="resudiv">
+                        
+                                                    </ul>
+                                                    <button type="button" value="0" id="bts">Tout sélectionner</button>
+                                                    <select name="action" id="act">
+                                                        <option value="rem">Supprimer</option>
+                                                        <option value="maj">Mettre à jour</option>
+                                                    </select>
+                        
+                                                    <script>
+                                                        $('#bts').click(function() {
+                        
+                                                            if (this.value === '1') {
+                                                                this.textContent = 'Déselectionner tout';
+                                                                this.value = '0';
+                                                                $("#resudiv").find(':checkbox').prop('checked', false);
+                                                            }
+                                                            else if (this.value === '0') {
+                                                                this.textContent = 'Tout sélectionner';
+                                                                this.value = '1';
+                                                                $("#resudiv").find(':checkbox').prop('checked', true);
+                                                            }
+                                                        });
+                                                    </script>
+                                                    <button type="button" onclick="actionsub();"> OK</button>
+                                                </form>-->
                         <script>
-                                //Petite fonction pour la soumission du formulaire permettant la mise à jour et la suppression en nombre
-                                function actionsub() {
-                                    action = $('#act').val();
-                                    if (action === 'rem') {
-                                        reponse = confirm('Vous vous apprétez à supprimer un flux. Toutes les items associées seront supprimée. Cette manipulation est irréverssible. Confirmez vous votre choix ?');
-                                        if (reponse) {
+                                    //Petite fonction pour la soumission du formulaire permettant la mise à jour et la suppression en nombre
+                                            function actionsub() {
+                                            action = $('#act').val();
+                                                    if (action === 'rem') {
+                                            reponse = confirm('Vous vous apprétez à supprimer un flux. Toutes les items associées seront supprimée. Cette manipulation est irréverssible. Confirmez vous votre choix ?');
+                                                    if (reponse) {
                                             $('#formaction2').attr('action', '${rootpath}flux/' + action);
-                                            $('#formaction2').submit();
-                                        }
-                                    }
-                                    else if (action === 'maj') {
-                                        $('#formaction2').attr('action', '${rootpath}flux/' + action);
-                                        $('#formaction2').submit();
-                                    }
-                                }
+                                                    $('#formaction2').submit();
+                                            }
+                                            }
+                                            else if (action === 'maj') {
+                                            $('#formaction2').attr('action', '${rootpath}flux/' + action);
+                                                    $('#formaction2').submit();
+                                            }
+                                            }
 
                         </script>
                     </c:when>
@@ -312,22 +309,18 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
                             <li><a href="${rootpath}incidents/recherche?fluxSelection2=${bean.ID}&type=CollecteIncident">Parcourir les incidents</a></li>
                             <li><a href="${rootpath}flux/importcsv?id=${bean.ID}">Importer des items</a></li>
                             <script>
-                                $(document).ready(function() {
-                                    $('#suppLink').on('click', function truc2(e) {
+                                        $(document).ready(function() {
+                                        $('#suppLink').on('click', function truc2(e) {
 
                                         reponse = confirm('Vous vous apprétez à supprimer un flux. Toutes les items associées seront supprimée. Cette manipulation est irréverssible. Confirmez vous votre choix ?');
-                                        if (reponse) {
-                                            return true;
+                                                if (reponse) {
+                                        return true;
                                         } else {
-                                            e.preventDefault();
-                                            return false;
+                                        e.preventDefault();
+                                                return false;
                                         }
-                                    });
-
-                                });
-
-
-                            </script>
+                                        });
+                                        });</script>
 
 
                         </ul>
@@ -339,18 +332,18 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
                         <script src="http://code.highcharts.com/modules/exporting.js"></script>
 
                         <script>
-                                $(function() {
-                                    $(".datepicker").datepicker({dateFormat: "dd/mm/yy"});
-                                });</script>
+                                                $(function() {
+                                        $(".datepicker").datepicker({dateFormat: "dd/mm/yy"});
+                                        });</script>
 
 
 
                         <form method="POST" action="${rootpath}item/comptejour?vue=hightchart" id="form">
                             <input type="hidden" name="action" value="print"/>
                             <label for="date1">Date début : </label>
-                            <input type="text" name="date1" class="datepicker"/>
+                            <input type="text" name="date1" class="datepicker" id="date1"/>
                             <label for="date2">Date fin : </label>
-                            <input type="text" name="date2" class="datepicker"/>
+                            <input type="text" name="date2" class="datepicker" id="date2"/>
                             <br />
 
 
@@ -371,12 +364,20 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
 
                                     <td>
 
-                                        <select multiple="multiple" name="flux" id="fluxSelection" style="width: 300px">
-                                            <option value="">NULL</option>
-                                            <c:forEach items="${listFlux}" var="fl">
-                                                <option value="${fl.ID}">${fl}</option>
-                                            </c:forEach>
-                                        </select>
+                                        <ul id="fluxSelection" name="oldid-flux" style="min-width: 300px; width: 400px" class="connectedSortable">
+                                            <c:forEach items="${listflux}" var="fl">
+                                                <li value="${fl.ID}">${fl}</li>                                
+                                                </c:forEach>
+                                            </li>
+                                        </ul>
+
+
+                                        <!--                                        <select multiple="multiple" name="flux" id="fluxSelection" style="width: 300px">
+                                                                                    <option value="">NULL</option>
+                                        <c:forEach items="${listFlux}" var="fl">
+                                            <option value="${fl.ID}">${fl}</option>
+                                        </c:forEach>
+                                    </select>-->
                                     </td>
                                     <td>
                                         <button type="button" onclick="selectflux();">--></button><p />
@@ -384,23 +385,24 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
                                         <button type="button" onclick="supp();"><--</button>
                                     </td>
                                     <td>
-                                        <select id="fluxSelection2" name="fluxSelection2" multiple="multiple" style="width: 300px"></select>
+                                        <ul style="max-width: 300px; width: 300px" name="fluxSelection2" id="fluxSelection2" class="connectedSortable"></ul>
+                                        <!--<select id="fluxSelection2" name="fluxSelection2" multiple="multiple" style="width: 300px"></select>-->
                                     </td>
                                 </tr>
                             </table>
 
-                            <script src="dynListJournauxFLux.js"></script>
+
 
                             <br />
-                            <label for="temporalite">Temporalité : </label>
-                            <select name="temporalite">
-                                <option>jour</option>
-                                <option>mois</option>
-                            </select>
+                            <!--                            <label for="temporalite">Temporalité : </label>
+                                                        <select name="temporalite">
+                                                            <option>jour</option>
+                                                            <option>mois</option>
+                                                        </select>-->
                             <input type="submit" />
                         </form>
 
-                        <script src="${rootpath}dynListJournauxFLux.js"></script>
+                        <script src="${rootpath}dynListJournauxFLux.js"></script>  <!--Le script permettant de sélectionner dynamiquement les journaux-->
 
                         <div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
                         <!--                        <script>
@@ -410,7 +412,7 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
                         
                                                 </script>-->
 
-                        <script src="${rootpath}FluxRecapHighChart.js"></script>
+                        <script src="${rootpath}FluxRecapHighChart.js"></script> <!--Le script permettant l'affichage du graphique en utilisant Highchart-->
 
 
                     </c:when>
@@ -526,34 +528,42 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
 
                             * 1=nombre item trouvé ; 2 dedoub memoire; 3 BDD item lié ;4 BDD item déjà présente mais lien ajouté ;  5 item nouvelles
 
-                            <c:forEach items="${listflux}" var="fl">
+                            <c:forEach items="${listTache}" var="tache">
+                                IT
+
+                            </c:forEach>
+
+                            <c:forEach items="${listTache}" var="tache">
                                 <tr>
-                                    <td> ${fl}</td>
-                                    <td>${fl.mediatorFluxAction.dedoubloneur.compteCapture[0]}</td>
-                                    <td>${fl.mediatorFluxAction.dedoubloneur.compteCapture[1]}</td>
-                                    <td>${fl.mediatorFluxAction.dedoubloneur.compteCapture[2]}</td>
-                                    <td>${fl.mediatorFluxAction.dedoubloneur.compteCapture[3]}</td>
-                                    <td>${fl.mediatorFluxAction.dedoubloneur.compteCapture[4]}</td>
+                                    <td> ${tache.flux}</td>
+                                    <td>${tache.comportementDuFlux.dedoubloneur.compteCapture[0]}</td>
+                                    <td>${tache.comportementDuFlux.dedoubloneur.compteCapture[1]}</td>
+                                    <td>${tache.comportementDuFlux.dedoubloneur.compteCapture[2]}</td>
+                                    <td>${tache.comportementDuFlux.dedoubloneur.compteCapture[3]}</td>
+                                    <td>${tache.comportementDuFlux.dedoubloneur.compteCapture[4]}</td>
                                     <td>
                                         <c:set var="erreur" value="0"></c:set>
-                                        <c:forEach items="${fl.incidentEnCours}" var="inci" varStatus="last">
+                                        <c:forEach items="${tache.flux.incidentEnCours}" var="inci" varStatus="last">
                                             <c:set var="erreur" value="1"></c:set>
                                             ${inci.messageEreur}
                                         </c:forEach>
-                                        <c:if test="${not empty fl.tacheRechupManuelle.exeption}">
+                                        <c:if test="${not empty tache.exeption}">
                                             <c:set var="erreur" value="1"></c:set>
-                                            ${fl.tacheRechupManuelle.exeption.message}
+                                            ${tache.exeption}
                                         </c:if>
 
                                         <c:if test="${erreur!=1}">OK</c:if>
                                     </tr>
                             </c:forEach>
+
+
                         </table>
                     </c:when>
 
                     <c:when test="${action=='read'}">
                         <c:import url="/WEB-INF/inc/editionBean.jsp" />
 
+                        <h2>Paramètres du flux</h2>
 
                         <p><strong>Url : </strong> ${bean.url}</p>
                         <p><strong>Nom du flux :</strong> ${bean.nom}</p>
@@ -572,7 +582,13 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
 
                         </p>
                         <hr />
-                        <p><strong title="Blabla Explicatif">Indice captation : </strong>${bean.indiceQualiteCaptation}</p>
+                        
+                        <h2>Indice de captation</h2>
+                        <p><strong title="L'indice de qualité captation est le rapport entre la période pour laquelle le flux a pu être collecté correctement et la somme des périodes pour lesquels le flux n'a pu être collecté : ">Indice Qualité captation : </strong>${bean.indiceQualiteCaptation}</p>
+    
+    
+                            <h3>Nombre d'item jour captutée</h3>
+
                         <p><strong>Mediane : </strong>${bean.indiceMedianeNbrItemJour}</p>
                         <p><strong>Décile :</strong>${bean.indiceDecileNbrItemJour}</p>
                         <p><strong>Quartile : </strong>${bean.indiceQuartileNbrItemJour}</p>
@@ -583,72 +599,74 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
                         <script src="http://code.highcharts.com/highcharts.js"></script>
                         <script src="http://code.highcharts.com/highcharts-more.js"></script>
                         <script src="http://code.highcharts.com/modules/exporting.js"></script>
-                        ${bean.indiceQuartileNbrItemJour}ddd
+
                         <script>
 
-                                $(function() {
-                                    $('#container').highcharts({
+                                                $(function() {
+                                        $('#container').highcharts({
                                         chart: {
-                                            type: 'boxplot'
+                                        type: 'boxplot'
                                         },
+                                                title: {
+                                        text: 'BoxPloat nombre d\'item jour sur la période'
+                                        },
+                                                legend: {
+                                        enabled: false
+                                        },
+                                                xAxis: {
+                                        categories: ['1', '2', '3', '4', '5'],
+                                                title: {
+                                        text: 'Flux ${bean}.'
+                                        }
+                                        },
+                                                yAxis: {
                                         title: {
-                                            text: 'Highcharts Box Plot Example'
+                                        text: 'Nombre d\'item par jour'
                                         },
-                                        legend: {
-                                            enabled: false
+                                                plotLines: [{
+                                        value: 932,
+                                                color: 'red',
+                                                width: 1,
+                                                label: {
+                                        text: 'Theoretical mean: 932',
+                                                align: 'center',
+                                                style: {
+                                        color: 'gray'
+                                        }
+                                        }
+                                        }]
                                         },
-                                        xAxis: {
-                                            categories: ['1', '2', '3', '4', '5'],
-                                            title: {
-                                                text: 'Experiment No.'
-                                            }
-                                        },
-                                        yAxis: {
-                                            title: {
-                                                text: 'Observations'
-                                            },
-                                            plotLines: [{
-                                                    value: 932,
-                                                    color: 'red',
-                                                    width: 1,
-                                                    label: {
-                                                        text: 'Theoretical mean: 932',
-                                                        align: 'center',
-                                                        style: {
-                                                            color: 'gray'
-                                                        }
-                                                    }
-                                                }]
-                                        },
-                                        series: [{
-                                                name: 'Observations',
+                                                series: [{
+                                        name: 'Observations',
                                                 data: [
-                                                    [${bean.indiceMinimumNbrItemJour}, ${bean.indiceQuartileNbrItemJour}, ${bean.indiceMedianeNbrItemJour}, ${bean.indiceDecileNbrItemJour}, ${bean.indiceMaximumNbrItemJour}]
-                                                ],
+                                                [${bean.indiceMinimumNbrItemJour}, ${bean.indiceQuartileNbrItemJour}, ${bean.indiceMedianeNbrItemJour}, ${bean.indiceDecileNbrItemJour}, ${bean.indiceMaximumNbrItemJour}]
+                                        ],
                                                 tooltip: {
-                                                    headerFormat: '<em>Experiment No {point.key}</em><br/>'
-                                                }
-                                            }, {
-                                                name: 'Outlier',
-                                                color: Highcharts.getOptions().colors[0],
-                                                type: 'scatter',
-                                                data: [// x, y positions where 0 is the first category
-                                                    [0, 644],
-                                                    [4, 718],
-                                                    [4, 951],
-                                                    [4, 969]
-                                                ],
-                                                marker: {
-                                                    fillColor: 'white',
-                                                    lineWidth: 1,
-                                                    lineColor: Highcharts.getOptions().colors[0]
-                                                },
-                                                tooltip: {
-                                                    pointFormat: 'Observation: {point.y}'
-                                                }
-                                            }]
-                                    });
-                                });
+                                        headerFormat: '<em>Experiment No {point.key}</em><br/>'
+                                        }
+                                        }
+//                                            , {
+//                                                name: 'Outlier',
+//                                                color: Highcharts.getOptions().colors[0],
+//                                                type: 'scatter',
+//                                                data: [// x, y positions where 0 is the first category
+//                                                    [0, 644],
+//                                                    [4, 718],
+//                                                    [4, 951],
+//                                                    [4, 969]
+//                                                ],
+//                                                marker: {
+//                                                    fillColor: 'white',
+//                                                    lineWidth: 1,
+//                                                    lineColor: Highcharts.getOptions().colors[0]
+//                                                },
+//                                                tooltip: {
+//                                                    pointFormat: 'Observation: {point.y}'
+//                                                }
+//                                            }
+                                        ]
+                                        });
+                                        });
 
                         </script>
 

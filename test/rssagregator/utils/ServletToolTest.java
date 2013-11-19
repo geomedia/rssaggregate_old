@@ -168,21 +168,21 @@ public class ServletToolTest {
         fail("The test case is a prototype.");
     }
 
-    /**
-     * Test of actionADD2 method, of class ServletTool.
-     */
-    @Test
-    public void testActionADD2() {
-        System.out.println("actionADD2");
-        HttpServletRequest request = null;
-        String beansnameJSP = "";
-        String formNameJSP = "";
-        Class beansClass = null;
-        Boolean notifiObserver = null;
-        ServletTool.actionADD2(request, beansnameJSP, formNameJSP, beansClass, notifiObserver);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
+//    /**
+//     * Test of actionADD2 method, of class ServletTool.
+//     */
+//    @Test
+//    public void testActionADD2() {
+//        System.out.println("actionADD2");
+//        HttpServletRequest request = null;
+//        String beansnameJSP = "";
+//        String formNameJSP = "";
+//        Class beansClass = null;
+//        Boolean notifiObserver = null;
+//        ServletTool.actionADD2(request, beansnameJSP, formNameJSP, beansClass, notifiObserver);
+//        // TODO review the generated test code and remove the default call to fail.
+//        fail("The test case is a prototype.");
+//    }
 
     /**
      * Test of actionREM method, of class ServletTool.
@@ -219,7 +219,7 @@ public class ServletToolTest {
         listExpect.add(new Long(3));
         List expResult = listExpect;
 //        List result = ServletTool.parseidFromRequest(req);
-        assertEquals(expResult, ServletTool.parseidFromRequest(req));
+        assertEquals(expResult, ServletTool.parseidFromRequest(req,null));
 
 //        for (int i = 0; i < result.size(); i++) {
 //            Object object = result.get(i);
@@ -233,7 +233,7 @@ public class ServletToolTest {
         ic = sc.newInvocation(request);
         req = ic.getRequest();
         
-        assertEquals(expResult, ServletTool.parseidFromRequest(req));
+        assertEquals(expResult, ServletTool.parseidFromRequest(req, null));
         
         
         //Forme id=1
@@ -242,7 +242,7 @@ public class ServletToolTest {
         req = ic.getRequest();
         expResult = new ArrayList();
         expResult.add(new Long(1));
-        assertEquals(expResult, ServletTool.parseidFromRequest(req));
+        assertEquals(expResult, ServletTool.parseidFromRequest(req, null));
         
         
         //En cas de null
@@ -253,7 +253,7 @@ public class ServletToolTest {
         expResult.add(new Long(1));
 //        assertEquals(expResult, ServletTool.parseidFromRequest(req));
         try {
-           List<Long> resu =  ServletTool.parseidFromRequest(req);
+           List<Long> resu =  ServletTool.parseidFromRequest(req,null);
 //            System.out.println("resu : " + resu.get(0));
 //             System.out.println("------FIN");
         } catch (Exception e) {

@@ -4,6 +4,7 @@
  */
 package rssagregator.beans.form;
 
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.logging.Level;
@@ -42,7 +43,7 @@ public class FluxForm extends AbstrForm {
     Boolean estStable = null;
     //---------------------------------------------------
 
-    public FluxForm() {
+    protected FluxForm() {
     }
 
     @Override
@@ -82,7 +83,7 @@ public class FluxForm extends AbstrForm {
             }
 
             //------> Dernière date de modification du flux
-            flux.setModified(new Date());
+//            flux.setModified(new Timestamp(n));
         }
         return objEntre;
     }
@@ -254,4 +255,9 @@ public class FluxForm extends AbstrForm {
         }
         return this.valide;
     }
+
+
+    
+    
+    
 }

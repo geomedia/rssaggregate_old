@@ -80,7 +80,6 @@ public abstract class AbstrService implements Observer {
      * @param tache
      */
     public void schedule(AbstrTacheSchedule tache) {
-
         
         // pour une tache devant être schedulé suivant un nombre fixe de seconde
         if (tache.getTimeSchedule() != null) {
@@ -100,9 +99,7 @@ public abstract class AbstrService implements Observer {
             DateTime next = dtCurrent.withTime(tache.getHeureSchedule(), tache.getMinuteSchedule(), 0, 0);
             Duration dur = new Duration(dtCurrent, next);
             this.executorService.schedule(tache, dur.getStandardSeconds(), TimeUnit.SECONDS);
-            
         }
-
     }
 
     /**

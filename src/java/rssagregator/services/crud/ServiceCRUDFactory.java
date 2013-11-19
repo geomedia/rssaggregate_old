@@ -26,6 +26,8 @@ public class ServiceCRUDFactory {
     ServiceCRUDBeansSynchro serviceCRUDBeansSynchro = new ServiceCRUDBeansSynchro();
     ServiceCRUDComportement serviceCRUDComportement = new ServiceCRUDComportement();
     ServiceCRUDJournal serviceCRUDJournal = new ServiceCRUDJournal();
+    ServiceCrudIncident serviceCrudIncident = new ServiceCrudIncident();
+//    ServiceCRUDBeansBasiqueLock serviceCRUDBeansBasiqueLock = new ServiceCRUDBeansBasiqueLock();
 
     private ServiceCRUDFactory() {
    
@@ -62,7 +64,7 @@ public class ServiceCRUDFactory {
             } else if (beans.equals(Item.class)) {
                 serviceCrud = serviceCRUDBeansBasique;
             } else if (AbstrIncident.class.isAssignableFrom(beans)) {
-                serviceCrud = serviceCRUDBeansBasique;
+                serviceCrud = serviceCrudIncident;
             } else if (beans.equals(MediatorCollecteAction.class)) {
                 serviceCrud = serviceCRUDComportement;
             } else if (beans.equals(ServeurSlave.class)) {

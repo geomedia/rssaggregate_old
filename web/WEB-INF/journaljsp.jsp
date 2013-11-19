@@ -34,32 +34,32 @@
             <c:when test="${empty redirmap}">
                 <c:choose>
                     <c:when test="${action=='recherche'}">
-<!--                        Critere
-                        <form method="POST" action="${rootpath}journaux/recherche">
-                            <label>Pays : </label>
-                            <select name="pays">
-                                <option value="">Tous</option>
-                                <c:forEach var="country" items="${listCountry}">
-                                    <option>${country}</option>
-                                    <option value="${country.key}" <c:if test="${country.key==bean.pays}"> selected="true"</c:if>>${country.value}</option>
-                                </c:forEach>
-                            </select><br />
+                        <!--                        Critere
+                                                <form method="POST" action="${rootpath}journaux/recherche">
+                                                    <label>Pays : </label>
+                                                    <select name="pays">
+                                                        <option value="">Tous</option>
+                        <c:forEach var="country" items="${listCountry}">
+                            <option>${country}</option>
+                            <option value="${country.key}" <c:if test="${country.key==bean.pays}"> selected="true"</c:if>>${country.value}</option>
+                        </c:forEach>
+                    </select><br />
 
-                            <label>Langue</label>
-                            <select name="langue">
-                                <option value="">Toutes</option>
-                                <c:forEach items="${listLocal}" var="loc">
-                                    <option value="${loc.key}" <c:if test="${loc.key==bean.langue}"> selected="true"</c:if>>${loc.value}</option>>
-                                </c:forEach>
-                            </select>
+                    <label>Langue</label>
+                    <select name="langue">
+                        <option value="">Toutes</option>
+                        <c:forEach items="${listLocal}" var="loc">
+                            <option value="${loc.key}" <c:if test="${loc.key==bean.langue}"> selected="true"</c:if>>${loc.value}</option>>
+                        </c:forEach>
+                    </select>
 
-                            <input type="submit" />
-                        </form>-->
+                    <input type="submit" />
+                </form>-->
 
                         <!--<script src="js/jquery-1.4.2.min.js" type="text/javascript"></script>-->
                         <script src="${rootpath}ress/jqgrid/js/i18n/grid.locale-fr.js" type="text/javascript"></script>
                         <script src="${rootpath}ress/jqgrid/js/jquery.jqGrid.min.js" type="text/javascript"></script>
-                        
+
                         <link rel="stylesheet" type="text/css" media="screen" href="css/ui-lightness/jquery-ui-1.7.1.custom.css" />
                         <link rel="stylesheet" type="text/css" media="screen" href="${rootpath}ress/jqgrid/css/ui.jqgrid.css" />
                         <link rel="stylesheet" type="text/css" media="screen" href="${rootpath}ress/jquery-ui-1.10.3.custom/css/base/jquery-ui.css" />
@@ -93,10 +93,10 @@
                                     colNames: ["ID", "nom", "langue", "pays", "typeJournal", "urlAccueil"],
                                     colModel: [
                                         {name: "ID", width: 55, hidden: false, searchoptions: {sopt: ['cn', 'eq']}},
-                                        {name: "nom", classtype: 'clem',sorttype:'float', width: 90, formatter: myLinkFormatter, searchoptions: {sopt: ['cn', 'eq']}},
+                                        {name: "nom", classtype: 'clem', sorttype: 'float', width: 90, formatter: myLinkFormatter, searchoptions: {sopt: ['cn', 'eq']}},
                                         {name: "langue", index: 'langue', key: true, search: true, width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
                                         {name: "pays", width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
-                                        {name: "typeJournal", width: 80, align: "right", stype: 'select', editoptions:{value:{'' : 'tous', 'autre':'autre','quotidien':'quotidien'}}},
+                                        {name: "typeJournal", width: 80, align: "right", stype: 'select', editoptions: {value: {'': 'tous', 'autre': 'autre', 'quotidien': 'quotidien'}}},
                                         {name: "urlAccueil", width: 150, sortable: true, searchoptions: {sopt: ['cn', 'eq']}}
                                     ],
                                     pager: "#pager",
@@ -113,7 +113,6 @@
                                     autowidth: true,
                                     exptype: "csvstring",
                                     root: "grid",
-                                    
                                     ident: "\t"
 //                                    filterToolbar: {searchOperators: true},
 //                                    search: {
@@ -128,7 +127,7 @@
                                 }
                                 );
 
-optionsearch = {searchOperators: true, stringResult:true};
+                                optionsearch = {searchOperators: true, stringResult: true};
 //                                jQuery("#list").jqGrid('filterToolbar', {searchOperators: true});
                                 jQuery("#list").filterToolbar(optionsearch);
                                 jQuery("#list").navGrid('#pager', {edit: false, add: false, del: false, search: false})
@@ -146,11 +145,11 @@ optionsearch = {searchOperators: true, stringResult:true};
                         </script>
 
 
-<!--                        <ul>
-                            <c:forEach items="${listjournaux}" var="it">
-                                <li><a href="${rootpath}journaux/read?id=${it.ID}"><c:out value="${it.nom}"></c:out></a></li>
-                            </c:forEach>
-                        </ul>-->
+                        <!--                        <ul>
+                        <c:forEach items="${listjournaux}" var="it">
+                            <li><a href="${rootpath}journaux/read?id=${it.ID}"><c:out value="${it.nom}"></c:out></a></li>
+                        </c:forEach>
+                    </ul>-->
                     </c:when> 
 
                     <c:when test="${action=='mod' or action=='add'}">
@@ -160,6 +159,7 @@ optionsearch = {searchOperators: true, stringResult:true};
                                 <li>  <a href="${rootpath}journaux/rem?id=${bean.ID}">Supprimer journal</a></li>
                                 <li>  <a href="${rootpath}flux/list?journal-id=${bean.ID}">Parcourir les flux du journal</a></li>
                                 <li><a href="${rootpath}flux/add?journal-id=${bean.ID}">Ajouter un flux au journal</a></li>
+                                <li><a href="${rootpath}journaux/discover?id=${bean.ID}" id="linkDiscover">Ajout de tous les flux du journal par découverte</a><div id="sousFormDiscover"></div></li>
                             </ul>
                         </c:if>
 
@@ -177,7 +177,7 @@ optionsearch = {searchOperators: true, stringResult:true};
                                 <input type="text" name="urlAccueil" value="<c:out value="${bean.urlAccueil}" />"/><span class="erreur" id="errurlAccueil"></span><br />
 
 
-                                <label title="De nombreux journaux présente un page avec des liens pour chacun des flux RSS disponible.">URL de la page présentant les flux RSS du journal : </label>
+                                <label title="De nombreux journaux présente un page avec des liens pour chacun des flux RSS disponibles. Cette url sera utilisée si vous utilisez la fonctionnalité de découverte automatique des flux du journal">URL de la page présentant les flux RSS du journal : </label>
                                 <input type="text" name="urlHtmlRecapFlux" value="<c:out value="${bean.urlHtmlRecapFlux}"></c:out>" /><span class="erreur" id="errurlHtmlRecapFlux"></span>
                                     <br />
                                     <label for="langue">Langue : </label>
@@ -188,14 +188,34 @@ optionsearch = {searchOperators: true, stringResult:true};
                                 </select>
 
                                 <br />
-                                <label for="pays">Pays :</label>
-                                <select name="pays" id="pays">
+
+
+                                <label title="Renseignez ici le comportement qui doit être utilisé par défault pour les flux appartenant à ce journal. C'est ce comportement qui sera utilisé si vous utilisez la découverte automatique de flux.">Comportement par défault des flux du journal : </label>
+                                <select name="comportementParDefaultDesFlux" id="comportementParDefaultDesFlux">
+                                    <c:forEach items="${listcomportement}" var="compo">
+                                        <option value="${compo.ID}">${compo}</option>
+                                    </c:forEach>
+                                </select><br />
+
+                                <label>Découverte automatique des flux du journal</label>
+                                <input type="checkbox" name="autoUpdateFlux" id="autoUpdateFlux" <c:if test="${bean.autoUpdateFlux=='true'}"> checked="checked="</c:if>/>
+                                
+                                <div id="updateDiv"></div>
+                                <br />
+
+                                    <label for="pays">Pays :</label>
+                                    <select name="pays" id="pays">
                                     <c:forEach items="${listCountry}" var="country">
                                         <option value="${country.key}" <c:if test="${country.key==bean.pays}"> selected="true"</c:if>>${country.value}</option>
                                     </c:forEach>
                                 </select>
 
                                 <br />
+                                
+                                
+                                
+                                
+                                
 
                                 <label for="">Fuseau Horaire : </label>
                                 <select name="fuseauHorraire">
@@ -219,7 +239,7 @@ optionsearch = {searchOperators: true, stringResult:true};
                                     <label>Information : </label><br />
                                     <textarea name="information" rows="10" cols="60">${bean.information}</textarea><br />
 
-                                <input type="hidden" name="id" value="${bean.ID}">
+                                <input type="hidden" id="id" name="id" value="${bean.ID}">
                                 <input type="hidden" name="vue" value="jsonform" />
 
                                 <input type="submit" value="Inscription" class="sansLabel" />
@@ -228,6 +248,7 @@ optionsearch = {searchOperators: true, stringResult:true};
                         </form>
 
                         <script src="${rootpath}AjaxAddModBean.js"></script>
+                        <script src="${rootpath}journalJs.js"></script>
 
 
 
@@ -247,6 +268,18 @@ optionsearch = {searchOperators: true, stringResult:true};
                         <ul>
                             <c:forEach items="${bean.fluxLie}" var="fl"> 
                                 <li><a href="${rootpath}flux/read?id=${fl.ID}">${fl}</a></li>
+
+
+                            </c:forEach>
+                        </ul>
+                    </c:when>
+
+                    <c:when test="${action=='discover'}">
+                        <h1>Découverte de Flux</h1>
+                        <p>Liste des flux découverts et ajouté</p>
+                        <ul>
+                            <c:forEach items="${tacheDecouverte.listFluxDecouvert}" var="fl">
+                                <li><a href="${rootpath}flux?read?id=${fl.ID}">${fl}</a></li>
 
                             </c:forEach>
                         </ul>

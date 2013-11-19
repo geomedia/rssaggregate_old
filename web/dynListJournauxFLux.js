@@ -3,26 +3,60 @@
  * and open the template in the editor.
  */
 
+/***
+ * Fonction permettant le dragdrop dans la liste de journaux
+ */
+$(document).ready(function() {
+//    $('#fluxSelection li').draggable({helper: "clone", connectWith: ".connectedSortable"})
+    ;
+    $("#fluxSelection, #fluxSelection2").sortable({
+        connectWith: ".connectedSortable",
+        remove: uiRemove,
+        placeholder: "sortable-placeholder",
+        helper: "clone",
+        revert: true
+    });
+    
 
+    
+//    $("#fluxSelection li").draggable({helper: "clone"});
+});
+
+
+/***
+ * Lorsqu'un élément est recut dans la liste 2 il faut vérifier qu'il n'est pas déjà présent. Cette fontion permet d'annuler le drop si l'élémetn est déjà présent
+ * @param {type} event
+ * @param {type} ui
+ * @returns {Boolean}
+ */
+function uiRemove(event, ui) {
+    trouve = 0;
+    for (i = 0; i < $('#fluxSelection2 li').length; i++) {
+        if (ui['item'].val() === $('#fluxSelection2 li')[i]['value']) {
+//                          alert("trouve");
+            trouve++;
+        }
+    }
+    if (trouve > 1) {
+        return false;
+    }
+}
 
 $(document).ready(function() {
-
-    var $journalSelection = $('#journalSelection');
-    var $fluxSelection = $('#fluxSelection');
 
     // à la sélection d une région dans la liste
     $('#journalSelection').on('change', function truc() {
         var val = $(this).val(); // on récupère la valeur de la région
 
         if (val != '') {
-           $('#fluxSelection').empty(); // on vide la liste des départements
+            $('#fluxSelection').empty(); // on vide la liste des départements
             $.ajax({
                 url: '/RSSAgregate/flux/list?vue=json',
                 data: 'journalid=' + val, // on envoie $_GET['id_region']
                 dataType: 'json',
                 success: function(json) {
                     $.each(json, function(index, value) {
-                        $('#fluxSelection').append('<option value="' + value[0] + '">' + value[1] + '</option>');
+                        $('#fluxSelection').append('<li class=\"boxelement\" value="' + value[0] + '">' + value[1] + '</li>');
                     });
                 }
             });
@@ -54,7 +88,7 @@ function supp() {
     $('#fluxSelection2  option:selected').each(function(aaa) {
         $(this).remove();
     }
-    
+
     );
 
 }

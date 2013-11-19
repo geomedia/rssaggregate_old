@@ -16,7 +16,7 @@
         <!--<non-jta-data-source>postconf</non-jta-data-source>-->
         <!--<non-jta-data-source/>-->
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
-        <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
+        <shared-cache-mode>ALL</shared-cache-mode>
         <!--=============================================================================================================-->
         <!--.................................PARAMETRES DE CONNECTION A POSTGRES SQL.....................................-->
         <!--=============================================================================================================-->

@@ -11,8 +11,12 @@ import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.servlet.http.HttpServletRequest;
 import rssagregator.beans.Journal;
+import rssagregator.beans.traitement.MediatorCollecteAction;
+import rssagregator.dao.AbstrDao;
+import rssagregator.dao.DAOComportementCollecte;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoJournal;
+import rssagregator.utils.ServletTool;
 
 /**
  * Classe permettant de valider et binder les données issues d'une requête dans un bean <strong>Journal</strong>
@@ -31,13 +35,19 @@ public class JournalForm extends AbstrForm {
     private String fuseauHorraire;
     private String information;
     private String typeJournal;
+    private MediatorCollecteAction comportementParDefaultDesFlux;
+    private Boolean autoUpdateFlux;
+    private Boolean activerFluxDecouvert;
+    private Integer periodiciteDecouverte;
     //--------------------------------------
     org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(JournalForm.class);
 
-    public JournalForm() {
-        super();
+    protected JournalForm() {
     }
 
+//    public JournalForm() {
+//        super();
+//    }
     @Override
     public Object bind(HttpServletRequest request, Object objEntre, Class type) {
 //        return super.bind(request, objEntre, type); //To change body of generated methods, choose Tools | Templates.
@@ -67,6 +77,10 @@ public class JournalForm extends AbstrForm {
         journal.setFuseauHorraire(fuseauHorraire);
         journal.setInformation(information);
         journal.setTypeJournal(typeJournal);
+        journal.setComportementParDefaultDesFlux(comportementParDefaultDesFlux);
+        journal.setAutoUpdateFlux(autoUpdateFlux);
+        journal.setPeriodiciteDecouverte(periodiciteDecouverte);
+        journal.setActiverFluxDecouvert(activerFluxDecouvert);
         //---------------------------------------------------
         return journal;
     }
@@ -101,11 +115,9 @@ public class JournalForm extends AbstrForm {
                 } catch (NonUniqueResultException e) {
                     logger.error("Plusieurs journaux portent le même nom. Ceci ne devrait jamais arriver !");
                     j = new Journal(); // C'est un problème on va instancier un journal pour bloquer l'ajout
-                } 
-                catch (NoResultException e){
+                } catch (NoResultException e) {
                     logger.debug("pas de résult OK");
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     logger.error("Problème lors de l'usage de la dao : " + e);
                     j = new Journal(); // C'est un problème on va instancier un journal pour bloquer l'ajout
                 }
@@ -169,7 +181,44 @@ public class JournalForm extends AbstrForm {
             erreurs.put("typeJournal", new String[]{ERR_NE_PEUT_ETRE_NULL, ERR_NE_PEUT_ETRE_NULL});
         }
 
+
+        s = request.getParameter("comportementParDefaultDesFlux");
+        if (s != null && !s.isEmpty()) {
+            // On utiliser la dao pour rechercher
+            try {
+                DAOComportementCollecte dao = DAOFactory.getInstance().getDAOComportementCollecte();
+                comportementParDefaultDesFlux = (MediatorCollecteAction) dao.find(new Long(s));
+            } catch (Exception e) {
+            }
+        }
+
+        autoUpdateFlux = ServletTool.getBooleen(request, "autoUpdateFlux");
+
+        activerFluxDecouvert = ServletTool.getBooleen(request, "activerFluxDecouvert");
+
+
+        s = request.getParameter("periodiciteDecouverte");
+        if (s != null) {
+            try {
+                periodiciteDecouverte = new Integer(s);
+                if(periodiciteDecouverte<10){
+                    erreurs.put("periodiciteDecouverte", new String[]{"La valeur doit être supérieurs à 10"});
+                }
+            } catch (Exception e) {
+                erreurs.put("periodiciteDecouverte", new String[]{"Ce n'est pas un int"});
+            }
+
+        }
+        
+        
         valide = erreurs.isEmpty();
         return valide;
+    }
+
+    @Override
+    public void parseListeRequete(HttpServletRequest request, AbstrDao dao) throws Exception {
+//        super.parseListeRequete(request); //To change body of generated methods, choose Tools | Templates.
+        this.recupStandartFilters(request, dao, filtersList);
+
     }
 }

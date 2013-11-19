@@ -3,6 +3,8 @@
     Created on : 21 oct. 2013, 12:54:32
     Author     : clem
 --%>
+<%@page import="javax.xml.bind.JAXBContext"%>
+
 <%@page import="rssagregator.beans.Flux"%>
 <%@page import="java.util.Date"%>
 <%-- 
@@ -47,6 +49,12 @@ Cette JSP permet de mettre en forme les données afficher par la grid de présen
         if (j.getJournalLie() != null) {
 //             o1array.add(j.getJournalLie().toString());
              o1array.add(j.getJournalLie().getNom());
+//               ObjectMapper mapper = new ObjectMapper();
+//               System.out.println(mapper.writeValueAsString(j.getJournalLie()));
+//             o1array.add(mapper.writeValueAsString(j.getJournalLie()));
+ 
+           
+              
         } else {
             o1array.add("aucun");
         }

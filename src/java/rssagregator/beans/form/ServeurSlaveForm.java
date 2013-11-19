@@ -24,7 +24,9 @@ public class ServeurSlaveForm extends AbstrForm {
     private String description;
 
     //------------------------------------------------------
-    public ServeurSlaveForm() {
+    
+    
+    protected ServeurSlaveForm() {
         super();
     }
     

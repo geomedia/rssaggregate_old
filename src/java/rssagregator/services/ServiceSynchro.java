@@ -40,9 +40,11 @@ import rssagregator.beans.incident.JMSDiffusionIncident;
 import rssagregator.beans.incident.JMSPerteConnectionIncident;
 import rssagregator.beans.incident.SynchroIncident;
 import rssagregator.beans.traitement.MediatorCollecteAction;
+import rssagregator.dao.DAOComportementCollecte;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DAOGenerique;
 import rssagregator.dao.DAOIncident;
+import rssagregator.dao.DaoFlux;
 import rssagregator.dao.DaoItem;
 import rssagregator.dao.DaoJournal;
 import rssagregator.utils.XMLTool;
@@ -190,7 +192,7 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
         connection.setExceptionListener(this);
         session = connection.createTopicSession(true, Session.CLIENT_ACKNOWLEDGE);
         topic = session.createTopic(queueName);
-        
+
 
         consumer = session.createDurableSubscriber(topic, servname);
         // Si le serveur n'est pas maitre (cad, si il est esclave), il doit ecouter le topic
@@ -356,7 +358,10 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
 //                                    }
 //                                }
                                 // pas de panique pour les objet liés. Si ils sont existant dans la base de données la dao va s'occuper de leur création lors de la création du flux. Si il n'existent pas, c'est la dao qui va les créer grace à la cascade persist
-                                DAOFactory.getInstance().getDAOFlux().creer(flux);
+                                DaoFlux dao = DAOFactory.getInstance().getDAOFlux();
+                                dao.beginTransaction();
+                                dao.creer(flux);
+                                dao.commit();
                                 msg.acknowledge();
                                 session.commit();
                                 logger.info("ajout d'un flux par Syncronisation id : " + flux.getID().toString());
@@ -370,7 +375,11 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
                             // On récupère dans la BDD le flux
 //                        Flux FluxBDD = (Flux) DAOFactory.getInstance().getDAOFlux().find(flux.getID());
                             try {
-                                DAOFactory.getInstance().getDAOFlux().modifier(flux);
+                                DaoFlux dao = DAOFactory.getInstance().getDAOFlux();
+                                dao.beginTransaction();
+                                dao.modifier(flux);
+                                dao.commit();
+
                                 msg.acknowledge();
                                 session.commit();
                             } catch (IllegalStateException ex) {
@@ -395,7 +404,10 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
                     } else if (bean instanceof MediatorCollecteAction) {
                         if (action.equals("add")) {
                             try {
-                                DAOFactory.getInstance().getDAOComportementCollecte().creer(bean);
+                                DAOComportementCollecte dao = DAOFactory.getInstance().getDAOComportementCollecte();
+                                dao.beginTransaction();
+                                dao.creer(bean);
+                                dao.commit();
                                 msg.acknowledge();
                                 session.commit();
                             } catch (Exception ex) {
@@ -417,7 +429,9 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
                                     Item item = items.get(i);
                                     item.setSyncStatut(3);
                                     try {
+                                        daoItem.beginTransaction();
                                         daoItem.modifier(item);
+                                        daoItem.commit();
                                     } catch (Exception e) {
                                         logger.error("erreur lors de la modification du bean : " + e);
                                     }
@@ -428,8 +442,11 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
 
 
 
-
-                                DAOFactory.getInstance().getDAOComportementCollecte().modifier(bean);
+                                DAOComportementCollecte dao = DAOFactory.getInstance().getDAOComportementCollecte();
+                                dao.beginTransaction();
+                                dao.modifier(bean);
+                                dao.commit();
+                                
                                 logger.debug("On tente de modifier");
                                 msg.acknowledge();
                                 session.commit();
@@ -449,7 +466,9 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
                         DAOGenerique dao = DAOFactory.getInstance().getDAOGenerique();
                         if (action.equals("add")) {
                             try {
+                                dao.beginTransaction();
                                 dao.creer(bean);
+                                dao.commit();
                                 msg.acknowledge();
                                 session.commit();
                             } catch (Exception ex) {
@@ -457,7 +476,9 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
                             }
                         } else if (action.equals("mod")) {
                             try {
+                                dao.beginTransaction();
                                 dao.modifier(bean);
+                                dao.commit();
                                 msg.acknowledge();
                                 session.commit();
                             } catch (Exception ex) {
@@ -478,7 +499,9 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
                         DaoJournal dao = DAOFactory.getInstance().getDaoJournal();
                         if (action.equals("add")) {
                             try {
+                                dao.beginTransaction();
                                 dao.creer(bean);
+                                dao.commit();
                                 msg.acknowledge();
                                 session.commit();
                             } catch (Exception ex) {
@@ -486,7 +509,9 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
                             }
                         } else if (action.equals("mod")) {
                             try {
+                                dao.beginTransaction();
                                 dao.modifier(bean);
+                                dao.commit();
                                 msg.acknowledge();
                                 session.commit();
                             } catch (Exception ex) {
@@ -573,6 +598,21 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
                 //--------La tâche de vérification de la connection JMS
             } else if (o.getClass().equals(TacheLancerConnectionJMS.class)) {
                 TacheLancerConnectionJMS t = (TacheLancerConnectionJMS) o;
+                // Si on a un échec
+                if(t.getExeption()!=null){
+                    try {
+                        t.gererIncident();
+                    } catch (Exception ex) {
+                        Logger.getLogger(ServiceSynchro.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                else{
+                    try {
+                        t.fermetureIncident();
+                    } catch (Exception ex) {
+                        Logger.getLogger(ServiceSynchro.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
 
                 if (t.schedule) {
                     schedule(t);
@@ -587,7 +627,6 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
                 TacheSynchroHebdomadaire t = (TacheSynchroHebdomadaire) o;
 
                 if (t.getSchedule()) {
-//                    executorService.schedule(t, conf.getDurationSync(), TimeUnit.SECONDS);
                     schedule(t);
                 }
 //                if (t.getExeption() != null) {
@@ -603,7 +642,7 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
 //                }
             }
 
-            gererIncident((AbstrTacheSchedule) o);
+//            gererIncident((AbstrTacheSchedule) o);
         }
     }
 
@@ -694,7 +733,9 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
 //            DAOIncident dao = (DAOIncident) DAOFactory.getInstance().getDaoFromType(SynchroIncident.class);
             if (si != null) {
                 try {
+                    dao.beginTransaction();
                     dao.creer(si);
+                    dao.commit();
                 } catch (Exception ex) {
                     Logger.getLogger(ServiceSynchro.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -713,7 +754,9 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
                     jMSPerteConnectionIncident.setDateFin(new Date());
                     try {
                         logger.debug("fermeture de l'incident");
+                        dao.beginTransaction();
                         dao.modifier(jMSPerteConnectionIncident);
+                        dao.commit();
                     } catch (Exception ex) {
                         Logger.getLogger(ServiceSynchro.class.getName()).log(Level.SEVERE, null, ex);
                     }

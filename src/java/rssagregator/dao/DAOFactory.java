@@ -21,10 +21,12 @@ import rssagregator.beans.incident.AliveIncident;
 import rssagregator.beans.incident.AnomalieCollecte;
 import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.beans.incident.Incidable;
+import rssagregator.beans.incident.IncidentDecouverteRSS;
 import rssagregator.beans.incident.IncidentFactory;
 import rssagregator.beans.incident.JMSDiffusionIncident;
 import rssagregator.beans.incident.JMSPerteConnectionIncident;
 import rssagregator.beans.incident.MailIncident;
+import rssagregator.beans.incident.NotificationAjoutFlux;
 import rssagregator.beans.incident.ServerIncident;
 import rssagregator.beans.incident.SynchroIncident;
 import rssagregator.beans.traitement.MediatorCollecteAction;
@@ -125,30 +127,10 @@ public class DAOFactory<T extends AbstrDao> {
     }
 
     public EntityManager getEntityManager() {
-        //TODO : faire le point la créaion du EntityManager, il n'est peut être pas nécessaire de le créer à chaque fois. 
-
-//        int i = 0;
-//
-//        
-//        
-//        System.out.println("DDE EME");
-//        System.out.println("################################");
-//        for(i=0; i<listEm.size(); i++){
-//            System.out.println("OPEN : "+listEm.get(i).isOpen());;
-//        }
-
-//        em = emf.createEntityManager();
-//        listEm.add(em);
-//        if(this.em==null || !this.em.isOpen()){
-//            System.out.println("INSTANCIATION DE l EM");
-//    
-//            em=emf.createEntityManager();
-//          
-//        }
-        // Maintenant on instancie pour chaque DAO un EntityManager. C'est le cache du persist unit qui doit permettre le stockage générale des objet comme flux en mémoire pas l'entity manager
-        em = emf.createEntityManager();
         
-        return this.em;
+        EntityManager nEm = emf.createEntityManager();
+//        em = emf.createEntityManager();
+        return nEm;
     }
 
     public DAOUser getDAOUser() {
@@ -209,6 +191,7 @@ public class DAOFactory<T extends AbstrDao> {
             dao = (T) new DAOIncident<AliveIncident>(this);
             dao.setClassAssocie(beansClass);
         } else if (beansClass.equals(ServerIncident.class)) {
+            System.out.println("---> Instanciation DAOOO.");
             dao = (T) new DAOIncident<ServerIncident>(this);
             dao.setClassAssocie(beansClass);
         } else if (beansClass.equals(ServeurSlave.class)) {
@@ -224,6 +207,14 @@ public class DAOFactory<T extends AbstrDao> {
         }
         else if(beansClass.equals(Item.class)){
             dao =(T) getDaoItem();
+        }
+        else if(beansClass.equals(NotificationAjoutFlux.class)){
+            dao = (T) new DAOIncident<NotificationAjoutFlux>(this);
+            dao.setClassAssocie(NotificationAjoutFlux.class);
+        }
+        else if(beansClass.equals(IncidentDecouverteRSS.class)){
+            dao = (T) new DAOIncident<IncidentDecouverteRSS>(this);
+            dao.setClassAssocie(IncidentDecouverteRSS.class);
         }
         
 

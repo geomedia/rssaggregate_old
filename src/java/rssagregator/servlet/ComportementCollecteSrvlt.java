@@ -54,7 +54,6 @@ public class ComportementCollecteSrvlt extends HttpServlet {
 
         redirmap = null;
 
-        ComportementCollecteForm form = new ComportementCollecteForm();
 
         MediatorCollecteAction obj = null;
 

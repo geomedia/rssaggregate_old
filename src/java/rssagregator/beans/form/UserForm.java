@@ -26,7 +26,15 @@ public class UserForm extends AbstrForm {
     Boolean adminstatut;
     private String username;
     private Boolean adminMail;
+
     //-----------------------------
+    protected UserForm() {
+        super();
+    }
+    
+    
+    
+    
     // Expression régulière permettant de valider un email.
     private static final String EMAIL_PATTERN =
             "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"

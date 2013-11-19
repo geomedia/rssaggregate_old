@@ -45,7 +45,7 @@ public class StartServlet implements ServletContextListener {
      * @param sce
      */
     @Override
-    public void contextInitialized(ServletContextEvent sce) {
+    public void contextInitialized(ServletContextEvent sce){
         try {
             Class.forName("com.mysql.jdbc.Driver");
         } catch (ClassNotFoundException ex) {

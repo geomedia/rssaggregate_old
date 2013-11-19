@@ -7,9 +7,11 @@ package rssagregator.servlet;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
 import java.util.TimeZone;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
@@ -17,16 +19,16 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.eclipse.persistence.jpa.jpql.utility.iterable.ListIterable;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import rssagregator.beans.Journal;
+import rssagregator.beans.exception.DonneeInterneCoherente;
+import rssagregator.beans.exception.IncompleteBeanExeption;
+import rssagregator.beans.form.AbstrForm;
+import rssagregator.beans.form.FORMFactory;
 import rssagregator.beans.form.JournalForm;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoJournal;
-import rssagregator.dao.SearchFilter;
+import rssagregator.services.ServiceCollecteur;
+import rssagregator.services.TacheDecouverteAjoutFlux;
 import rssagregator.utils.CodePays;
 import rssagregator.utils.ServletTool;
 
@@ -79,16 +81,16 @@ public class JournauxSrvl extends HttpServlet {
 
 
         DaoJournal daoJournal = DAOFactory.getInstance().getDaoJournal();
-        JournalForm journalForm = new JournalForm();
+        
         Journal journal = null;
 
-        request.setAttribute(ATT_FORM, journalForm);
         request.setAttribute(ATT_JOURNAL, journal);
 
         VUE = request.getParameter("vue");
         if (VUE == null || VUE.isEmpty()) {
             VUE = "/WEB-INF/journaljsp.jsp";
         }
+
 
         /**
          * *===================================================================================================
@@ -105,8 +107,34 @@ public class JournauxSrvl extends HttpServlet {
             request.setAttribute(ATT_LIST_JOURNAUX, listJournaux);
         } //---------------------------------ACTION LIST --------------------------------------
         else if (action.equals("list")) {
-            
-            ServletTool.actionLIST(request, Journal.class, ATT_JOURNAL, DAOFactory.getInstance().getDaoJournal());
+            DaoJournal dao = DAOFactory.getInstance().getDaoJournal();
+
+            System.out.println("--------------");
+            System.out.println("ACTION LIST ");
+            System.out.println("--------------");
+
+            AbstrForm form = null;
+            try {
+                form = FORMFactory.getInstance().getForm(Journal.class, "list");
+
+            } catch (Exception ex) {
+                Logger.getLogger(JournauxSrvl.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+
+
+            try {
+                form.parseListeRequete(request, dao);
+            } catch (Exception ex) {
+                Logger.getLogger(JournauxSrvl.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+
+            dao.setCriteriaSearchFilters(form.getFiltersList());
+
+
+
+            ServletTool.actionLIST(request, Journal.class, ATT_JOURNAL, dao);
 //
 //            // On récupère les paramettre demandé par la grid
 //            // Parametre page
@@ -246,8 +274,7 @@ public class JournauxSrvl extends HttpServlet {
 
 
 
-        } //--------------------------------------ACTION REM--------------------------------------------------
-        else if (action.equals("rem")) {
+        } else if (action.equals("rem")) {
             ServletTool.actionREM(request, Journal.class, Boolean.TRUE);
 //            try {
 //                journal = (Journal) daoJournal.find(new Long(request.getParameter("id")));
@@ -268,16 +295,38 @@ public class JournauxSrvl extends HttpServlet {
 
         //---------------------------------ACTION ADD ---------------------------------------------------
         if (action.equals("add")) {
-//            ServletTool.actionADD2(request, ATT_JOURNAL, ATT_FORM, Journal.class, Boolean.TRUE);
+            request.setAttribute("listcomportement", DAOFactory.getInstance().getDAOComportementCollecte().findall());
             ServletTool.actionADD(request, ATT_JOURNAL, ATT_FORM, Journal.class, Boolean.TRUE);
-
         } //-----------------------------------ACTION MOD ---------------------------------------------------
         else if (action.equals("mod")) {
+             request.setAttribute("listcomportement", DAOFactory.getInstance().getDAOComportementCollecte().findall());
             ServletTool.actionMOD(request, ATT_JOURNAL, ATT_FORM, Journal.class, Boolean.TRUE);
-
         } //-------------------------------ACTION READ-------------------------------------------------------
         else if (action.equals("read")) {
             ServletTool.actionREAD(request, Journal.class, ATT_JOURNAL);
+        }
+        //--------------------------------ACTION DISCOVER----------------------------------------------------
+        else if(action.equals("discover")){
+            //Récup de l'id
+            Journal j = (Journal) DAOFactory.getInstance().getDaoJournal().find(new Long(request.getParameter("id")));
+  
+            try {
+                Future<TacheDecouverteAjoutFlux> fut = ServiceCollecteur.getInstance().decouverteFluxJournal(j, ServletTool.getBooleen(request, "persist"), ServletTool.getBooleen(request, "active"));
+                
+                TacheDecouverteAjoutFlux tache = fut.get(1, TimeUnit.MINUTES);
+                request.setAttribute("tacheDecouverte", tache);
+                
+            } catch (IncompleteBeanExeption ex) {
+                Logger.getLogger(JournauxSrvl.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (DonneeInterneCoherente ex) {
+                Logger.getLogger(JournauxSrvl.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(JournauxSrvl.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ExecutionException ex) {
+                Logger.getLogger(JournauxSrvl.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (TimeoutException ex) {
+                Logger.getLogger(JournauxSrvl.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
 
 

@@ -7,7 +7,6 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -15,7 +14,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -30,17 +28,11 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.xml.ws.http.HTTPException;
 import org.apache.poi.util.Beta;
-import org.eclipse.persistence.annotations.Cache;
-import org.eclipse.persistence.annotations.CacheCoordinationType;
-import org.eclipse.persistence.annotations.CacheType;
-import org.eclipse.persistence.config.CacheIsolationType;
 import rssagregator.beans.BeanSynchronise;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.dao.DAOFactory;
-import rssagregator.dao.DaoFlux;
 import rssagregator.dao.DaoItem;
-import rssagregator.services.ServiceCollecteur;
 
 /**
  * Cette classe gère les relations entre un ou plusieurs flux et les differents objets de traitement(parseurs,
@@ -53,8 +45,8 @@ import rssagregator.services.ServiceCollecteur;
  */
 @Entity
 @Table(name = "tr_mediatocollecteaction")
-@Cacheable(true)
-@Cache(type = CacheType.FULL, coordinationType = CacheCoordinationType.INVALIDATE_CHANGED_OBJECTS, isolation = CacheIsolationType.SHARED)
+//@Cacheable(true)
+//@Cache(type = CacheType.FULL, coordinationType = CacheCoordinationType.INVALIDATE_CHANGED_OBJECTS, isolation = CacheIsolationType.SHARED)
 public class MediatorCollecteAction implements Serializable, Cloneable, BeanSynchronise {
 
     @Transient
@@ -211,6 +203,11 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
                 this.dedoubloneur.calculHash(listItem);
                 listItem = this.dedoubloneur.dedoublonne(listItem, flux);
             }
+            
+            //Le deuxieme dedoub
+            DedoubloneurComparaisonTitre dedoub2 = new DedoubloneurComparaisonTitre();
+            listItem =  dedoub2.dedoublonne(listItem, flux);
+            
 
         } catch (Exception e) {
             logger.info("erreur lors de lu traitement : " + e);
@@ -283,6 +280,7 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
      *
      * @param flux : le flux pour lequel la liste des items doit être enregistrée
      */
+    @Deprecated
     public void persiter(Flux flux) {
 
         if (listItem.size() > 0) {
@@ -295,7 +293,7 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
 //                if (persit) {
                 try {
                     // La persistance se fait maintenant en passant par le service
-                    ServiceCollecteur.getInstance().ajouterItemAuFlux(flux, listItem.get(i));
+//                    ServiceCollecteur.getInstance().ajouterItemAuFlux(flux, listItem.get(i));
 //                    daoItem.enregistrement(listItem.get(i), flux);
                 } catch (Exception e) {
                     logger.error("Catch d'une errreur dans l'enregistrement d'un item");
@@ -305,16 +303,18 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
             }
 
 
-            // On supprime des hash pour éviter l'accumulation. On en laisse 10 en plus du nombre d'item contenues dans le flux.
-//        Integer nbr = flux.getMediatorFluxAction().getDedoubloneur().getCompteCapture()[0] + 10;
-            Integer nbr = this.dedoubloneur.getCompteCapture()[0] + 10;
-            if (nbr > 0 && nbr < flux.getLastEmpruntes().size()) {
-                Iterator<String> iterator = flux.getLastEmpruntes().iterator();
-                for (Iterator<Item> it = listItem.iterator(); it.hasNext();) {
-                    Item item = it.next();
-                    it.remove();
-                }
-            }
+//            // On supprime des hash pour éviter l'accumulation. On en laisse 10 en plus du nombre d'item contenues dans le flux.
+////        Integer nbr = flux.getMediatorFluxAction().getDedoubloneur().getCompteCapture()[0] + 10;
+//            Integer nbr = this.dedoubloneur.getCompteCapture()[0] + 10;
+//            if (nbr > 0 && nbr < ServiceCollecteur.getInstance().getCacheHashFlux().returnLashHash(flux).size()) {
+////                = flux.getLastEmpruntes().iterator();
+//                Iterator<String> iterator = ServiceCollecteur.getInstance().getCacheHashFlux().returnLashHash(flux).iterator();
+//                for (Iterator<Item> it = listItem.iterator(); it.hasNext();) {
+//                    Item item = it.next();
+//                    it.remove();
+//                    
+//                }
+//            }
 
 
             // On supprimer les items capturée du cache de l'ORM pour éviter l'encombrement
@@ -458,10 +458,22 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
         this.defaut = defaut;
     }
 
+    /**
+     * *
+     * setter pour {@link #periodiciteCollecte}
+     *
+     * @return
+     */
     public Integer getPeriodiciteCollecte() {
         return periodiciteCollecte;
     }
 
+    /**
+     * *
+     * getter pour {@link #periodiciteCollecte}
+     *
+     * @return
+     */
     public void setPeriodiciteCollecte(Integer periodiciteCollecte) {
         this.periodiciteCollecte = periodiciteCollecte;
     }

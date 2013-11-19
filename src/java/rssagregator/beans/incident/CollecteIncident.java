@@ -31,6 +31,9 @@ public class CollecteIncident extends AbstrIncident implements Serializable {
         this.fluxLie = fluxLie;
     }
 
+    public String incidDesc(){
+        return "Les incidents de collectes sont blablabla";
+    }
     
     /***
      * Une erreur de collecte ne doit être notifiée que si elle a subit 2 répétition. Il faut en effet éviter de notifier dès le premier échec.

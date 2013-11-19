@@ -10,14 +10,14 @@
   
   <!--Les ressources JMS utilisées pour la synchronisation de EclipseLink-->
   <Resource auth="Container"
-          name="jms/ConnectionFactoryC"
+          name="jms/ConnectionFactory"
           type="org.apache.activemq.ActiveMQConnectionFactory"
           description="JMS Connection Factory"
           factory="org.apache.activemq.jndi.JNDIReferenceFactory"
           brokerURL="tcp://172.17.201.17:61616"
           brokerName="MyActiveMQBroker"/>
  
-<Resource name="jms/topic/MyTopicC"
+<Resource name="jms/topic/MyTopic"
         auth="Container"
         type="org.apache.activemq.command.ActiveMQTopic"
         factory="org.apache.activemq.jndi.JNDIReferenceFactory"

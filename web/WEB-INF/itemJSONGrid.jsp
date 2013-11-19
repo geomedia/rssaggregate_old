@@ -6,6 +6,7 @@ Cette JSP permet de mettre en forme les données afficher par la grid de présen
     Author     : clem
 --%>
 
+<%@page import="org.jsoup.Jsoup"%>
 <%@page import="rssagregator.beans.Flux"%>
 <%@page import="rssagregator.beans.Item"%>
 <%@page import="java.util.List"%>
@@ -35,7 +36,8 @@ Cette JSP permet de mettre en forme les données afficher par la grid de présen
         JSONArray o1array = new JSONArray();
         o1array.add(j.getID());
         o1array.add(j.getTitre());
-        o1array.add(j.getDescription());
+        o1array.add(Jsoup.parse(j.getDescription()).text()); // TODO : potentiellement pompeur de ressource si beaucoup de client font des requetes en ajax. ?
+        
         
         JSONArray fluxs = new JSONArray();
 //        export.put("flux", fluxs);

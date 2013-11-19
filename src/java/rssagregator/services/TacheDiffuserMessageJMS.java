@@ -27,7 +27,7 @@ import rssagregator.utils.XMLTool;
  *
  * @author clem
  */
-public class TacheDiffuserMessageJMS extends AbstrTacheSchedule<TacheDiffuserMessageJMS> implements Incidable {
+public class TacheDiffuserMessageJMS extends TacheImpl<TacheDiffuserMessageJMS> implements Incidable {
 
     protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheDiffuserMessageJMS.class);
     /**
@@ -60,11 +60,8 @@ public class TacheDiffuserMessageJMS extends AbstrTacheSchedule<TacheDiffuserMes
     }
 
     @Override
-    public TacheDiffuserMessageJMS call() throws Exception {
-        
-        this.exeption = null;
-        try {
-            if (connection != null) {
+    protected void callCorps() throws Exception {
+               if (connection != null) {
                 Session sessionDiff = connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
                 MessageProducer producer = sessionDiff.createProducer(topic);
                 producer.setDeliveryMode(DeliveryMode.PERSISTENT);
@@ -87,16 +84,54 @@ public class TacheDiffuserMessageJMS extends AbstrTacheSchedule<TacheDiffuserMes
             else{
                 throw new JMSException("La connection au service JMS est innactive.");
             }
-
-        } catch (Exception e) {
-            this.exeption = e;
-            logger.error("Erreur lors de la diffusion d'un message JMS : " + e);
-        } finally {
-            this.setChanged();
-            this.notifyObservers();
-            return this;
-        }
     }
+
+    @Override
+    protected TacheDiffuserMessageJMS callFinalyse() {
+        return super.callFinalyse(); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    
+    
+
+//    @Override
+//    public TacheDiffuserMessageJMS call() throws Exception {
+//        
+//        this.exeption = null;
+//        try {
+//            if (connection != null) {
+//                Session sessionDiff = connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
+//                MessageProducer producer = sessionDiff.createProducer(topic);
+//                producer.setDeliveryMode(DeliveryMode.PERSISTENT);
+//                MapMessage mapMessage = sessionDiff.createMapMessage();
+//
+//                beanSerialise = XMLTool.serialise(bean);
+//                mapMessage.setStringProperty("bean", beanSerialise);
+//                mapMessage.setStringProperty("action", action);
+//
+//                Conf c = DAOFactory.getInstance().getDAOConf().getConfCourante();
+//
+//                mapMessage.setStringProperty("sender", c.getServname());
+//                mapMessage.setJMSCorrelationID(c.getServname());
+//                producer.send(mapMessage);
+//                mapMessage.acknowledge();
+//                sessionDiff.close();
+//                logger.debug("Diffusion du Beans effectuée");
+//                throw new Exception("test Exception");
+//            }
+//            else{
+//                throw new JMSException("La connection au service JMS est innactive.");
+//            }
+//
+//        } catch (Exception e) {
+//            this.exeption = e;
+//            logger.error("Erreur lors de la diffusion d'un message JMS : " + e);
+//        } finally {
+//            this.setChanged();
+//            this.notifyObservers();
+//            return this;
+//        }
+//    }
 
     /**
      * *
@@ -146,6 +181,17 @@ public class TacheDiffuserMessageJMS extends AbstrTacheSchedule<TacheDiffuserMes
     public String getBeanSerialise() {
         return beanSerialise;
     }
-    
-    
+
+    @Override
+    public void gererIncident() throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    /***
+     * Cette méthode ne fait rien. 
+     */
+    public void fermetureIncident() throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

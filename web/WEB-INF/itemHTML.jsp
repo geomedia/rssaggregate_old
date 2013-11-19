@@ -34,7 +34,7 @@
                 <ul>
 
                     <c:forEach items="${item.listFlux}" var="flux">
-                        <li><a href="flux?action=read-item&id=${flux.ID}">${flux}</a></li>
+                        <li><a href="${flux.readURL}">${flux}</a></li>
                         </c:forEach>
 
                 </ul>
@@ -59,7 +59,7 @@
 
             <script>
                 $(function() {
-                     $(".datepicker").datepicker({dateFormat: "dd/mm/yy"});
+                    $(".datepicker").datepicker({dateFormat: "dd/mm/yy"});
                 });</script>
 
 
@@ -69,7 +69,104 @@
                 <div>
 
 
-                    <script src="${rootpath}ress/jqgrid/js/i18n/grid.locale-fr.js" type="text/javascript"></script>
+                    <form method="GET" id="pagina" action="${rootpath}item/list">
+
+
+                        <input type="hidden" id="firstResult" value="0"/>
+
+
+                        <br />
+                        <fieldset>
+                            <legend>Affiner la recherche</legend>
+
+                            <table>
+                                <caption>Flux de provenance</caption>
+                                <tr>
+                                    <th>Journaux</th>
+                                    <th>Flux disponibles</th>
+                                    <th></th>
+                                    <th>Flux sélectionnés</th>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <select id="journalSelection" style="width: 300px">
+                                            <option value="null">Journal : </option>
+                                            <option id="tous">tous</option>
+                                            <c:forEach items="${listJournaux}" var="j">
+                                                <option value="${j.ID}">${j.nom}</option>
+                                            </c:forEach>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        
+                                        <ul id="fluxSelection" name="oldid-flux" style="min-width: 300px; width: 400px" class="connectedSortable">
+                                            <c:forEach items="${listflux}" var="fl">
+                                                <li class="boxelement" value="${fl.ID}">${fl}</li>                                
+                                            </c:forEach>
+                                            </li>
+                                        </ul>
+
+                                    </td>
+                                    <td>
+
+                                        <!--                                        <button type="button" onclick="selectflux();">--></button><br />
+                                        <!--<button type="button" onclick="supp();"><--</button>-->
+                                    </td>
+                                    <td><ul style="max-width: 300px; width: 300px" name="fluxSelection2" id="fluxSelection2" class="connectedSortable"></ul></td>
+                                </tr>
+
+                            </table>
+
+
+                            <script src="dynListJournauxFLux.js"></script>   <!--Le Script permettant de gérer la sélection des flux -->
+                            <script src="AjaxItemDynGrid.js"></script> <!--Le script permettant de gérer la Grid d'affichage des Item-->
+                            <br />
+
+                            <!--                            <label>Ordonner par : </label>
+                                                        <select id="order" name="order">
+                                                            <option value=""></option>
+                                                            <option value="dateRecup" <c:if test="${param.order=='dateRecup'}">selected="true"</c:if>>Date de récupération</option>
+                                                            <option value="datePub" <c:if test="${param.order=='datePub'}"> selected="true"</c:if>>Date de publication</option>
+                                                            <option value="listFlux" <c:if test="${param.order=='listFlux'}"> selected="true"</c:if>>Flux</option>
+                                                            </select>-->
+
+
+                                <!--                                <label for="desc">Décroissant</label>
+                                                                <input type="checkbox" name="desc" value="true" <c:if test="${param.desc=='true'}"> checked="true"</c:if>/>-->
+
+
+                                <label for="date1">Date début : </label>
+                                <input type="text" name="date1" class="datepicker" id="date1"/>
+                                <label for="date2">Date fin : </label>
+                                <input type="text" name="date2" class="datepicker" id="date2"/>
+
+                                <input type="button" value="Affiner la sélection" id="afin">
+
+                                <select name="vue" id="vue" onchange="subExport();">
+                                    <option value="html">Export de la sélection</option>
+                                    <option value="csv">CSV</option>
+                                    <option value="csvexpert">CSV Expert</option>
+                                    <option value="xls">XLS</option>
+                                </select>
+                                <!--                                <button type="submit"  formaction="Export" formtarget="_blank">Exporter</button>-->
+                                <script>
+                function subExport() {
+                    if ($('#vue').val() == 'csv' || $('#vue').val() == 'csvexpert' || $('#vue').val() == 'xls') {
+                        var old = $('#order').val();
+                        $('#order').val('listFlux');
+                        //                        $('#afin').click()
+                        $('#pagina').submit();
+                        $('#order').val(old);
+                    }
+                }
+                                </script>
+
+                            </fieldset>
+
+                        </form>
+
+
+                        <script src="${rootpath}ress/jqgrid/js/i18n/grid.locale-fr.js" type="text/javascript"></script>
                     <script src="${rootpath}ress/jqgrid/js/jquery.jqGrid.min.js" type="text/javascript"></script>
                     <!--<script src="${rootpath}ress/jqgrid/plugins/grid.addons.js" type="text/javascript"></script>-->
 
@@ -103,12 +200,15 @@
                 function  fluxFormatter(cellvalue, options, rowObjcet, l4) {
 //                    alert(JSON.stringify(cellvalue))
                     txt = "<ul>";
+                    pp="";
                     for (i = 0; i < cellvalue.length; i++) {
                         txt = +"<li>" + cellvalue[i]['val'] + "</li>";
+                        pp+= "<div class=\"boxelement\">"+cellvalue[i]['val']+"</div>  ";
 
                     }
                     txt += "</ul>";
-
+//return "AA";
+return pp;
                     return txt;
                 }
                 /***
@@ -144,7 +244,7 @@
 
                     grid.jqGrid({
                         loadonce: false,
-                        url: "${rootpath}item/listgrid?vue=grid",
+                        url: "${rootpath}item/list?vue=grid",
                         datatype: "json",
                         mtype: "GET",
                         colNames: ["ID", "titre", "description", "flux"],
@@ -159,7 +259,7 @@
                         ],
                         pager: '#pager',
                         rowNum: 10,
-                        rowList: [10, 20, 30],
+                        rowList: [10, 20, 30, 50, 100],
                         sortname: "invid",
                         sortorder: "desc",
                         viewrecords: true,
@@ -172,6 +272,7 @@
                         exptype: "csvstring",
                         root: "grid",
                         ident: "\t",
+                        height: 500,
                         search: true,
 //                        search: {
 //                            modal: true,
@@ -193,23 +294,17 @@
                         multipleSearch: true, multipleGroup: true, showQuery: true
                     };
 
-////                    jQuery("#list").searchGrid(optionsSearch);
-//                    jQuery('#list').jqGrid('searchGrid', {multipleSearch: true, modal: true, Find: 'zouzouzouu tralala', beforeShowSearch: function() {
-//                            alert('beafore');
-//                        }});
-//
-//
-//
-//                    jQuery("#list").navGrid('#pager', {add: false, edit: false, del: false, search: true, refresh: true}, {}, {}, {}, optionsSearch).navButtonAdd('#pager',
-//                            {
-//                                caption: "'Export To CSV",
-//                                buttonicon: "ui-icon-add",
-//                                onClickButton: function() {
-//                                    opt = {exptype: "jsonstring"};
-//                                    $("#list").jqGrid('excelExport', {tag: 'csv', url: '${rootpath}journaux/list?vue=csv'});
-//                                },
-//                                position: "last"
-//                            });
+
+                    jQuery("#list").navGrid('#pager', {add: false, edit: false, del: false, search: true, refresh: true}, {}, {}, {}, optionsSearch).navButtonAdd('#pager',
+                            {
+                                caption: "'Export To CSV",
+                                buttonicon: "ui-icon-add",
+                                onClickButton: function() {
+                                    opt = {exptype: "jsonstring"};
+                                    $("#list").jqGrid('excelExport', {tag: 'csv', url: '${rootpath}item/list?vue=csv'});
+                                },
+                                position: "last"
+                            });
 
                 });
 
@@ -221,133 +316,17 @@
 
 
 
-                    <form method="GET" id="pagina" action="${rootpath}item/list">
-                        <fieldset>
-                            <legend title="truc"  >Pages : </legend> 
 
-                            <!--    On calcul des début et fin-->
-                            <%--<c:import url="/WEB-INF/paginator.jsp" />--%>
-                            <div>
-                                <span id="btPaginDiv"></span>
+                </div>
 
+                <div>
+                    <ul id="resudiv">
 
-                                <!--                            <label for="itPrPage">Item par page : </label>-->
-                                Afficher :
-                                <select name="itPrPage" onChange="$('#afin').click();" id="itPrPage"> 
-                                    <c:forEach var="i" begin="20" end="500" step="20">
-                                        <option value="${i}" <c:if test="${param.itPrPage==i}"> selected="true"</c:if>>${i}</option>
-                                    </c:forEach>
-                                </select> résultats par page.
+                    </ul>
 
-                            </div>
+                </div>
 
-                            <!--<noscript>-->
-                            <!--<input type="submit" value="Changer"  />-->
-                            <!--</noscript>-->
-
-
-                        </fieldset>
-
-                        <input type="hidden" id="firstResult" value="0"/>
-
-
-                        <br />
-                        <fieldset>
-                            <legend>Affiner la recherche</legend>
-
-                            <table>
-                                <caption>Flux de provenance</caption>
-                                <tr>
-                                    <th>Journaux</th>
-                                    <th>Flux disponibles</th>
-                                    <th></th>
-                                    <th>Flux sélectionnés</th>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <select id="journalSelection" style="width: 300px">
-                                            <option value="null">Journal : </option>
-                                            <option id="tous">tous</option>
-                                            <c:forEach items="${listJournaux}" var="j">
-                                                <option value="${j.ID}">${j.nom}</option>
-                                            </c:forEach>
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <select id="fluxSelection" name="oldid-flux" style="min-width: 300px; width: 400px" multiple="true">
-                                            <option value="all">Tous</option>
-                                            <c:forEach items="${listflux}" var="fl">
-                                                <option value="${fl.ID}">${fl}</option>                                
-                                            </c:forEach>
-                                        </select>
-
-                                    </td>
-                                    <td>
-
-                                        <button type="button" onclick="selectflux();">--></button><br />
-                                        <button type="button" onclick="supp();"><--</button>
-                                    </td>
-                                    <td><select multiple="true" style="max-width: 300px; width: 300px" name="fluxSelection2" id="fluxSelection2"></select></td>
-                                </tr>
-
-                            </table>
-
-
-                            <script src="dynListJournauxFLux.js"></script>
-                            <script src="AjaxItemDynGrid.js"></script>
-                            <br />
-
-                            <label>Ordonner par : </label>
-                            <select id="order" name="order">
-                                <option value=""></option>
-                                <option value="dateRecup" <c:if test="${param.order=='dateRecup'}">selected="true"</c:if>>Date de récupération</option>
-                                <option value="datePub" <c:if test="${param.order=='datePub'}"> selected="true"</c:if>>Date de publication</option>
-                                <option value="listFlux" <c:if test="${param.order=='listFlux'}"> selected="true"</c:if>>Flux</option>
-                                </select>
-
-
-                                <label for="desc">Décroissant</label>
-                                <input type="checkbox" name="desc" value="true" <c:if test="${param.desc=='true'}"> checked="true"</c:if>/>
-
-
-                                <label for="date1">Date début : </label>
-                                <input type="text" name="date1" class="datepicker" id="date1"/>
-                                <label for="date2">Date fin : </label>
-                                <input type="text" name="date2" class="datepicker" id="date2"/>
-
-                                <input type="button" value="Affiner la sélection" id="afin">
-
-                                <select name="vue" id="vue" onchange="subExport();">
-                                    <option value="html">Export de la sélection</option>
-                                    <option value="csv">CSV</option>
-                                    <option value="csvexpert">CSV Expert</option>
-                                    <option value="xls">XLS</option>
-                                </select>
-                                <!--                                <button type="submit"  formaction="Export" formtarget="_blank">Exporter</button>-->
-                                <script>
-                function subExport() {
-                    if ($('#vue').val() == 'csv' || $('#vue').val() == 'csvexpert' || $('#vue').val() == 'xls') {
-                        var old = $('#order').val();
-                        $('#order').val('listFlux');
-                        //                        $('#afin').click()
-                        $('#pagina').submit();
-                        $('#order').val(old);
-                    }
-                }
-                                </script>
-
-                            </fieldset>
-                        </form>
-                    </div>
-
-                    <div>
-                        <ul id="resudiv">
-
-                        </ul>
-
-                    </div>
-
-                    <!--                    <ul>    MAINTENANT GERRÉE EN aAJAX-->  
+                <!--                    <ul>    MAINTENANT GERRÉE EN aAJAX-->  
                 <%--<c:forEach items="${listItem}" var="ite">--%>
                 <!--<li><p>-->
                         <!--<a href="item?action=read&id=${ite.ID}">${ite.titre}</a>-->

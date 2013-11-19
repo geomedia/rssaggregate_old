@@ -54,6 +54,7 @@ public class Dedoubloneur extends AbstrDedoublonneur {
          */
 //        Set<String> listLastEmprunte = flux.getLastEmpruntes();
         Set<String> listLastEmprunte = ServiceCollecteur.getInstance().getCacheHashFlux().returnLashHash(flux);
+//        System.out.println("TAILLER DU SET : " + listLastEmprunte.size());
         if (listLastEmprunte != null) {
             for (Iterator<String> it = listLastEmprunte.iterator(); it.hasNext();) {
                 String hashMemoire = it.next();
@@ -69,135 +70,162 @@ public class Dedoubloneur extends AbstrDedoublonneur {
         }
 
 
-        //==========================================================================================
-        //. . . . . . . . . . . . . . . . DEDOUBLONNAGE BDD
-        //==========================================================================================
-        /**
-         * Dans ce block on va chercher les hashs des items restante dans la base de données. Si on obtien des résultats
-         * il faut alors observer si l'item est déjà lié au flux (dans ce cas l'item capturé doit être retirée de la
-         * liste) ou si l'item existe dans le flux mais n'est pas lié au flux observé (dans ce cas la liaison doit être
-         * effectuée)
-         */
-        // 
-        if (listItemCapture.size() > 0) { //Si il reste encore des items dans la liste, on procède à la vérification.
 
-            //--------> Formulation de la requète
-            DaoItem dao = DAOFactory.getInstance().getDaoItem();
-            //Construction de la liste des hash a envoyé à la dao.
-            int z;
-            String hashParamSQL = "";
-            for (z = 0; z < listItemCapture.size(); z++) {
-                hashParamSQL += "'" + listItemCapture.get(z).getHashContenu() + "', ";
+        // On commence par vérifier que deux items capturée n'ont pas le même hash. Certain journaux fournissent des flux avec plusieurs fois le même items...
+        for (Iterator<Item> it = listItemCapture.iterator(); it.hasNext();) {
+            Item item1 = it.next();
+            int cpt = 0;
+            for (int i = 0; i < listItemCapture.size(); i++) {
+                Item item = listItemCapture.get(i);
+                if (item.getHashContenu().equals(item1.getHashContenu())) {
+                    cpt++;
+                }
             }
-            if (hashParamSQL.length() > 2) {
-                hashParamSQL = hashParamSQL.substring(0, hashParamSQL.length() - 2);
+            if (cpt > 1) {
+                it.remove();
             }
-            List<Item> listItemDejaPresenteBDD = dao.findHashFlux(hashParamSQL, flux);
+
+        }
+
+        //On désactive
+//        if (false) {
 
 
-            //------> Parcours des items trouvée dans la base de donnée.
-            for (int i = 0; i < listItemDejaPresenteBDD.size(); i++) {
-                Item ItemBdd = listItemDejaPresenteBDD.get(i);
-                for (ListIterator<Item> it = listItemCapture.listIterator(); it.hasNext();) {
-                    Item itemRetour = it.next();
-                    //Si les hash entre item dans la base et item trouvée sont similaire
-                    if (ItemBdd.getHashContenu().equals(itemRetour.getHashContenu())) {
+            //==========================================================================================
+            //. . . . . . . . . . . . . . . . DEDOUBLONNAGE BDD
+            //==========================================================================================
+            /**
+             * Dans ce block on va chercher les hashs des items restante dans la base de données. Si on obtien des
+             * résultats il faut alors observer si l'item est déjà lié au flux (dans ce cas l'item capturé doit être
+             * retirée de la liste) ou si l'item existe dans le flux mais n'est pas lié au flux observé (dans ce cas la
+             * liaison doit être effectuée)
+             */
+            // 
+            if (listItemCapture.size() > 0) { //Si il reste encore des items dans la liste, on procède à la vérification.
 
-                        //----------> SUPPRESSION DE L'ITEM COLLECTE SI ELLE EST DEJÀ LIÉE AU FLUX OBSERVÉ
-                        // On récupère les id des flux des items présente dans la BDD
-                        List<Flux> listfluxItemBDD = ItemBdd.getListFlux();
-                        int k;
-                        boolean trouve = false;
-                        for (k = 0; k < listfluxItemBDD.size(); k++) {
-                            // SI l'item courante possède la même id que dans la base de donnée, on supprime de la liste courante
-                            if (listfluxItemBDD.get(k).getID().equals(flux.getID())) {
-                                compteCapture[2]++;
-                                it.remove();
-                                trouve = true;
-                                continue;
+                //--------> Formulation de la requète
+                DaoItem dao = DAOFactory.getInstance().getDaoItem();
+                //Construction de la liste des hash a envoyé à la dao.
+                int z;
+                String hashParamSQL = "";
+                for (z = 0; z < listItemCapture.size(); z++) {
+                    hashParamSQL += "'" + listItemCapture.get(z).getHashContenu() + "', ";
+                }
+                if (hashParamSQL.length() > 2) {
+                    hashParamSQL = hashParamSQL.substring(0, hashParamSQL.length() - 2);
+                }
+                List<Item> listItemDejaPresenteBDD = dao.findHashFlux(hashParamSQL, flux); // Il s'agit de la liste des item possédant les hash
+                System.out.println("NBR ITEM DS BDD : " + listItemDejaPresenteBDD.size());
 
+
+                //------> Parcours des items trouvée dans la base de donnée.
+                for (int i = 0; i < listItemDejaPresenteBDD.size(); i++) {
+                    Item ItemBdd = listItemDejaPresenteBDD.get(i);
+                    for (ListIterator<Item> it = listItemCapture.listIterator(); it.hasNext();) {
+                        Item itemRetour = it.next();
+                        //Si les hash entre item dans la base et item trouvée sont similaire
+                        if (ItemBdd.getHashContenu().equals(itemRetour.getHashContenu())) {
+
+                            //----------> SUPPRESSION DE L'ITEM COLLECTE SI ELLE EST DEJÀ LIÉE AU FLUX OBSERVÉ
+                            // On récupère les id des flux des items présente dans la BDD
+                            List<Flux> listfluxItemBDD = ItemBdd.getListFlux();
+                            int k;
+                            boolean trouve = false;
+                            for (k = 0; k < listfluxItemBDD.size(); k++) {
+                                System.out.println("FLUX : " + listfluxItemBDD.get(k));
+                                // SI l'item courante possède la même id que dans la base de donnée, on supprime de la liste courante
+                                if (listfluxItemBDD.get(k).getID().equals(flux.getID())) {
+                                    compteCapture[2]++;
+                                    // On supprimer l'item de la liste a ajouté et on ajoute le hash au cache pour un dédoublonnage plus efficace a l'avenir
+                                    it.remove();
+//                                ServiceCollecteur.getInstance().getCacheHashFlux().addHash(flux, itemRetour.getHashContenu());
+                                    trouve = true;
+                                    continue;
+
+                                }
+                            }
+                            //---------> AJOUT D'UNE LIAISON POUR L'ITEM TROUVÉ DANS LA BASE DE DONNÉE
+                            // L'item analysé existe dans la base de donnée mais n'est pas encore lié à notre flux. Il faut remplacer par l'item trouvé dans la base de donnée (concevation de  l'id et des paticulaité de l'item existant)
+                            if (!trouve) {
+                                it.set(ItemBdd);
+                                compteCapture[3]++;
                             }
                         }
-                        //---------> AJOUT D'UNE LIAISON POUR L'ITEM TROUVÉ DANS LA BASE DE DONNÉE
-                        // L'item analysé existe dans la base de donnée mais n'est pas encore lié à notre flux. Il faut remplacer par l'item trouvé dans la base de donnée (concevation de  l'id et des paticulaité de l'item existant)
-                        if (!trouve) {
-                            it.set(ItemBdd);
-                            compteCapture[3]++;
-                        }
                     }
                 }
-            }
 
-            //=========================================================================================================
-            // . . . . . . . . . . . . DEDOUBLONNAGE PAR RAPPORT AUX COMPORTEMENTS DE COLLECTE ANCIENS
-            //=========================================================================================================
-            /**
-             * Le comportement de collecte d'un flux peut être changé. Si un flux a possédé plusieurs comportement de
-             * collecte, il est nécessaire de vérifier si l'item collecté ne correspond pas à à une item collecté à
-             * l'aide d'un ancien comportement
-             */
-            // -------> Récupétation des anciens comportement de collecte du flux.
-            List<FluxPeriodeCaptation> periodeCaptation = flux.getPeriodeCaptations();
-            HashSet<MediatorCollecteAction> comportementReleve = new HashSet<MediatorCollecteAction>(); // On crée un hashset pour être certain de n'ajouter qu'une fois le comportement
-            comportementReleve.add(flux.getMediatorFlux());
-            for (int k = 0; k < periodeCaptation.size(); k++) {
-                FluxPeriodeCaptation fluxPeriodeCaptation = periodeCaptation.get(k);
-                comportementReleve.add(fluxPeriodeCaptation.getComportementDurantLaPeriode());
-            }
-            comportementReleve.remove(flux.getMediatorFlux());
+                //=========================================================================================================
+                // . . . . . . . . . . . . DEDOUBLONNAGE PAR RAPPORT AUX COMPORTEMENTS DE COLLECTE ANCIENS
+                //=========================================================================================================
+                /**
+                 * Le comportement de collecte d'un flux peut être changé. Si un flux a possédé plusieurs comportement
+                 * de collecte, il est nécessaire de vérifier si l'item collecté ne correspond pas à à une item collecté
+                 * à l'aide d'un ancien comportement
+                 */
+                // -------> Récupétation des anciens comportement de collecte du flux.
+                List<FluxPeriodeCaptation> periodeCaptation = flux.getPeriodeCaptations();
+                HashSet<MediatorCollecteAction> comportementReleve = new HashSet<MediatorCollecteAction>(); // On crée un hashset pour être certain de n'ajouter qu'une fois le comportement
+                comportementReleve.add(flux.getMediatorFlux());
+                for (int k = 0; k < periodeCaptation.size(); k++) {
+                    FluxPeriodeCaptation fluxPeriodeCaptation = periodeCaptation.get(k);
+                    comportementReleve.add(fluxPeriodeCaptation.getComportementDurantLaPeriode());
+                }
+                comportementReleve.remove(flux.getMediatorFlux());
 
 
-            // ------------> SI on a plusieurs comportements
-            if (comportementReleve.size() > 0) {
-                String concatHash = "";
-                // Pour chaque item capturée (celles qui restent...)
-                for (int k = 0; k < listItemCapture.size(); k++) {
-                    Item it = listItemCapture.get(k);
-                    // On calcul le hash avec l'ancien comportement de capture 
+                // ------------> SI on a plusieurs comportements
+                if (comportementReleve.size() > 0) {
+                    String concatHash = "";
+                    // Pour chaque item capturée (celles qui restent...)
+                    for (int k = 0; k < listItemCapture.size(); k++) {
+                        Item it = listItemCapture.get(k);
+                        // On calcul le hash avec l'ancien comportement de capture 
 
-                    for (Iterator<MediatorCollecteAction> it1 = comportementReleve.iterator(); it1.hasNext();) { // Pour chaque compotement relevé
-                        MediatorCollecteAction mediatorCollecteAction = it1.next();
-                        try {
-                            concatHash += "'" + mediatorCollecteAction.dedoubloneur.returnHash(it) + "', ";
-                        } catch (NoSuchAlgorithmException ex) {
-                            java.util.logging.Logger.getLogger(Dedoubloneur.class.getName()).log(Level.SEVERE, null, ex);
+                        for (Iterator<MediatorCollecteAction> it1 = comportementReleve.iterator(); it1.hasNext();) { // Pour chaque compotement relevé
+                            MediatorCollecteAction mediatorCollecteAction = it1.next();
+                            try {
+                                concatHash += "'" + mediatorCollecteAction.dedoubloneur.returnHash(it) + "', ";
+                            } catch (NoSuchAlgorithmException ex) {
+                                java.util.logging.Logger.getLogger(Dedoubloneur.class.getName()).log(Level.SEVERE, null, ex);
+                            }
                         }
                     }
-                }
-                if (concatHash.length() > 2) {
-                    concatHash = concatHash.substring(0, concatHash.length() - 2); // On retire simplement la chaine ", " a la fin
+                    if (concatHash.length() > 2) {
+                        concatHash = concatHash.substring(0, concatHash.length() - 2); // On retire simplement la chaine ", " a la fin
 
-                    // ------> REQUETE DE DEDOUBLE 
-                    List<Item> itemAncienHash = dao.findHashFlux(concatHash, null);
-                    // Si on en trouve 
-                    if (!itemAncienHash.isEmpty()) {
-                        // Il faut remplacer l'ancien par celui qui vient d'être trouvé.
-                        for (int k = 0; k < itemAncienHash.size(); k++) {
-                            Item itemBDDAncienHash = itemAncienHash.get(k);
+                        // ------> REQUETE DE DEDOUBLE 
+                        List<Item> itemAncienHash = dao.findHashFlux(concatHash, null);
+                        // Si on en trouve 
+                        if (!itemAncienHash.isEmpty()) {
+                            // Il faut remplacer l'ancien par celui qui vient d'être trouvé.
+                            for (int k = 0; k < itemAncienHash.size(); k++) {
+                                Item itemBDDAncienHash = itemAncienHash.get(k);
 
-                            for (ListIterator<Item> it = listItemCapture.listIterator(); it.hasNext();) {
-                                try {
-                                    Item itemCapture = it.next();
-                                    if (flux.getMediatorFlux().dedoubloneur.returnHash(itemBDDAncienHash).equals(itemCapture.getHashContenu())) {
+                                for (ListIterator<Item> it = listItemCapture.listIterator(); it.hasNext();) {
+                                    try {
+                                        Item itemCapture = it.next();
+                                        if (flux.getMediatorFlux().dedoubloneur.returnHash(itemBDDAncienHash).equals(itemCapture.getHashContenu())) {
 
-                                        //Si l'item a besoin d'être liée
-                                        if (!itemBDDAncienHash.getListFlux().contains(flux)) {
-                                            it.set(itemBDDAncienHash);
-                                        } //Sinon on la retire
-                                        else {
-                                            it.remove();
-                                        }
+                                            //Si l'item a besoin d'être liée
+                                            if (!itemBDDAncienHash.getListFlux().contains(flux)) {
+                                                it.set(itemBDDAncienHash);
+                                            } //Sinon on la retire
+                                            else {
+//                                            ServiceCollecteur.getInstance().getCacheHashFlux().addHash(flux, concatHash);
+                                                it.remove();
+                                            }
 //                                        item = itemBDDAncienHash;
+                                        }
+                                    } catch (NoSuchAlgorithmException ex) {
+                                        java.util.logging.Logger.getLogger(Dedoubloneur.class.getName()).log(Level.SEVERE, null, ex);
                                     }
-                                } catch (NoSuchAlgorithmException ex) {
-                                    java.util.logging.Logger.getLogger(Dedoubloneur.class.getName()).log(Level.SEVERE, null, ex);
                                 }
                             }
                         }
                     }
                 }
             }
-        }
+//        }
         compteCapture[4] = listItemCapture.size();
         logger.debug("Item trouvé : " + compteCapture[0] + "; Dedoub mémoire : " + compteCapture[1] + "; BDD déjà lié : " + compteCapture[2] + "; " + "BDD lien crée : " + compteCapture[3] + "Total nouv item : " + compteCapture[4]);
         return listItemCapture;

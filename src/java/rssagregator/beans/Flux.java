@@ -6,6 +6,7 @@ import com.sun.syndication.feed.opml.Outline;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
@@ -15,8 +16,6 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
-import javax.annotation.PostConstruct;
-import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -28,16 +27,11 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.QueryHint;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.Transient;
-import org.eclipse.persistence.annotations.Cache;
-import org.eclipse.persistence.annotations.CacheCoordinationType;
-import org.eclipse.persistence.annotations.CacheType;
+import javax.persistence.Version;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
-import org.eclipse.persistence.annotations.CloneCopyPolicy;
-import org.eclipse.persistence.config.CacheIsolationType;
 import org.eclipse.persistence.descriptors.ClassDescriptor;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.eclipse.persistence.descriptors.DescriptorEventAdapter;
@@ -48,11 +42,8 @@ import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.beans.traitement.MediatorCollecteAction;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoFlux;
-import rssagregator.dao.DaoItem;
-import rssagregator.services.ServiceCollecteur;
 import rssagregator.services.TacheCalculQualiteFlux;
-import rssagregator.services.TacheRecupCallable;
-import rssagregator.services.TacheVerifComportementFLux;
+//import rssagregator.services.TacheVerifComportementFLux;
 
 /**
  * Une des entités les plus importantes... Il s'agit d'un flux de syndication (RSS ATOM...). Un flux appartient est lié
@@ -67,15 +58,17 @@ import rssagregator.services.TacheVerifComportementFLux;
  */
 @Entity()
 //@EntityListeners( value = {Test.class})
-@CloneCopyPolicy(workingCopyMethod = "clone", method = "clone")
+//@CloneCopyPolicy(workingCopyMethod = "clone", method = "clone")
 @Table(name = "flux")
-@Cacheable(value = true)
-@Cache(type = CacheType.FULL, coordinationType = CacheCoordinationType.SEND_NEW_OBJECTS_WITH_CHANGES, isolation = CacheIsolationType.SHARED)
-public class Flux extends AbstrObservableBeans implements Observer, Serializable, BeanSynchronise, Cloneable {
+//@Cacheable(value = true)
+//@Cache(type = CacheType.FULL, coordinationType = CacheCoordinationType.SEND_NEW_OBJECTS_WITH_CHANGES, isolation = CacheIsolationType.SHARED )
+public class Flux extends Bean implements Observer, Serializable, BeanSynchronise, Cloneable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long ID; 
+    @GeneratedValue(strategy = GenerationType.TABLE)
+    private Long ID;
+    
+
 
     public Flux() {
         propertyChangeSupport = new PropertyChangeSupport(this);
@@ -89,9 +82,9 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
 //        this.mediatorFlux = MediatorCollecteAction.getDefaultCollectAction();
         this.incidentsLie = new ArrayList<CollecteIncident>();
         this.periodeCaptations = new ArrayList<FluxPeriodeCaptation>();
-        
 
-        this.setChanged();
+
+//        this.setChanged();
     }
     /**
      * *
@@ -165,22 +158,22 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
      * L'objet Callable qui permet d'être lancé pour effectuer la récupération du flux. Cet objet doit être ajouté dans
      * le pool de thread du service de récupération. Il n'est pas persisté
      */
-    @Transient
-    private TacheRecupCallable tacheRechup;
+//    @Transient
+//    private TacheRecupCallable tacheRechup;
     /**
      * *
      * Cette tâche de récupération est utilisée lorsque l'utilisateur demande manuellement la mise à jour du flux
      */
-    @Transient
-    private TacheRecupCallable tacheRechupManuelle;
+//    @Transient
+//    private TacheRecupCallable tacheRechupManuelle;
     /**
      * Lors du lancement d'une collecte par la tache de récupération, cette liste est mise à jour lorsque à la fin de la
      * collecte, la tache notifie au flux ses résultats. On trouve dans ces résultats des items déja collecte, ils sont
      * marqué du bool item.isNew.
      */
-    @Deprecated
-    @Transient
-    private List<Item> listDernierItemCollecte;
+//    @Deprecated
+//    @Transient
+//    private List<Item> listDernierItemCollecte;
     /**
      *
      * Liste des Item du flux. La relation est possédée par l'item !! Il faut passer par la DAO pour obtenir la liste
@@ -224,7 +217,7 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
      * Un flux peut appratenir à un journal. Un journal peut contenir plusieurs flux
      */
 // On veut que le flux ne puisse pas créer de journaux mais simplment se lier. Ce n'est pas à la dao du flux de de créer des journaux.
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
     private Journal journalLie;
     /**
      * Le mediator flux permet d'assigner un flux un comportement de collecte. Un médiator est une configuration de
@@ -276,8 +269,28 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
     private Boolean erreurDerniereLevee;
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     Date created;
+//    @Version
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     Date modified;
+    
+    /***
+     * Utilisé pour le lock
+     */
+    @Version
+    int version;
+
+    public int getVersion() {
+        return version;
+    }
+
+   
+
+    public void setVersion(int version) {
+        this.version = version;
+    }
+    
+    
+    
     /**
      * *
      * Un flux peut être le sous flux d'un autre, exemple Europe est un sous flux de international. Si null, il s'agit
@@ -348,7 +361,7 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
      * des entitées persisté dans la base de données possédant deux dates. Durant sa période de captation, un flux peut
      * être en échec (posséder des incident {@link CollecteIncident}
      */
-    @OneToMany(mappedBy = "flux", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "flux", cascade = CascadeType.ALL, orphanRemoval = true)
     protected List<FluxPeriodeCaptation> periodeCaptations;
     /**
      * *
@@ -391,28 +404,25 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
      */
     public void Flux() {
         this.item = new ArrayList<Item>();
-        this.listDernierItemCollecte = new ArrayList<Item>();
+//        this.listDernierItemCollecte = new ArrayList<Item>();
     }
 
-    public MediatorCollecteAction getMediatorFluxAction() {
-        return mediatorFluxAction;
-    }
-
-    public void setMediatorFluxAction(MediatorCollecteAction mediatorFluxAction) {
-        this.mediatorFluxAction = mediatorFluxAction;
-    }
-
+//    public MediatorCollecteAction getMediatorFluxAction() {
+//        return mediatorFluxAction;
+//    }
+//
+//    public void setMediatorFluxAction(MediatorCollecteAction mediatorFluxAction) {
+//        this.mediatorFluxAction = mediatorFluxAction;
+//    }
 
     public String getUrl() {
         return url;
     }
-    
-    
 
     public void setUrl(String url) {
         this.url = url;
 //          MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
- 
+
 //        try {
 //
 //            FluxMBean cast = this;
@@ -455,47 +465,42 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
         this.htmlUrl = urlRubrique;
     }
 
-    
-    public Set<String> getLastEmpruntes() {
-//        System.out.println("LAST EMPRUNTE");
-//        DaoItem dao = DAOFactory.getInstance().getDaoItem();
-//        Set<String> hash = dao.findLastHash(this, 100);
-//        this.lastEmpruntes = hash;
-        return lastEmpruntes;
-    }
-
-    public void setLastEmpruntes(Set<String> lastEmpruntes) {
-        this.lastEmpruntes = lastEmpruntes;
-    }
-
+//    public Set<String> getLastEmpruntes() {
+////        System.out.println("LAST EMPRUNTE");
+////        DaoItem dao = DAOFactory.getInstance().getDaoItem();
+////        Set<String> hash = dao.findLastHash(this, 100);
+////        this.lastEmpruntes = hash;
+//        return lastEmpruntes;
+//    }
+//    public void setLastEmpruntes(Set<String> lastEmpruntes) {
+//        this.lastEmpruntes = lastEmpruntes;
+//    }
     /**
      * *
      * Pointeur vers la tache schedule permettant de récupérer le flux
      *
      * @return
      */
-    public TacheRecupCallable getTacheRechup() {
-        return tacheRechup;
-    }
-
-    /**
-     * *
-     * Pointeur vers la tache schedule permettant de récupérer le flux
-     *
-     * @param tacheRechup
-     */
-    public void setTacheRechup(TacheRecupCallable tacheRechup) {
-        this.tacheRechup = tacheRechup;
-    }
-
-    public List<Item> getListDernierItemCollecte() {
-        return listDernierItemCollecte;
-    }
-
-    public void setListDernierItemCollecte(List<Item> listDernierItemCollecte) {
-        this.listDernierItemCollecte = listDernierItemCollecte;
-    }
-
+//    public TacheRecupCallable getTacheRechup() {
+//        return tacheRechup;
+//    }
+//
+//    /**
+//     * *
+//     * Pointeur vers la tache schedule permettant de récupérer le flux
+//     *
+//     * @param tacheRechup
+//     */
+//    public void setTacheRechup(TacheRecupCallable tacheRechup) {
+//        this.tacheRechup = tacheRechup;
+//    }
+//    public List<Item> getListDernierItemCollecte() {
+//        return listDernierItemCollecte;
+//    }
+//
+//    public void setListDernierItemCollecte(List<Item> listDernierItemCollecte) {
+//        this.listDernierItemCollecte = listDernierItemCollecte;
+//    }
     public List<Item> getItem() {
         return item;
     }
@@ -547,7 +552,6 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
         return periodeCaptations;
     }
 
- 
     public String getInfoCollecte() {
         return infoCollecte;
     }
@@ -601,7 +605,6 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
     public void setErreurDerniereLevee(Boolean erreurDerniereLevee) {
         this.erreurDerniereLevee = erreurDerniereLevee;
     }
-
 
     public Long getID() {
         return ID;
@@ -759,18 +762,33 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
         } else {
             return "FLUX ";
         }
-
-
     }
-
-    public TacheRecupCallable getTacheRechupManuelle() {
-        return tacheRechupManuelle;
+    
+    @Override
+    public String getReadURL(){
+         
+        Conf c = DAOFactory.getInstance().getDAOConf().getConfCourante();
+        String url = c.getServurl();
+        //On rajoute un / a la fin de l'url si besoin est
+        if (url != null && url.length() > 1) {
+            Character ch = url.charAt(url.length() - 1);
+            if (!ch.equals(new Character('/'))) {
+                url += "/";
+            }
+        }
+        String retour = url + "flux/read?id=" + ID.toString();
+        return retour;
     }
+            
+    
 
-    public void setTacheRechupManuelle(TacheRecupCallable tacheRechupManuelle) {
-        this.tacheRechupManuelle = tacheRechupManuelle;
-    }
-
+//    public TacheRecupCallable getTacheRechupManuelle() {
+//        return tacheRechupManuelle;
+//    }
+//
+//    public void setTacheRechupManuelle(TacheRecupCallable tacheRechupManuelle) {
+//        this.tacheRechupManuelle = tacheRechupManuelle;
+//    }
     void addItem(Item nouvellesItems) {
         this.item.add(nouvellesItems);
     }
@@ -841,12 +859,11 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
      * Enregistre le flux auprès des service JMS et Service de collecte. Cette procédure ne peut être faite dans le
      * constructeur à cause de l'ORM
      */
-    @Override
-    public void enregistrerAupresdesService() {
-        this.deleteObservers();
-        this.addObserver(ServiceCollecteur.getInstance());
-    }
-
+//    @Override
+//    public void enregistrerAupresdesService() {
+//        this.deleteObservers();
+//        this.addObserver(ServiceCollecteur.getInstance());
+//    }
     @Override
     /**
      * Ce beans ne doit être synchronisé que si le booleen haschange (du partern observer/observable) est à true. On
@@ -854,11 +871,27 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
      */
     public Boolean synchroImperative() {
 
-        if (hasChanged()) {
-            return true;
-        }
-        return false;
+        return true;
+//        if (hasChanged()) {
+//            return true;
+//        }
+//        return false;
     }
+    
+    public FluxPeriodeCaptation returnDerniereFluxPeriodeCaptation(){
+        FluxPeriodeCaptation last =null;
+        for (int i = 0; i < periodeCaptations.size(); i++) {
+            FluxPeriodeCaptation period = periodeCaptations.get(i);
+            if(last == null){
+                last = period;
+            }
+            if(period.getDateDebut().after(last.getDateDebut())){
+                last = period;
+            }
+        }
+        return last;
+    }
+    
 
     /**
      * Retourne la durée totale de captation du flux en s'appuyant sur les entites FluxPeriodeCaptation
@@ -896,19 +929,14 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
     public Object clone() throws CloneNotSupportedException {
         System.out.println("-->> CLONE USE");
         Flux clone = (Flux) super.clone();
-        
+
 //        LinkedHashSet lastEmpruntestmp = (LinkedHashSet)this.lastEmpruntes;
 //        clone.lastEmpruntes = (Set<String>) lastEmpruntestmp.clone();
 //        System.out.println("Tailler du last : " + clone.lastEmpruntes.size());
         return clone;
-     
+
 //        return super.clone(); //To change body of generated methods, choose Tools | Templates.
     }
-    
-
-    
-    
-    
 
     /**
      * Lors de l'activation désactivation ou du changement de comportement, ce lisner est chargé de modifier des
@@ -1009,12 +1037,11 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
             }
         }
     }
-    
-    public class Test extends DescriptorEventAdapter{
+
+    public class Test extends DescriptorEventAdapter {
 
         public Test() {
         }
-        
 
         @Override
         public void postClone(DescriptorEvent event) {
@@ -1028,14 +1055,10 @@ public class Flux extends AbstrObservableBeans implements Observer, Serializable
 //            super.postMerge(event); //To change body of generated methods, choose Tools | Templates.
             Object source = event.getSource();
             System.out.println("--> POST MERGE SOURCE : " + source);
-                    
+
         }
-        
-        
     }
-    
-    
-    public class CutoClem extends ClassDescriptor{
-        
+
+    public class CutoClem extends ClassDescriptor {
     }
 }

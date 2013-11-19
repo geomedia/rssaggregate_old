@@ -165,8 +165,10 @@
                         <c:if test="${bean['class'].simpleName=='CollecteIncident'}">
                             <p><strong>Flux impacté : </strong><a href="${rootpath}flux/read?id=${bean.fluxLie.ID}">${bean.fluxLie}</a></p>
                             </c:if>
+                            
+                            
                             <c:if test="${bean['class'].simpleName=='ServerIncident'}">
-                            <p><strong>Service impacté : </strong>${bean.serviceEnErreur}</p>
+                            
                         </c:if>
 
 

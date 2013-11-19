@@ -60,8 +60,10 @@ public class ServiceGestionIncident {
                     Date datefin = new Date();
                     incidentOuvert.get(i).setDateFin(datefin);
                     System.out.println("DATE DE FIN : " + datefin);
-                    DAOFactory.getInstance().getDAOIncident().modifier(incidentOuvert.get(i));
-//                    flux.getIncidentEnCours().remove(incidentOuvert.get(i));
+                    DAOIncident dao = DAOFactory.getInstance().getDAOIncident();
+                    dao.beginTransaction();
+                    dao.modifier(incidentOuvert.get(i));
+                    dao.commit();
                     
                 } catch (Exception ex) {
                     Logger.getLogger(ServiceGestionIncident.class.getName()).log(Level.SEVERE, null, ex);
@@ -130,7 +132,10 @@ public class ServiceGestionIncident {
             incident.setNombreTentativeEnEchec(nbr);
 
             try {
-                DAOFactory.getInstance().getDAOIncident().modifier(incident);
+                DAOIncident dao = DAOFactory.getInstance().getDAOIncident();
+                dao.beginTransaction();
+                dao.modifier(incident);
+                dao.commit();
 //                flux.getIncidentsLie().add(incident);
 //                DAOFactory.getInstance().getDAOIncident().creer(incident);
             } catch (Exception ex1) {

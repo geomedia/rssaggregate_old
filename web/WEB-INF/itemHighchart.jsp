@@ -3,13 +3,14 @@
     Created on : 11 oct. 2013, 15:50:47
     Author     : clem
 --%>
+
+<%@page import="rssagregator.beans.POJOCompteItem"%>
 <%@page import="org.joda.time.DateTime"%>
 <%@page import="org.joda.time.format.DateTimeFormatter"%>
 <%@page import="org.joda.time.format.DateTimeFormat"%>
 <%@page import="java.util.Map"%>
 <%@page import="java.util.Date"%>
 <%@page import="java.util.List"%>
-<%@page import="rssagregator.beans.POJOCompteItem"%>
 <%@page import="org.json.simple.JSONArray"%>
 <%@page import="org.json.simple.JSONObject"%>
 <%@ page language="java" contentType="application/json; charset=UTF-8" pageEncoding="UTF-8"%>
@@ -30,10 +31,14 @@
     if(!list.isEmpty()){
          DateTimeFormatter fmt = DateTimeFormat.forPattern("dd/MM");
         POJOCompteItem compte = list.get(0);
+        
         for (Map.Entry<Date, Integer> entry : compte.getCompte().entrySet()) {
              Date date = entry.getKey();
              categories.add(fmt.print(new DateTime(date)));
         }
+    }
+    else{
+        System.out.println("ELSE Liste Vide");
     }
 
     xAxis.put("categories", categories);

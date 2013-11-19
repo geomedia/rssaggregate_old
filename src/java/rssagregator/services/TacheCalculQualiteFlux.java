@@ -4,31 +4,39 @@
  */
 package rssagregator.services;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Observer;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import rssagregator.beans.Flux;
 import rssagregator.beans.FluxPeriodeCaptation;
 import rssagregator.beans.Item;
+import rssagregator.beans.POJOCompteItem;
 import rssagregator.beans.exception.DonneeInterneCoherente;
 import rssagregator.beans.incident.AnomalieCollecte;
 import rssagregator.beans.incident.CollecteIncident;
+import rssagregator.beans.incident.IncidentFactory;
 import rssagregator.dao.DAOFactory;
+import rssagregator.dao.DAOIncident;
+import rssagregator.dao.DaoFlux;
 import rssagregator.dao.DaoItem;
+import rssagregator.services.crud.ServiceCRUDFactory;
+import rssagregator.services.crud.ServiceCrudIncident;
 
 /**
- * Note sur l'inice de qualité.
+ * Cette tâche effectue différents calculs observant le nombre d'item /jour capturés par un flux. Les calculs sont
+ * effectué vis à vis de la dernière {@link FluxPeriodeCaptation} du flux. Cette tache permet de calculer les données
+ * permettant d'afficher une box ploat (min quartile mediane décile max). Elle calcul aussi l'indice de qualité de
+ * captation.
+ *
  *
  * @author clem
  */
-public class TacheCalculQualiteFlux extends AbstrTacheSchedule<TacheCalculQualiteFlux> {
+public class TacheCalculQualiteFlux extends TacheImpl<TacheCalculQualiteFlux> {
 
     private Flux flux;
     Float indiceCaptation;
@@ -37,7 +45,7 @@ public class TacheCalculQualiteFlux extends AbstrTacheSchedule<TacheCalculQualit
     Integer quartile;
     Integer maximum;
     Integer minimum;
-    
+    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheCalculQualiteFlux.class);
 
     public TacheCalculQualiteFlux(Observer s) {
         super(s);
@@ -46,157 +54,138 @@ public class TacheCalculQualiteFlux extends AbstrTacheSchedule<TacheCalculQualit
     public TacheCalculQualiteFlux() {
         super();
     }
-    
-    
 
-    @Override
-    public TacheCalculQualiteFlux call() throws DonneeInterneCoherente, Exception {
-        try {
-            this.exeption = null;
-            Long nbrSecondCaptation = flux.returnCaptationDuration();
-            // On doit ensuite chercher tous les incident de collecte lié à ce flux. On obtient un nombre d'heure. 
-            List<CollecteIncident> listIncid = flux.getIncidentsLie();
-            Long timeIncid = new Long(0);
-            for (int i = 0; i < listIncid.size(); i++) {
-                CollecteIncident collecteIncident = listIncid.get(i);
-
-                // Certaines exeption ne doivent pas être relevée dans le calcul.
-                if (collecteIncident.getClass().equals(AnomalieCollecte.class)) {
-                    AnomalieCollecte cast = (AnomalieCollecte) collecteIncident;
-                    if (cast.getCauseChangementLigneEditoriale() == true || (cast.getCauseChangementLigneEditoriale() == null && cast.getCauseTechniqueSiteJournal() == null)) {
-                        continue;
-                    }
-                }
-
-                if (collecteIncident.getDateDebut() != null && collecteIncident.getDateFin() == null) {
-                    DateTime dtDebut = new DateTime(collecteIncident.getDateDebut());
-                    DateTime dtFin = new DateTime(collecteIncident.getDateFin());
-                    Duration dur = new Duration(dtDebut, dtFin);
-                    timeIncid += dur.getStandardSeconds();
-                } else if (collecteIncident.getDateDebut() != null && collecteIncident.getDateFin() == null) {
-                    DateTime dtDebut = new DateTime(collecteIncident.getDateDebut());
-                    DateTime dtFin = new DateTime();
-                    Duration dur = new Duration(dtDebut, dtFin);
-                    timeIncid += dur.getStandardSeconds();
-                }
-            }
-            if (timeIncid != 0) {
-                Float indice = (100 - (timeIncid.floatValue() / nbrSecondCaptation.floatValue()));
-                indiceCaptation = indice;
-//            flux.setIndiceQualiteCaptation(indice.intValue());
-            } else {
-                System.out.println("ELSEE ! ");
-                indiceCaptation = new Float(100.00);
-            }
-
-
-            SortedMap<Date, Integer> map = new TreeMap<Date, Integer>();
-
-//            List<CompteItemJour> listCompteJour = new ArrayList<CompteItemJour>();
-
-
-            //Initialisation de la map
-            List<FluxPeriodeCaptation> listPeriode = flux.getPeriodeCaptations();
-            for (int i = 0; i < listPeriode.size(); i++) {
-                FluxPeriodeCaptation fluxPeriodeCaptation = listPeriode.get(i);
-                // On boucle sur chaque jour. 
-                DateTime dateDebut = new DateTime(fluxPeriodeCaptation.getDateDebut()).withTime(0, 0, 0, 0);
-                 DateTime dateFin = null;
-                 System.out.println("--");
-                if(fluxPeriodeCaptation.getDatefin()==null){
-                     dateFin = new DateTime();
-                     System.out.println("NEW");
-                }
-                else {
-                dateFin = new DateTime(fluxPeriodeCaptation.getDatefin()).withTime(23, 59, 59, 0);                    
-                }
-
-                Duration d = new Duration(dateDebut, dateFin);
-
-                DateTime dtCurosos = new DateTime(dateDebut);
-                while (dtCurosos.isBefore(dateFin)) {
-                    map.put(dtCurosos.toDate(), 0);
-//                    listCompteJour.add(new CompteItemJour(dtCuros.toDate(), 0));
-                    dtCurosos = dtCurosos.plusDays(1);
-                    System.out.println("---");
-                }
-            }
-
-            //Récupération de la liste des items. 
-            DaoItem dao = DAOFactory.getInstance().getDaoItem();
-            dao.initcriteria();
-            List<Flux> lf = new ArrayList<Flux>();
-            lf.add(flux);
-            dao.setWhere_clause_Flux(lf);
-            List<Item> listItem = DAOFactory.getInstance().getDaoItem().findCretaria();
-
-            for (int i = 0; i < listItem.size(); i++) {
-                Item item = listItem.get(i);
-                DateTime dtItem = new DateTime(item.getDateRecup()).withTime(0, 0, 0, 0);
-
-                Integer cpt = map.get(dtItem.toDate());
-                if (cpt == null) {
-                    throw new DonneeInterneCoherente("Des items ont été capturée en dehors des période de captation !");
-                }
-                cpt++;
-                map.put(dtItem.toDate(), cpt);
-            }
-
-            System.out.println("================================");
-//            // On affiche les résultat
-//            for (Map.Entry<Date, Integer> entry : map.entrySet()) {
-//                System.out.println("%%%");
-//                Date date = entry.getKey();
-//                Integer integer = entry.getValue();
-//                System.out.println("DATE : " + date + ". CPT : " + integer);
+//    @Override
+//    public TacheCalculQualiteFlux call() throws DonneeInterneCoherente, Exception {
+//        DaoFlux daof = DAOFactory.getInstance().getDAOFlux();
+//        DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
+//        EntityManager em = daof.getEm();
+//        daoItem.setEm(em);
+//        em.getTransaction().begin();
+//
+//        try {
+//
+//            this.exeption = null;
+//
+//            if (!em.contains(flux)) { // On bloque la ressouce flux car elle va être modifié et persité
+//                Flux f = em.find(Flux.class, flux.getID());
+//                em.lock(f, LockModeType.PESSIMISTIC_WRITE);
+//            } else {
+//                em.lock(flux, LockModeType.PESSIMISTIC_WRITE);
 //            }
-
-
-            // calcul de la mediane
-
-            Object[] tab = map.entrySet().toArray();
-            Collection<Integer> listInt = map.values();
-            List<Integer> listou = new ArrayList<Integer>();
-            listou.addAll(listInt);
-            Collections.sort(listou);
-            for (int i = 0; i < listou.size(); i++) {
-                Integer integer = listou.get(i);
-                System.out.println("INTTT : " + integer);
-            }
-
-            // On retouve la médiane
-            int medianeId = listou.size() / 2;
-            Float quartileId = new Float(0.25 * listou.size());
-            Float decileId = new Float(0.75 * listou.size());
-            
-
-            
-
-
-            this.quartile = (int) Math.round(listou.get(quartileId.intValue()));
-            this.decile = (int) Math.round(listou.get(decileId.intValue()));
-            this.mediane = listou.get(medianeId);
-            this.maximum = listou.get(listou.size()-1);
-            this.minimum = listou.get(0);
-            
-
-
-
-
-        } catch (Exception e) {
-            this.exeption = e;
-        } finally {
-            this.setChanged();
-            this.notifyObservers();
-            return this;
-        }
-
-
-
-
+//
+//
+//
+//
+//
+//            //------------------------------CALCUL DE L'incide de captation
+//            Long nbrSecondCaptation = flux.returnCaptationDuration();
+//            // On doit ensuite chercher tous les incident de collecte lié à ce flux. On obtient un nombre d'heure. 
+//            List<CollecteIncident> listIncid = flux.getIncidentsLie();
+//            Long timeIncid = new Long(0);
+//            for (int i = 0; i < listIncid.size(); i++) {
+//                CollecteIncident collecteIncident = listIncid.get(i);
+//
+//                // Certaines exeption ne doivent pas être relevée dans le calcul.
+//                if (collecteIncident.getClass().equals(AnomalieCollecte.class)) {
+//                    AnomalieCollecte cast = (AnomalieCollecte) collecteIncident;
+//                    if (cast.getCauseChangementLigneEditoriale() != null && cast.getCauseChangementLigneEditoriale()) { // Si l'anomalie est due a un changement de ligne éditoriale
+//                        continue;
+//                    }
+//                }
+//
+//                if (collecteIncident.getDateDebut() != null && collecteIncident.getDateFin() == null) {
+//                    DateTime dtDebut = new DateTime(collecteIncident.getDateDebut());
+//                    DateTime dtFin = new DateTime(collecteIncident.getDateFin());
+//                    Duration dur = new Duration(dtDebut, dtFin);
+//                    timeIncid += dur.getStandardSeconds();
+//                } else if (collecteIncident.getDateDebut() != null && collecteIncident.getDateFin() == null) {
+//                    DateTime dtDebut = new DateTime(collecteIncident.getDateDebut());
+//                    DateTime dtFin = new DateTime();
+//                    Duration dur = new Duration(dtDebut, dtFin);
+//                    timeIncid += dur.getStandardSeconds();
+//                }
+//            }
+//            if (timeIncid != 0) {
+//                Float indice = (100 - (timeIncid.floatValue() / nbrSecondCaptation.floatValue()));
+//                flux.setIndiceQualiteCaptation(indice);
+////            flux.setIndiceQualiteCaptation(indice.intValue());
+//            } else {
+//                flux.setIndiceQualiteCaptation(new Float(100.00));
+//            }
+//
+//
+//
+//            //-----------------Calcul de la moyenne médiane quartiele décile....
+//
+//            FluxPeriodeCaptation period = flux.returnDerniereFluxPeriodeCaptation();
+//            Date date1 = period.getDateDebut();
+//            Date date2 = new DateTime(period.getDatefin()).minusDays(1).withEarlierOffsetAtOverlap().toDate(); // Pour la date 2, on prend la date de fin de période - 1 jour avec heures la plus tardive
+//
+//
+//            List<Item> items = daoItem.itemCaptureParleFluxDurantlaDernierePeriodeCollecte(flux);
+//            POJOCompteItem compteItem = new POJOCompteItem();
+//            compteItem.setFlux(flux);
+//            compteItem.setItems(items);
+//            compteItem.setDate1(date1);
+//            compteItem.setDate2(date2);
+//            compteItem.compte();
+//            compteItem.calculterBoxPloat();
+//
+//            flux.setIndiceMaximumNbrItemJour(compteItem.getMax().intValue());
+//            flux.setIndiceMinimumNbrItemJour(compteItem.getMin());
+//            flux.setIndiceQuartileNbrItemJour(compteItem.getQuartile());
+//            flux.setIndiceDecileNbrItemJour(compteItem.getDecile());
+//            flux.setIndiceMedianeNbrItemJour(compteItem.getMediane());
+//
+//
+//
+//
+//            //--------------Detection des anomalies 
+//            compteItem.calculerMoyenne(date1, date2);
+//            Map<Date, Integer> anomalies = compteItem.detecterAnomalieParrapportAuSeuil(33);
+//
+//            IncidentFactory<AnomalieCollecte> factory = new IncidentFactory<AnomalieCollecte>();
+//            ServiceCrudIncident serviceCrud = (ServiceCrudIncident) ServiceCRUDFactory.getInstance().getServiceFor(AnomalieCollecte.class);
+//
+//            DAOIncident<AnomalieCollecte> daoIncident = (DAOIncident<AnomalieCollecte>) DAOFactory.getInstance().getDaoFromType(AnomalieCollecte.class);
+//
+//            List<AnomalieCollecte> AnomalieDsBSS = daoIncident.findOpenCollecteIncident(flux, AnomalieCollecte.class, null);
+//            
+//
+//            for (Map.Entry<Date, Integer> entry : anomalies.entrySet()) {
+//                Date date = entry.getKey();
+//                Integer nbtConstate = entry.getValue();
+//                AnomalieCollecte anomalieIncident = factory.getIncident(AnomalieCollecte.class, "Le nombre d'item capturé pour ce jour est anormalement haut ou bas", null);
+//                anomalieIncident.setDateDebut(date);
+//                anomalieIncident.setNombreCaptureConstate(nbtConstate);
+//                anomalieIncident.setFluxLie(flux);
+//                anomalieIncident.setMoyenneDesCapture(compteItem.getMoyenne());
+//                anomalieIncident.setSeuil(33);
+//
+//                serviceCrud.ajouterIncidentdeCollecte(anomalieIncident, flux, em, false);
+//            }
+//
+//
+//
+//            //------------Enregistrement
+//            em.merge(flux); // On modifi le flux sans passer par le service, on ne veut pas que ces chiffre donnenen tlieu à une synchronisation
+//        } catch (Exception e) {
+//            this.exeption = e;
+//            if (em != null && em.isJoinedToTransaction()) {
+//                em.getTransaction().rollback();
+//            }
+//        } finally {
+//            if (em != null && em.isJoinedToTransaction()) {
+//                em.getTransaction().commit();
+//            }
+//
+//            this.setChanged();
+//            this.notifyObservers();
+//            return this;
+//        }
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
+//    }
     public Flux getFlux() {
         return flux;
     }
@@ -252,47 +241,138 @@ public class TacheCalculQualiteFlux extends AbstrTacheSchedule<TacheCalculQualit
     public void setMinimum(Integer minimum) {
         this.minimum = minimum;
     }
-    
-    
-    
-    
 
-    public static void main(String[] args) {
-        ServiceCollecteur collecteur = ServiceCollecteur.getInstance();
+//    public class CompteItemJour {
+//
+//        Date date;
+//        Integer compte;
+//
+//        public CompteItemJour(Date date, Integer compte) {
+//            this.date = date;
+//            this.compte = compte;
+//        }
+//
+//        public Date getDate() {
+//            return date;
+//        }
+//
+//        public void setDate(Date date) {
+//            this.date = date;
+//        }
+//
+//        public Integer getCompte() {
+//            return compte;
+//        }
+//
+//        public void setCompte(Integer compte) {
+//            this.compte = compte;
+//        }
+//    }
+    @Override
+    protected void callCorps() throws Exception {
+        DaoFlux daof = DAOFactory.getInstance().getDAOFlux();
+        DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
+        daoItem.setEm(em);
+        em.getTransaction().begin();
 
-        Flux f = (Flux) DAOFactory.getInstance().getDAOFlux().find(new Long(55));
-        System.out.println("FLUX  : " + f);
-        TacheCalculQualiteFlux calculQualiteFlux = new TacheCalculQualiteFlux(collecteur);
-        calculQualiteFlux.setFlux(f);
 
-        collecteur.getExecutorService().submit(calculQualiteFlux);
+        verrouillerObjectDansLEM(flux, LockModeType.PESSIMISTIC_WRITE);
+        
+
+
+        //------------------------------CALCUL DE L'incide de captation
+        Long nbrSecondCaptation = flux.returnCaptationDuration();
+        // On doit ensuite chercher tous les incident de collecte lié à ce flux. On obtient un nombre d'heure. 
+        List<CollecteIncident> listIncid = flux.getIncidentsLie();
+        Long timeIncid = new Long(0);
+        for (int i = 0; i < listIncid.size(); i++) {
+            CollecteIncident collecteIncident = listIncid.get(i);
+
+            // Certaines exeption ne doivent pas être relevée dans le calcul.
+            if (collecteIncident.getClass().equals(AnomalieCollecte.class)) {
+                AnomalieCollecte cast = (AnomalieCollecte) collecteIncident;
+                if (cast.getCauseChangementLigneEditoriale() != null && cast.getCauseChangementLigneEditoriale()) { // Si l'anomalie est due a un changement de ligne éditoriale
+                    continue;
+                }
+            }
+
+            if (collecteIncident.getDateDebut() != null && collecteIncident.getDateFin() == null) {
+                DateTime dtDebut = new DateTime(collecteIncident.getDateDebut());
+                DateTime dtFin = new DateTime(collecteIncident.getDateFin());
+                Duration dur = new Duration(dtDebut, dtFin);
+                timeIncid += dur.getStandardSeconds();
+            } else if (collecteIncident.getDateDebut() != null && collecteIncident.getDateFin() == null) {
+                DateTime dtDebut = new DateTime(collecteIncident.getDateDebut());
+                DateTime dtFin = new DateTime();
+                Duration dur = new Duration(dtDebut, dtFin);
+                timeIncid += dur.getStandardSeconds();
+            }
+        }
+        if (timeIncid != 0) {
+            Float indice = (100 - (timeIncid.floatValue() / nbrSecondCaptation.floatValue()));
+            flux.setIndiceQualiteCaptation(indice);
+//            flux.setIndiceQualiteCaptation(indice.intValue());
+        } else {
+            flux.setIndiceQualiteCaptation(new Float(100.00));
+        }
+
+
+
+        //-----------------Calcul de la moyenne médiane quartiele décile....
+
+        FluxPeriodeCaptation period = flux.returnDerniereFluxPeriodeCaptation();
+        Date date1 = period.getDateDebut();
+        Date date2 = new DateTime(period.getDatefin()).minusDays(1).withEarlierOffsetAtOverlap().toDate(); // Pour la date 2, on prend la date de fin de période - 1 jour avec heures la plus tardive
+
+
+        List<Item> items = daoItem.itemCaptureParleFluxDurantlaDernierePeriodeCollecte(flux);
+        POJOCompteItem compteItem = new POJOCompteItem();
+        compteItem.setFlux(flux);
+        compteItem.setItems(items);
+        compteItem.setDate1(date1);
+        compteItem.setDate2(date2);
+        compteItem.compte();
+        compteItem.calculterBoxPloat();
+
+        flux.setIndiceMaximumNbrItemJour(compteItem.getMax().intValue());
+        flux.setIndiceMinimumNbrItemJour(compteItem.getMin());
+        flux.setIndiceQuartileNbrItemJour(compteItem.getQuartile());
+        flux.setIndiceDecileNbrItemJour(compteItem.getDecile());
+        flux.setIndiceMedianeNbrItemJour(compteItem.getMediane());
+
+
+
+
+        //--------------Detection des anomalies 
+        compteItem.calculerMoyenne(date1, date2);
+        Map<Date, Integer> anomalies = compteItem.detecterAnomalieParrapportAuSeuil(33);
+
+        IncidentFactory<AnomalieCollecte> factory = new IncidentFactory<AnomalieCollecte>();
+        ServiceCrudIncident serviceCrud = (ServiceCrudIncident) ServiceCRUDFactory.getInstance().getServiceFor(AnomalieCollecte.class);
+
+        DAOIncident<AnomalieCollecte> daoIncident = (DAOIncident<AnomalieCollecte>) DAOFactory.getInstance().getDaoFromType(AnomalieCollecte.class);
+
+        List<AnomalieCollecte> AnomalieDsBSS = daoIncident.findOpenCollecteIncident(flux, AnomalieCollecte.class, null);
+
+
+        for (Map.Entry<Date, Integer> entry : anomalies.entrySet()) {
+            Date date = entry.getKey();
+            Integer nbtConstate = entry.getValue();
+            AnomalieCollecte anomalieIncident = factory.getIncident(AnomalieCollecte.class, "Le nombre d'item capturé pour ce jour est anormalement haut ou bas", null);
+            anomalieIncident.setDateDebut(date);
+            anomalieIncident.setNombreCaptureConstate(nbtConstate);
+            anomalieIncident.setFluxLie(flux);
+            anomalieIncident.setMoyenneDesCapture(compteItem.getMoyenne());
+            anomalieIncident.setSeuil(33);
+
+            serviceCrud.ajouterIncidentdeCollecte(anomalieIncident, flux, em, false);
+        }
+
+
+
+        //------------Enregistrement
+        em.merge(flux); // On modifi le flux sans passer par le service, on ne veut pas que ces chiffre donnenen tlieu à une synchronisation
 
     }
 
-    public class CompteItemJour {
-
-        Date date;
-        Integer compte;
-
-        public CompteItemJour(Date date, Integer compte) {
-            this.date = date;
-            this.compte = compte;
-        }
-
-        public Date getDate() {
-            return date;
-        }
-
-        public void setDate(Date date) {
-            this.date = date;
-        }
-
-        public Integer getCompte() {
-            return compte;
-        }
-
-        public void setCompte(Integer compte) {
-            this.compte = compte;
-        }
-    }
 }

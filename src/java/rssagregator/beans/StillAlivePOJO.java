@@ -4,6 +4,9 @@
  */
 package rssagregator.beans;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -13,6 +16,8 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.joda.time.DateTime;
 import rssagregator.utils.XMLTool;
 
@@ -35,26 +40,34 @@ public class StillAlivePOJO {
         alive = new ArrayList<Date[]>();
     }
 
+    
     public static StillAlivePOJO load(File f) throws FileNotFoundException {
         //On charge le fichier
 //        FileReader fileReader = new FileReader(f);
 //        BufferedReader br = new BufferedReader(new FileReader(f));
-        StillAlivePOJO pojo = (StillAlivePOJO) XMLTool.unSerialize(new FileInputStream(f));
-        
-
+//        StillAlivePOJO pojo = (StillAlivePOJO) XMLTool.unSerialize(new FileInputStream(f));
+        StillAlivePOJO pojo=null;
+          ObjectMapper mapper = new ObjectMapper();
+        try {
+           pojo = mapper.readValue(f, StillAlivePOJO.class);
+        } catch (IOException ex) {
+            Logger.getLogger(StillAlivePOJO.class.getName()).log(Level.SEVERE, null, ex);
+        } 
         return pojo;
-
-
     }
 
     public void write(File f) throws IOException {
 
-        String xml = XMLTool.serialise(this);
-        //enregistrement
-        OutputStreamWriter osw = new FileWriter(f);
-        osw.write(xml, 0, xml.length());
-        osw.flush();
-        osw.close();
+//        String xml = XMLTool.serialise(this);
+//        //enregistrement
+//        OutputStreamWriter osw = new FileWriter(f);
+//        osw.write(xml, 0, xml.length());
+//        osw.flush();
+//        osw.close();
+        
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.writeValue(f, this);
+        
 
     }
 
@@ -102,17 +115,4 @@ public class StillAlivePOJO {
         this.alive = alive;
     }
 
-
-
-//    public static void main(String[] args) throws IOException {
-////        StillAlivePOJO alivePOJO = new StillAlivePOJO();
-////        alivePOJO.getAlive().add(new Date[]{new Date(), new Date()});
-//        File fi = new File("/home/clem/pojo");
-////        alivePOJO.write(fi);
-//
-//        StillAlivePOJO alivePOJO2 =StillAlivePOJO.load(fi);
-//        alivePOJO2.check();
-//        alivePOJO2.write(fi);
-//
-//    }
 }

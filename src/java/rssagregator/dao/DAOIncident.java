@@ -17,6 +17,8 @@ import org.apache.poi.ss.formula.functions.T;
 import rssagregator.beans.Flux;
 import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.beans.incident.JMSPerteConnectionIncident;
+import rssagregator.beans.incident.NotificationAjoutFlux;
+import rssagregator.services.TacheAlerteMail;
 
 /**
  *
@@ -63,6 +65,24 @@ public class DAOIncident<T> extends AbstrDao {
 
     }
 
+    /**
+     * *
+     * Retourne tous les incidents non clos du type envoyé en argument
+     *
+     * @return
+     */
+    public List<T> findIncidentNonClos(Class<T> T) {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<T> cq = cb.createQuery(T);
+        Root<T> root = cq.from(T);
+
+        cq.where(cb.isNull(root.get("dateFin")));
+        TypedQuery<T> tq = em.createQuery(cq);
+        return tq.getResultList();
+
+    }
+
+    @Deprecated
     public List<T> findCriteria(Class<T> T) {
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -129,7 +149,7 @@ public class DAOIncident<T> extends AbstrDao {
      */
     @Deprecated
     public List<T> findIncidentOuvert(Long fluxId) {
-        String req = "SELECT i FROM incidentflux i JOIN i.fluxLie flux WHERE flux.ID=:idflux AND i.dateFin IS NULL";
+        String req = "SELECT i FROM i_collecteincident i JOIN i.fluxLie flux WHERE flux.ID=:idflux AND i.dateFin IS NULL";
         Query query = em.createQuery(req);
         query.setParameter("idflux", fluxId);
         return query.getResultList();
@@ -142,7 +162,7 @@ public class DAOIncident<T> extends AbstrDao {
      * @return
      */
     public List<T> findAllOpenIncident() {
-        String req = "SELECT i FROM incidentflux i WHERE i.dateFin IS NULL";
+        String req = "SELECT i FROM i_superclass i WHERE i.dateFin IS NULL";
 //        String req = "SELECT i FROM incidentflux i";
         Query query = em.createQuery(req);
 
@@ -155,35 +175,93 @@ public class DAOIncident<T> extends AbstrDao {
         return l;
     }
 
-    public static void main(String[] args) {
+    /**
+     * *
+     * Retourne les incident de collecte pour le flux F. Les incident sont de la class envoyé en argument.
+     *
+     * @param f
+     * @param T
+     * @return
+     */
+    public List<T> findOpenCollecteIncident(Flux f, Class<T> T, Boolean datefinnull) {
 
-        //Test de la methode flux incident
-//        DAOIncident dao = DAOFactory.getInstance().getDAOIncident();
-//        List<FluxIncident> list =  dao.findAllOpenIncident();
-//        for (int i = 0; i < list.size(); i++) {
-//            CollecteIncident fluxIncident = list.get(i);
-//            System.out.println(""+fluxIncident);
-//        }
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+
+        CriteriaQuery<T> cq = cb.createQuery(T);
+        Root<T> root = cq.from(T);
+        Predicate where = cb.conjunction();
+
+        where = cb.equal(root.get("fluxLie"), f);
 
 
-        // Test de la méthode findIncidentOuvert
-//         DAOIncident dao = DAOFactory.getInstance().getDAOIncident();
-//         List<CollecteIncident> list =  dao.findIncidentOuvert(new Long(355));
-//         for (int i = 0; i < list.size(); i++) {
-//            CollecteIncident fluxIncident = list.get(i);
-//             System.out.println(fluxIncident);
-//        }
-
-        DAOIncident<JMSPerteConnectionIncident> dao = new DAOIncident<JMSPerteConnectionIncident>(DAOFactory.getInstance());
-        dao.setClos(false);
-        List l = dao.findCriteria(JMSPerteConnectionIncident.class);
-        System.out.println("LIST SIZE : " + l.size());
-        for (int i = 0; i < l.size(); i++) {
-            Object object = l.get(i);
-            System.out.println("" + object);
+        if (datefinnull != null) {
+            if (datefinnull) {
+                where = cb.and(where, cb.and(root.get("champdate").isNull()));
+            } else {
+                where = cb.and(where, cb.and(root.get("champdate").isNotNull()));
+            }
         }
 
+        cq.where(where);
 
+        TypedQuery<T> tq = em.createQuery(cq);
+
+        return tq.getResultList();
+    }
+
+    /**
+     * *
+     * Retourne la liste des incident devant être notifié, cette requête est utilisée par la tache
+     * {@link TacheAlerteMail}. Pour des tâche basique ou les critères de recherche ne sont pas déterminé par le
+     * contexte, on préfère ne pas utiliser critéria
+     *
+     * @return
+     */
+    public List<T> findIncidentANotifier() {
+        String req = "SELECT i FROM i_superclass i WHERE i.lastNotification is null";
+        Query q = em.createQuery(req);
+        return q.getResultList();
+    }
+
+    /**
+     * *
+     * Retourne toute les NotificationAjoutFlux pour le flux envoyé en argument
+     *
+     * @param f
+     * @return
+     */
+    public List<NotificationAjoutFlux> findNotificationAjoutFluxFromFlux(Flux f) {
+        String req = "SELECT n FROM i_ajoutflux n WHERE n.fluxAjoute IN :id";
+
+        //f WHERE n.fluxAjoute IN :id
+        List<Flux> listflux = new ArrayList<Flux>();
+        listflux.add(f);
+
+        Query q = em.createQuery(req);
+        q.setParameter("id", listflux);
+
+        List resu = q.getResultList();
+        return resu;
+
+    }
+
+    public static void main(String[] args) {
+
+
+        Flux fl = new Flux();
+        fl.setID(new Long(300));
+
+        DAOIncident<NotificationAjoutFlux> dao = new DAOIncident<NotificationAjoutFlux>(DAOFactory.getInstance());
+        dao.findNotificationAjoutFluxFromFlux(fl);
+
+//        DAOIncident<JMSPerteConnectionIncident> dao = new DAOIncident<JMSPerteConnectionIncident>(DAOFactory.getInstance());
+//        dao.setClos(false);
+//        List l = dao.findCriteria(JMSPerteConnectionIncident.class);
+//        System.out.println("LIST SIZE : " + l.size());
+//        for (int i = 0; i < l.size(); i++) {
+//            Object object = l.get(i);
+//            System.out.println("" + object);
+//        }
     }
 
 //        @Override

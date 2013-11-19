@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import rssagregator.beans.Flux;
+import rssagregator.beans.form.FORMFactory;
 import rssagregator.beans.form.IncidentForm;
 import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.CollecteIncident;
@@ -81,8 +82,9 @@ public class IncidentsSrvl extends HttpServlet {
 
 
 //        DAOIncident dao = DAOFactory.getInstance().getDAOIncident();
-        IncidentForm form = new IncidentForm();
-        request.setAttribute("form", form);
+//        IncidentForm form = FORMFactory.getInstance().getForm(null, action)
+////                new IncidentForm();
+//        request.setAttribute("form", form);
 
 
 //        CollecteIncident incident = null;
@@ -209,6 +211,7 @@ public class IncidentsSrvl extends HttpServlet {
 
             //recup de la list des incidents
             List<Object> listAll = dao.findCriteria(c);
+            
             System.out.println("°°°° LIST : " + listAll);
             System.out.println("°°°° LIST : " + listAll.size());
             System.out.println("TAILLE LISTE : " + listAll.size());
@@ -250,7 +253,7 @@ public class IncidentsSrvl extends HttpServlet {
                 System.out.println("CLASS not foun");
                 redir(request, ATT_SERV_NAME + "/read?id=" + request.getParameter("id"), "L'entité demandée n'existe pas !", Boolean.TRUE);
             } catch (Exception ex) {
-                System.out.println("EXX");
+                logger.debug("EXX", ex);
                 redir(request, ATT_SERV_NAME + "/read?id=" + request.getParameter("id"), "L'entité demandée n'existe pas !", Boolean.TRUE);
             }
         }

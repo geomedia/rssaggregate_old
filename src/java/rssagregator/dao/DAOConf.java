@@ -321,7 +321,10 @@ public class DAOConf extends AbstrDao {
             logger.debug("Mise à jour du compte root dans la BDD");
             uBdd.setMail(m);
             uBdd.setPass(p);
+            
+            daou.beginTransaction();
             daou.modifier(uBdd);
+            daou.commit();
         }
         System.out.println("================================================");
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.

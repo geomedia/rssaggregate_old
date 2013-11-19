@@ -34,6 +34,13 @@ public class ComportementCollecteForm extends AbstrForm {
     private String comportement_desc;
     private Boolean defaut;
 
+    protected ComportementCollecteForm() {
+    }
+    
+    
+    
+    
+
     @Override
     public Object bind(HttpServletRequest request, Object objEntre, Class type) {
         MediatorCollecteAction collecte = (MediatorCollecteAction) objEntre;

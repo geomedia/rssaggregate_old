@@ -7,6 +7,7 @@ package rssagregator.beans.form;
 import rssagregator.beans.Conf;
 import rssagregator.beans.Flux;
 import rssagregator.beans.FluxType;
+import rssagregator.beans.Item;
 import rssagregator.beans.Journal;
 import rssagregator.beans.ServeurSlave;
 import rssagregator.beans.UserAccount;
@@ -51,35 +52,55 @@ public class FORMFactory {
     /**
      * Retourne un formulaire de gestion pour le beans envoyé en argument
      *
-     * @param beansClass
-     * @return
+     * @param beansClass : la class du beans a traiter.
+     * @param action L'action demandé par l'utilisateur "add", "mod... Ce paramettre influ sur les traitements opéré par le formulaire.
+     * @return Le formulaire correspondant au beans envoyé en argument et configuré pour l'action demandée.
      */
-    public AbstrForm getForm(Class beansClass) {
+    public AbstrForm getForm(Class beansClass, String action) throws Exception {
+        
+        if(beansClass == null){
+            throw new Exception("Il est impossible d'instancier un formulaire si on ne précise pas la class du bean");
+        }
+        
+        AbstrForm form = null;
+        
         if (CollecteIncident.class.isAssignableFrom(beansClass)) {
-            return new IncidentForm();
+            form =  new IncidentForm();
         } else if (beansClass.equals(Flux.class)) {
-            return new FluxForm();
+            form =  new FluxForm();
         } else if (beansClass.equals(Journal.class)) {
-            return new JournalForm();
+            form =  new JournalForm();
         } else if (beansClass.equals(MediatorCollecteAction.class)) {
-            return new ComportementCollecteForm();
+            form =  new ComportementCollecteForm();
         } else if (beansClass.equals(FluxType.class)) {
-            return new FluxTypeForm();
+            form =  new FluxTypeForm();
         } else if (beansClass.equals(UserAccount.class)) {
-            return new UserForm();
+            form =  new UserForm();
         }
         else if(beansClass.equals(ServeurSlave.class)){
-            return new ServeurSlaveForm();
+            form =  new ServeurSlaveForm();
         }
         else if (AbstrIncident.class.isAssignableFrom(beansClass)) {
-            return new IncidentForm();
+            form =  new IncidentForm();
         }
         
         else if(beansClass.equals(Conf.class)){
-            System.out.println("----INSTANCIATION FORM");
-            return new ConfForm();
+            form =  new ConfForm();
         }
-        throw new UnsupportedOperationException("Le beans envoyé en argument n'a pas de formulaire associé dans cette factory");
-
+        else if (beansClass.equals(Item.class)){
+            form =  new ItemForm();
+        }
+        
+        if(form != null){
+            if(action!=null && !action.isEmpty()){
+                form.setAction(action);
+            }
+            form.beanClass = beansClass;
+            
+            return form;
+        }
+        else{
+             throw new UnsupportedOperationException("Le beans envoyé en argument n'a pas de formulaire associé dans cette factory");
+        }
     }
 }

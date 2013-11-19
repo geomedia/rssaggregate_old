@@ -25,7 +25,12 @@ public class IncidentForm extends AbstrForm {
     //----------------------------------------
     private String noteIndicent;
     private Date dateFin;
+
     //----------------------------------------
+    protected IncidentForm() {
+    }
+    
+    
 
     @Override
     public Object bind(HttpServletRequest request, Object objEntre, Class type) {

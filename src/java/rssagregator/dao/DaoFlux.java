@@ -51,7 +51,7 @@ public class DaoFlux extends AbstrDao {
         this.classAssocie = Flux.class;
         this.dAOFactory = dAOFactory;
         em.setProperty("javax.persistence.cache.storeMode", "CheckCacheOnly");
-//        "eclipselink.cache-usage", "CheckCacheOnly");
+    
 
     }
 
@@ -127,6 +127,7 @@ public class DaoFlux extends AbstrDao {
      * @param sql true= parcourir la base, false : juste le cache
      * @return
      */
+    @Deprecated
     public List<Flux> findAllFlux(Boolean sql) {
         Query query = em.createQuery(REQ_FIND_ALL);
         if (!sql) {
@@ -180,24 +181,13 @@ public class DaoFlux extends AbstrDao {
             // Pour chaque flux, on va charger les 100 dernier hash 
             DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
             Set<String> dernierHash = daoItem.findLastHash(fl, 100, false);
-            fl.setLastEmpruntes(dernierHash);
-            try {
-                Flux cloneTest = (Flux) fl.clone();
-                System.out.println("LAST EMPRUNTE DU CLONE  : " + cloneTest.getLastEmpruntes().size());
-            } catch (CloneNotSupportedException ex) {
-                Logger.getLogger(DaoFlux.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            try {
-                daoFlux.modifier(fl);
-                System.out.println("---> TAILLER DU LAST APRES MERGE : " + fl.getLastEmpruntes().size());
-            } catch (Exception ex) {
-                Logger.getLogger(DaoFlux.class.getName()).log(Level.SEVERE, null, ex);
-            }
+//            fl.setLastEmpruntes(dernierHash);
+                   
 
 
 
             //On enregistre le flux à ses services
-            fl.enregistrerAupresdesService();
+//            fl.enregistrerAupresdesService();
 
             //Lors de l'attribution d'un id, on enregistre le flux aurpès du Server de Mbeans
 
@@ -549,4 +539,24 @@ public class DaoFlux extends AbstrDao {
 //         CacheHashFlux cache = CacheHashFlux.getInstance();
 //         cache.addHash(flux, emprunte);
 //    }
+
+    
+    /***
+     * Recherche un flux à partir de son URL. Si aucun flux n'est retrouvé, la DAO renvoie null
+     * @param url l'url sur laquelle doit d'appuyer la recherche
+     * @return Le flux ou null si aucun flux n'a été trouvé
+     */
+    public Flux findWithUrl(String url) {
+        String req = "SELECT f from Flux f WHERE f.url LIKE(:u)";
+        Query q = em.createQuery(req);
+        q.setParameter("u", url);
+        Flux f =null;
+        try {
+        f = (Flux) q.getSingleResult();    
+        } catch (Exception e) {
+        }
+        
+
+        return f;
+    }
 }

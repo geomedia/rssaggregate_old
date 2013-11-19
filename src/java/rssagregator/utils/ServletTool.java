@@ -8,14 +8,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.persistence.NoResultException;
 import javax.servlet.http.HttpServletRequest;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import rssagregator.beans.AbstrObservableBeans;
 import rssagregator.beans.Conf;
 import rssagregator.beans.Flux;
@@ -23,11 +17,9 @@ import rssagregator.beans.form.AbstrForm;
 import rssagregator.beans.form.FORMFactory;
 import rssagregator.dao.AbstrDao;
 import rssagregator.dao.DAOFactory;
-import rssagregator.dao.SearchFilter;
 import rssagregator.services.crud.AbstrServiceCRUD;
 import rssagregator.services.crud.ServiceCRUDFactory;
 import rssagregator.services.ServiceSynchro;
-import rssagregator.servlet.JournauxSrvl;
 
 /**
  * Une série de methode static pouvant être utilisée dans les Servlet du projet.
@@ -214,139 +206,168 @@ public class ServletTool {
         // Obtenssion de la dao
 //        AbstrDao dao = DAOFactory.getInstance().getDaoFromType(beansClass);
 //        dao.initcriteria();
-
-        //Gestion des paramettre filtre permet de configurer les where clause dans criteria en fonction de ce qui est envoyé par JQGRID
-        if (request.getParameter("filters") != null && !request.getParameter("filters").isEmpty()) {
-            String filter = request.getParameter("filters");
-            JSONObject obj = new JSONObject();
-            JSONParser parse = new JSONParser();
-            try {
-                JSONObject obj2 = (JSONObject) parse.parse(filter);
-                JSONArray rules = (JSONArray) obj2.get("rules");
-                for (int i = 0; i < rules.size(); i++) {
-                    JSONObject object = (JSONObject) rules.get(i);
-                    String field = (String) object.get("field");
-                    String op = (String) object.get("op");
-                    String data = (String) object.get("data");
-                    System.out.println("field : " + field);
-                    System.out.println("op : " + op);
-                    System.out.println("data : " + data);
-
-                    SearchFilter filt = new SearchFilter();
-
-
-                    filt.setData(data);
-                    filt.setField(field);
-                    filt.setOp(op);
-                    //On essai de retrouver le type du champs par reflexivité
-                    try {
-                        System.out.println("On tente de trouver le type");
-                        filt.setType(beansClass.getDeclaredField(field).getType());
-
-                    } catch (NoSuchFieldException ex) {
-                        Logger.getLogger(ServletTool.class.getName()).log(Level.SEVERE, null, ex);
-                    } catch (SecurityException ex) {
-                        Logger.getLogger(ServletTool.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-
-
-                    dao.getCriteriaSearchFilters().getFilters().add(filt);
-                }
-
-            } catch (ParseException ex) {
-                Logger.getLogger(JournauxSrvl.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-
-        //Compte du nombre total de résultat
-        Integer count = null;
-        try {
-            count = dao.cptCriteria();
-            request.setAttribute("count", count);
-        } catch (Exception e) {
-            logger.debug("err count", e);
-        }
-
-
-        // Juste un bloc de test permettant d'afficher les paramettre de la dequete pour faire du debug
-        Map<String, String[]> map = request.getParameterMap();
-        for (Map.Entry<String, String[]> entry : map.entrySet()) {
+//        System.out.println("nbr filt tool a l'entree" + dao.getCriteriaSearchFilters().getFilters().size());
+//
+//        //Gestion des paramettre filtre permet de configurer les where clause dans criteria en fonction de ce qui est envoyé par JQGRID
+//        if (request.getParameter("filters") != null && !request.getParameter("filters").isEmpty()) {
+//            String filter = request.getParameter("filters");
+//            JSONObject obj = new JSONObject();
+//            JSONParser parse = new JSONParser();
+//            try {
+//                JSONObject obj2 = (JSONObject) parse.parse(filter);
+//                JSONArray rules = (JSONArray) obj2.get("rules");
+//                for (int i = 0; i < rules.size(); i++) {
+//                    JSONObject object = (JSONObject) rules.get(i);
+//                    String field = (String) object.get("field");
+//                    String op = (String) object.get("op");
+//                    String data = (String) object.get("data");
+//                    System.out.println("field : " + field);
+//                    System.out.println("op : " + op);
+//                    System.out.println("data : " + data);
+//
+//                    SearchFilter filt = new SearchFilter();
+//
+//
+//                    filt.setData(data);
+//                    filt.setField(field);
+//                    filt.setOp(op);
+//                    //On essai de retrouver le type du champs par reflexivité
+//                    try {
+//                        System.out.println("On tente de trouver le type");
+//                        filt.setType(beansClass.getDeclaredField(field).getType());
+//
+//                    } catch (NoSuchFieldException ex) {
+//                        Logger.getLogger(ServletTool.class.getName()).log(Level.SEVERE, null, ex);
+//                    } catch (SecurityException ex) {
+//                        Logger.getLogger(ServletTool.class.getName()).log(Level.SEVERE, null, ex);
+//                    }
+//
+//
+//                    dao.getCriteriaSearchFilters().getFilters().add(filt);
+//                    System.out.println("--> nb filter : " + dao.getCriteriaSearchFilters().getFilters().size());
+//                }
+//
+//            } catch (ParseException ex) {
+//                Logger.getLogger(JournauxSrvl.class.getName()).log(Level.SEVERE, null, ex);
+//            }
+//        }
+//        System.out.println("NB FILT DS TOOL " + dao.getCriteriaSearchFilters().getFilters().size());
+//
+//        //Compte du nombre total de résultat
+//        Integer count = null;
+//        try {
+//            count = dao.cptCriteria();
+//            request.setAttribute("count", count);
+//        } catch (Exception e) {
+//            logger.debug("err count", e);
+//        }
+//
+//
+//        // Juste un bloc de test permettant d'afficher les paramettre de la dequete pour faire du debug
+//        Map<String, String[]> map = request.getParameterMap();
+//        for (Map.Entry<String, String[]> entry : map.entrySet()) {
+//            String string = entry.getKey();
+//            String[] strings = entry.getValue();
+//            System.out.println("-- key : " + string + " // value : " + strings[0] + " size " + strings.length);
+//        }
+//
+//        System.out.println("AV ROW");
+//        // ROW
+//        if (request.getParameter("vue") != null && !request.getParameter("vue").equals("csv")) {
+//            Integer limit = null;
+//            if (request.getParameter("rows") != null && !request.getParameter("rows").isEmpty()) {
+//                try {
+//                    limit = new Integer(request.getParameter("rows"));
+//                    request.setAttribute("rows", limit);
+//                    dao.setCriteriaRow(limit);
+//                } catch (Exception e) {
+//                }
+//            } else {
+//            }
+//            System.out.println("°1");
+//
+//            //-----PAGE
+//            Integer page = null;
+//            if (request.getParameter("page") != null && !request.getParameter("page").isEmpty()) {
+//                System.out.println("°°°°°°°°°))");
+//                try {
+//                    page = new Integer(request.getParameter("page"));
+//
+//                    request.setAttribute("page", new Integer(request.getParameter("page")));
+//                    Integer startRows = limit * page - limit;
+//                    dao.setCriteriaStartRow(startRows);
+//
+//                    Double totalPagedbl;
+//                    Integer totalPage = null;
+//                    if (count != null && limit != null && count > 0 && limit > 0) {
+//                        totalPagedbl = Math.ceil(count.doubleValue() / limit.doubleValue());
+//                        totalPage = totalPagedbl.intValue();
+//                        System.out.println("--->> TOTAL PAGE : " + totalPage);
+//
+//                        request.setAttribute("total", totalPage);
+//                    } else {
+//                        totalPage = 1;
+//                        request.setAttribute("total", totalPage);
+//                    }
+//                } catch (Exception e) {
+//                    logger.debug("Erreur", e);
+//                }
+//            } else {
+//                request.setAttribute("page", new Integer(1));
+//            }
+//        }
+//
+//        // Traitement de l'ordre 
+//        if (request.getParameter("sidx") != null && !request.getParameter("sidx").isEmpty()) {
+//            try {
+//                request.setAttribute("sidx", request.getParameter("sidx"));
+//                dao.setCriteriaSidx(request.getParameter("sidx"));
+//            } catch (Exception e) {
+//            }
+//        }
+//
+//        if (request.getParameter("sord") != null && !request.getParameter("sord").isEmpty()) {
+//            dao.setCriteriaSord(request.getParameter("sord"));
+//        }
+//
+//
+//        if (request.getParameter("sord") != null && !request.getParameter("sord").isEmpty()) {
+//            request.setAttribute("sord", request.getParameter("sord"));
+//        }
+        
+        // Pour le debug, on liste chacun des paramettres de la requete. A qupprimer en prod
+       Map<String, String[]> mapTest= request.getParameterMap();
+        for (Map.Entry<String, String[]> entry : mapTest.entrySet()) {
             String string = entry.getKey();
             String[] strings = entry.getValue();
-            System.out.println("-- key : " + string + " // value : " + strings[0] + " size " + strings.length);
-        }
-
-        System.out.println("AV ROW");
-        // ROW
-        if (request.getParameter("vue") != null && !request.getParameter("vue").equals("csv")) {
-            Integer limit = null;
-            if (request.getParameter("rows") != null && !request.getParameter("rows").isEmpty()) {
-                try {
-                    limit = new Integer(request.getParameter("rows"));
-                    request.setAttribute("rows", limit);
-                    dao.setCriteriaRow(limit);
-                } catch (Exception e) {
-                }
-            } else {
-            }
-            System.out.println("°1");
-
-            //-----PAGE
-            Integer page = null;
-            if (request.getParameter("page") != null && !request.getParameter("page").isEmpty()) {
-                System.out.println("°°°°°°°°°))");
-                try {
-                    page = new Integer(request.getParameter("page"));
-
-                    request.setAttribute("page", new Integer(request.getParameter("page")));
-                    Integer startRows = limit * page - limit;
-                    dao.setCriteriaStartRow(startRows);
-
-                    Double totalPagedbl;
-                    Integer totalPage = null;
-                    if (count != null && limit != null && count > 0 && limit > 0) {
-                        totalPagedbl = Math.ceil(count.doubleValue() / limit.doubleValue());
-                        totalPage = totalPagedbl.intValue();
-                        System.out.println("--->> TOTAL PAGE : " + totalPage);
-
-                        request.setAttribute("total", totalPage);
-                    } else {
-                        totalPage = 1;
-                        request.setAttribute("total", totalPage);
-                    }
-                } catch (Exception e) {
-                    logger.debug("Erreur", e);
-                }
-            } else {
-                request.setAttribute("page", new Integer(1));
+            System.out.println("--> Request Key : " + string);
+            for (int i = 0; i < strings.length; i++) {
+                String string1 = strings[i];
+                System.out.println("--> Value for " + string+ " : " + string1);
+                
             }
         }
 
-        // Traitement de l'ordre 
-        if (request.getParameter("sidx") != null && !request.getParameter("sidx").isEmpty()) {
-            try {
-                request.setAttribute("sidx", request.getParameter("sidx"));
-                dao.setCriteriaSidx(request.getParameter("sidx"));
-            } catch (Exception e) {
-            }
-        }
 
-        if (request.getParameter("sord") != null && !request.getParameter("sord").isEmpty()) {
-            dao.setCriteriaSord(request.getParameter("sord"));
-        }
-
-
-        if (request.getParameter("sord") != null && !request.getParameter("sord").isEmpty()) {
-            request.setAttribute("sord", request.getParameter("sord"));
-        }
-
-
-        // On utilise la dao pour effectuer la sélection
+        // On récupère la liste des items en utilisant la dao
         List<Object> items = dao.findCriteria();
         request.setAttribute("items", items);
 
-        Integer records = dao.cptCriteria();
+        // On effectue les comptes
+        Integer records = dao.cptCriteria(); // records corresponds au nombre total d'enregistrement
         System.out.println("RECORDS : " + records);
+
+        // Calcul du nombre de pages
+        Double totalPagedbl;
+        Integer totalPage = 60;
+        
+        Integer limit = dao.getCriteriaSearchFilters().getCriteriaRow();
+        if (limit!=null && limit>0){
+            totalPagedbl = Math.ceil(records.doubleValue() / limit.doubleValue());
+            totalPage = totalPagedbl.intValue();
+        }
+
+        request.setAttribute("total", totalPage);
         request.setAttribute("records", records);
 
     }
@@ -409,7 +430,7 @@ public class ServletTool {
             }
             //On bind
             //On crée un formulaire 
-            f = FORMFactory.getInstance().getForm(bean.getClass());
+            f = FORMFactory.getInstance().getForm(bean.getClass(), "mod");
             System.out.println(" FORM DS TOOL : " + f);
             f.setAction("mod");
             request.setAttribute("form", f);
@@ -423,26 +444,25 @@ public class ServletTool {
                 // Si le bind a fonctionné, on bind pour de vrai.
                 if (f.getValide()) {
                     bean = f.bind(request, bean, bean.getClass());
+                    
+                    AbstrServiceCRUD service = ServiceCRUDFactory.getInstance().getServiceFor(beansClass);
 
+                    service.modifier(bean);
 
-                    if (bean instanceof Flux) {
-                        Flux ff = (Flux) bean;
-                    }
-
-                    dao.beginTransaction();
-                    dao.modifier(bean);
-                    dao.commit();
-
-                    if (bean instanceof Flux) {
-                        Flux ff = (Flux) bean;
-                    }
-
-                    if (notifiObserver && AbstrObservableBeans.class.isAssignableFrom(bean.getClass())) {
-                        AbstrObservableBeans b = (AbstrObservableBeans) bean;
-                        b.enregistrerAupresdesService();
-                        b.forceChangeStatut();
-                        b.notifyObservers();
-                    }
+//                    dao.beginTransaction();
+//                    dao.modifier(bean);
+//                    dao.commit();
+//
+//                    if (bean instanceof Flux) {
+//                        Flux ff = (Flux) bean;
+//                    }
+//
+//                    if (notifiObserver && AbstrObservableBeans.class.isAssignableFrom(bean.getClass())) {
+//                        AbstrObservableBeans b = (AbstrObservableBeans) bean;
+//                        b.enregistrerAupresdesService();
+//                        b.forceChangeStatut();
+//                        b.notifyObservers();
+//                    }
                     //Si un type est précisé
                     String type = request.getParameter("type");
                     if (type == null) {
@@ -483,7 +503,7 @@ public class ServletTool {
         try {
             Object o = null;
 
-            form = FORMFactory.getInstance().getForm(beansClass);
+            form = FORMFactory.getInstance().getForm(beansClass, "add");
             form.setAction("add");
 //            form.setAddAction(true);
             request.setAttribute(formNameJSP, form);
@@ -498,9 +518,6 @@ public class ServletTool {
                     o = form.bind(request, o, beansClass);
                     AbstrServiceCRUD serviceCRUD = ServiceCRUDFactory.getInstance().getServiceFor(o.getClass());
                     serviceCRUD.ajouter(o);
-//                    dao.beginTransaction();
-//                    dao.creer(o);
-//                    dao.commit();
                     if (notifiObserver && AbstrObservableBeans.class.isAssignableFrom(o.getClass())) {
                         AbstrObservableBeans aob = (AbstrObservableBeans) o;
                         aob.enregistrerAupresdesService();
@@ -523,43 +540,42 @@ public class ServletTool {
         }
     }
 
-    @Deprecated
-    public static void actionADD2(HttpServletRequest request, String beansnameJSP, String formNameJSP, Class beansClass, Boolean notifiObserver) {
-        String srlvtname = (String) request.getAttribute("srlvtname");
-        System.out.println("--->>>>>> ADD ");
-        try {
-            Object o = null;
-
-            AbstrForm form = FORMFactory.getInstance().getForm(beansClass);
-            form.setAction("add");
-//            form.setAddAction(true);
-            request.setAttribute(formNameJSP, form);
-            AbstrDao dao = DAOFactory.getInstance().getDaoFromType(beansClass);
-            if (request.getMethod().equals("POST")) {
-                form.validate(request);
-                request.setAttribute(beansnameJSP, o);
-
-                if (form.getValide()) {
-                    o = form.bind(request, o, beansClass);
-                    dao.creer(o);
-                    if (notifiObserver && AbstrObservableBeans.class.isAssignableFrom(o.getClass())) {
-                        AbstrObservableBeans aob = (AbstrObservableBeans) o;
-                        aob.enregistrerAupresdesService();
-                        aob.forceChangeStatut();
-                        aob.notifyObservers("add");
-                    }
-                    redir(request, srlvtname + "/recherche", "AJOUT effectué : ", Boolean.FALSE);
-                } else { // Si le formulaire n'est pas valide
-                    System.out.println("Servlet : pas valid ");
-                }
-            }
-
-        } catch (Exception e) {
-            redir(request, srlvtname + "/add", "ERREUR lors du traitement : " + e, Boolean.TRUE);
-            System.out.println("ERR : " + e);
-        }
-    }
-
+//    @Deprecated
+//    public static void actionADD2(HttpServletRequest request, String beansnameJSP, String formNameJSP, Class beansClass, Boolean notifiObserver) {
+//        String srlvtname = (String) request.getAttribute("srlvtname");
+//        System.out.println("--->>>>>> ADD ");
+//        try {
+//            Object o = null;
+//
+//            AbstrForm form = FORMFactory.getInstance().getForm(beansClass, "add");
+//            form.setAction("add");
+////            form.setAddAction(true);
+//            request.setAttribute(formNameJSP, form);
+//            AbstrDao dao = DAOFactory.getInstance().getDaoFromType(beansClass);
+//            if (request.getMethod().equals("POST")) {
+//                form.validate(request);
+//                request.setAttribute(beansnameJSP, o);
+//
+//                if (form.getValide()) {
+//                    o = form.bind(request, o, beansClass);
+//                    dao.creer(o);
+//                    if (notifiObserver && AbstrObservableBeans.class.isAssignableFrom(o.getClass())) {
+//                        AbstrObservableBeans aob = (AbstrObservableBeans) o;
+//                        aob.enregistrerAupresdesService();
+//                        aob.forceChangeStatut();
+//                        aob.notifyObservers("add");
+//                    }
+//                    redir(request, srlvtname + "/recherche", "AJOUT effectué : ", Boolean.FALSE);
+//                } else { // Si le formulaire n'est pas valide
+//                    System.out.println("Servlet : pas valid ");
+//                }
+//            }
+//
+//        } catch (Exception e) {
+//            redir(request, srlvtname + "/add", "ERREUR lors du traitement : " + e, Boolean.TRUE);
+//            System.out.println("ERR : " + e);
+//        }
+//    }
     public static void actionREM(HttpServletRequest request, Class beansClass, Boolean notifiObserver) {
         String srlvtname = (String) request.getAttribute("srlvtname");
         AbstrDao dao = DAOFactory.getInstance().getDaoFromType(beansClass);
@@ -603,22 +619,30 @@ public class ServletTool {
 
     /**
      * *
-     *  Parcour la requête pour former une liste de Long au travers du paramettre id sous ses différentes formes. <ul>
+     * Parcour la requête pour former une liste de Long au travers du paramettre id sous ses différentes formes. <ul>
      * <li>id=1,105,6</li>
      * <li>id=1&id=2</li>
      * <li>id=1</li>
      * </ul>
+     *
      * @param request
      * @return Une liste de Long contenant les id trouvé.
      * @throws NoResultException
      */
-    public static List<Long> parseidFromRequest(HttpServletRequest request) throws NoResultException {
+    public static List<Long> parseidFromRequest(HttpServletRequest request, String chaine) throws NoResultException {
 //throw new NoResultException("gnagna");
         List<Long> listId = new ArrayList<Long>();
 
-            String[] tabIdf = request.getParameterValues("id");
+        String[] tabIdf = null;
+        if (request != null) {
+            tabIdf = request.getParameterValues("id");
+        } else if (chaine != null) {
+            tabIdf = new String[]{chaine};
+        }
 
-        if(tabIdf==null){
+
+
+        if (tabIdf == null) {
             throw new NoResultException("Pas de paramettre ID");
         }
 
@@ -667,5 +691,16 @@ public class ServletTool {
             }
         }
         throw new NoResultException("Impossible de parser les ID");
+    }
+    
+    
+    
+    public static Boolean getBooleen(HttpServletRequest request, String param){
+        
+        String str = request.getParameter(param);
+        if(str!=null && !str.isEmpty()){
+            return true;
+        }
+        return false;
     }
 }

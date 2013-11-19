@@ -62,8 +62,6 @@ public class ServeurSlaveSrlvt extends HttpServlet {
         DAOServeurSlave dao = DAOFactory.getInstance().getDAOServeurSlave();
 //        dao.setClassAssocie(ServeurSlave.class);
 
-        ServeurSlaveForm form = new ServeurSlaveForm();
-         request.setAttribute(ATT_FORM, form);
 
         //=========================================================================================================================
         //............................GESTION DES ACTIONS
