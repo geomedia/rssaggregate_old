@@ -270,7 +270,6 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
         }
     }
 
-    
     @Override
     public void fermetureIncident() throws Exception {
         logger.debug("cloture");
@@ -417,23 +416,26 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
                 em.getTransaction().commit(); // On commit les ajouts d'item au flux. Ce commit va aussi libérer la ressource flux en écriture
                 em.close();
             }
-            // Si le comit passe alors on peut ajouter tous les hash au cache
-            ServiceCollecteur collecteur = ServiceCollecteur.getInstance();
-            if (nouvellesItems != null) {
-                for (int i = 0; i < nouvellesItems.size(); i++) {
-                    Item item = nouvellesItems.get(i);
-                    collecteur.getCacheHashFlux().addHash(flux, item.getHashContenu());
-                }
-            }
+
 
             // Il faut aussi supprimer des hash si ils sont trop nombreux
 
             // Il faut retirer des hash du cache 
             if (this.getExeption() == null) {
+
+                // Si le comit passe alors on peut ajouter tous les hash au cache
+                ServiceCollecteur collecteur = ServiceCollecteur.getInstance();
+                if (nouvellesItems != null) {
+                    for (int i = 0; i < nouvellesItems.size(); i++) {
+                        Item item = nouvellesItems.get(i);
+                        collecteur.getCacheHashFlux().addHash(flux, item.getHashContenu());
+                    }
+                }
+
+
                 try {
                     if (this.getComportementDuFlux().getDedoubloneur().getCompteCapture() != null) {
                         Integer nbrItObserve = this.getComportementDuFlux().getDedoubloneur().getCompteCapture()[0];
-                        System.out.println("##############-----> NOMBRE D'item Observé : " + nbrItObserve);
                         Integer nbrDsCache = collecteur.getCacheHashFlux().returnNbrHash(flux);
                         if (nbrDsCache != null && nbrItObserve != null) {
                             Integer nbrItASup = nbrDsCache - nbrItObserve - 100; // On en laisse 100 de marge 
@@ -459,9 +461,6 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
 
     @Override
     protected void callCorps() throws Exception {
-        System.out.println("CALLLL");
-
-
 
 //                    Thread.sleep(3000);
         if (!flux.getActive()) {
@@ -469,53 +468,36 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
         }
 
 //            if (!annulerTache) {  // Si la tache n'a pas été annulé elle se déroule normalement.
-        logger.debug(flux + "--avant em");
         em = DAOFactory.getInstance().getEntityManager();
         em.getTransaction().begin();
-        logger.debug(flux + "--après em");
-        
-        
+
         this.verrouillerObjectDansLEM(flux, LockModeType.PESSIMISTIC_WRITE);
 
-//        if (!em.contains(flux)) { // Si le flux n'est pas contenu dans l'em, on le recharge...
-//            logger.debug("em find");
-//            flux = em.find(Flux.class, flux.getID());
-//
-//        }
-//        logger.debug("après if");
-//
-//        em.lock(this.flux, LockModeType.PESSIMISTIC_WRITE); // On block le flux en ecriture pour toute la durée de la transaction
-        System.out.println("FLUX LOCKE OK");
-        
-        
 
         if (flux.getJournalLie() != null && flux.getJournalLie().getID() != null) {
             verrouillerObjectDansLEM(flux.getJournalLie(), LockModeType.PESSIMISTIC_READ);
-//            Journal j = em.find(Journal.class, flux.getJournalLie().getID());
-//            System.out.println("JOURNAL : " + j);
-////                    em.lock(j, LockModeType.PESSIMISTIC_WRITE);
-//            em.lock(j, LockModeType.PESSIMISTIC_READ);
         }
-        System.out.println("JOURNAL LOCK OK");
+
 
         MediatorCollecteAction cloneComportement = this.flux.getMediatorFlux().genererClone(); //On crée une copie du mediator devant être employé. Cela permet de faire travailler plusieurs flux avec le même modèle de Comportement
         this.comportementDuFlux = cloneComportement;
-        logger.debug("clonageok");
 
         nouvellesItems = cloneComportement.executeActions(this.flux); // On exécute la collecte en utilisant le Comportement de Collecte cloné
-        logger.debug("Action eecuté");
+
 
         //On enregistre chaque item trouvé
         ServiceCollecteur collecteur = ServiceCollecteur.getInstance();
         for (int i = 0; i < nouvellesItems.size(); i++) {
-            logger.debug("ajout");
+
             Item item = nouvellesItems.get(i);
+            if (item.getDonneeBrutes().size() > 1) {
+                System.out.println("ITEM ID : " + item.getID());
+                System.out.println("---> BRUT : " + item.getDonneeBrutes().size());
+            }
 
             collecteur.ajouterItemAuFlux(flux, item, em, false); // Il faut préciser au collecteur l'em qu'il doit utiliser, on lui donne celui qui block actuellement le flux. Les enregistrements ne sont alors pas encore commités
 
         }
-//            }
-        logger.debug("fin try");
 
     }
 }

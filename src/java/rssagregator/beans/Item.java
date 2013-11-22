@@ -1,11 +1,11 @@
 package rssagregator.beans;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,13 +14,12 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import org.apache.poi.util.Beta;
-import org.eclipse.persistence.annotations.Cache;
-import org.eclipse.persistence.annotations.CacheCoordinationType;
-import org.eclipse.persistence.annotations.CacheType;
-import org.eclipse.persistence.config.CacheIsolationType;
+import org.eclipse.persistence.annotations.Index;
+import rssagregator.beans.exception.IncompleteBeanExeption;
 import rssagregator.services.ServiceSynchro;
 
 /**
@@ -45,7 +44,8 @@ public class Item implements Serializable, Comparable<Item> {
      * *
      * Titre de l'item. Element persisté dans la base de données
      */
-    @Column(name = "titre", length = 500)
+    @Index
+    @Column(name = "titre", length = 1000)
     private String titre;
     /**
      * *
@@ -88,13 +88,14 @@ public class Item implements Serializable, Comparable<Item> {
      * La catégorie. On a choisi de pas créer une nouvelle entitée pour les catégories. Toutes les catégories sont
      * concaténée dans ce champs
      */
-    @Column(name = "categorie", length = 500)
+    @Column(name = "categorie", length = 1500)
     private String categorie;
     /**
      * *
      * Le hash permettant d'identifier de manière unique l'item. Ce champs ne peut être null et doit être unique dans la
      * base de données.
      */
+    @Index
     @Column(name = "hashContenu", unique = true, nullable = false)
     private String hashContenu;
     /**
@@ -134,6 +135,21 @@ public class Item implements Serializable, Comparable<Item> {
      */
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.REFRESH, CascadeType.MERGE}, targetEntity = Flux.class)
     private List<Flux> listFlux;
+    
+    
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<DonneeBrute> donneeBrutes = new ArrayList<DonneeBrute>();
+
+    public List<DonneeBrute> getDonneeBrutes() {
+        return donneeBrutes;
+    }
+
+    public void setDonneeBrutes(List<DonneeBrute> donneeBrutes) {
+        this.donneeBrutes = donneeBrutes;
+    }
+    
+    
+    
 
 //    @Transient
 //    private Boolean nonPresentDansBDD;
@@ -158,8 +174,8 @@ public class Item implements Serializable, Comparable<Item> {
      * *
      * Pour générer la clé unique, on concatene les champs titre, daterecup, description lien et ont hash en md5
      */
-    public void genererCleUnique() {
-    }
+//    public void genererCleUnique() {
+//    }
 
     public String getTitre() {
         return titre;
@@ -306,5 +322,102 @@ public class Item implements Serializable, Comparable<Item> {
             return -1;
         }
 
+    }
+
+    public void genererDonneesBrutes(Flux f) throws IncompleteBeanExeption {
+        
+        if(f==null){
+            throw new NullPointerException("impossible de verser avec un flux null");
+        }
+         
+        if(f.getID()==null){
+            throw new IncompleteBeanExeption("Le flux envoyé n'a pas d'id");
+        }
+        
+        
+        List<DonneeBrute> donneesbrutes = this.donneeBrutes;
+        boolean absente = true;
+        for (int i = 0; i < donneesbrutes.size(); i++) {
+            DonneeBrute donneeBrute = donneesbrutes.get(i);
+
+            if (donneeBrute.getFlux().getID().equals(f.getID()) && donneeBrute.getHashContenu().equals(this.hashContenu)) {
+                absente = false;
+            }
+
+        }
+
+        if (absente) {
+            DonneeBrute newDonneeBrute = new DonneeBrute();
+            newDonneeBrute.setDescription(description);
+            newDonneeBrute.setLink(link);
+            newDonneeBrute.setGuid(guid);
+            newDonneeBrute.setFlux(f);
+            newDonneeBrute.setHashContenu(hashContenu);
+            newDonneeBrute.setTitre(titre);
+            newDonneeBrute.setDatePub(datePub);
+            newDonneeBrute.setDateRecup(dateRecup);
+            newDonneeBrute.setHashContenu(hashContenu);
+                   
+//            newDonneeBrute.setItem(this);
+            this.donneeBrutes.add(newDonneeBrute);
+        }
+    }
+    
+    /***
+     * Les donnée brutes de l'item envoyée en argument son ajouté si nécessaire aux données brutes de l'item courante
+     * @param i 
+     */
+    public void verserLesDonneeBruteAutreItem(Item i){
+        
+        List<DonneeBrute> listDonneebruteAutreItem = i.donneeBrutes;
+        for (int j = 0; j < listDonneebruteAutreItem.size(); j++) {
+            DonneeBrute donneeBruteAutre = listDonneebruteAutreItem.get(j);
+            List<DonneeBrute> listdonneBrutThis = this.donneeBrutes;
+            boolean trouve = false;
+            for (int k = 0; k < listdonneBrutThis.size(); k++) {
+                DonneeBrute donneeBruteThis = listdonneBrutThis.get(k);
+                if(donneeBruteAutre.getFlux().getID().equals(donneeBruteThis.getFlux().getID())){
+                    trouve = true;
+                }
+            }
+            if(!trouve){
+                        this.donneeBrutes.add(donneeBruteAutre);
+//                System.out.println("===========VERSEMENT==============");
+//                System.out.println("NOMBRE DONNEE BRUT POUR ITEM : " + this.donneeBrutes.size());
+                for (int k = 0; k < this.donneeBrutes.size(); k++) {
+                    DonneeBrute donneeBrute = this.donneeBrutes.get(k);
+//                    System.out.println("DESC : " + donneeBrute.getDescription());
+                    
+                }
+        
+            }
+        }
+    }
+    
+    /***
+     * Ajoute un flux si nécessaire à la liste de l'item
+     * @param f 
+     */
+    public void addFlux(Flux f) throws IncompleteBeanExeption{
+        
+        if(f==null){
+            throw new NullPointerException("Impossible d'ajouter un flux null");
+        }
+        if(f.getID()==null){
+            throw new IncompleteBeanExeption("Le flux n'a pas d'id");
+        }
+        
+        List<Flux> flThis = this.getListFlux();
+        boolean present = false;
+        for (int i = 0; i < flThis.size(); i++) {
+            Flux flux = flThis.get(i);
+            if(flux.getID().equals(f.getID())){
+                present = true;
+            }
+        }
+        if(!present){
+            listFlux.add(f);
+        }
+        
     }
 }

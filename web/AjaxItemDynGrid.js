@@ -85,6 +85,7 @@ $(document).ready(function() {
                 };
 
         $("#list").jqGrid('setGridParam', {data: [], postData: {filters: JSON.stringify(filters)}});
+//        $("#list").jqGrid('setGridParam', {data: [], postData: {filters: ''}});
         $("#list").jqGrid().trigger("reloadGrid");
 
 

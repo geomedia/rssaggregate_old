@@ -8,6 +8,7 @@ import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.CollecteIncident;
+import rssagregator.dao.AbstrDao;
 
 /**
  * Le formulaire permettant de valider et binder des donnée tirées de la requête
@@ -65,4 +66,15 @@ public class IncidentForm extends AbstrForm {
         valide = erreurs.isEmpty();
         return valide;
     }
+
+    @Override
+    public void parseListeRequete(HttpServletRequest request, AbstrDao dao) throws Exception {
+        super.parseListeRequete(request, dao); //To change body of generated methods, choose Tools | Templates
+
+        
+        // Recup du spe
+    }
+    
+    
+    
 }

@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.persistence.Entity;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -19,6 +20,7 @@ import rssagregator.beans.Journal;
 import rssagregator.beans.exception.ArgumentIncorrect;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoItem;
+import rssagregator.services.ServiceCollecteur;
 
 /**
  * Ce dedoublonneur est utilisé en second Après de {@link Dedoubloneur}, il permet de compléter le traitement. Ce
@@ -27,14 +29,20 @@ import rssagregator.dao.DaoItem;
  *
  * @author clem
  */
+@Entity(name = "DedoubloneurComparaisonTitre")
 public class DedoubloneurComparaisonTitre extends AbstrDedoublonneur {
 
-    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DedoubloneurComparaisonTitre.class);
+//    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DedoubloneurComparaisonTitre.class);
+    
+
+    
+    
+    
 
     @Override
     public List<Item> dedoublonne(List<Item> listItemCapture, Flux flux) {
 
-
+  this.dedoublonnageInterneduneListDItem(listItemCapture);
 
         DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
         Journal journal = flux.getJournalLie();
@@ -43,73 +51,118 @@ public class DedoubloneurComparaisonTitre extends AbstrDedoublonneur {
             Item itemCapture = it.next();
             // Si l'item est nouvelle
             if (itemCapture.getID() == null) {
-                try {
+                if (journal != null) {
+                    try {
 
-                    List<Item> itemsSemblableBDD = daoItem.findItemPossedantTitreAppartenantAuJournal(itemCapture.getTitre(), journal);
+                        List<Item> itemsSemblableBDD = daoItem.findItemPossedantTitreAppartenantAuJournal(itemCapture.getTitre(), journal);
 
-                    Document documentTxtItemCapture = Jsoup.parse(itemCapture.getDescription());
-                    
-                    documentTxtItemCapture.select("a").remove();
-                    String textItemCapture = documentTxtItemCapture.text();
+                        Document documentTxtItemCapture = Jsoup.parse(itemCapture.getDescription());
 
-                    for (int j = 0; j < itemsSemblableBDD.size(); j++) {
-                        Item itemSemblableBDD = itemsSemblableBDD.get(j);
-                        /**
-                         * *
-                         * === Comparaison de la description === Si on trouve une item possédant le même texte de
-                         * description elle est considérée comme similaire
-                         */
-                        Document documentTxt = Jsoup.parse(itemSemblableBDD.getDescription());
-
-                        documentTxt.select("a").remove();    // Suppression de tous les liens
-                        String textItemSemblableBdd = documentTxt.text(); // Suppression du HTML
+                        documentTxtItemCapture.select("a").remove();
+                        String textItemCapture = documentTxtItemCapture.text();
 
 
 
-                        if (textItemCapture.equals(textItemSemblableBdd)) { // Si les deux texte sont semblable
-                            // On cherche a savoir si l'item BDD est déjà lié au flux
-                            Boolean trouve = fluxPresentDansList(itemSemblableBDD.getListFlux(), flux);
+                        for (int j = 0; j < itemsSemblableBDD.size(); j++) {
+                            Item itemSemblableBDD = itemsSemblableBDD.get(j);
+                            
 
-                            if (trouve) { // Si c'est déjà lié
-                                logger.debug("item déjà lié au flux inspecté on supprime");
-                            it.remove();
 
-                            } else {
-                                try {
-                                    logger.debug("Text description similaire. Liason avec une item déjà existance");
-                                    it.set(itemSemblableBDD); // On remplace       
 
-                                } catch (Exception e) {
-                                    logger.debug("err", e);
+                            /**
+                             * *
+                             * === Comparaison de la description === Si on trouve une item possédant le même texte de
+                             * description elle est considérée comme similaire
+                             */
+                            if (!textItemCapture.isEmpty()) {
+                               
+
+                                Document documentTxt = Jsoup.parse(itemSemblableBDD.getDescription());
+
+                                documentTxt.select("a").remove();    // Suppression de tous les liens
+                                String textItemSemblableBdd = documentTxt.text(); // Suppression du HTML
+
+
+
+                                if (textItemCapture.equals(textItemSemblableBdd)) { // Si les deux texte sont semblable
+                                    // On cherche a savoir si l'item BDD est déjà lié au flux
+                                    Boolean trouve = fluxPresentDansList(itemSemblableBDD.getListFlux(), flux);
+
+                                    if (trouve) { // Si c'est déjà lié
+                                        logger.debug("item déjà lié au flux inspecté on supprime");
+                                        ServiceCollecteur.getInstance().getCacheHashFlux().addHash(flux, itemCapture.getHashContenu());
+                                        it.remove();
+
+                                    } else {
+                                        try {
+                                            logger.debug("Text description similaire. Liason avec une item déjà existance");
+                                            itemSemblableBDD.verserLesDonneeBruteAutreItem(itemCapture);
+                                            it.set(itemSemblableBDD); // On remplace       
+
+                                        } catch (Exception e) {
+                                            logger.debug("err", e);
+                                        }
+                                    }
+                                    break; // L'item trouvé a été traité on passe a la suivante
+//                        continue; // L'item trouvé a été traité on passe a la suivante
                                 }
                             }
-                            break; // L'item trouvé a été traité on passe a la suivante
-//                        continue; // L'item trouvé a été traité on passe a la suivante
+
+                            /**
+                             * *
+                             * Comparaison basé sur la date de publication Si Les titre sont == et date de pub == On
+                             * considère que c'est la même item
+                             */
+                            if (itemCapture.getDatePub() != null && itemSemblableBDD.getDatePub() != null) {
+
+                                if (itemCapture.getDatePub().equals(itemSemblableBDD.getDatePub())) {
+                                    Boolean trouve = fluxPresentDansList(itemSemblableBDD.getListFlux(), flux);
+                                    if (trouve) {
+                                        it.remove();
+                                    } else {
+                                        itemSemblableBDD.verserLesDonneeBruteAutreItem(itemCapture);
+                                        it.set(itemSemblableBDD);
+                                    }
+                                    break;
+                                }
+                            }
+                    
                         }
 
-                        /**
-                         * *
-                         * Comparaison basé sur la date de publication
-                         */
-//                    if (itemCapture.getDatePub() != null && itemSemblableBDD.getDatePub() != null) {
-//                        if (itemCapture.getDatePub().equals(itemSemblableBDD.getDatePub())) {
-//                            Boolean trouve = fluxPresentDansList(itemSemblableBDD.getListFlux(), flux);
-//                            if (trouve) {
-//                                it.remove();
-//                            } else {
-//                                it.set(itemSemblableBDD);
-//                            }
-//                        }
-//                    }
+                    } catch (NullPointerException ex) {
+                        Logger.getLogger(DedoubloneurComparaisonTitre.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (ArgumentIncorrect ex) {
+                        Logger.getLogger(DedoubloneurComparaisonTitre.class.getName()).log(Level.SEVERE, null, ex);
                     }
-
-                } catch (NullPointerException ex) {
-                    Logger.getLogger(DedoubloneurComparaisonTitre.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (ArgumentIncorrect ex) {
-                    Logger.getLogger(DedoubloneurComparaisonTitre.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }
+
+
+
+        // Suppression des possible doublons a l'intérieur de la liste
+
+      
+//        for (Iterator<Item> it = listItemCapture.iterator(); it.hasNext();) {
+//            Item item = it.next();
+//            int cpt = 0;
+//            if (item.getID() != null) {
+//                for (Iterator<Item> it1 = listItemCapture.iterator(); it1.hasNext();) {
+//                    Item item1 = it1.next();
+//                    if(item1.getID() != null){
+//                        if(item1.getID().equals(item.getID())){
+//                            cpt ++;
+//                        }
+//                    }
+//                }
+//                if(cpt>1){
+//                    it.remove();
+//                }
+//            }
+//
+//        }
+
+
 
         return listItemCapture;
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.

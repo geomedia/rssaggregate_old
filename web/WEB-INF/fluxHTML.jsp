@@ -124,58 +124,58 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
                         <table id="list" width="600"><tr><td></td></tr></table> 
                         <div id="pager"></div> 
                         <script type="text/javascript">
-                                    /***
-                                     *  Utilisé par JQgrid pour formater le champ journal en un lien
-                                     * @param {type} cellvalue
-                                     * @param {type} options
-                                     * @param {type} rowObjcet
-                                     * @param {type} l4
-                                     * @param {type} l5
-                                     * @returns {String}
-                                     */
-                                            function myLinkFormatter(cellvalue, options, rowObjcet, l4, l5) {
-                                            // Lors du classement après recherche sur le client side, le rowObjet ne peut être lu de la même manière. La ligne suivant permet de pallier à ce problème
-                                            id = rowObjcet[0];
-                                                    texteLien = rowObjcet[1];
-                                                    if (rowObjcet[0] === undefined) {
-                                            id = rowObjcet['ID'];
-                                                    texteLien = rowObjcet['nom'];
-                                            }
-                                            return '<a href = "/RSSAgregate/flux/read?id=' + id + '">' + texteLien + '</a>';
-                                            }
+                            /***
+                             *  Utilisé par JQgrid pour formater le champ journal en un lien
+                             * @param {type} cellvalue
+                             * @param {type} options
+                             * @param {type} rowObjcet
+                             * @param {type} l4
+                             * @param {type} l5
+                             * @returns {String}
+                             */
+                            function myLinkFormatter(cellvalue, options, rowObjcet, l4, l5) {
+                                // Lors du classement après recherche sur le client side, le rowObjet ne peut être lu de la même manière. La ligne suivant permet de pallier à ce problème
+                                id = rowObjcet[0];
+                                texteLien = rowObjcet[1];
+                                if (rowObjcet[0] === undefined) {
+                                    id = rowObjcet['ID'];
+                                    texteLien = rowObjcet['nom'];
+                                }
+                                return '<a href = "/RSSAgregate/flux/read?id=' + id + '">' + texteLien + '</a>';
+                            }
 
-                                    $(function() {
-                                    $("#list").jqGrid({
+                            $(function() {
+                                $("#list").jqGrid({
                                     url: "${rootpath}flux/list?vue=grid",
-                                            loadonce: true,
-                                            datatype: "json",
-                                            mtype: "GET",
-                                            colNames: ["ID", 'nom', "Journal", "Type", "active", "created"],
-                                            colModel: [
-                                    {name: "ID", key: true, width: 55, hidden: true},
-                                    {name: "nom", width: 55, search: true, formatter: myLinkFormatter, searchoptions: {sopt: ['cn', 'eq']}},
-                                    {name: "journalLie", width: 90, searchoptions: {sopt: ['cn', 'eq']}},
-                                    {name: "typeFlux", title: 'Type', search: true, width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
-                                    {name: "active", width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
-                                    {name: "created", width: 80, align: "right", stype: 'select', editoptions: {value: {'': 'tous', 'autre': 'autre', 'quotidien': 'quotidien'}}},
+                                    loadonce: true,
+                                    datatype: "json",
+                                    mtype: "GET",
+                                    colNames: ["ID", 'nom', "Journal", "Type", "active", "created"],
+                                    colModel: [
+                                        {name: "ID", key: true, width: 55, hidden: true},
+                                        {name: "nom", width: 55, search: true, formatter: myLinkFormatter, searchoptions: {sopt: ['cn', 'eq']}},
+                                        {name: "journalLie", width: 90, searchoptions: {sopt: ['cn', 'eq']}},
+                                        {name: "typeFlux", title: 'Type', search: true, width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
+                                        {name: "active", width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
+                                        {name: "created", width: 80, align: "right", stype: 'select', editoptions: {value: {'': 'tous', 'autre': 'autre', 'quotidien': 'quotidien'}}},
                                     ],
-                                            pager: "#pager",
-                                            rowNum: 10,
-                                            rowList: [30, 50, 100, 150, 300, 500],
-                                            sortname: "invid",
-                                            sortorder: "desc",
-                                            viewrecords: true,
-                                            gridview: true,
-                                            autoencode: true,
-                                            caption: "Recherche parmis les flux",
-                                            sortable: true,
-                                            sorttype: 'text',
-                                            autowidth: true,
-                                            exptype: "csvstring",
-                                            root: "grid",
-                                            multiselect: true,
+                                    pager: "#pager",
+                                    rowNum: 10,
+                                    rowList: [30, 50, 100, 150, 300, 500],
+                                    sortname: "invid",
+                                    sortorder: "desc",
+                                    viewrecords: true,
+                                    gridview: true,
+                                    autoencode: true,
+                                    caption: "Recherche parmis les flux",
+                                    sortable: true,
+                                    sorttype: 'text',
+                                    autowidth: true,
+                                    exptype: "csvstring",
+                                    root: "grid",
+                                    multiselect: true,
 //                                            scrollrows : true,
-                                            ident: "\t"
+                                    ident: "\t"
 //                                    filterToolbar: {searchOperators: true},
 //                                    search: {
 //                                        caption: "Search...",
@@ -186,64 +186,64 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
 //                                        matchText: " match",
 //                                        rulesText: " rules"
 //                                    }
-                                    }
-                                    );
-                                            optionsearch = {searchOperators: true, stringResult: true};
+                                }
+                                );
+                                optionsearch = {searchOperators: true, stringResult: true};
 //                                jQuery("#list").jqGrid('filterToolbar', {searchOperators: true});
-                                            jQuery("#list").filterToolbar(optionsearch);
-                                            jQuery("#list").navGrid('#pager', {edit: false, add: false, del: false, search: false})
-                                            .navButtonAdd('#pager', {
+                                jQuery("#list").filterToolbar(optionsearch);
+                                jQuery("#list").navGrid('#pager', {edit: false, add: false, del: false, search: false})
+                                        .navButtonAdd('#pager', {
                                     caption: "'Export To CSV",
-                                            buttonicon: "ui-icon-add",
-                                            onClickButton: function() {
-                                    opt = {exptype: "jsonstring"};
-                                            $("#list").jqGrid('excelExport', {tag: 'csv', url: '${rootpath}flux/list?vue=csv'});
+                                    buttonicon: "ui-icon-add",
+                                    onClickButton: function() {
+                                        opt = {exptype: "jsonstring"};
+                                        $("#list").jqGrid('excelExport', {tag: 'csv', url: '${rootpath}flux/list?vue=csv'});
                                     },
-                                            position: "last"
-                                    })
-                                            .navButtonAdd('#pager',
-                                    {
-                                    caption: "Supprimer",
+                                    position: "last"
+                                })
+                                        .navButtonAdd('#pager',
+                                        {
+                                            caption: "Supprimer",
                                             buttonicon: "ui-icon-add",
                                             onClickButton: function() {
-                                    reponse = confirm('Vous vous apprétez à supprimer un flux. Toutes les items associées seront supprimée. Cette manipulation est irréverssible. Confirmez vous votre choix ?');
-                                            if (reponse) {
-                                    selRowId = $('#list').jqGrid('getGridParam', 'selarrrow');
-                                            //chaine = "";
-                                            //for (i = 0; i < selRowId.length; i++) {
-                                            //    chaine += 'id=' + selRowId[i] + ',';
-                                            //}
-                                            //if (chaine.length > 2) {
-                                            //    chaine = chaine.substr(0, chaine.length - 1);
-                                            //}
-                                            //url = ${rootpath} + 'flux/rem?' + chaine;
-                                            url = ${rootpath} + 'flux/rem?id=' + selRowId;
-                                            location.href = url;
-                                    }
-
-                                    },
-                                    })
-                                            .navButtonAdd('#pager', {
-                                    caption: "Mise a jour",
-                                            buttonicon: "ui-icon-add",
-                                            onClickButton: function() {
-                                    alert('maj' + formatIdParamFromSelectedRow());
-                                            location.href = ${rootpath} + 'flux/maj?' + formatIdParamFromSelectedRow();
-                                    }
-                                    });
-                                    });
-                                            /***
-                                    * Parcours les items sélectionné par dans la grid et renvoi une chaine de caractère sous la forme id=nul,id=num2. Permet de formater les paramettres dans une url
-                                             * @returns {unresolved} */
-                                                    function formatIdParamFromSelectedRow() {
+                                                reponse = confirm('Vous vous apprétez à supprimer un flux. Toutes les items associées seront supprimée. Cette manipulation est irréverssible. Confirmez vous votre choix ?');
+                                                if (reponse) {
                                                     selRowId = $('#list').jqGrid('getGridParam', 'selarrrow');
-                                                            ch = "";
-                                                            for (i = 0; i < selRowId.length; i++) {
-                                                    ch += 'id=' + selRowId[i] + ',aa';
-                                                    }
-                                                    if (ch.length > 2) {
-                                                    ch = ch.substr(0, ch.length - 1);
-                                                    }
+                                                    //chaine = "";
+                                                    //for (i = 0; i < selRowId.length; i++) {
+                                                    //    chaine += 'id=' + selRowId[i] + ',';
+                                                    //}
+                                                    //if (chaine.length > 2) {
+                                                    //    chaine = chaine.substr(0, chaine.length - 1);
+                                                    //}
+                                                    //url = ${rootpath} + 'flux/rem?' + chaine;
+                                                    url = ${rootpath} + 'flux/rem?id=' + selRowId;
+                                                    location.href = url;
+                                                }
+
+                                            },
+                                        })
+                                        .navButtonAdd('#pager', {
+                                    caption: "Mise a jour",
+                                    buttonicon: "ui-icon-add",
+                                    onClickButton: function() {
+                                        alert('maj' + formatIdParamFromSelectedRow());
+                                        location.href = ${rootpath} + 'flux/maj?' + formatIdParamFromSelectedRow();
+                                    }
+                                });
+                            });
+                            /***
+                             * Parcours les items sélectionné par dans la grid et renvoi une chaine de caractère sous la forme id=nul,id=num2. Permet de formater les paramettres dans une url
+                             * @returns {unresolved} */
+                            function formatIdParamFromSelectedRow() {
+                                selRowId = $('#list').jqGrid('getGridParam', 'selarrrow');
+                                ch = "";
+                                for (i = 0; i < selRowId.length; i++) {
+                                    ch += 'id=' + selRowId[i] + ',aa';
+                                }
+                                if (ch.length > 2) {
+                                    ch = ch.substr(0, ch.length - 1);
+                                }
 <!--alert(selRowId);-->
                                 return 'id=' + selRowId;
                                 return ch;
@@ -281,21 +281,21 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
                                                     <button type="button" onclick="actionsub();"> OK</button>
                                                 </form>-->
                         <script>
-                                    //Petite fonction pour la soumission du formulaire permettant la mise à jour et la suppression en nombre
-                                            function actionsub() {
-                                            action = $('#act').val();
-                                                    if (action === 'rem') {
-                                            reponse = confirm('Vous vous apprétez à supprimer un flux. Toutes les items associées seront supprimée. Cette manipulation est irréverssible. Confirmez vous votre choix ?');
-                                                    if (reponse) {
-                                            $('#formaction2').attr('action', '${rootpath}flux/' + action);
-                                                    $('#formaction2').submit();
-                                            }
-                                            }
-                                            else if (action === 'maj') {
-                                            $('#formaction2').attr('action', '${rootpath}flux/' + action);
-                                                    $('#formaction2').submit();
-                                            }
-                                            }
+                            //Petite fonction pour la soumission du formulaire permettant la mise à jour et la suppression en nombre
+                            function actionsub() {
+                                action = $('#act').val();
+                                if (action === 'rem') {
+                                    reponse = confirm('Vous vous apprétez à supprimer un flux. Toutes les items associées seront supprimée. Cette manipulation est irréverssible. Confirmez vous votre choix ?');
+                                    if (reponse) {
+                                        $('#formaction2').attr('action', '${rootpath}flux/' + action);
+                                        $('#formaction2').submit();
+                                    }
+                                }
+                                else if (action === 'maj') {
+                                    $('#formaction2').attr('action', '${rootpath}flux/' + action);
+                                    $('#formaction2').submit();
+                                }
+                            }
 
                         </script>
                     </c:when>
@@ -309,18 +309,18 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
                             <li><a href="${rootpath}incidents/recherche?fluxSelection2=${bean.ID}&type=CollecteIncident">Parcourir les incidents</a></li>
                             <li><a href="${rootpath}flux/importcsv?id=${bean.ID}">Importer des items</a></li>
                             <script>
-                                        $(document).ready(function() {
-                                        $('#suppLink').on('click', function truc2(e) {
+                                $(document).ready(function() {
+                                    $('#suppLink').on('click', function truc2(e) {
 
                                         reponse = confirm('Vous vous apprétez à supprimer un flux. Toutes les items associées seront supprimée. Cette manipulation est irréverssible. Confirmez vous votre choix ?');
-                                                if (reponse) {
-                                        return true;
+                                        if (reponse) {
+                                            return true;
                                         } else {
-                                        e.preventDefault();
-                                                return false;
+                                            e.preventDefault();
+                                            return false;
                                         }
-                                        });
-                                        });</script>
+                                    });
+                                });</script>
 
 
                         </ul>
@@ -332,9 +332,9 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
                         <script src="http://code.highcharts.com/modules/exporting.js"></script>
 
                         <script>
-                                                $(function() {
-                                        $(".datepicker").datepicker({dateFormat: "dd/mm/yy"});
-                                        });</script>
+                                $(function() {
+                                    $(".datepicker").datepicker({dateFormat: "dd/mm/yy"});
+                                });</script>
 
 
 
@@ -543,13 +543,10 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
                                     <td>${tache.comportementDuFlux.dedoubloneur.compteCapture[4]}</td>
                                     <td>
                                         <c:set var="erreur" value="0"></c:set>
-                                        <c:forEach items="${tache.flux.incidentEnCours}" var="inci" varStatus="last">
-                                            <c:set var="erreur" value="1"></c:set>
-                                            ${inci.messageEreur}
-                                        </c:forEach>
+                                      
                                         <c:if test="${not empty tache.exeption}">
                                             <c:set var="erreur" value="1"></c:set>
-                                            ${tache.exeption}
+                                            ${tache.exeption} 
                                         </c:if>
 
                                         <c:if test="${erreur!=1}">OK</c:if>
@@ -565,7 +562,7 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
 
                         <h2>Paramètres du flux</h2>
 
-                        <p><strong>Url : </strong> ${bean.url}</p>
+                        <p><strong>Url : </strong> <a  target="_blank"href="${bean.url}">${bean.url}</a></p>
                         <p><strong>Nom du flux :</strong> ${bean.nom}</p>
                         <p><strong>Page HTML :</strong> ${bean.htmlUrl}</p>
                         <p><strong>Comportement de collecte :</strong><a href="${rootpath}ComportementCollecte/read?id=${bean.mediatorFlux.ID}"> ${bean.mediatorFlux}</a></p>
@@ -582,96 +579,114 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
 
                         </p>
                         <hr />
-                        
+
                         <h2>Indice de captation</h2>
+
+                        
+                         <script src="${rootpath}AjaxFluxDyn.js"></script>
+                        <label>Periode de captation : </label> 
+                        <select id="selectionPeriod">
+                            <option>Selection</option>
+                            <c:forEach items="${bean.periodeCaptations}" var="pCapt">
+                                <option value="${pCapt.ID}">${pCapt}</option>
+                            </c:forEach>
+                        </select>
+                        
+                        
+
                         <p><strong title="L'indice de qualité captation est le rapport entre la période pour laquelle le flux a pu être collecté correctement et la somme des périodes pour lesquels le flux n'a pu être collecté : ">Indice Qualité captation : </strong>${bean.indiceQualiteCaptation}</p>
-    
-    
-                            <h3>Nombre d'item jour captutée</h3>
+
+                        <div id="affichageCaptation"></div>
+
+<!--                        <h3>Nombre d'item jour captutée</h3>
 
                         <p><strong>Mediane : </strong>${bean.indiceMedianeNbrItemJour}</p>
                         <p><strong>Décile :</strong>${bean.indiceDecileNbrItemJour}</p>
                         <p><strong>Quartile : </strong>${bean.indiceQuartileNbrItemJour}</p>
                         <p><strong>Maximum : </strong>${bean.indiceMaximumNbrItemJour}</p>
-                        <p><strong>Minimum : </strong>${bean.indiceMinimumNbrItemJour}</p>
+                        <p><strong>Minimum : </strong>${bean.indiceMinimumNbrItemJour}</p>-->
 
 
                         <script src="http://code.highcharts.com/highcharts.js"></script>
                         <script src="http://code.highcharts.com/highcharts-more.js"></script>
                         <script src="http://code.highcharts.com/modules/exporting.js"></script>
 
+
+                        <div id="container" style="height: 400px; margin: auto; min-width: 310px; max-width: 600px"></div>
+
                         <script>
 
-                                                $(function() {
-                                        $('#container').highcharts({
-                                        chart: {
-                                        type: 'boxplot'
-                                        },
-                                                title: {
-                                        text: 'BoxPloat nombre d\'item jour sur la période'
-                                        },
-                                                legend: {
-                                        enabled: false
-                                        },
-                                                xAxis: {
-                                        categories: ['1', '2', '3', '4', '5'],
-                                                title: {
-                                        text: 'Flux ${bean}.'
-                                        }
-                                        },
-                                                yAxis: {
-                                        title: {
-                                        text: 'Nombre d\'item par jour'
-                                        },
-                                                plotLines: [{
-                                        value: 932,
-                                                color: 'red',
-                                                width: 1,
-                                                label: {
-                                        text: 'Theoretical mean: 932',
-                                                align: 'center',
-                                                style: {
-                                        color: 'gray'
-                                        }
-                                        }
-                                        }]
-                                        },
-                                                series: [{
-                                        name: 'Observations',
-                                                data: [
-                                                [${bean.indiceMinimumNbrItemJour}, ${bean.indiceQuartileNbrItemJour}, ${bean.indiceMedianeNbrItemJour}, ${bean.indiceDecileNbrItemJour}, ${bean.indiceMaximumNbrItemJour}]
-                                        ],
-                                                tooltip: {
-                                        headerFormat: '<em>Experiment No {point.key}</em><br/>'
-                                        }
-                                        }
-//                                            , {
-//                                                name: 'Outlier',
-//                                                color: Highcharts.getOptions().colors[0],
-//                                                type: 'scatter',
-//                                                data: [// x, y positions where 0 is the first category
-//                                                    [0, 644],
-//                                                    [4, 718],
-//                                                    [4, 951],
-//                                                    [4, 969]
+                                $(function() {
+
+//                                    $('#container').highcharts({
+//                                        chart: {
+//                                            type: 'boxplot'
+//                                        },
+//                                        title: {
+//                                            text: 'BoxPloat nombre d\'item jour sur la période'
+//                                        },
+//                                        legend: {
+//                                            enabled: false
+//                                        },
+//                                        xAxis: {
+//                                            categories: ['1', '2', '3', '4', '5'],
+//                                            title: {
+//                                                text: 'Flux ${fn:replace(bean, "'", "\\'")}.'
+//                                            }
+//                                        },
+//                                        yAxis: {
+//                                            title: {
+//                                                text: 'Nombre d\'item par jour'
+//                                            },
+//                                            plotLines: [{
+//                                                    value: 932,
+//                                                    color: 'red',
+//                                                    width: 1,
+//                                                    label: {
+//                                                        text: 'Theoretical mean: 932',
+//                                                        align: 'center',
+//                                                        style: {
+//                                                            color: 'gray'
+//                                                        }
+//                                                    }
+//                                                }]
+//                                        },
+//                                        series: [{
+//                                                name: 'Observations',
+//                                                data: [
+//                                                    [${bean.indiceMinimumNbrItemJour}, ${bean.indiceQuartileNbrItemJour}, ${bean.indiceMedianeNbrItemJour}, ${bean.indiceDecileNbrItemJour}, ${bean.indiceMaximumNbrItemJour}]
 //                                                ],
-//                                                marker: {
-//                                                    fillColor: 'white',
-//                                                    lineWidth: 1,
-//                                                    lineColor: Highcharts.getOptions().colors[0]
-//                                                },
 //                                                tooltip: {
-//                                                    pointFormat: 'Observation: {point.y}'
+//                                                    headerFormat: '<em>Experiment No {point.key}</em><br/>'
 //                                                }
 //                                            }
-                                        ]
-                                        });
-                                        });
+////                                            , {
+////                                                name: 'Outlier',
+////                                                color: Highcharts.getOptions().colors[0],
+////                                                type: 'scatter',
+////                                                data: [// x, y positions where 0 is the first category
+////                                                    [0, 644],
+////                                                    [4, 718],
+////                                                    [4, 951],
+////                                                    [4, 969]
+////                                                ],
+////                                                marker: {
+////                                                    fillColor: 'white',
+////                                                    lineWidth: 1,
+////                                                    lineColor: Highcharts.getOptions().colors[0]
+////                                                },
+////                                                tooltip: {
+////                                                    pointFormat: 'Observation: {point.y}'
+////                                                }
+////                                            }
+//                                        ]
+//                                    });
+                                });
 
                         </script>
 
 
-                        <div id="container" style="height: 400px; margin: auto; min-width: 310px; max-width: 600px"></div>
+
 
 
 

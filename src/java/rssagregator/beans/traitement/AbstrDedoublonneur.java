@@ -7,6 +7,7 @@ package rssagregator.beans.traitement;
 import java.io.Serializable;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Iterator;
 import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -19,6 +20,8 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.apache.log4j.Logger;
 import org.apache.tomcat.util.buf.HexUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.dao.DAOFactory;
@@ -60,6 +63,16 @@ public abstract class AbstrDedoublonneur implements Serializable, Cloneable {
     protected Boolean dedouGUID;
     @Column(name = "dedoubCategory")
     protected Boolean dedoubCategory;
+    @Column(name = "enable")
+    protected Boolean enable = true;
+
+    public Boolean getEnable() {
+        return enable;
+    }
+
+    public void setEnable(Boolean enable) {
+        this.enable = enable;
+    }
     /**
      * *
      * 1=nombre item trouvé ; 2 dedoub memoire; 3 BDD item lié ;4 BDD item déjà présente mais lien ajouté ; 5 item
@@ -88,7 +101,6 @@ public abstract class AbstrDedoublonneur implements Serializable, Cloneable {
 //        }
 //        return false;
 //    }
-
     @Deprecated
     public Boolean testDoublonageBDD(Item get, Flux flux) {
         // On test si on peu trouver une item possédant le hash pour le flux
@@ -99,7 +111,7 @@ public abstract class AbstrDedoublonneur implements Serializable, Cloneable {
         return false;
     }
 
-   public abstract List<Item> dedoublonne(List<Item> listItemCapture, Flux flux);
+    public abstract List<Item> dedoublonne(List<Item> listItemCapture, Flux flux);
 
     public Boolean getDeboubTitle() {
         return deboubTitle;
@@ -194,12 +206,12 @@ public abstract class AbstrDedoublonneur implements Serializable, Cloneable {
 
 //                concat = item.getTitre() + item.getDescription();
         MessageDigest digest;
-     
-            digest = MessageDigest.getInstance("MD5");
-            digest.reset();
-            byte[] hash = digest.digest(concat.getBytes());
-            String hashString = HexUtils.toHexString(hash);
-            return hashString;
+
+        digest = MessageDigest.getInstance("MD5");
+        digest.reset();
+        byte[] hash = digest.digest(concat.getBytes());
+        String hashString = HexUtils.toHexString(hash);
+        return hashString;
 
     }
 
@@ -221,7 +233,18 @@ public abstract class AbstrDedoublonneur implements Serializable, Cloneable {
             }
 
             if (this.deboudDesc && item.getDescription() != null) {
-                concat += item.getDescription();
+
+//                String descTmtRafiner = Jsoup.parse(item.getDescription()).html();
+                // On supprimer les a
+                // Le calcul du hash pour la description exclu le code HTML ainsi que les balise style a et ul car elle peuvent contenir des artivles en liaison. On veut le hash du contenu de l'item en text. 
+                Document documentTxtItemCapture = Jsoup.parse(item.getDescription());
+                documentTxtItemCapture.select("a").remove();
+                documentTxtItemCapture.select("li").remove();
+                documentTxtItemCapture.select("ol").remove();
+                String textItemCapture = documentTxtItemCapture.text();
+                concat += textItemCapture;
+
+//                concat += item.getDescription();
             }
 
             if (this.dedouGUID && item.getDescription() != null) {
@@ -263,5 +286,53 @@ public abstract class AbstrDedoublonneur implements Serializable, Cloneable {
         clone.compteCapture = this.compteCapture.clone();
 
         return clone; //To change body of generated methods, choose Tools | Templates.
+    }
+
+    /**
+     * *
+     * Parcours la liste envoyé en argument pour supprimer des doublons interne à celle ci (pas de vérification par
+     * rapport à la base de données)
+     *
+     * @param listItem La liste d'item à vérifier
+     */
+    protected void dedoublonnageInterneduneListDItem(List<Item> listItem) {
+
+        if (listItem != null) {
+            // suppression des items possédant le même hash
+            for (Iterator<Item> it = listItem.iterator(); it.hasNext();) {
+                Item item1 = it.next();
+                int cpt = 0;
+                for (int i = 0; i < listItem.size(); i++) {
+                    Item item = listItem.get(i);
+                    if (item.getHashContenu().equals(item1.getHashContenu())) {
+                        cpt++;
+                    }
+                }
+                if (cpt > 1) {
+                    it.remove();
+                }
+            }
+
+            //Vérification si on n'a pas deux foix un même ID pour une Item
+            for (Iterator<Item> it = listItem.iterator(); it.hasNext();) {
+                Item item = it.next();
+                int cpt = 0;
+                if (item.getID() != null) {
+                    for (Iterator<Item> it1 = listItem.iterator(); it1.hasNext();) {
+                        Item item1 = it1.next();
+                        if (item1.getID() != null) {
+                            if (item1.getID().equals(item.getID())) {
+                                cpt++;
+                                item1.verserLesDonneeBruteAutreItem(item);
+                                item.verserLesDonneeBruteAutreItem(item1);
+                            }
+                        }
+                    }
+                    if (cpt > 1) {
+                        it.remove();
+                    }
+                }
+            }
+        }
     }
 }

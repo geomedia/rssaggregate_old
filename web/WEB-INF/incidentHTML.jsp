@@ -46,29 +46,31 @@
 
                                 <input type="hidden" name="firstResult" id="firstResult" value="0"/> 
 
+                                
                                 <label>Type D'incident :</label>
-                                Collecte :<input type="radio" name="type" value="CollecteIncident" checked="checked" id="type" />
-                                Synchronisation : <input type="radio" name="type" value="SynchroIncident">
-                                Serveur : <input type="radio" name="type" value="ServerIncident">
-                                Mail : <input type="radio" name="type" value="MailIncident"/>
+                                <label>Tous : </label><input type="radio" name="type" value="AbstrIncident" /><br />
+                                <label>Collecte </label>:<input type="radio" name="type" value="CollecteIncident" checked="checked" id="type" /><br />
+                                <label>Synchronisation </label>: <input type="radio" name="type" value="SynchroIncident"><br />
+                                <label>Serveur :</label> <input type="radio" name="type" value="ServerIncident"><br />
+                                <label>Mail :</label> <input type="radio" name="type" value="MailIncident"/>
 
 
 
                                 <br />
-                                <label>Entité par page</label>
+<!--                                <label>Entité par page</label>
                                 <select id="itPrPage" name="itPrPage" onChange="this.form.submit();"> 
                                     <c:forEach var="i" begin="25" end="150" step="25">
                                         <option value="${i}" <c:if test="${itPrPage==i}"> selected="selected"</c:if>>${i}</option>
                                     </c:forEach>
-                                </select><br />
+                                </select><br />-->
                                 <label>Voir : </label>
                                 <input type="radio" id="clos" name="clos" value="true"<c:if test="${clos}"> checked="checked"</c:if> onclick="$('afin').click();">Incident clos
                                 <input type="radio" name="clos" value="false"<c:if test="${!clos}"> checked="checked"</c:if> onclick="$('afin').click();">Incident non clos
 
 
                                     <br />
-                                    <button value="0" name="limiterFlux" id="limiterFlux" type="button">Limiter aux flux</button>
-                                    <div id="divLimiterFluxContener">
+                                    <!--<button value="0" name="limiterFlux" id="limiterFlux" type="button">Limiter aux flux</button>-->
+<!--                                    <div id="divLimiterFluxContener">
                                         <div id="divLimiterFlux">
                                             <label>Flux lie : </label>
                                             <table>
@@ -100,7 +102,7 @@
                                                 </td>
                                                 <td>
 
-                                                    <button type="button" onclick="selectflux();">--></button><br />
+                                                    <button type="button" onclick="selectflux();"></button><br />
                                                     <button type="button" onclick="supp();"><--</button>
                                                 </td>
                                                 <td><select multiple="true" style="max-width: 300px; width: 300px" name="fluxSelection2" id="fluxSelection2">
@@ -113,23 +115,114 @@
 
                                         </table>
                                     </div>
-                                </div>
+                                </div>-->-->
 
                                 <input type="hidden" name="requestOnStart" id="requestOnStart" value="${requestOnStart}"/>
-                                <script src="${rootpath}AjaxIncidDyn.js"></script>
+                                <script src="${rootpath}AjaxIncidDynGrid.js"></script>
                                 <script src="${rootpath}dynListJournauxFLux.js"></script>
-             
+
 
                                 <button type="button" id="afin" >Affiner</button>
                             </fieldset>
 
                         </form>
-                                <div id="disabledElement"></div>
+                        <div id="disabledElement"></div>
 
 
                         <ul id="resudiv">
 
                         </ul>
+
+
+                        <table id="list" width="600"><tr><td></td></tr></table> 
+                        <div id="pager"></div> 
+
+
+                        <script src="${rootpath}ress/jqgrid/js/i18n/grid.locale-fr.js" type="text/javascript"></script>
+                        <script src="${rootpath}ress/jqgrid/js/jquery.jqGrid.min.js" type="text/javascript"></script>
+
+                        <link rel="stylesheet" type="text/css" media="screen" href="css/ui-lightness/jquery-ui-1.7.1.custom.css" />
+                        <link rel="stylesheet" type="text/css" media="screen" href="${rootpath}ress/jqgrid/css/ui.jqgrid.css" />
+                        <link rel="stylesheet" type="text/css" media="screen" href="${rootpath}ress/jquery-ui-1.10.3.custom/css/base/jquery-ui.css" />
+
+                        <script type="text/javascript">
+                                    /***
+                                     *  Utilisé par JQgrid pour formater le champ journal en un lien
+                                     * @param {type} cellvalue
+                                     * @param {type} options
+                                     * @param {type} rowObjcet
+                                     * @param {type} l4
+                                     * @param {type} l5
+                                     * @returns {String}
+                                     */
+                                    function myLinkFormatter(cellvalue, options, rowObjcet, l4, l5) {
+//        alert("0" + rowObjcet[0]);
+//        alert("1" + rowObjcet[1])
+//        alert("2"+ rowObjcet[2])
+        return '<a href = "/RSSAgregate/incidents/read?id=' + rowObjcet[0]+"&type=" +rowObjcet[2]+ '">' + rowObjcet[1] + '</a>';
+                                    }
+
+                                    $(function() {
+                                        $("#list").jqGrid({
+                                            loadonce: false,
+                                            url: "${rootpath}incidents/list2?vue=grid&type=CollecteIncident",
+//                                            url: "${rootpath}item/list?vue=grid",
+                                            datatype: "json",
+                                            mtype: "GET",
+                                            colNames: ["ID", "intitulé","type", "messageEreur", "dateDebut", "dateFin"],
+                                            colModel: [
+                                                {name: "ID", width: 55, hidden: true, searchoptions: {sopt: ['cn', 'eq']}},
+                                                {name: "intitulé", classtype: 'clem', sorttype: 'float', width: 90, formatter: myLinkFormatter, searchoptions: {sopt: ['cn', 'eq']}},
+                                                {name: "type", index: 'type', key: false, search: false, width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
+                                                {name: "messageEreur", index: 'langue', key: true, search: true, width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
+                                                {name: "dateDebut", width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
+                                                {name: "dateFin", width: 80, align: "right", stype: 'select', editoptions: {value: {'': 'tous', 'autre': 'autre', 'quotidien': 'quotidien'}}},
+                                            ],
+                                            pager: "#pager",
+                                            rowNum: 10,
+                                            rowList: [10, 20, 30],
+                                            sortname: "invid",
+                                            sortorder: "desc",
+                                            viewrecords: true,
+                                            gridview: true,
+                                            autoencode: true,
+                                            caption: "Recherche parmis les journaux",
+                                            sortable: true,
+                                            sorttype: 'text',
+                                            autowidth: true,
+                                            exptype: "csvstring",
+                                            root: "grid",
+                                            ident: "\t"
+//                                    filterToolbar: {searchOperators: true},
+//                                    search: {
+//                                        caption: "Search...",
+//                                        Find: "Find",
+//                                        Reset: "Reset",
+//                                        odata: ['equal', 'not equal', 'less', 'less or equal', 'greater', 'greater or equal', 'begins with', 'does not begin with', 'is in', 'is not in', 'ends with', 'does not end with', 'contains', 'does not contain'],
+//                                        groupOps: [{op: "AND", text: "all"}, {op: "OR", text: "any"}],
+//                                        matchText: " match",
+//                                        rulesText: " rules"
+//                                    }
+                                        }
+                                        );
+
+                                        optionsearch = {searchOperators: true, stringResult: true};
+//                                jQuery("#list").jqGrid('filterToolbar', {searchOperators: true});
+                                        jQuery("#list").filterToolbar(optionsearch);
+                                        jQuery("#list").navGrid('#pager', {edit: false, add: false, del: false, search: false})
+                                                .navButtonAdd('#pager', {
+                                            caption: "'Export To CSV",
+                                            buttonicon: "ui-icon-add",
+                                            onClickButton: function() {
+
+                                                opt = {exptype: "jsonstring"};
+                                                $("#list").jqGrid('excelExport', {tag: 'csv', url: '${rootpath}journaux/list?vue=csv'});
+                                            },
+                                            position: "last"
+                                        });
+                                    });
+                        </script>
+
 
                     </c:when>
 
@@ -165,10 +258,10 @@
                         <c:if test="${bean['class'].simpleName=='CollecteIncident'}">
                             <p><strong>Flux impacté : </strong><a href="${rootpath}flux/read?id=${bean.fluxLie.ID}">${bean.fluxLie}</a></p>
                             </c:if>
-                            
-                            
-                            <c:if test="${bean['class'].simpleName=='ServerIncident'}">
-                            
+
+
+                        <c:if test="${bean['class'].simpleName=='ServerIncident'}">
+
                         </c:if>
 
 

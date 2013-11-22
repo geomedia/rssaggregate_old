@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import rssagregator.beans.traitement.Dedoubloneur;
+import rssagregator.beans.traitement.DedoubloneurComparaisonTitre;
 import rssagregator.beans.traitement.MediatorCollecteAction;
 import rssagregator.beans.traitement.Requester;
 import rssagregator.beans.traitement.RomeParse;
@@ -33,13 +34,10 @@ public class ComportementCollecteForm extends AbstrForm {
     private String comportement_nom;
     private String comportement_desc;
     private Boolean defaut;
+    private Boolean secondDedoub;
 
     protected ComportementCollecteForm() {
     }
-    
-    
-    
-    
 
     @Override
     public Object bind(HttpServletRequest request, Object objEntre, Class type) {
@@ -74,9 +72,17 @@ public class ComportementCollecteForm extends AbstrForm {
             collecte.getDedoubloneur().setDedoubDatePub(dedoubDatePub);
             collecte.getDedoubloneur().setDedoubCategory(dedoubCategory);
 
+
+            collecte.getDedoublonneur2().setEnable(secondDedoub);
+
+
+
             collecte.setNom(comportement_nom);
             collecte.setDescription(comportement_desc);
             collecte.setDefaut(defaut);
+
+
+
         }
         return collecte;
     }
@@ -111,8 +117,7 @@ public class ComportementCollecteForm extends AbstrForm {
             } catch (Exception e) {
                 erreurs.put("periodiciteCollecte", new String[]{"N'est pas un numéric", ""});
             }
-        }
-        else{
+        } else {
             erreurs.put("periodiciteCollecte", new String[]{"Ne peut être nul", ""});
         }
 
@@ -204,6 +209,15 @@ public class ComportementCollecteForm extends AbstrForm {
         } else {
             defaut = true;
         }
+
+
+        s = request.getParameter("secondDedoub");
+        if (s == null || s.isEmpty()) {
+            secondDedoub = false;
+        } else {
+            secondDedoub = true;
+        }
+
 
 
         //---------------------------------------------------------------

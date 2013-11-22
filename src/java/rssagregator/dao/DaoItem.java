@@ -301,23 +301,16 @@ public class DaoItem extends AbstrDao {
      * @param flux : Flux devant être lié aux items
      * @return : euu ne sert a rien ?
      */
-    public synchronized List<Item> findHashFlux(String hashParamSQL, Flux flux) {
+    public synchronized List<Item> findHashFlux(String hashParamSQL) {
 //        em = dAOFactory.getEntityManager();
 //        em.getTransaction().begin();
 
         // Constuction de la liste des hash
         int i;
-//        String hashParamSQL = "";
-//        for (i = 0; i < hashContenu.size(); i++) {
-//            hashParamSQL += "'" + hashContenu.get(i).getHashContenu() + "', ";
-//        }
-//        
-//        if (hashParamSQL.length() > 2) {
-//            hashParamSQL = hashParamSQL.substring(0, hashParamSQL.length() - 2);
-//        }
+
 // TODO : C'est laid de faire des requete mon préparée en plein milieu du code. Mais on n'arive pas a préparer une requete basée su une liste de string
 //        Query query = em.createQuery("SELECT item FROM Item item JOIN item.listFlux flux where item.hashContenu IN ("+hashParamSQL+") AND flux.ID=:fluxid");
-        System.out.println(hashParamSQL);
+//        System.out.println(hashParamSQL);
         Query query = em.createQuery("SELECT item FROM Item item LEFT JOIN fetch item.listFlux WHERE item.hashContenu IN (" + hashParamSQL + ")");
 //        Query query = em.createQuery("SELECT i FROM Item i WHERE i.hashContenu IN (" + hashParamSQL + ")");
         //LEFT JOIN FETCH item.listFlux
@@ -327,6 +320,46 @@ public class DaoItem extends AbstrDao {
         resuList = query.getResultList();
         return resuList;
     }
+
+    
+    /***
+     * Retourne les items possédant des données brute avec un hash contenu dans la list
+     * @param hash
+     * @return 
+     */
+    public List<Item> findItemsAvecHashDansDonneSource(String hash) {
+
+        Query query = em.createQuery("SELECT item FROM Item item JOIN item.listFlux f, item.donneeBrutes b WHERE  b.hashContenu IN (" + hash + ")");
+
+
+        List<Item> resuList;
+        resuList = query.getResultList();
+        return resuList;
+
+
+    }
+    
+        /***
+     * Retourne les items possédant des données brute avec un hash contenu dans la list
+     * @param hash
+     * @return 
+     */
+    public Item findItemAvecHashDansDonneSource(String hash) {
+
+        Query query = em.createQuery("SELECT item FROM Item item JOIN item.listFlux f, item.donneeBrutes b WHERE  b.hashContenu = :hash");
+        query.setParameter("hash", hash);
+
+
+        Item resu;
+        resu = (Item) query.getSingleResult();
+        
+        return resu;
+
+
+    }
+    
+    
+    
 
     /**
      * *
@@ -576,20 +609,20 @@ public class DaoItem extends AbstrDao {
 
     public List<Item> itemCaptureParleFluxDurantlaDernierePeriodeCollecte(Flux flux) throws ArgumentIncorrect, IncompleteBeanExeption {
 
-        if(flux==null){
+        if (flux == null) {
             throw new ArgumentIncorrect("Le flux envoyé en argument est null");
         }
-        
-        
+
+
         // Le flux doit être activé et posséder une période de collecte
 
         List resu = null;
         FluxPeriodeCaptation last = flux.returnDerniereFluxPeriodeCaptation();
         System.out.println("LAST : " + last);
-        if(last==null){
+        if (last == null) {
             throw new IncompleteBeanExeption("Impossible de retrouver la dernière période de captation du flux");
         }
-        
+
         if (last != null) {
 
             String req = "SELECT i FROM Item i JOIN i.listFlux f, f.periodeCaptations p WHERE p.ID=:idP";
@@ -598,7 +631,7 @@ public class DaoItem extends AbstrDao {
             resu = query.getResultList();
 
         }
-   
+
         return resu;
     }
 

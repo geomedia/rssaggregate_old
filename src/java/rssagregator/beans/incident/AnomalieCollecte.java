@@ -4,6 +4,7 @@
  */
 package rssagregator.beans.incident;
 
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import rssagregator.services.ServiceCollecteur;
@@ -129,4 +130,12 @@ public class AnomalieCollecte extends CollecteIncident implements Notification {
     public Float returnSeuilMinTolere() {
         return moyenneDesCapture - (moyenneDesCapture * seuil / 100);
     }
+
+    @Override
+    public String toString() {
+        return "Anomalie de Collecte flux : "+this.fluxLie;
+    }
+    
+    
+    
 }

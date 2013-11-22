@@ -8,12 +8,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import rssagregator.beans.Flux;
+import rssagregator.beans.Journal;
+import rssagregator.beans.form.AbstrForm;
 import rssagregator.beans.form.FORMFactory;
 import rssagregator.beans.form.IncidentForm;
 import rssagregator.beans.incident.AbstrIncident;
@@ -21,6 +25,7 @@ import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DAOIncident;
 import rssagregator.dao.DaoFlux;
+import static rssagregator.servlet.JournauxSrvl.ATT_JOURNAL;
 import rssagregator.utils.ServletTool;
 import static rssagregator.utils.ServletTool.redir;
 
@@ -42,7 +47,7 @@ public class IncidentsSrvl extends HttpServlet {
     public static final String ATT_OBJ = "bean";
     public String VUE = "/WEB-INF/incidentHTML.jsp";
     public static final String ATT_SERV_NAME = "incidents";
-        protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(IncidentsSrvl.class);
+    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(IncidentsSrvl.class);
 
     /**
      * Processes requests for both HTTP
@@ -125,7 +130,7 @@ public class IncidentsSrvl extends HttpServlet {
                     fluxSelectionne.add(f);
                 }
                 request.setAttribute("requestOnStart", true);
-                
+
             }
 
             request.setAttribute("fluxsel", fluxSelectionne);
@@ -211,12 +216,45 @@ public class IncidentsSrvl extends HttpServlet {
 
             //recup de la list des incidents
             List<Object> listAll = dao.findCriteria(c);
-            
+
             System.out.println("°°°° LIST : " + listAll);
             System.out.println("°°°° LIST : " + listAll.size());
             System.out.println("TAILLE LISTE : " + listAll.size());
             request.setAttribute(ATT_LIST, listAll);
             //--------------------------------------------ACTION : MOD-------------------------------------
+        } else if (action.equals("list2")) {
+
+            try {
+                Class c = null;
+                DAOIncident dao = null;
+                try {
+                    System.out.println("AAA");
+                    c = Class.forName("rssagregator.beans.incident." + request.getParameter("type"));
+                    System.out.println("CLASS : " + c);
+                    dao = (DAOIncident) DAOFactory.getInstance().getDaoFromType(c);
+                    if (!AbstrIncident.class.isAssignableFrom(c)) {
+                        System.out.println("PAS ASSIGNABLE");
+                        throw new Exception("non");
+                    }
+                } catch (Exception e) {
+
+                    System.out.println("ERR" + e);
+                }
+
+
+                AbstrForm form = FORMFactory.getInstance().getForm(c, "list");
+                System.out.println("FOMR : " + form);
+                System.out.println("DAO : " + dao);
+                System.out.println("TYPE : " + c.getName());
+                form.parseListeRequete(request, dao);
+                dao.setCriteriaSearchFilters(form.getFiltersList());
+                ServletTool.actionLIST(request, c, ATT_OBJ, dao);
+
+
+            } catch (Exception ex) {
+                Logger.getLogger(IncidentsSrvl.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
         } else if (action.equals("mod")) {
             System.out.println("");
             try {
@@ -265,6 +303,8 @@ public class IncidentsSrvl extends HttpServlet {
 
         if (vue.equals("html")) {
             VUE = "/WEB-INF/incidentHTML.jsp";
+        } else if (vue.equals("grid")) {
+            VUE = "/WEB-INF/incidentJSONGrid.jsp";
         }
         this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
 

@@ -116,6 +116,7 @@ public abstract class AbstrIncident implements Serializable {
      * Date de fin de l'incident. Cette variable est complété lorsqu'une tâche parvient à retrouver un comportement
      * normal
      */
+    @Column(name = "dateFin", nullable = true)
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     protected Date dateFin;
     

@@ -7,7 +7,9 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -28,6 +30,7 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.xml.ws.http.HTTPException;
 import org.apache.poi.util.Beta;
+import org.eclipse.persistence.jpa.jpql.utility.iterable.ListIterable;
 import rssagregator.beans.BeanSynchronise;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
@@ -117,6 +120,12 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
      */
     @OneToOne(cascade = CascadeType.ALL)
     protected AbstrDedoublonneur dedoubloneur;
+    /**
+     * *
+     * Il est possible de configurer un second dédoublonneur complétant le travail du premier
+     */
+    @OneToOne(cascade = CascadeType.ALL)
+    protected AbstrDedoublonneur dedoublonneur2;
     @Transient
     private Integer nbrItemCollecte;
     /**
@@ -190,8 +199,31 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
                 listItem = futurs.get(requesteur.getTimeOut(), TimeUnit.SECONDS);
             }
 
-            System.out.println("SIZE 1 : " + this.listItem.size());
             this.nbrItemCollecte = listItem.size();
+
+
+
+            // Génrer hash
+            if (dedoubloneur != null && dedoubloneur.enable != null && dedoubloneur.enable) {
+                this.dedoubloneur.calculHash(listItem);
+            }
+
+
+            // Ajout brut
+            RafineurHTML rafineur = new RafineurHTML();
+            for (int i = 0; i < listItem.size(); i++) {
+                Item item = listItem.get(i);
+                item.genererDonneesBrutes(flux);
+                rafineur.raffiner(item);
+            }
+
+
+
+            //rafi
+
+
+
+
 
 
             //-----------------------------
@@ -199,15 +231,40 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
             //-----------------------------
 
             // calcul des Md5
-            if (dedoubloneur != null) {
-                this.dedoubloneur.calculHash(listItem);
+            if (dedoubloneur != null && dedoubloneur.enable != null && dedoubloneur.enable) {
+//                this.dedoubloneur.calculHash(listItem);
+                // On lance le premier dédoublonneur. Il est chargé de dédoublonner par rapport aux hash.
                 listItem = this.dedoubloneur.dedoublonne(listItem, flux);
             }
-            
-            //Le deuxieme dedoub
-            DedoubloneurComparaisonTitre dedoub2 = new DedoubloneurComparaisonTitre();
-            listItem =  dedoub2.dedoublonne(listItem, flux);
-            
+
+            //Le deuxieme dedoub. Sur ce qu'il reste. Il dédoublonne en comparant titre et description
+//            DedoubloneurComparaisonTitre dedoub2 = new DedoubloneurComparaisonTitre();
+//            listItem = dedoub2.dedoublonne(listItem, flux);
+
+            if (dedoublonneur2 != null && dedoublonneur2.getEnable() != null && dedoublonneur2.getEnable()) {
+                listItem = dedoublonneur2.dedoublonne(listItem, flux);
+            }
+
+
+
+            DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
+
+
+            for (ListIterator<Item> it = listItem.listIterator(); it.hasNext();) {
+                Item item = it.next();
+                if (item.getID() == null) {
+                    Item itBDD = daoItem.findByHash(item.getHashContenu());
+                    if (itBDD != null) {
+
+//                        itBDD.addFlux(flux);
+                        itBDD.verserLesDonneeBruteAutreItem(item);
+                        it.set(itBDD);
+
+                    }
+                }
+            }
+
+
 
         } catch (Exception e) {
             logger.info("erreur lors de lu traitement : " + e);
@@ -408,6 +465,7 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
         this.dedoubloneur = new Dedoubloneur();
         this.requesteur = new Requester();
         this.dedoubloneur = new Dedoubloneur();
+        this.dedoublonneur2 = new DedoubloneurComparaisonTitre();
         this.parseur = new RomeParse();
     }
 
@@ -503,6 +561,14 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
 
             return "unamed";
         }
+    }
+
+    public AbstrDedoublonneur getDedoublonneur2() {
+        return dedoublonneur2;
+    }
+
+    public void setDedoublonneur2(AbstrDedoublonneur dedoublonneur2) {
+        this.dedoublonneur2 = dedoublonneur2;
     }
 
     @Override

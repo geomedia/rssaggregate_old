@@ -8,7 +8,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Observer;
-import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
@@ -16,7 +15,6 @@ import rssagregator.beans.Flux;
 import rssagregator.beans.FluxPeriodeCaptation;
 import rssagregator.beans.Item;
 import rssagregator.beans.POJOCompteItem;
-import rssagregator.beans.exception.DonneeInterneCoherente;
 import rssagregator.beans.incident.AnomalieCollecte;
 import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.beans.incident.IncidentFactory;
@@ -270,14 +268,18 @@ public class TacheCalculQualiteFlux extends TacheImpl<TacheCalculQualiteFlux> {
 //    }
     @Override
     protected void callCorps() throws Exception {
+        logger.debug("Calcul calité flux " + flux);
+        em = DAOFactory.getInstance().getEntityManager();
+        em.getTransaction().begin();
+        verrouillerObjectDansLEM(flux, LockModeType.PESSIMISTIC_WRITE);
         DaoFlux daof = DAOFactory.getInstance().getDAOFlux();
         DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
         daoItem.setEm(em);
-        em.getTransaction().begin();
 
 
-        verrouillerObjectDansLEM(flux, LockModeType.PESSIMISTIC_WRITE);
-        
+
+
+
 
 
         //------------------------------CALCUL DE L'incide de captation
@@ -322,7 +324,14 @@ public class TacheCalculQualiteFlux extends TacheImpl<TacheCalculQualiteFlux> {
 
         FluxPeriodeCaptation period = flux.returnDerniereFluxPeriodeCaptation();
         Date date1 = period.getDateDebut();
-        Date date2 = new DateTime(period.getDatefin()).minusDays(1).withEarlierOffsetAtOverlap().toDate(); // Pour la date 2, on prend la date de fin de période - 1 jour avec heures la plus tardive
+        Date date2 = null;
+        if(period.getDatefin()!=null){
+        date2 = new DateTime(period.getDatefin()).minusDays(1).withEarlierOffsetAtOverlap().toDate(); // Pour la date 2, on prend la date de fin de période - 1 jour avec heures la plus tardive    
+        }
+        else{
+            date2 = new Date();
+        }
+        
 
 
         List<Item> items = daoItem.itemCaptureParleFluxDurantlaDernierePeriodeCollecte(flux);
@@ -336,9 +345,51 @@ public class TacheCalculQualiteFlux extends TacheImpl<TacheCalculQualiteFlux> {
 
         flux.setIndiceMaximumNbrItemJour(compteItem.getMax().intValue());
         flux.setIndiceMinimumNbrItemJour(compteItem.getMin());
-        flux.setIndiceQuartileNbrItemJour(compteItem.getQuartile());
-        flux.setIndiceDecileNbrItemJour(compteItem.getDecile());
+        flux.setIndiceQuartileNbrItemJour(compteItem.getQuartilePremier());
+        flux.setIndiceDecileNbrItemJour(compteItem.getQuartileTrois());
         flux.setIndiceMedianeNbrItemJour(compteItem.getMediane());
+        
+        period.setStatMax(compteItem.getMax());
+        period.setStatMin(compteItem.getMin());
+        period.setStatQuartilePremier(compteItem.getQuartilePremier());
+        period.setStatQuartileTrois(compteItem.getQuartileTrois());
+        period.setStatMedian(compteItem.getMediane());
+        period.setStatMoyenne(compteItem.getMoyenne());
+        period.setStatEcartType(compteItem.getEcartType());
+        period.setStatSommeItemCapture(compteItem.getSomme());
+
+        // Stat par jour
+//        for (int i = 1; i < 8; i++) {
+//            period.sets
+//            
+//        }
+        period.setStatEcartTypeLundi(compteItem.getStatEcartypeDayOfWeek()[0]);
+        period.setStatMedLundi(compteItem.getStatMoyDayOfWeek()[0]);
+        period.setStatMoyLundi(compteItem.getStatMoyDayOfWeek()[0]);
+
+        period.setStatEcartTypeMardi(compteItem.getStatEcartypeDayOfWeek()[1]);
+        period.setStatMedMardi(compteItem.getStatMoyDayOfWeek()[1]);
+        period.setStatMoyMardi(compteItem.getStatMoyDayOfWeek()[1]);
+
+        period.setStatEcartTypeMercredi(compteItem.getStatEcartypeDayOfWeek()[2]);
+        period.setStatMedMercredi(compteItem.getStatMoyDayOfWeek()[2]);
+        period.setStatMoyMercredi(compteItem.getStatMoyDayOfWeek()[2]);
+
+        period.setStatEcartTypeJeudi(compteItem.getStatEcartypeDayOfWeek()[3]);
+        period.setStatMedJeudi(compteItem.getStatMoyDayOfWeek()[3]);
+        period.setStatMoyJeudi(compteItem.getStatMoyDayOfWeek()[3]);
+
+        period.setStatEcartTypeVendredi(compteItem.getStatEcartypeDayOfWeek()[4]);
+        period.setStatMedVendredi(compteItem.getStatMoyDayOfWeek()[4]);
+        period.setStatMoyVendredi(compteItem.getStatMoyDayOfWeek()[4]);
+
+        period.setStatEcartTypeSamedi(compteItem.getStatEcartypeDayOfWeek()[5]);
+        period.setStatMedSamedi(compteItem.getStatMoyDayOfWeek()[5]);
+        period.setStatMoySamedi(compteItem.getStatMoyDayOfWeek()[5]);
+
+        period.setStatEcartTypeDimanche(compteItem.getStatEcartypeDayOfWeek()[6]);
+        period.setStatMedDimanche(compteItem.getStatMoyDayOfWeek()[6]);
+        period.setStatMoyDimanche(compteItem.getStatMoyDayOfWeek()[6]);
 
 
 
@@ -374,5 +425,4 @@ public class TacheCalculQualiteFlux extends TacheImpl<TacheCalculQualiteFlux> {
         em.merge(flux); // On modifi le flux sans passer par le service, on ne veut pas que ces chiffre donnenen tlieu à une synchronisation
 
     }
-
 }

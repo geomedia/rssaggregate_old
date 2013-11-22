@@ -4,6 +4,10 @@
  */
 package rssagregator.servlet;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.sun.syndication.io.FeedException;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -27,8 +31,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.Part;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.ws.http.HTTPException;
+import net.sf.json.util.PropertyFilter;
+import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import rssagregator.beans.Flux;
+import rssagregator.beans.FluxPeriodeCaptation;
 import rssagregator.beans.FluxType;
 import rssagregator.beans.Journal;
 import rssagregator.beans.form.ParseCsvForm;
@@ -158,16 +168,16 @@ public class FluxSrvl extends HttpServlet {
             List<Flux> listFlux = new ArrayList<Flux>();
             try {
                 listFlux = new ArrayList<Flux>();
-                List<Long> listId = ServletTool.parseidFromRequest(request,null);
+                List<Long> listId = ServletTool.parseidFromRequest(request, null);
                 for (int i = 0; i < listId.size(); i++) {
                     Long long1 = listId.get(i);
-                    listFlux.add((Flux)daoFlux.find(long1));
+                    listFlux.add((Flux) daoFlux.find(long1));
                 }
-                
+
                 List<TacheRecupCallable> listTache = ServiceCollecteur.getInstance().majManuellAll(listFlux);
                 request.setAttribute(ATT_LISTOBJ, listFlux);
                 request.setAttribute("listTache", listTache);
-                
+
 
             } catch (NumberFormatException e) {
                 ServletTool.redir(request, "flux/maj", "Flux Inconnu", true);
@@ -191,11 +201,11 @@ public class FluxSrvl extends HttpServlet {
                 request.setAttribute("journalid", idJournal);
                 journalLie = (Journal) daoJournal.find(idJournal);
                 daoFlux.setCriteriaJournalLie(journalLie);
-                
+
             } catch (Exception e) {
                 logger.debug(e);
             }
-            
+
             ServletTool.actionLIST(request, Flux.class, null, daoFlux);
             System.out.println("-->--> LIST ACTION");
 //            // On restreint la liste des flux affiché
@@ -237,8 +247,8 @@ public class FluxSrvl extends HttpServlet {
 //            request.setAttribute(ATT_LISTOBJ, list);
             //-----------------------------------------------------ACTION REMOVE ---------------------------------------
 
-            
-            
+
+
         } else if (action.equals("rem")) {
             logger.debug("Action remmm");
             // On tente de supprimer. Si une exeption est levée pendant la suppression. On redirige l'utilisateur différement
@@ -246,7 +256,7 @@ public class FluxSrvl extends HttpServlet {
                 List<Flux> listFlux = ServletTool.getListFluxFromRequest(request, daoFlux);
                 ServiceCRUDFlux service = (ServiceCRUDFlux) ServiceCRUDFactory.getInstance().getServiceFor(Flux.class);
                 service.SupprimerListFlux(listFlux, true, null);
-                
+
 //                for (int i = 0; i < listFlux.size(); i++) {
 //                    Flux flux1 = listFlux.get(i);
 ////                    ServiceCollecteur.getInstance().removeFluxWithItem(flux1);
@@ -356,6 +366,33 @@ public class FluxSrvl extends HttpServlet {
                 }
 
             }
+        } else if (action.equals("statcaptation")) {
+
+            // On récup l'ID de la période de captation
+            List<Long> ids = ServletTool.parseidFromRequest(request, null);
+
+            if (!ids.isEmpty()) {
+                // 
+
+                DAOGenerique dao = DAOFactory.getInstance().getDAOGenerique();
+                dao.setClassAssocie(FluxPeriodeCaptation.class);
+                FluxPeriodeCaptation periode = (FluxPeriodeCaptation) dao.find(ids.get(0));
+
+                System.out.println("PERIODE DEMANDE : " + periode);
+
+                ObjectMapper mapper = new ObjectMapper();
+
+                FilterProvider filters = new SimpleFilterProvider().addFilter("serialisePourUtilisateur",
+                        SimpleBeanPropertyFilter.serializeAllExcept("flux", "comportementDurantLaPeriode"));
+                
+                String jsonn =  mapper.writer(filters).writeValueAsString(periode);
+                request.setAttribute("jsonstr", jsonn);
+                System.out.println(""+jsonn);
+                
+                vue = "jsonstr";
+
+            }
+
         }
 
         //------------------------------------------------------------------------
@@ -380,14 +417,17 @@ public class FluxSrvl extends HttpServlet {
             VUE = "/WEB-INF/jsonform.jsp";
         } else if (vue.equals("highchart")) {
             VUE = "/WEB-INF/highchartFlux.jsp";
-        }
-        else if(vue.equals("grid")){
+        } else if (vue.equals("grid")) {
             VUE = "/WEB-INF/fluxJSONGrid.jsp";
             System.out.println("GRID VUEE");
-        }
-        else if(vue.equals("csv")){
+        } else if (vue.equals("csv")) {
             VUE = "/WEB-INF/fluxCSV.jsp";
         }
+        else if(vue.equals("jsonstr")){
+            VUE = "/WEB-INF/jsonPrint.jsp";
+        }
+        
+        
         else {
             response.setContentType("text/html;charset=UTF-8");
             response.setCharacterEncoding("UTF-8");

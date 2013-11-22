@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 
@@ -45,14 +46,11 @@ public class POJOCompteItem {
      * la date de fin du compte
      */
     Date date2;
-    
-    
-    
     /**
      * *
      * Nombre total d'item
      */
-    Integer somme;
+    Long somme;
     /**
      * *
      * Nombre moyen d'item capturés par jours
@@ -76,22 +74,33 @@ public class POJOCompteItem {
      * *
      * Quartile d'item jour dans la période
      */
-    Integer quartile;
+    Integer quartilePremier;
+    Integer quartileTrois;
     /**
      * *
      * decile d'item jour dans la période
      */
-    Integer decile;
+    Integer decilePremier;
+    Integer decileNeuf;
+    Double ecartType;
+    
+    private Float[] statMoyDayOfWeek = new Float[7];
+    private Integer[] statMedDayOfWeek = new Integer[7];
+    private Double[] statEcartypeDayOfWeek = new Double[7];
+    
+    
+//    private Float statMoyLundi;
+//    private Float statMoyMardi;
+//    private Float statMoyMercredi;
+//    private Float statMoyJeudi;
+//    private Float statMoyVendredi;
+//    private Float statMoySamedi;
+//    private Float statMoyDimanche;
 
     public POJOCompteItem() {
         compte = new TreeMap<Date, Integer>();
         items = new ArrayList<Item>();
     }
-    
-    
-
-    
-
 
     /**
      * *
@@ -145,11 +154,11 @@ public class POJOCompteItem {
         this.date2 = date2;
     }
 
-    public Integer getSomme() {
+    public Long getSomme() {
         return somme;
     }
 
-    public void setSomme(Integer somme) {
+    public void setSomme(Long somme) {
         this.somme = somme;
     }
 
@@ -185,21 +194,77 @@ public class POJOCompteItem {
         this.min = min;
     }
 
-    public Integer getQuartile() {
-        return quartile;
+    public Integer getQuartilePremier() {
+        return quartilePremier;
     }
 
-    public void setQuartile(Integer quartile) {
-        this.quartile = quartile;
+    public void setQuartilePremier(Integer quartilePremier) {
+        this.quartilePremier = quartilePremier;
     }
 
-    public Integer getDecile() {
-        return decile;
+    public Integer getQuartileTrois() {
+        return quartileTrois;
     }
 
-    public void setDecile(Integer decile) {
-        this.decile = decile;
+    public void setQuartileTrois(Integer quartileTrois) {
+        this.quartileTrois = quartileTrois;
     }
+
+    public Integer getDecilePremier() {
+        return decilePremier;
+    }
+
+    public void setDecilePremier(Integer decilePremier) {
+        this.decilePremier = decilePremier;
+    }
+
+    public Integer getDecileNeuf() {
+        return decileNeuf;
+    }
+
+    public void setDecileNeuf(Integer decileNeuf) {
+        this.decileNeuf = decileNeuf;
+    }
+
+    public Double getEcartType() {
+        return ecartType;
+    }
+
+    public void setEcartType(Double ecartType) {
+        this.ecartType = ecartType;
+    }
+
+    public Float[] getStatMoyDayOfWeek() {
+        return statMoyDayOfWeek;
+    }
+
+    /***
+     * retroune le nombre moyen d'item pour le jour 
+     * @param statMoyDayOfWeek 
+     */
+    public void setStatMoyDayOfWeek(Float[] statMoyDayOfWeek) {
+        this.statMoyDayOfWeek = statMoyDayOfWeek;
+    }
+
+    public Integer[] getStatMedDayOfWeek() {
+        return statMedDayOfWeek;
+    }
+
+    public void setStatMedDayOfWeek(Integer[] statMedDayOfWeek) {
+        this.statMedDayOfWeek = statMedDayOfWeek;
+    }
+
+    public Double[] getStatEcartypeDayOfWeek() {
+        return statEcartypeDayOfWeek;
+    }
+
+    public void setStatEcartypeDayOfWeek(Double[] statEcartypeDayOfWeek) {
+        this.statEcartypeDayOfWeek = statEcartypeDayOfWeek;
+    }
+    
+    
+    
+    
 
     /**
      * *
@@ -249,8 +314,8 @@ public class POJOCompteItem {
         DateTime dt2 = new DateTime(date2).withEarlierOffsetAtOverlap();
         DateTime dtIt = new DateTime(date1).withTimeAtStartOfDay();
         Interval interval = new Interval(dt1, dt2);
-        
-        
+
+
 
 
 //        while (dtIt.isBefore(dt2)) {
@@ -292,54 +357,128 @@ public class POJOCompteItem {
             throw new NullPointerException("Vous devez initialiser les comptes en utilisant au préalable la méthode compte()");
         }
 
-        //------ Calcul de la médiane
-        List<Integer> listInt = new ArrayList<Integer>();
+        DescriptiveStatistics stats = new DescriptiveStatistics();
 
         for (Map.Entry<Date, Integer> entry : compte.entrySet()) {
             Date date = entry.getKey();
             Integer integer = entry.getValue();
-            listInt.add(integer);
+            stats.addValue(integer);
+
         }
 
-        Collections.sort(listInt);
 
-        System.out.println("size : " + listInt.size());
+        Double dl = stats.getMin();
+        min = ((Double) stats.getMin()).intValue();
+        max = ((Double) stats.getMax()).intValue();
+        ecartType = stats.getStandardDeviation();
+        moyenne = ((Double) stats.getMean()).floatValue();
+        mediane = ((Double) stats.getPercentile(50)).intValue();
+        quartilePremier = ((Double) stats.getPercentile(25)).intValue();
+        quartileTrois = ((Double) stats.getPercentile(75)).intValue();
+        decilePremier = ((Double) stats.getPercentile(10)).intValue();
+        decileNeuf = ((Double) stats.getPercentile(90)).intValue();
+        somme = ((Double)stats.getSum()).longValue();
 
-        // MEDIANE
-        int indMediant;
-        if ((listInt.size() % 2) != 0) {
-            indMediant = listInt.size() / 2;
-        } else {
-            indMediant = (listInt.size() + 1) / 2;
-        }
-        mediane = listInt.get(indMediant);
 
-        //Minimum
-        min = listInt.get(0);
 
-        //Max
-        if (listInt.size() > 0) {
-            max = listInt.get(listInt.size() - 1);
-        }
+        // Calcul des moyennes par jour
 
-        // quartile
-        Integer quartileId = Math.round(new Float(0.25 * listInt.size()));
-        if (quartileId < listInt.size()) {
-            quartile = listInt.get(Math.round(quartileId));
-        }
+//        Float[] sommeJour = new Float[7]; // Initialisation
         
-
-        Integer decileId = Math.round(new Float(0.75 * listInt.size()));
-        if (decileId < listInt.size()) {
-            decile = listInt.get(decileId);
+        Map<Integer,  DescriptiveStatistics> mapStatJour = new HashMap<Integer, DescriptiveStatistics>();
+        
+        Integer[] nbrJour = new Integer[8];
+        for (int i = 0; i < 7; i++) {
+            System.out.println("I : " + i);
+            DescriptiveStatistics stat = new DescriptiveStatistics();
+            mapStatJour.put(i+1, stat);
+//            Long long1 = sommeJour[i];
+//            sommeJour[i] = new Float(0);
+//            nbrJour[i] = 0;
         }
-//        this.decile = (int) Math.round(listInt.get(decileId.intValue()));
 
-        System.out.println("min : " + min);
-        System.out.println("quartile " + quartile);
-        System.out.println("med : " + mediane);
-        System.out.println("decile " + decile);
-        System.out.println("max : " + max);
+        for (Map.Entry<Date, Integer> entry : compte.entrySet()) {
+            Date date = entry.getKey();
+            DateTime dt = new DateTime(date);
+            Integer integer = entry.getValue();
+            int dayOfWeek = dt.getDayOfWeek();
+//            System.out.println("IT" );
+            System.out.println("DAYokWEEK : " + dayOfWeek);
+            mapStatJour.get(dayOfWeek).addValue(integer);
+
+//            sommeJour[dayOfWeek] += integer;
+//            nbrJour[dayOfWeek]++;
+
+        }
+
+        for (int i = 0; i < 7; i++) {
+            DescriptiveStatistics statDuJour = mapStatJour.get(i+1);
+            
+            Double moy = statDuJour.getMean();
+            if(moy.equals(Double.NaN)){
+                moy = new Double(0);
+            }
+            
+            Double ecat = statDuJour.getStandardDeviation();
+            if(ecat.equals(Double.NaN)){
+            }
+            
+            statMoyDayOfWeek[i] = moy.floatValue();
+            statMedDayOfWeek[i] = ((Double) statDuJour.getPercentile(50)).intValue();
+            statEcartypeDayOfWeek[i] = ((Double) statDuJour.getStandardDeviation());
+            
+        }
+
+
+
+//        //------ Calcul de la médiane
+//        List<Integer> listInt = new ArrayList<Integer>();
+//
+//        for (Map.Entry<Date, Integer> entry : compte.entrySet()) {
+//            Date date = entry.getKey();
+//            Integer integer = entry.getValue();
+//            listInt.add(integer);
+//        }
+//
+//        Collections.sort(listInt);
+//
+//        System.out.println("size : " + listInt.size());
+//
+//        // MEDIANE
+//        int indMediant;
+//        if ((listInt.size() % 2) != 0) {
+//            indMediant = listInt.size() / 2;
+//        } else {
+//            indMediant = (listInt.size() + 1) / 2;
+//        }
+//        mediane = listInt.get(indMediant);
+//
+//        //Minimum
+//        min = listInt.get(0);
+//
+//        //Max
+//        if (listInt.size() > 0) {
+//            max = listInt.get(listInt.size() - 1);
+//        }
+//
+//        // quartile
+//        Integer quartileId = Math.round(new Float(0.25 * listInt.size()));
+//        if (quartileId < listInt.size()) {
+//            quartile = listInt.get(Math.round(quartileId));
+//        }
+//        
+//
+//        Integer decileId = Math.round(new Float(0.75 * listInt.size()));
+//        if (decileId < listInt.size()) {
+//            decile = listInt.get(decileId);
+//        }
+////        this.decile = (int) Math.round(listInt.get(decileId.intValue()));
+//
+//        System.out.println("min : " + min);
+//        System.out.println("quartile " + quartile);
+//        System.out.println("med : " + mediane);
+//        System.out.println("decile " + decile);
+//        System.out.println("max : " + max);
 
     }
 

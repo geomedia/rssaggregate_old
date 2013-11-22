@@ -512,6 +512,7 @@ form{
     
     .boxelement{
          color: black;
+         margin-top: 1px;
         
         border:#000000;
         border-style: solid;

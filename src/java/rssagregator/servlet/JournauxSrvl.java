@@ -327,6 +327,9 @@ public class JournauxSrvl extends HttpServlet {
             } catch (TimeoutException ex) {
                 Logger.getLogger(JournauxSrvl.class.getName()).log(Level.SEVERE, null, ex);
             }
+            catch(Exception ex){
+                logger.debug("Err", ex);
+            }
         }
 
 

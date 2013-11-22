@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.TransactionRequiredException;
 import org.joda.time.DateTime;
+import rssagregator.beans.DonneeBrute;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.beans.Journal;
@@ -143,7 +144,7 @@ public class ServiceCollecteur extends AbstrService {
             tache.setTimeSchedule(f.getMediatorFlux().getPeriodiciteCollecte());  // On définit son temsp de schedulation en fonction des paramettre de son comportement de collecte
             TacheCalculQualiteFlux tachecalcul = new TacheCalculQualiteFlux(this);// Création de la nouvelle tache de vérification.
             tachecalcul.setFlux(f);
-            tachecalcul.setTimeSchedule(f.getMediatorFlux().getPeriodiciteCollecte() * 5); // Le calcul de la qualité est effectuer tous les 5* temps de récupération. 
+            tachecalcul.setTimeSchedule(f.getMediatorFlux().getPeriodiciteCollecte() * 1); // Le calcul de la qualité est effectuer tous les 5* temps de récupération. 
 
 
             List<AbstrTacheSchedule> nouvList = new ArrayList<AbstrTacheSchedule>();
@@ -362,7 +363,7 @@ public class ServiceCollecteur extends AbstrService {
 //                    schedule(cast);
 //                }
 //            } //------------------------Tache de vérification de la capture pour un flux
-            else if (o.getClass().equals(TacheVerifComportementFLux.class)) {
+//            else if (o.getClass().equals(TacheVerifComportementFLux.class)) {
 //                TacheVerifComportementFLux cast = (TacheVerifComportementFLux) o;
 //                if (cast.getExeption() == null) {
 //                    if (cast.getAnomalie()) { // Si la tache a déterminée une annomalie de capture
@@ -382,7 +383,10 @@ public class ServiceCollecteur extends AbstrService {
 //                        }
 //                    }
 //                }
-            } else if (o.getClass().equals(TacheCalculQualiteFlux.class)) {
+//            } 
+            
+            
+            else if (o.getClass().equals(TacheCalculQualiteFlux.class)) {
                 TacheCalculQualiteFlux cast = (TacheCalculQualiteFlux) o;
                 if (cast.getExeption() == null) {
                     cast.getFlux().setIndiceQualiteCaptation(cast.getIndiceCaptation());
@@ -701,9 +705,6 @@ public class ServiceCollecteur extends AbstrService {
         }
         dao.setEm(em);
 
-        System.out.println("--AJOUT");
-
-
 //
 //        if (em != null) {
 //            dao.setEm(em);
@@ -736,7 +737,28 @@ public class ServiceCollecteur extends AbstrService {
         if (item.getID() != null) { // Une item possédant un ID n'est pas nouvelle, il faut alors changer le booleean
             itemEstNouvelle = false;
         }
-        logger.debug("item nouvelle : " + itemEstNouvelle);
+        
+        // Si l'item est nouvelle, on cherche si si n'existe pas déjà dans la base de données une item possédant ce hash. 
+        
+//        if(itemEstNouvelle){
+//            try {
+//                Item itBdd = dao.findByHash(item.getHashContenu());
+//                if(itBdd!= null){
+//                    itBdd.verserLesDonneeBruteAutreItem(item);
+//                    item = itBdd;
+//                    itemEstNouvelle = false;
+//                    item.addFlux(flux);
+//                }
+//                
+//            } catch (Exception e) {
+//            
+//            logger.debug("err", e);
+//            }
+//            
+//        }
+        
+        
+        
         //
         if (itemEstNouvelle) {  // Si l'item est nouvelle, on va effectuer une création dans la base de données
             try {
@@ -747,22 +769,46 @@ public class ServiceCollecteur extends AbstrService {
             }
         }
 
-        // Si l'item n'est pas nouvelle ou si il y a eu une erreur lors de l'enregistrement précédent, Il faut retrouver l'item dans la base de donnée et l'aéjouter si besoin est au flux
-        if (!itemEstNouvelle || err) {
-            Item itBDD = dao.findByHash(item.getHashContenu());
-            // Si on a bien trouvé une item
-            if (itBDD != null) {
-                // On ajoute l'item au flux 
-                itBDD.getListFlux().add(flux);
-                try {
-                    // On tente de modifier l'item 
-                    dao.modifier(itBDD);
-                    err = false;
-                } catch (Exception ex) {
-                    Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
-                }
+        
+        if(!itemEstNouvelle){
+            try {
+                
+//               List<DonneeBrute> donneBrut = item.getDonneeBrutes();
+//                for (int i = 0; i < donneBrut.size(); i++) {
+//                    DonneeBrute donneeBrute = donneBrut.get(i);
+//                    if(donneeBrute.getID()!= null ) {
+//                        
+//                        em.persist(donneeBrute);
+//                    }
+//                    else{
+//                        em.merge(donneeBrute);
+//                    }
+//                }
+                
+//                item.setDonneeBrutes(null);
+                       dao.modifier(item);
+            } catch (Exception e) {
+                err = true;
             }
+     
         }
+        
+        // Si l'item n'est pas nouvelle ou si il y a eu une erreur lors de l'enregistrement précédent, Il faut retrouver l'item dans la base de donnée et l'aéjouter si besoin est au flux
+//        if ( err) {
+//            Item itBDD = dao.findByHash(item.getHashContenu());
+//            // Si on a bien trouvé une item
+//            if (itBDD != null) {
+//                // On ajoute l'item au flux 
+//                itBDD.getListFlux().add(flux);
+//                try {
+//                    // On tente de modifier l'item 
+//                    dao.modifier(itBDD);
+//                    err = false;
+//                } catch (Exception ex) {
+//                    Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//            }
+//        }
 
         // Si le traitement s'est bien déroulé
         if (!err) {

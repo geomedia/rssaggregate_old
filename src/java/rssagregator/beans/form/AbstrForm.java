@@ -223,20 +223,24 @@ public abstract class AbstrForm {
      */
     public void parseListeRequete(HttpServletRequest request, AbstrDao dao) throws Exception {
         this.recupStandartFilters(request, dao, filtersList);
+        this.recupSpeFilters(request, dao, filtersList);
     }
 
-    /***
+    /**
+     * *
      * getter for {@linkplain #filtersList}
-     * @return 
+     *
+     * @return
      */
     public SearchFiltersList getFiltersList() {
         return filtersList;
     }
 
-    
-    /***
+    /**
+     * *
      * setter for {@linkplain #filtersList}
-     * @param filtersList 
+     *
+     * @param filtersList
      */
     public void setFiltersList(SearchFiltersList filtersList) {
         this.filtersList = filtersList;
@@ -356,6 +360,53 @@ public abstract class AbstrForm {
 
             } catch (ParseException ex) {
                 Logger.getLogger(JournauxSrvl.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    protected void recupSpeFilters(HttpServletRequest request, AbstrDao dao, SearchFiltersList filters) {
+
+        if (action.equals("list")) {
+
+            if (request.getParameter("filters") != null && !request.getParameter("filters").isEmpty()) {
+                String filter = request.getParameter("filters");
+                JSONParser parse = new JSONParser();
+
+                //-------> Récupération des champs spéciaux
+
+                try {
+                    JSONObject obj2 = (JSONObject) parse.parse(filter);
+                    JSONArray rules = (JSONArray) obj2.get("spefield");
+                    for (int i = 0; i < rules.size(); i++) {
+                        JSONObject obj = (JSONObject) rules.get(i);
+                        String field = (String) obj.get("field");
+                        String op = (String) obj.get("op");
+
+                        if (op.equals("inn")) {
+                            SearchFilter nouveauFiltre = new SearchFilter();
+                            nouveauFiltre.setOp(op);
+                            nouveauFiltre.setField(field);
+                            nouveauFiltre.setData("NULL");
+                            nouveauFiltre.setType(String.class);
+                            filters.getFilters().add(nouveauFiltre);
+                            System.out.println("---------ADDD NOUVEAU FILTRE");
+                                    
+                        }
+                        else if(op.equals("isn")){
+                             SearchFilter nouveauFiltre = new SearchFilter();
+                            nouveauFiltre.setOp(op);
+                            nouveauFiltre.setField(field);
+                            nouveauFiltre.setData("NULL");
+                            nouveauFiltre.setType(String.class);
+                            filters.getFilters().add(nouveauFiltre);
+                            System.out.println("---------ADDD NOUVEAU FILTRE");
+                        }
+                        
+                    }
+
+
+                } catch (Exception e) {
+                }
             }
         }
     }

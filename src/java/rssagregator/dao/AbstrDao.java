@@ -177,6 +177,17 @@ public abstract class AbstrDao<T> {
                         listWhere.add(cb.and(cb.lessThan(root.get(searchFilter.getField()), d)));
                     }
                 }
+                else if(searchFilter.getOp().equals("inn")){
+                    System.out.println("#####################################");
+                    System.out.println("------IS NOT NULL");
+                    System.out.println("#####################################");
+                    System.out.println("FIELD ; " + searchFilter.getField());
+                    listWhere.add(cb.and(root.get(searchFilter.getField()).isNotNull()));
+                }
+                else if(searchFilter.getOp().equals("isn")){
+                    System.out.println("DAO---------FILTRE IS NULL");
+                    listWhere.add(cb.and(root.get(searchFilter.getField()).isNull()));
+                }
             }
         }
 

@@ -117,6 +117,12 @@
                                     <input type="checkbox" name="dedoubCategory" <c:if test="${bean.dedoubloneur.dedoubCategory}"> checked="true"</c:if>/>
 
                                 </fieldset>
+                                
+                                
+                                <fieldset>
+                                    <legend>Second dédoublonneur</legend>
+                                    <label>Utiliser le second dédoublonneur : </label><input type="checkbox" name="secondDedoub" <c:if test="${bean.dedoublonneur2.enable == 'true'}"> checked="dedoubloneur"</c:if>/>
+                                </fieldset>
 
                                 <br />
                                 <input type="hidden" name="vue" value="jsonform" />

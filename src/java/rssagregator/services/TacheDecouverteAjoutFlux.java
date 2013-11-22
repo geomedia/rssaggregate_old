@@ -177,6 +177,7 @@ public class TacheDecouverteAjoutFlux extends TacheImpl<TacheDecouverteAjoutFlux
                     AbstrServiceCRUD crudIncid = ServiceCRUDFactory.getInstance().getServiceFor(NotificationAjoutFlux.class);
                     crudIncid.ajouter(notificationAjoutFlux);
                 }
+                System.out.println("FIN CORPS");
     }
 
     /***

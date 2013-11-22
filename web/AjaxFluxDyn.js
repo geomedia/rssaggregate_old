@@ -110,6 +110,126 @@ $(document).ready(function() {
             }
         });
     });
+    
+    
+    /***
+     * 
+     */
+     $('#selectionPeriod').on('change', function truc2() {
+         
+         
+         id = $('#selectionPeriod').val();
+         
+         
+         // Requête en ajax
+         
+         $.ajax({
+            url: '/RSSAgregate/flux/statcaptation?&id='+id,
+            data: '', // on envoie $_GET['id_region']
+            dataType: 'json',
+            success: function(jsonentre) {
+                $('#affichageCaptation').empty();
+                   $('#affichageCaptation').append("<p><strong>Nombre d\'item capturée ensemble de la période : </strong>"+jsonentre['statSommeItemCapture']+"</p>");
+                $('#affichageCaptation').append("<p><strong>Moyenne jour : </strong>"+jsonentre['statMoyenne']+"</p>");
+                $('#affichageCaptation').append("<p><strong>Minimum jour : </strong>"+jsonentre['statMin']+"</p>");
+                $('#affichageCaptation').append("<p><strong>Premier quartile jour : </strong>"+jsonentre['statQuartilePremier']+"</p>");
+                $('#affichageCaptation').append("<p><strong>Troisiéme quartile jour : </strong>"+jsonentre['statQuartileTrois']+"</p>");
+                
+                $('#affichageCaptation').append("<p><strong>Maximum jour : </strong>"+jsonentre['statMax']+"</p>");
+                $('#affichageCaptation').append("<p><strong>Ecart type jour : </strong>"+jsonentre['statEcartType']+"</p>");
+             
+                $('#affichageCaptation').append("<p><h2>Regroupement par jour de la semaine</h2>");
+                
+                
+                $('#affichageCaptation').append("<table border=\"1\">\n\
+<tr> <td>       </td><td>Lundi</td><td>Mardi</td><td>Mercredi</td><td>Jeudi</td><td>Vendredi</td><td>Samedi</td><td>Dimanche</td></tr>\n\
+<tr> <td>Moyenne</td><td>"+jsonentre['statMoyLundi']+"</td><td>"+jsonentre['statMoyMardi']+"</td><td>"+jsonentre['statMoyMercredi']+"</td><td>"+jsonentre['statMoyJeudi']+"</td><td>"+jsonentre['statMoyVendredi']+"</td><td>"+jsonentre['statMoySamedi']+"</td><td>"+jsonentre['statMoyDimanche']+"</td></tr>\n\
+<tr> <td>Mediane</td><td>"+jsonentre['statMedLundi']+"</td><td>"+jsonentre['statMedMardi']+"</td><td>"+jsonentre['statMedMercredi']+"</td><td>"+jsonentre['statMedJeudi']+"</td><td>"+jsonentre['statMedVendredi']+"</td><td>"+jsonentre['statMedSamedi']+"</td><td>"+jsonentre['statMedDimanche']+"</td></tr>\n\
+<tr> <td>Ecart type </td><td>"+jsonentre['statEcartTypeLundi']+"</td><td>"+jsonentre['statEcartTypeMardi']+"</td><td>"+jsonentre['statEcartTypeMercredi']+"</td><td>"+jsonentre['statEcartTypeJeudi']+"</td><td>"+jsonentre['statEcartTypeVendredi']+"</td><td>"+jsonentre['statEcartTypeSamedi']+"</td><td>"+jsonentre['statEcartTypeDimanche']+"</td></tr>\n\
+</table>\n\
+");
+                
+                
+                // On dessine la plat
+                $('#container').highcharts({
+                                        chart: {
+                                            type: 'boxplot'
+                                        },
+                                        title: {
+                                            text: 'BoxPloat nombre d\'item jour sur la période'
+                                        },
+                                        legend: {
+                                            enabled: false
+                                        },
+                                        xAxis: {
+                                            categories: ['1', '2', '3', '4', '5'],
+                                            title: {
+                                                text: 'Flux'
+                                            }
+                                        },
+                                        yAxis: {
+                                            title: {
+                                                text: 'Nombre d\'item par jour'
+                                            },
+                                            plotLines: [{
+                                                    value: 932,
+                                                    color: 'red',
+                                                    width: 1,
+                                                    label: {
+                                                        text: 'Theoretical mean: 932',
+                                                        align: 'center',
+                                                        style: {
+                                                            color: 'gray'
+                                                        }
+                                                    }
+                                                }]
+                                        },
+                                        series: [{
+                                                name: 'Observations',
+                                                data: [
+                                                    [jsonentre['statMin'], jsonentre['statQuartilePremier'], jsonentre['statMedian'], jsonentre['statQuartileTrois'],  jsonentre['statMax']]
+                                                ],
+                                                tooltip: {
+                                                    headerFormat: '<em>Experiment No {point.key}</em><br/>'
+                                                }
+                                            }
+//                                            , {
+//                                                name: 'Outlier',
+//                                                color: Highcharts.getOptions().colors[0],
+//                                                type: 'scatter',
+//                                                data: [// x, y positions where 0 is the first category
+//                                                    [0, 644],
+//                                                    [4, 718],
+//                                                    [4, 951],
+//                                                    [4, 969]
+//                                                ],
+//                                                marker: {
+//                                                    fillColor: 'white',
+//                                                    lineWidth: 1,
+//                                                    lineColor: Highcharts.getOptions().colors[0]
+//                                                },
+//                                                tooltip: {
+//                                                    pointFormat: 'Observation: {point.y}'
+//                                                }
+//                                            }
+                                        ]
+                                    });
+                
+                
+//                $('#affichageCaptation').append("");
+//                $('#affichageCaptation').append("<tr><td>Moyenne</td><td>LUN</td><td>Mardi</td><td>Merc</td><td>Jeud</td><td>Ven</td><td>Sam</td><td>DIM</td></tr>");
+                
+                
+//                $('#affichageCaptation').append("</table>");
+                
+
+                
+//                alert(jsonentre);
+            }
+         }
+     )
+         
+     });
 
 
 });

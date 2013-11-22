@@ -28,6 +28,8 @@ public class SearchFilter {
      * <li>in : le champs doit être dans une liste de valeur opérateur in</li>
      * <li>gt : greater than</li>
      * <li>lt : less than</li>
+     * <li>inn : not null --> valeur ajouté par rapport a la grid</li>
+     * <li>isn : is null --> valeur ajouté par rapport a la grid</li>
      * <li><li>
      * Ces opérateur sont inspiré des opérateur provenant de filter de jqgrid voir
      * http://www.trirand.com/jqgridwiki/doku.php?id=wiki:search_config à savoir

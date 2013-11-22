@@ -21,7 +21,7 @@ public class CollecteIncident extends AbstrIncident implements Serializable {
      * possède qu'un flux. Un flux peut posséder plusieurs incidents.
      */
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.REFRESH})
-    private Flux fluxLie;
+    protected Flux fluxLie;
 
     public Flux getFluxLie() {
         return fluxLie;
@@ -49,6 +49,13 @@ public class CollecteIncident extends AbstrIncident implements Serializable {
         }
 //        return super.doitEtreNotifieParMail(); //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    public String toString() {
+        return "Incident de collecte FLux : "+fluxLie;
+    }
+    
+    
     
     
 }
