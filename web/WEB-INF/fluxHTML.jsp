@@ -333,7 +333,7 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
 
                         <script>
                                 $(function() {
-                                    $(".datepicker").datepicker({dateFormat: "dd/mm/yy"});
+                                    $(".datepicker").datepicker({dateFormat: "yy-mm-dd"});
                                 });</script>
 
 
@@ -518,6 +518,7 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
                             <tr>
                                 <th>Flux</th>
                                 <th>Item trouvée</th>
+                                <th>Doublon Interne au flux</th>
                                 <th>Dedoub mémoire</th>
                                 <th>Dedoub BDD</th>
                                 <th>Item liée</th>
@@ -536,11 +537,17 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
                             <c:forEach items="${listTache}" var="tache">
                                 <tr>
                                     <td> ${tache.flux}</td>
-                                    <td>${tache.comportementDuFlux.dedoubloneur.compteCapture[0]}</td>
+<!--                                    <td>${tache.comportementDuFlux.dedoubloneur.compteCapture[0]}</td>
                                     <td>${tache.comportementDuFlux.dedoubloneur.compteCapture[1]}</td>
                                     <td>${tache.comportementDuFlux.dedoubloneur.compteCapture[2]}</td>
                                     <td>${tache.comportementDuFlux.dedoubloneur.compteCapture[3]}</td>
-                                    <td>${tache.comportementDuFlux.dedoubloneur.compteCapture[4]}</td>
+                                    <td>${tache.comportementDuFlux.dedoubloneur.compteCapture[4]}</td>-->
+                                    <td>${tache.comportementDuFlux.nbItTrouve}</td>
+                                    <td>${tache.comportementDuFlux.nbDoublonInterneAuflux}</td>
+                                    <td>${tache.comportementDuFlux.nbDedoubMemoire}</td>
+                                    <td>${tache.comportementDuFlux.nbDedoubBdd}</td>
+                                    <td>${tache.comportementDuFlux.nbLiaisonCree}</td>
+                                    <td>${tache.comportementDuFlux.nbNouvelle}</td>
                                     <td>
                                         <c:set var="erreur" value="0"></c:set>
                                       

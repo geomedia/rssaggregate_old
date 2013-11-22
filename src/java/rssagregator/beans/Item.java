@@ -35,7 +35,7 @@ import rssagregator.services.ServiceSynchro;
 @Table(name = "item")
 //@Cacheable(value = true)
 //@Cache(type = CacheType.CACHE, coordinationType = CacheCoordinationType.SEND_NEW_OBJECTS_WITH_CHANGES, isolation = CacheIsolationType.SHARED, shared = true)
-public class Item implements Serializable, Comparable<Item> {
+public class Item implements Serializable, Comparable<Item>, ContentRSS {
 
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE)
@@ -364,7 +364,7 @@ public class Item implements Serializable, Comparable<Item> {
     }
     
     /***
-     * Les donnée brutes de l'item envoyée en argument son ajouté si nécessaire aux données brutes de l'item courante
+     * Les donnée brutes de l'item envoyée en argument sont ajouté si nécessaire aux données brutes de l'item courante
      * @param i 
      */
     public void verserLesDonneeBruteAutreItem(Item i){

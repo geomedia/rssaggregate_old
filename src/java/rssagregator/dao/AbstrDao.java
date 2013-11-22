@@ -100,8 +100,6 @@ public abstract class AbstrDao<T> {
         System.out.println("");
         CriteriaBuilder cb = em.getCriteriaBuilder();
         List<Predicate> listWhere = new ArrayList<Predicate>();
-        System.out.println("GESTION CRITERIA");
-        System.out.println("NOMBRE CRITERE : " + this.criteriaSearchFilters.getFilters().size());
         
 
         CriteriaQuery cq = cb.createQuery(classAssocie);
@@ -115,7 +113,7 @@ public abstract class AbstrDao<T> {
                 if (searchFilter.getData() == null || searchFilter.getField() == null || searchFilter.getOp() == null || searchFilter.getType() == null) {
                     continue;
                 }
-                System.out.println("OPERATOR : " + searchFilter.getOp());
+        
                 if (searchFilter.getOp().equals("eq")) {
                     
                     if (searchFilter.getType() != null && searchFilter.getType().equals(String.class)) {
@@ -140,7 +138,6 @@ public abstract class AbstrDao<T> {
                             Class c = classAssocie.getDeclaredField(searchFilter.getField()).getType();
                             // Si le champs concerné dan la classe métier est une liste, alors on va effectuer une jointure
                             if (List.class.isAssignableFrom(c)) {
-                                System.out.println("--------> JOINTURE DAO");
                                 Join joinFlux = root.join(searchFilter.getField());
                                 List lf = (List) searchFilter.getData();
                                 listWhere.add(joinFlux.in(lf));
@@ -164,29 +161,23 @@ public abstract class AbstrDao<T> {
 //                    listWhere.add(cb.and(root.get(searchFilter.getField()).in(coll)));
                 } //Opérateur supérieur a
                 else if (searchFilter.getOp().equals("gt")) {
-                    System.out.println("-----Opérator gt");
                     if (searchFilter.getType().equals(Date.class)) {
-                        System.out.println("----------CRITERE DE DATE GREATER");
                         Date d = (Date) searchFilter.getData();
                         listWhere.add(cb.and(cb.greaterThan(root.get(searchFilter.getField()), d)));
                     }
                 } else if (searchFilter.getOp().equals("lt")) {
                     if (searchFilter.getType().equals(Date.class)) {
-                        System.out.println("----------CRITERE DE DATE LESS");
                         Date d = (Date) searchFilter.getData();
                         listWhere.add(cb.and(cb.lessThan(root.get(searchFilter.getField()), d)));
                     }
                 }
                 else if(searchFilter.getOp().equals("inn")){
-                    System.out.println("#####################################");
-                    System.out.println("------IS NOT NULL");
-                    System.out.println("#####################################");
-                    System.out.println("FIELD ; " + searchFilter.getField());
                     listWhere.add(cb.and(root.get(searchFilter.getField()).isNotNull()));
                 }
                 else if(searchFilter.getOp().equals("isn")){
-                    System.out.println("DAO---------FILTRE IS NULL");
                     listWhere.add(cb.and(root.get(searchFilter.getField()).isNull()));
+                }
+                else {
                 }
             }
         }
@@ -209,19 +200,15 @@ public abstract class AbstrDao<T> {
         // On applique les wheres
         int i;
         if (listWhere.size() == 1) {
-            System.out.println("LIST WHERE = 1");
 
             cq.where(listWhere.get(0));
         } else if (listWhere.size() > 1) {
-            System.out.println("LIST WEHERE " + listWhere.size());
             Predicate pr = cb.and(listWhere.get(0));
             for (i = 1; i < listWhere.size(); i++) {
                 pr = cb.and(pr, listWhere.get(i));
             }
             cq.where(pr);
         }
-
-
 
         if (count) {
             cq.select(cb.count(root));
@@ -265,8 +252,6 @@ public abstract class AbstrDao<T> {
         }
         List<T> listResu = tq.getResultList();
 
-        System.out.println("-@@" + tq.getMaxResults());
-        System.out.println("--> List resu size : " + listResu.size());
         return listResu;
     }
 
@@ -276,7 +261,6 @@ public abstract class AbstrDao<T> {
         List resu = tq.getResultList();
         try {
             Integer retour = new Integer(resu.get(0).toString());
-            System.out.println("NBR cptCriteria : " + retour);
             return retour;
         } catch (Exception e) {
             logger.debug("erreur lors du compte", e);

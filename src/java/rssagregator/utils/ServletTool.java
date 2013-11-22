@@ -348,6 +348,7 @@ public class ServletTool {
             }
         }
 
+        System.out.println("SIZE DANS ACTION : " +dao.getCriteriaSearchFilters().getFilters().size() );        
 
         // On récupère la liste des items en utilisant la dao
         List<Object> items = dao.findCriteria();

@@ -150,7 +150,7 @@ public class TacheSynchroRecupItem extends TacheImpl<TacheSynchroRecupItem> impl
                     item.setID(null);
                     //On enregistre le nouvel item
 //                        daoItem.enregistrement(item, flux);
-                    ServiceCollecteur.getInstance().ajouterItemAuFlux(flux, item, null, true);
+                    ServiceCollecteur.getInstance().ajouterItemAuFlux(flux, item, null, true, null);
                 }
 //                    return this;
             }

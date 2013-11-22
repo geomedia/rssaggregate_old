@@ -495,7 +495,7 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
                 System.out.println("---> BRUT : " + item.getDonneeBrutes().size());
             }
 
-            collecteur.ajouterItemAuFlux(flux, item, em, false); // Il faut préciser au collecteur l'em qu'il doit utiliser, on lui donne celui qui block actuellement le flux. Les enregistrements ne sont alors pas encore commités
+            collecteur.ajouterItemAuFlux(flux, item, em, false, cloneComportement); // Il faut préciser au collecteur l'em qu'il doit utiliser, on lui donne celui qui block actuellement le flux. Les enregistrements ne sont alors pas encore commités
 
         }
 

@@ -15,6 +15,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.json.simple.JSONArray;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 //import rssagregator.beans.POJOCompteItem;
@@ -233,6 +234,7 @@ public class ItemSrvl extends HttpServlet {
             }
 
             if (formu != null) {
+                System.out.println("SERVLET NBR FILTER : " + formu.getFiltersList().getFilters().size());
                 daoItem.setCriteriaSearchFilters(formu.getFiltersList());
                 request.setAttribute("filtersList", formu.getFiltersList());
                 
@@ -277,6 +279,7 @@ public class ItemSrvl extends HttpServlet {
             List<Item> listItem = null;
             Date date1 = null;
             Date date2 = null;
+            List<Flux> listFlux = null;
             ItemForm form = null;
             try {
                 form = (ItemForm) FORMFactory.getInstance().getForm(Item.class, "list");
@@ -300,6 +303,16 @@ public class ItemSrvl extends HttpServlet {
                         } else if (date2 == null) {
                             date2 = (Date) searchFilter.getData();
                         }
+                    }
+                    
+                    if(searchFilter.getField().equals("listFlux")){
+                        
+                        System.out.println(">>>>>>>>>>>>>>>ID FLUX ; " + searchFilter.getData());
+                        System.out.println("CLASS " + searchFilter.getData().getClass());
+                        if(searchFilter.getData().getClass().equals(JSONArray.class)){
+                            System.out.println("ARRAY JSON");
+                        }
+                        listFlux = (List<Flux>) searchFilter.getData();
                     }
                 }
 
@@ -326,86 +339,12 @@ public class ItemSrvl extends HttpServlet {
             System.out.println("---> LIST ITEM : " + listItem.size());
             compteurFluxItem.setDate1(date1);
             compteurFluxItem.setDate2(date2);
+            compteurFluxItem.setListFlux(listFlux);
 
             compteurFluxItem.compter();
 
 
             request.setAttribute("compte", compteurFluxItem.getListCompteItem());
-
-
-
-//            // On récupère l'objet de gestion de formulaire
-//            AbstrForm formu = null;
-//            try {
-//                formu = FORMFactory.getInstance().getForm(Item.class, action);
-//                formu.parseListeRequete(request, daoItem); // On parse la requete avec l'objet formulaire afin de configurer la dao et des attributs dans la requete
-//            } catch (Exception ex) {
-//                Logger.getLogger(ItemSrvl.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//
-//            if (formu != null) {
-//                daoItem.setCriteriaSearchFilters(formu.getFiltersList());
-//            }
-
-
-//
-//
-//
-//
-//            // On récupère les flux
-//            String[] fluxtab = request.getParameterValues("fluxSelection2");
-//
-//            List<Long> listIf = ServletTool.parseidFromRequest(request, null);
-//            for (int i = 0; i < listIf.size(); i++) {
-//                Long long1 = listIf.get(i);
-//                System.out.println("----J4AI UNE ID : " + long1);
-//
-//            }
-//
-//            List<POJOCompteItem> listeCompte = new ArrayList<POJOCompteItem>();
-//            if (fluxtab != null) {
-//
-//                for (int i = 0; i < fluxtab.length; i++) {
-//                    String string = fluxtab[i];
-//                    Flux f = (Flux) DAOFactory.getInstance().getDAOFlux().find(new Long(string));
-//                    List<Flux> listF = new ArrayList<Flux>();
-//                    listF.add(f);
-//
-//                    //Mise en forme de la requete
-//                    Date date1 = null;
-//                    DateTimeFormatter fmt = DateTimeFormat.forPattern("dd/MM/yyyy");
-//                    try {
-//                        date1 = fmt.parseDateTime(request.getParameter("date1")).toDate();
-//
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                        System.out.println("ERR date " + e);
-//                    }
-//
-//                    Date date2 = null;
-//                    try {
-//                        date2 = fmt.parseDateTime(request.getParameter("date2")).toDate();
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
-//                    daoItem.initcriteria();
-//                    daoItem.setDate1(date1);
-//                    daoItem.setDate2(date2);
-//                    daoItem.setWhere_clause_Flux(listF);
-//                    List<Item> itDuflux = daoItem.findCretaria();
-//
-//                    POJOCompteItem compteItem = new POJOCompteItem();
-//                    compteItem.setFlux(f);
-//                    compteItem.setItems(itDuflux);
-//                    compteItem.setDate1(date1);
-//                    compteItem.setDate2(date2);
-//                    compteItem.compte();
-//                    listeCompte.add(compteItem);
-//
-//                }
-//            }
-
-//            request.setAttribute("compte", listeCompte);
 
         }
 

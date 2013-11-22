@@ -4,16 +4,37 @@
  */
 package rssagregator.beans.form;
 
+import com.fasterxml.jackson.databind.util.BeanUtil;
+import com.fasterxml.jackson.databind.util.ClassUtil;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
+import junit.framework.Test;
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.beanutils.BeanUtilsBean2;
+import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.beanutils.PropertyUtilsBean;
+import org.apache.commons.collections.ListUtils;
+import org.apache.commons.lang.ClassUtils;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import rssagregator.beans.Flux;
+import rssagregator.beans.Item;
 import rssagregator.dao.AbstrDao;
+import rssagregator.dao.DAOFactory;
 import rssagregator.dao.SearchFilter;
 import rssagregator.dao.SearchFiltersList;
 import rssagregator.servlet.JournauxSrvl;
@@ -382,6 +403,61 @@ public abstract class AbstrForm {
                         String field = (String) obj.get("field");
                         String op = (String) obj.get("op");
 
+
+
+                        /**
+                         * *
+                         * On parse un critère IN
+                         */
+                        if (op.equals("in")) {
+                            Object object = beanClass.newInstance(); // On va le farfouiller avec beansutils il y a suremebnt plus élégent mais on n'a pas trouvé commen manier simplement dans la class en dehors de la réflexion classqiue
+                            //Récupération du field
+                            Class c = PropertyUtils.getPropertyType(object, field);
+
+                            if (List.class.isAssignableFrom(c)) {
+
+
+                                SearchFilter newFilter = new SearchFilter();
+//                                Object prop = PropertyUtils.getIndexedProperty(object, field);
+
+                                Field stringListField = Item.class.getDeclaredField(field);
+                                ParameterizedType stringListType = (ParameterizedType) stringListField.getGenericType();
+                                Class<?> classDeLalist = (Class<?>) stringListType.getActualTypeArguments()[0];
+                                System.out.println(classDeLalist); // class java.lang.String.
+
+                                String ids = "";
+                                if (obj.get("data").getClass().equals(JSONArray.class)) { // Si c'est un tableau json on le met en string
+                                    ids = ((JSONArray) obj.get("data")).toString();
+                                    if (ids.length() > 2) {
+                                        ids = ids.substring(1, ids.length() - 1);
+                                    }
+                                }
+
+                                AbstrDao daoDutypedeLarg = DAOFactory.getInstance().getDaoFromType(classDeLalist);
+
+                                List<Long> listId = new ArrayList<Long>();
+                                try {
+                                    listId = ServletTool.parseidFromRequest(null, ids);
+                                } catch (Exception e) {
+                                    logger.debug("err", e);
+                                }
+
+                                List whereData = new ArrayList();
+                                for (int j = 0; j < listId.size(); j++) {
+                                    Object oo = classDeLalist.newInstance();
+                                    PropertyUtils.setProperty(oo, "ID", listId.get(j));
+                                    whereData.add(oo);
+
+                                }
+                                newFilter.setData(whereData);
+                                newFilter.setType(List.class);
+                                newFilter.setOp("in");
+                                newFilter.setField(field);
+                                filters.getFilters().add(newFilter);
+                            }
+                        }
+
+
                         if (op.equals("inn")) {
                             SearchFilter nouveauFiltre = new SearchFilter();
                             nouveauFiltre.setOp(op);
@@ -389,23 +465,77 @@ public abstract class AbstrForm {
                             nouveauFiltre.setData("NULL");
                             nouveauFiltre.setType(String.class);
                             filters.getFilters().add(nouveauFiltre);
-                            System.out.println("---------ADDD NOUVEAU FILTRE");
-                                    
-                        }
-                        else if(op.equals("isn")){
-                             SearchFilter nouveauFiltre = new SearchFilter();
+
+                        } else if (op.equals("isn")) {
+                            SearchFilter nouveauFiltre = new SearchFilter();
                             nouveauFiltre.setOp(op);
                             nouveauFiltre.setField(field);
-                            nouveauFiltre.setData("NULL");
+                            nouveauFiltre.setData("NULL"); // Is not ne demande pas de data mais ca va gueler sinon
                             nouveauFiltre.setType(String.class);
                             filters.getFilters().add(nouveauFiltre);
-                            System.out.println("---------ADDD NOUVEAU FILTRE");
-                        }
+
+
+
+                        } else if (op.equals("lt")) {
+                            SearchFilter newfilter = new SearchFilter();
+                            newfilter.setOp("lt");
+                            newfilter.setField(field);
+
+
+                            Object object = beanClass.newInstance();
+//                            Object prop = PropertyUtils.getPropertyType(object, field);
+                           Class c = PropertyUtils.getPropertyType(object, field);
+
+
+                            if (c.equals(Date.class)) {
+                                DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+
+                                DateTime dt = fmt.parseDateTime((String) obj.get("data"));
+                                newfilter.setData(dt.toDate());
+                            } else {
+                                newfilter.setData(obj.get("data"));
+                            }
+
+                            newfilter.setType(c);
+                            
+                            filters.getFilters().add(newfilter);
+
+                        } else if (op.equals("gt")) {
+                            try {
+                      
+                            SearchFilter newfilter = new SearchFilter();
+                            newfilter.setOp(op);
+                            newfilter.setField(field);
+
+                            // récup du type du champ
+                            Object object = beanClass.newInstance();
+                            Class c = PropertyUtils.getPropertyType(object, field);
                         
+//                            Class c = prop.getClass();
+                            newfilter.setType(c);
+                       
+                             if (c.equals(Date.class)) {
+                                DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+
+                                DateTime dt = fmt.parseDateTime((String) obj.get("data"));
+                                newfilter.setData(dt.toDate());
+                            } else {
+                                newfilter.setData(obj.get("data"));
+                            }
+                            
+                            filters.getFilters().add(newfilter);
+                            System.out.println("-- FIN GT");
+                            } catch (Exception e) {
+                                logger.debug("err", e);
+                            }
+                         
+                        }
+
                     }
 
 
                 } catch (Exception e) {
+                    logger.debug("err", e);
                 }
             }
         }
@@ -429,5 +559,32 @@ public abstract class AbstrForm {
      */
     public void setBeanClass(Class beanClass) {
         this.beanClass = beanClass;
+    }
+
+    public static void main(String[] args) {
+        try {
+            List<String> stringList = new ArrayList<String>();
+            List<Integer> integerList = new ArrayList<Integer>();
+
+
+            Field stringListField = Item.class.getDeclaredField("listFlux");
+            ParameterizedType stringListType = (ParameterizedType) stringListField.getGenericType();
+            Class<?> stringListClass = (Class<?>) stringListType.getActualTypeArguments()[0];
+            System.out.println(stringListClass); // class java.lang.String.
+
+
+
+
+
+
+
+//        System.out.println(""it.getListFlux().getClass().);
+        } catch (NoSuchFieldException ex) {
+            Logger.getLogger(AbstrForm.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SecurityException ex) {
+            Logger.getLogger(AbstrForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+
     }
 }

@@ -25,6 +25,7 @@ import rssagregator.beans.Journal;
 import rssagregator.beans.exception.DonneeInterneCoherente;
 import rssagregator.beans.exception.IncompleteBeanExeption;
 import rssagregator.beans.exception.UnIncidableException;
+import rssagregator.beans.traitement.MediatorCollecteAction;
 import rssagregator.dao.CacheHashFlux;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoFlux;
@@ -352,40 +353,38 @@ public class ServiceCollecteur extends AbstrService {
                 }
 
             } //---------------------------Tache générale de vérification de la capture---------------------------------
-//            else if (o.getClass().equals(TacheVerifComportementFluxGeneral.class)) {
-//                TacheVerifComportementFluxGeneral cast = (TacheVerifComportementFluxGeneral) o;
-//                
-//                if (cast.schedule) {
-////                    DateTime dtCurrent = new DateTime();
-////                    DateTime next = dtCurrent.plusDays(1).withHourOfDay(2);// withDayOfWeek(DateTimeConstants.SUNDAY);
-////                    Duration dur = new Duration(dtCurrent, next);
-////                    executorService.schedule(cast, dur.getStandardSeconds(), TimeUnit.SECONDS);
-//                    schedule(cast);
-//                }
-//            } //------------------------Tache de vérification de la capture pour un flux
-//            else if (o.getClass().equals(TacheVerifComportementFLux.class)) {
-//                TacheVerifComportementFLux cast = (TacheVerifComportementFLux) o;
-//                if (cast.getExeption() == null) {
-//                    if (cast.getAnomalie()) { // Si la tache a déterminée une annomalie de capture
-//                        AnomalieCollecte anomalie = new AnomalieCollecte();
-//                        anomalie.setDateDebut(new Date());
-//                        anomalie.setFluxLie(cast.getFlux());
-//                        anomalie.feedMessageFromTask(cast);
-//                        
-//                        try {
-//                            DAOIncident dao = (DAOIncident) DAOFactory.getInstance().getDaoFromType(AnomalieCollecte.class);
-//                            dao.beginTransaction();
-//                            dao.creer(anomalie);
-//                            dao.commit();
-//                        } catch (Exception ex) {
-//                            logger.error("Erreur de la tâche : " + cast + ". Flux : " + cast.getFlux() + ". Lors de la création de l'anomanie : " + anomalie, ex);
-//                            Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
-//                        }
-//                    }
-//                }
-//            } 
-            
-            
+            //            else if (o.getClass().equals(TacheVerifComportementFluxGeneral.class)) {
+            //                TacheVerifComportementFluxGeneral cast = (TacheVerifComportementFluxGeneral) o;
+            //                
+            //                if (cast.schedule) {
+            ////                    DateTime dtCurrent = new DateTime();
+            ////                    DateTime next = dtCurrent.plusDays(1).withHourOfDay(2);// withDayOfWeek(DateTimeConstants.SUNDAY);
+            ////                    Duration dur = new Duration(dtCurrent, next);
+            ////                    executorService.schedule(cast, dur.getStandardSeconds(), TimeUnit.SECONDS);
+            //                    schedule(cast);
+            //                }
+            //            } //------------------------Tache de vérification de la capture pour un flux
+            //            else if (o.getClass().equals(TacheVerifComportementFLux.class)) {
+            //                TacheVerifComportementFLux cast = (TacheVerifComportementFLux) o;
+            //                if (cast.getExeption() == null) {
+            //                    if (cast.getAnomalie()) { // Si la tache a déterminée une annomalie de capture
+            //                        AnomalieCollecte anomalie = new AnomalieCollecte();
+            //                        anomalie.setDateDebut(new Date());
+            //                        anomalie.setFluxLie(cast.getFlux());
+            //                        anomalie.feedMessageFromTask(cast);
+            //                        
+            //                        try {
+            //                            DAOIncident dao = (DAOIncident) DAOFactory.getInstance().getDaoFromType(AnomalieCollecte.class);
+            //                            dao.beginTransaction();
+            //                            dao.creer(anomalie);
+            //                            dao.commit();
+            //                        } catch (Exception ex) {
+            //                            logger.error("Erreur de la tâche : " + cast + ". Flux : " + cast.getFlux() + ". Lors de la création de l'anomanie : " + anomalie, ex);
+            //                            Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
+            //                        }
+            //                    }
+            //                }
+            //            } 
             else if (o.getClass().equals(TacheCalculQualiteFlux.class)) {
                 TacheCalculQualiteFlux cast = (TacheCalculQualiteFlux) o;
                 if (cast.getExeption() == null) {
@@ -465,15 +464,15 @@ public class ServiceCollecteur extends AbstrService {
         for (i = 0; i < listFlux.size(); i++) {
             TacheRecupCallable task = new TacheRecupCallable(listFlux.get(i), this, false);
             listTache.add(task);
-            
+
 //            listFlux.get(i).setTacheRechupManuelle(task);
         }
         DateTime dtDebut = new DateTime();
-        
+
 
         List<Future<TacheRecupCallable>> listFutur = this.poolPrioritaire.invokeAll(listTache);
-      
-        
+
+
         return listTache;
     }
 
@@ -694,7 +693,7 @@ public class ServiceCollecteur extends AbstrService {
      * @param flux Le flux pour lequel il faut ajouter une item
      * @param item L'item devant être ajouté
      */
-    public synchronized void ajouterItemAuFlux(Flux flux, Item item, EntityManager em, Boolean commiter) {
+    public synchronized void ajouterItemAuFlux(Flux flux, Item item, EntityManager em, Boolean commiter, MediatorCollecteAction comportementCollecte) {
 
         DaoItem dao = DAOFactory.getInstance().getDaoItem();
 
@@ -726,6 +725,7 @@ public class ServiceCollecteur extends AbstrService {
             Flux flux1 = lf.get(i);
             if (flux1.getID().equals(flux.getID())) {
                 ajouter = false;
+
             }
         }
         if (ajouter) {
@@ -736,10 +736,11 @@ public class ServiceCollecteur extends AbstrService {
         Boolean err = false;
         if (item.getID() != null) { // Une item possédant un ID n'est pas nouvelle, il faut alors changer le booleean
             itemEstNouvelle = false;
+            
         }
-        
+
         // Si l'item est nouvelle, on cherche si si n'existe pas déjà dans la base de données une item possédant ce hash. 
-        
+
 //        if(itemEstNouvelle){
 //            try {
 //                Item itBdd = dao.findByHash(item.getHashContenu());
@@ -756,23 +757,36 @@ public class ServiceCollecteur extends AbstrService {
 //            }
 //            
 //        }
-        
-        
-        
+
+
+
         //
         if (itemEstNouvelle) {  // Si l'item est nouvelle, on va effectuer une création dans la base de données
             try {
                 dao.creer(item);
+                if(comportementCollecte!=null){
+                    short nb = comportementCollecte.getNbNouvelle();
+                    nb++;
+                    comportementCollecte.setNbNouvelle(nb);
+                }
+                
             } catch (Exception ex) {
                 err = true;
                 logger.debug("erreur lors de l'ajout", ex);
             }
         }
+        else{
+            if (comportementCollecte != null) {
+                short nb = comportementCollecte.getNbLiaisonCree();
+                nb++;
+                comportementCollecte.setNbLiaisonCree(nb);
+            } 
+        }
 
-        
-        if(!itemEstNouvelle){
+
+        if (!itemEstNouvelle) {
             try {
-                
+
 //               List<DonneeBrute> donneBrut = item.getDonneeBrutes();
 //                for (int i = 0; i < donneBrut.size(); i++) {
 //                    DonneeBrute donneeBrute = donneBrut.get(i);
@@ -784,15 +798,15 @@ public class ServiceCollecteur extends AbstrService {
 //                        em.merge(donneeBrute);
 //                    }
 //                }
-                
+
 //                item.setDonneeBrutes(null);
-                       dao.modifier(item);
+                dao.modifier(item);
             } catch (Exception e) {
                 err = true;
             }
-     
+
         }
-        
+
         // Si l'item n'est pas nouvelle ou si il y a eu une erreur lors de l'enregistrement précédent, Il faut retrouver l'item dans la base de donnée et l'aéjouter si besoin est au flux
 //        if ( err) {
 //            Item itBDD = dao.findByHash(item.getHashContenu());

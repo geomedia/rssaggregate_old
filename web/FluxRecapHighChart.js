@@ -44,27 +44,24 @@ $(document).ready(function() {
 
 
         //Date
-
-        $date2 = $('#date2');
-        $date1 = $('#date1');
+        $date1 = $('#date1').val()+" 00:00:00";
+        $date2 = $('#date2').val()+" 23:59:59";
 
         alert('D1 val : ' + $('#date1').val());
 
         d1 = {
             field: "dateRecup",
             op: "gt",
-            data: $date1.val()
+            data: $date1
         };
 
         d2 = {
             field: "dateRecup",
             op: "lt",
-            data: $date2.val()
+            data: $date2
         };
         champSpe.push(d1);
         champSpe.push(d2);
-        alert('date1 : ' + $date1.val());
-        alert('date2 '+$date2.val());
 
 //            param = param.substr(1, param.length);
 

@@ -4,6 +4,7 @@
  */
 package rssagregator.beans;
 
+import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,15 +12,18 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import javax.persistence.Temporal;
+import javax.persistence.UniqueConstraint;
 import org.eclipse.persistence.annotations.Index;
 
 /**
  *
  * @author clem
  */
+@Table(uniqueConstraints =  {@UniqueConstraint(columnNames = {"hashContenu", "flux"})})
 @Entity
-public class DonneeBrute {
+public class DonneeBrute implements Serializable, ContentRSS{
 
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE)
@@ -54,7 +58,7 @@ public class DonneeBrute {
      * base de données.
      */
     @Index
-    @Column(name = "hashContenu", unique = true, nullable = false)
+    @Column(name = "hashContenu", nullable = false)
     private String hashContenu;
 ////    @ManyToOne(optional = false)
 //    @ManyToOne

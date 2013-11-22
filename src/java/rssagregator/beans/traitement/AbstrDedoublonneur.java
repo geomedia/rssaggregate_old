@@ -65,6 +65,9 @@ public abstract class AbstrDedoublonneur implements Serializable, Cloneable {
     protected Boolean dedoubCategory;
     @Column(name = "enable")
     protected Boolean enable = true;
+    
+    @Transient
+    MediatorCollecteAction mediatorAReferer;
 
     public Boolean getEnable() {
         return enable;
@@ -272,6 +275,18 @@ public abstract class AbstrDedoublonneur implements Serializable, Cloneable {
         }
     }
 
+    protected Boolean fluxPresentDansList(List<Flux> listFlux, Flux flux) {
+        Boolean trouve = false;
+        for (int i = 0; i < listFlux.size(); i++) {
+            Flux fluxDelaListe = listFlux.get(i);
+            if (fluxDelaListe.getID().equals(flux.getID())) {
+                trouve = true;
+            }
+        }
+
+        return trouve;
+    }
+
     public Long getID() {
         return ID;
     }
@@ -295,44 +310,84 @@ public abstract class AbstrDedoublonneur implements Serializable, Cloneable {
      *
      * @param listItem La liste d'item à vérifier
      */
-    protected void dedoublonnageInterneduneListDItem(List<Item> listItem) {
+    protected void dedoublonnageInterneduneListDItem(List<Item> listItem, boolean suppItemMMHash, boolean suppItContenuSemblable, boolean suppItemMMID) {
 
         if (listItem != null) {
             // suppression des items possédant le même hash
-            for (Iterator<Item> it = listItem.iterator(); it.hasNext();) {
-                Item item1 = it.next();
-                int cpt = 0;
-                for (int i = 0; i < listItem.size(); i++) {
-                    Item item = listItem.get(i);
-                    if (item.getHashContenu().equals(item1.getHashContenu())) {
-                        cpt++;
-                    }
-                }
-                if (cpt > 1) {
-                    it.remove();
-                }
-            }
 
-            //Vérification si on n'a pas deux foix un même ID pour une Item
-            for (Iterator<Item> it = listItem.iterator(); it.hasNext();) {
-                Item item = it.next();
-                int cpt = 0;
-                if (item.getID() != null) {
-                    for (Iterator<Item> it1 = listItem.iterator(); it1.hasNext();) {
-                        Item item1 = it1.next();
-                        if (item1.getID() != null) {
-                            if (item1.getID().equals(item.getID())) {
-                                cpt++;
-                                item1.verserLesDonneeBruteAutreItem(item);
-                                item.verserLesDonneeBruteAutreItem(item1);
-                            }
+            if (suppItemMMHash) {
+                for (Iterator<Item> it = listItem.iterator(); it.hasNext();) {
+                    Item item1 = it.next();
+                    int cpt = 0;
+                    for (int i = 0; i < listItem.size(); i++) {
+                        Item item = listItem.get(i);
+                        if (item.getHashContenu().equals(item1.getHashContenu())) {
+                            cpt++;
                         }
                     }
                     if (cpt > 1) {
                         it.remove();
+                        mediatorAReferer.nbDoublonInterneAuflux++;
                     }
                 }
             }
+
+            // Comparaison de contenu On trouve parfois deux item de contenu semblable avec une différence minime.
+
+            if (suppItContenuSemblable) {
+                ItemComparator comparator = new ItemComparator();
+                for (Iterator<Item> it = listItem.iterator(); it.hasNext();) {
+                    Item item = it.next();
+                    int cpt = 0;
+                    for (int i = 0; i < listItem.size(); i++) {
+                        Item item1 = listItem.get(i);
+                        int retour = comparator.compare(item1, item);
+
+                        if (retour >= 0) {
+                            cpt++;
+                        }
+                    }
+                    if (cpt > 1) {
+                        it.remove();
+                        mediatorAReferer.nbDoublonInterneAuflux++;
+                    }
+
+                }
+            }
+
+            //Vérification si on n'a pas deux foix un même ID pour une Item
+            if (suppItemMMID) {
+                for (Iterator<Item> it = listItem.iterator(); it.hasNext();) {
+                    Item item = it.next();
+                    int cpt = 0;
+                    if (item.getID() != null) {
+                        for (Iterator<Item> it1 = listItem.iterator(); it1.hasNext();) {
+                            Item item1 = it1.next();
+                            if (item1.getID() != null) {
+                                if (item1.getID().equals(item.getID())) {
+                                    cpt++;
+                                    item1.verserLesDonneeBruteAutreItem(item);
+                                    item.verserLesDonneeBruteAutreItem(item1);
+                                }
+                            }
+                        }
+                        if (cpt > 1) {
+                            it.remove();
+                        }
+                    }
+                }
+            }
+
         }
     }
-}
+
+    public MediatorCollecteAction getMediatorAReferer() {
+        return mediatorAReferer;
+    }
+
+    public void setMediatorAReferer(MediatorCollecteAction mediatorAReferer) {
+        this.mediatorAReferer = mediatorAReferer;
+    }
+
+
+    }

@@ -350,8 +350,13 @@ public class DaoItem extends AbstrDao {
         query.setParameter("hash", hash);
 
 
-        Item resu;
-        resu = (Item) query.getSingleResult();
+        Item resu = null;
+        try {
+        resu = (Item) query.getSingleResult();            
+        } catch (Exception e) {
+
+        }
+
         
         return resu;
 

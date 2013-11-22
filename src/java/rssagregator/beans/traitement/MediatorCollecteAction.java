@@ -7,7 +7,6 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.concurrent.ExecutorService;
@@ -30,7 +29,6 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.xml.ws.http.HTTPException;
 import org.apache.poi.util.Beta;
-import org.eclipse.persistence.jpa.jpql.utility.iterable.ListIterable;
 import rssagregator.beans.BeanSynchronise;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
@@ -91,7 +89,7 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
     @OneToOne(cascade = CascadeType.ALL)
     private AbstrRequesteur requesteur;
     /**
-     * Le mediator flux permet d'assigner un flux un comportement de collecte. Un médiator est une configuration de
+     * Le mediatorAReferer flux permet d'assigner un flux un comportement de collecte. Un médiator est une configuration de
      * parseur Raffineur etc.
      *
      * @element-type Flux
@@ -152,6 +150,24 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
 //    }
     @Version
     private Timestamp dateUpdate;
+    
+    
+    
+    
+    @Transient
+    protected transient short nbItTrouve= 0;
+    @Transient
+    protected transient short nbDedoubMemoire = 0;
+    @Transient
+    protected transient short nbDedoubBdd = 0;
+    @Transient
+    protected transient short nbLiaisonCree = 0;
+    @Transient
+    protected transient short nbNouvelle = 0;
+    @Transient
+    protected transient short nbDoublonInterneAuflux =0;
+            
+    
 
     public Timestamp getDateUpdate() {
         return dateUpdate;
@@ -200,6 +216,7 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
             }
 
             this.nbrItemCollecte = listItem.size();
+            this.nbItTrouve = (short) listItem.size();
 
 
 
@@ -234,6 +251,7 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
             if (dedoubloneur != null && dedoubloneur.enable != null && dedoubloneur.enable) {
 //                this.dedoubloneur.calculHash(listItem);
                 // On lance le premier dédoublonneur. Il est chargé de dédoublonner par rapport aux hash.
+                this.dedoubloneur.setMediatorAReferer(this);
                 listItem = this.dedoubloneur.dedoublonne(listItem, flux);
             }
 
@@ -242,6 +260,7 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
 //            listItem = dedoub2.dedoublonne(listItem, flux);
 
             if (dedoublonneur2 != null && dedoublonneur2.getEnable() != null && dedoublonneur2.getEnable()) {
+                dedoublonneur2.setMediatorAReferer(this);
                 listItem = dedoublonneur2.dedoublonne(listItem, flux);
             }
 
@@ -388,7 +407,7 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
     }
 
     /**
-     * Retourne un objet mediator par default. Il permet de répondre à 95% des flux en se basant sur le parse par defaut
+     * Retourne un objet mediatorAReferer par default. Il permet de répondre à 95% des flux en se basant sur le parse par defaut
      * de l'API Rome, le connecteur standart.... Cette methode n'est plus maintenue. Déterminer le comportement par
      * défault par du code compilé et non changeable est mal, juste bon pour faire des test!
      */
@@ -647,4 +666,56 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
         }
         return true;
     }
+
+    public short getNbItTrouve() {
+        return nbItTrouve;
+    }
+
+    public void setNbItTrouve(short nbItTrouve) {
+        this.nbItTrouve = nbItTrouve;
+    }
+
+    public short getNbDedoubMemoire() {
+        return nbDedoubMemoire;
+    }
+
+    public void setNbDedoubMemoire(short nbDedoubMemoire) {
+        this.nbDedoubMemoire = nbDedoubMemoire;
+    }
+
+    public short getNbDedoubBdd() {
+        return nbDedoubBdd;
+    }
+
+    public void setNbDedoubBdd(short nbDedoubBdd) {
+        this.nbDedoubBdd = nbDedoubBdd;
+    }
+
+    public short getNbLiaisonCree() {
+        return nbLiaisonCree;
+    }
+
+    public void setNbLiaisonCree(short nbLiaisonCree) {
+        this.nbLiaisonCree = nbLiaisonCree;
+    }
+
+    public short getNbNouvelle() {
+        return nbNouvelle;
+    }
+
+    public void setNbNouvelle(short nbNouvelle) {
+        this.nbNouvelle = nbNouvelle;
+    }
+
+    public short getNbDoublonInterneAuflux() {
+        return nbDoublonInterneAuflux;
+    }
+
+    public void setNbDoublonInterneAuflux(short nbDoublonInterneAuflux) {
+        this.nbDoublonInterneAuflux = nbDoublonInterneAuflux;
+    }
+    
+    
+    
+    
 }

@@ -37,9 +37,15 @@ $(document).ready(function() {
             data: []
         };
 
+        strId = "";
         for (i = 0; i < options.length; i++) {
+//            strId += strId+", "
             idFlux['data'].push(options[i]['value']);
         }
+        if(strId.length>0){
+            strId = strId.substr(0, strId.length-2);
+        }
+//        idFlux['data'].push(strId);
 
         $resudiv.empty(); // on vide la liste des départements
 
@@ -47,8 +53,7 @@ $(document).ready(function() {
         $itPrPage = $('#itPrPage');
         $firstResult = $('#firstResult');
         $order = $('#order');
-        $date2 = $('#date2');
-        $date1 = $('#date1');
+    
 
 
         // Récupération des flux sélectionne
@@ -57,17 +62,18 @@ $(document).ready(function() {
 
 
         //Gestion des date
-        $date1 = $('#date1');
+        $date1 = $('#date1').val()+" 00:00:00";
         d1 = {
-            field: "date1",
+            field: "dateRecup",
             op: "gt",
-            data: $date1.val()
+            data: $date1
         };
 
+    $date2 = $('#date2').val()+' 23:59:59';
         d2 = {
-            field: "date2",
+            field: "dateRecup",
             op: "lt",
-            data: $date2.val()
+            data: $date2
         };
         champSpe.push(d2);
         champSpe.push(d1);
