@@ -1,3 +1,4 @@
+<%@page import="java.util.Properties"%>
 <%@page import="rssagregator.services.ServiceSynchro"%>
 <%@page import="rssagregator.beans.UserAccount"%>
 
@@ -14,16 +15,39 @@
 
 
             <link href="${rootpath}/ress/style.css" type="text/css" rel="stylesheet" media="all" />
+
+        <!--Jquery-->
         <link rel="stylesheet" href="${rootpath}ress/jquery-ui.css" />
         <script src="${rootpath}ress/jquery-1.10.2.min.js"></script>
-        <script src="${rootpath}ress/jquery-ui.js"></script>
-        <script src="${rootpath}ress/JMSReconnection.js"></script>
+
+        <!--Jquery UI--> 
+        <script src="${rootpath}ress/jquery-ui-1.10.3.custom/js/jquery-ui-1.10.3.custom.min.js"></script>
+        <!--<link href="${rootpath}ress/jquery-ui-1.10.3.custom/css/ui-lightness/jquery-ui-1.10.3.custom.min.css" rel="stylesheet" media="all" />-->
+        <link rel="stylesheet" type="text/css" media="screen" href="${rootpath}ress/jquery-ui-1.10.3.custom/css/base/jquery-ui.css" />
+
+        <!--JQGRID-->
+        <script src="${rootpath}ress/jqgrid/js/i18n/grid.locale-fr.js" type="text/javascript"></script>
+        <script src="${rootpath}ress/jqgrid/js/jquery.jqGrid.min.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" media="screen" href="${rootpath}ress/jqgrid/css/ui.jqgrid.css" />
+
+        
+        <!--highcharts-->
+
+                        <script src="${rootpath}ress/highcharts/exporting.js"></script>
+                        <script src="${rootpath}ress/highcharts/highcharts.js"></script>
+                        <script src="${rootpath}ress/highcharts/highcharts-more.js"></script>
+                            
+
+
+
+
         <script src="${rootpath}ress/modernizr.custom.36191.js"></script>
-        <!--<script src="http://code.jquery.com/jquery-1.9.1.js"></script>-->
-        <!--<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>-->
-        <!--<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>-->
-        <!--<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />-->
-        <!--        <link rel="stylesheet" href="/resources/demos/style.css" />-->
+<!--<script src="${rootpath}ress/jquery-ui.js"></script>-->
+        <script src="${rootpath}ress/JMSReconnection.js"></script>
+
+
+
+
 
 
 
@@ -174,42 +198,52 @@
 
                 <c:if test="${admin == 'true'}"><li <c:if test="${navmenu=='config'}"> class="current_page_item"</c:if>><a href="${rootpath}config/read?id=1">Configuration</a></li></c:if>
                 <li <c:if test="${navmenu=='aide'}"> class="current_page_item"</c:if>><a href="${rootpath}aide.jsp">Aide</a></li>  
-            </ul>  
-        </nav> 
+                </ul>  
+            </nav> 
 
-        <script>
-            var el = document.getElementsByTagName("body")[0];
-            el.className = "";
-        </script>
+            <script>
+                var el = document.getElementsByTagName("body")[0];
+                el.className = "";
+            </script>
 
 
-        <script>
-            (function($) {
+            <script>
+                (function($) {
 
-                //cache nav
-                var nav = $("#topNav");
+                    //cache nav
+                    var nav = $("#topNav");
 
-                //add indicators and hovers to submenu parents
-                nav.find("li").each(function() {
-                    if ($(this).find("ul").length > 0) {
+                    //add indicators and hovers to submenu parents
+                    nav.find("li").each(function() {
+                        if ($(this).find("ul").length > 0) {
 
-                        $("<span>").text("^").appendTo($(this).children(":first"));
+                            $("<span>").text("^").appendTo($(this).children(":first"));
 
-                        //show subnav on hover
-                        $(this).mouseenter(function() {
-                            $(this).find("ul").stop(true, true).slideDown();
-                        });
+                            //show subnav on hover
+                            $(this).mouseenter(function() {
+                                $(this).find("ul").stop(true, true).slideDown();
+                            });
 
-                        //hide submenus on exit
-                        $(this).mouseleave(function() {
-                            $(this).find("ul").stop(true, true).slideUp();
-                        });
-                    }
-                });
-            })(jQuery);
-        </script>
+                            //hide submenus on exit
+                            $(this).mouseleave(function() {
+                                $(this).find("ul").stop(true, true).slideUp();
+                            });
+                        }
+                    });
+                })(jQuery);
+            </script>
 
-        <div id="wrapper">
-            <div id="page">
-                <div id="page-bgtop">
-                    <div id="page-bgbtm">
+            <div id="wrapper">
+                <div id="page">
+                    <div id="page-bgtop">
+                        <div id="page-bgbtm">
+
+                            ssssss
+                        <%
+                            String testProp = "prop1";
+                            Properties sysProps = System.getProperties();
+
+                            System.out.println("Value of " + testProp + " is "
+                                    + sysProps.getProperty(testProp));
+
+                        %>

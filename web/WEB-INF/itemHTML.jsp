@@ -18,10 +18,7 @@
         </div></div>
 
 </div>
-<!--<script src="simplePagination/jquery-1.7.2.min.js"></script>-->
 
-<!--<script src="js/scripts.js"></script>-->
-<link type="text/css" rel="stylesheet" href="simplePagination/simplePagination.css"/>
 
 <div id="content">
 
@@ -354,8 +351,6 @@ return pp;
 
     <!--
     
-        <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
-        <script src="jqPagination/js/jquery.jqpagination.js"></script>-->
 
 
 

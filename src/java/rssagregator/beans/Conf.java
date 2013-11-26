@@ -39,6 +39,12 @@ public class Conf implements Serializable {
      */
     String jmsprovider;
     
+    
+    /***
+     * Indique si le serveur est en production. Certain messages d'erreur ne sont affiché que si il est en debug
+     */
+    Boolean prod;
+    
 
     /**
      * Delai au bout duquel les données doivent être stoquées supprimée de la
@@ -113,6 +119,17 @@ public class Conf implements Serializable {
     public void setServeurSlave(List<ServeurSlave> ServeurSlave) {
         this.serveurSlave = ServeurSlave;
     }
+
+    public Boolean getProd() {
+        return prod;
+    }
+
+    public void setProd(Boolean prod) {
+        this.prod = prod;
+    }
+    
+    
+    
 
 //    public Long getID() {
 //        return ID;

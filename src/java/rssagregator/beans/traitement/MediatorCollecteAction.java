@@ -196,6 +196,9 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
                 }
                 this.requesteur.requete(flux.getUrl());
                 retourInputStream = this.requesteur.getHttpInputStream();
+                
+//                System.out.println("retour : " + retourInputStream.toString());
+                
                 if (parseur != null) {
                     parseur.setInputStream(retourInputStream);
                 }

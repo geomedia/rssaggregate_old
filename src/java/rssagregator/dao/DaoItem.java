@@ -651,7 +651,7 @@ public class DaoItem extends AbstrDao {
      * @throws ArgumentIncorrect Si le tite envoyé est vide ou si le journal n'a pas d'id.
      * @return
      */
-    public List<Item> findItemPossedantTitreAppartenantAuJournal(String titre, Journal journal) throws NullPointerException, ArgumentIncorrect {
+    public List<Item> findItemPossedantTitreAppartenantAuJournal(String titre, String link,Journal journal) throws NullPointerException, ArgumentIncorrect {
         if (journal == null) {
             throw new NullPointerException("journal null");
         }
@@ -668,9 +668,10 @@ public class DaoItem extends AbstrDao {
             throw new ArgumentIncorrect("Le journal envoyé n'a pas d'ID");
         }
 
-        Query query = em.createQuery("SELECT i From Item i JOIN  i.listFlux f, f.journalLie j WHERE j.ID=:idJ AND i.titre LIKE(:titre)");
+        Query query = em.createQuery("SELECT i From Item i JOIN  i.listFlux f, f.journalLie j WHERE j.ID=:idJ AND i.titre LIKE(:titre) OR i.link = :link");
         query.setParameter("idJ", journal.getID());
         query.setParameter("titre", titre);
+        query.setParameter("link", link);
 
         return query.getResultList();
     }

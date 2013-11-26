@@ -115,12 +115,11 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
             </form>-->
                         <script src="${rootpath}AjaxFluxDyn.js"></script>
 
-                        <script src="${rootpath}ress/jqgrid/js/i18n/grid.locale-fr.js" type="text/javascript"></script>
-                        <script src="${rootpath}ress/jqgrid/js/jquery.jqGrid.min.js" type="text/javascript"></script>
 
-                        <link rel="stylesheet" type="text/css" media="screen" href="css/ui-lightness/jquery-ui-1.7.1.custom.css" />
-                        <link rel="stylesheet" type="text/css" media="screen" href="${rootpath}ress/jqgrid/css/ui.jqgrid.css" />
-                        <link rel="stylesheet" type="text/css" media="screen" href="${rootpath}ress/jquery-ui-1.10.3.custom/css/base/jquery-ui.css" />
+                        
+                        
+
+
                         <table id="list" width="600"><tr><td></td></tr></table> 
                         <div id="pager"></div> 
                         <script type="text/javascript">
@@ -328,8 +327,7 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
 
                     <c:when test="${action=='highchart'}">
 
-                        <script src="http://code.highcharts.com/highcharts.js"></script>
-                        <script src="http://code.highcharts.com/modules/exporting.js"></script>
+    
 
                         <script>
                                 $(function() {
@@ -413,6 +411,7 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
                                                 </script>-->
 
                         <script src="${rootpath}FluxRecapHighChart.js"></script> <!--Le script permettant l'affichage du graphique en utilisant Highchart-->
+                        <script src="${rootpath}AjaxFluxDyn.js"></script> <!--Le script permettant l'affichage du graphique en utilisant Highchart-->
 
 
                     </c:when>
@@ -614,9 +613,6 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
                         <p><strong>Minimum : </strong>${bean.indiceMinimumNbrItemJour}</p>-->
 
 
-                        <script src="http://code.highcharts.com/highcharts.js"></script>
-                        <script src="http://code.highcharts.com/highcharts-more.js"></script>
-                        <script src="http://code.highcharts.com/modules/exporting.js"></script>
 
 
                         <div id="container" style="height: 400px; margin: auto; min-width: 310px; max-width: 600px"></div>

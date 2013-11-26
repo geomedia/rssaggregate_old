@@ -118,6 +118,7 @@ public class Dedoubloneur extends AbstrDedoublonneur {
 
                 //Si on a trouvé une item
                 if (ItemBDD != null) {
+                    System.out.println("--> ITEM BDD");
                     //Si l'item BDD posséde déjà le flux observé
                     boolean present = fluxPresentDansList(ItemBDD.getListFlux(), flux);
                     if (present) {
@@ -135,10 +136,10 @@ public class Dedoubloneur extends AbstrDedoublonneur {
                         if (trouve) {
                             it.remove();
                             mediatorAReferer.nbDedoubBdd++;
-                            ServiceCollecteur.getInstance().getCacheHashFlux().addHash(flux, ItemBDD.getHashContenu());
+//                            ServiceCollecteur.getInstance().getCacheHashFlux().addHash(flux, ItemBDD.getHashContenu());
+                            ServiceCollecteur.getInstance().getCacheHashFlux().addAllHashDeLItem(itemCapture, flux); //addHash(flux, ItemBDD.getHashContenu());
                         } else {
                             
-                            System.out.println("===============LIAISON D1");
                             ItemBDD.verserLesDonneeBruteAutreItem(itemCapture);
                             it.set(ItemBDD);
                         }
@@ -287,7 +288,6 @@ public class Dedoubloneur extends AbstrDedoublonneur {
         }
 //        }
         compteCapture[4] = listItemCapture.size();
-        logger.debug("Item trouvé : " + compteCapture[0] + "; Dedoub mémoire : " + compteCapture[1] + "; BDD déjà lié : " + compteCapture[2] + "; " + "BDD lien crée : " + compteCapture[3] + "Total nouv item : " + compteCapture[4]);
         return listItemCapture;
     }
 //    /***

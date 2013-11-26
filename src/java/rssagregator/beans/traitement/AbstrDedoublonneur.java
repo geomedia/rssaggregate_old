@@ -26,6 +26,7 @@ import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoItem;
+import rssagregator.services.ServiceCollecteur;
 
 /**
  *
@@ -372,6 +373,7 @@ public abstract class AbstrDedoublonneur implements Serializable, Cloneable {
                             }
                         }
                         if (cpt > 1) {
+                            System.out.println("---COUCOU");
                             it.remove();
                         }
                     }

@@ -592,11 +592,12 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
         // ===================================================================================
         if (o instanceof AbstrTacheSchedule) {
             //--------Une tache de test qui ne sert a rien...
-            if (o.getClass().equals(TacheTest.class)) {
-                System.out.println(" Une Tache test bien de se notifier");
+//            if (o.getClass().equals(TacheTest.class)) {
+//                System.out.println(" Une Tache test bien de se notifier");
 
                 //--------La tâche de vérification de la connection JMS
-            } else if (o.getClass().equals(TacheLancerConnectionJMS.class)) {
+//            } 
+        if (o.getClass().equals(TacheLancerConnectionJMS.class)) {
                 TacheLancerConnectionJMS t = (TacheLancerConnectionJMS) o;
                 // Si on a un échec
                 if(t.getExeption()!=null){

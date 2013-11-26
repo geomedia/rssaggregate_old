@@ -50,7 +50,7 @@ public class TestReq extends HttpServlet {
         DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
         List<Item> resu;
         try {
-            resu = daoItem.findItemPossedantTitreAppartenantAuJournal("Tout sur le nouveau \"Journal Tactile enrichi\"", j);
+            resu = daoItem.findItemPossedantTitreAppartenantAuJournal("Tout sur le nouveau \"Journal Tactile enrichi\"", "", j);
               for (int i = 0; i < resu.size(); i++) {
             Item item = resu.get(i);
             System.out.println("ITEM : " + item.getTitre());

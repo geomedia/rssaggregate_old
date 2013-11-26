@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.Transient;
+import org.apache.commons.io.IOUtils;
 import rssagregator.beans.Item;
 
 /**
@@ -45,7 +46,11 @@ public class RomeParse extends AbstrParseur implements Cloneable {
     @Override
     public List<Item> execute(InputStream xmlIS) throws IOException, IllegalArgumentException, FeedException {
         List<Item> listItems = new ArrayList<Item>();
-
+        
+//        String str = IOUtils.toString(xmlIS);
+//        System.out.println("====");
+//        System.out.println(str);
+//        System.out.println("====");
 
         XmlReader reader = new XmlReader(xmlIS);
 

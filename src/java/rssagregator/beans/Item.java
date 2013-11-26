@@ -30,6 +30,7 @@ import rssagregator.services.ServiceSynchro;
  * information peut ainsi être trouvé dans des flux différent d'où cette relation de N à N<p>
  *
  * @author clem
+ * @version 0.1
  */
 @Entity
 @Table(name = "item")
@@ -357,6 +358,8 @@ public class Item implements Serializable, Comparable<Item>, ContentRSS {
             newDonneeBrute.setDatePub(datePub);
             newDonneeBrute.setDateRecup(dateRecup);
             newDonneeBrute.setHashContenu(hashContenu);
+            newDonneeBrute.setCategorie(categorie);
+            newDonneeBrute.setContenu(contenu);
                    
 //            newDonneeBrute.setItem(this);
             this.donneeBrutes.add(newDonneeBrute);
@@ -366,9 +369,12 @@ public class Item implements Serializable, Comparable<Item>, ContentRSS {
     /***
      * Les donnée brutes de l'item envoyée en argument sont ajouté si nécessaire aux données brutes de l'item courante
      * @param i 
+     * @return true si un versement qqchose a pu être versé. sinon false. 
      */
-    public void verserLesDonneeBruteAutreItem(Item i){
+    public Boolean verserLesDonneeBruteAutreItem(Item i){
         
+        
+        boolean versement = false;
         List<DonneeBrute> listDonneebruteAutreItem = i.donneeBrutes;
         for (int j = 0; j < listDonneebruteAutreItem.size(); j++) {
             DonneeBrute donneeBruteAutre = listDonneebruteAutreItem.get(j);
@@ -382,16 +388,26 @@ public class Item implements Serializable, Comparable<Item>, ContentRSS {
             }
             if(!trouve){
                         this.donneeBrutes.add(donneeBruteAutre);
+                        versement = true;
 //                System.out.println("===========VERSEMENT==============");
 //                System.out.println("NOMBRE DONNEE BRUT POUR ITEM : " + this.donneeBrutes.size());
-                for (int k = 0; k < this.donneeBrutes.size(); k++) {
-                    DonneeBrute donneeBrute = this.donneeBrutes.get(k);
-//                    System.out.println("DESC : " + donneeBrute.getDescription());
-                    
-                }
+//                for (int k = 0; k < this.donneeBrutes.size(); k++) {
+//                    DonneeBrute donneeBrute = this.donneeBrutes.get(k);
+////                    System.out.println("DESC : " + donneeBrute.getDescription());
+//                    
+//                }
         
             }
         }
+        
+        
+        if(versement){
+            return true; // Si des données brutes on été versées
+        }
+        else{
+            return false; // si rien n'a été versé.
+        }
+        
     }
     
     /***

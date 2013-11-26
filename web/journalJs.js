@@ -8,7 +8,6 @@ $(document).ready(function() {
 
  $('#autoUpdateFlux:checkbox').change(function() {
      
-     
      if($('#updateDiv').children().length===0){
          
          $('#updateDiv').empty();
@@ -48,17 +47,5 @@ $(document).ready(function() {
 
         return false;
     });
-//alert("ss")
-
-
-
-
-
-
-
-
-
-
-
 
 });

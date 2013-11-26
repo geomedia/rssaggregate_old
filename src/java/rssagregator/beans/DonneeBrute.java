@@ -5,7 +5,9 @@
 package rssagregator.beans;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -52,6 +54,15 @@ public class DonneeBrute implements Serializable, ContentRSS{
     private String link;
     @Column(name = "guid", length = 1000)
     private String guid;
+    
+    
+    
+        @Column(name = "contenu", columnDefinition = "text")
+    private String contenu;
+            @Column(name = "categorie", length = 1500)
+    private String categorie;
+    
+    
     /**
      * *
      * Le hash permettant d'identifier de manière unique l'item. Ce champs ne peut être null et doit être unique dans la
@@ -65,6 +76,9 @@ public class DonneeBrute implements Serializable, ContentRSS{
 //    private Item item; // Bidirectionnelle l'item a toute les cascades 
     @OneToOne(optional = false)
     private Flux flux; // bidirectionnelle le flux a toute les cascades
+    
+
+    
 
     public Long getID() {
         return ID;
@@ -74,26 +88,32 @@ public class DonneeBrute implements Serializable, ContentRSS{
         this.ID = ID;
     }
 
+    @Override
     public String getDescription() {
         return description;
     }
 
+    @Override
     public void setDescription(String description) {
         this.description = description;
     }
 
+    @Override
     public String getLink() {
         return link;
     }
 
+    @Override
     public void setLink(String link) {
         this.link = link;
     }
 
+    @Override
     public String getGuid() {
         return guid;
     }
 
+    @Override
     public void setGuid(String guid) {
         this.guid = guid;
     }
@@ -144,4 +164,24 @@ public class DonneeBrute implements Serializable, ContentRSS{
     public void setHashContenu(String hashContenu) {
         this.hashContenu = hashContenu;
     }
+
+    public String getContenu() {
+        return contenu;
+    }
+
+    public void setContenu(String contenu) {
+        this.contenu = contenu;
+    }
+
+    public String getCategorie() {
+        return categorie;
+    }
+
+    public void setCategorie(String categorie) {
+        this.categorie = categorie;
+    }
+    
+    
+    
+    
 }

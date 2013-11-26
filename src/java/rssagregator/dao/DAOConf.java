@@ -148,6 +148,17 @@ public class DAOConf extends AbstrDao {
         } catch (Exception e) {
             throw new Exception("Impossible de charger la durée avant purge dans la configuration");
         }
+        
+        
+        //----------Récupération du statut prod
+        s =prop.getProperty("prod");
+        if(s != null && s.isEmpty() && s.equals("true")){
+            conf.setProd(Boolean.TRUE);
+        }
+        else{
+            conf.setProd(false);
+        }
+        
 
         //--------------Chargement du host maitre
         s = prop.getProperty("hostMaster");

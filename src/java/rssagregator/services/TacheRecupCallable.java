@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Observer;
 import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
+import rssagregator.beans.DonneeBrute;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.beans.Journal;
@@ -429,16 +430,23 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
                     for (int i = 0; i < nouvellesItems.size(); i++) {
                         Item item = nouvellesItems.get(i);
                         collecteur.getCacheHashFlux().addHash(flux, item.getHashContenu());
+                        for (int j = 0; j < item.getDonneeBrutes().size(); j++) {
+                            DonneeBrute donneesBrutes = item.getDonneeBrutes().get(j);
+                            collecteur.getCacheHashFlux().addHash(flux, donneesBrutes.getHashContenu());
+                            
+                        }
                     }
                 }
 
 
                 try {
-                    if (this.getComportementDuFlux().getDedoubloneur().getCompteCapture() != null) {
-                        Integer nbrItObserve = this.getComportementDuFlux().getDedoubloneur().getCompteCapture()[0];
-                        Integer nbrDsCache = collecteur.getCacheHashFlux().returnNbrHash(flux);
-                        if (nbrDsCache != null && nbrItObserve != null) {
-                            Integer nbrItASup = nbrDsCache - nbrItObserve - 100; // On en laisse 100 de marge 
+//                    if (this.getComportementDuFlux().getDedoubloneur().getCompteCapture() != null) {
+                        if(this.comportementDuFlux.getNbItTrouve() >0){
+                            
+                            short nbrItObserve = this.comportementDuFlux.getNbItTrouve();
+                        short nbrDsCache = collecteur.getCacheHashFlux().returnNbrHash(flux).shortValue();
+                        if (nbrDsCache > (nbrItObserve + 500) ) { // Si le nombre d'item dans le cache est supérieur au nombre d'item obs + 500 
+                            Integer nbrItASup = nbrDsCache - nbrItObserve - 500; // On en laisse 100 de marge 
                             if (nbrItASup > 0) {
                                 collecteur.getCacheHashFlux().removeXHash(nbrItASup, flux);
                             }
@@ -490,14 +498,13 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
         for (int i = 0; i < nouvellesItems.size(); i++) {
 
             Item item = nouvellesItems.get(i);
-            if (item.getDonneeBrutes().size() > 1) {
-                System.out.println("ITEM ID : " + item.getID());
-                System.out.println("---> BRUT : " + item.getDonneeBrutes().size());
-            }
 
             collecteur.ajouterItemAuFlux(flux, item, em, false, cloneComportement); // Il faut préciser au collecteur l'em qu'il doit utiliser, on lui donne celui qui block actuellement le flux. Les enregistrements ne sont alors pas encore commités
 
         }
 
+        logger.debug("Recup du Flux " + flux.getID()+" "+ flux+"\n Découverte : " + cloneComportement.getNbrItemCollecte()+"; Mem Dedoub :" + cloneComportement.getNbDedoubMemoire()+"; dedoubBDD" + cloneComportement.getNbDedoubBdd()+"; interneFlux : " + cloneComportement.getNbDoublonInterneAuflux()+ "; Liaison : " + cloneComportement.getNbLiaisonCree()+"; it crée : "+cloneComportement.getNbNouvelle());
+        
+        
     }
 }

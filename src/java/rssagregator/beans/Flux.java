@@ -67,6 +67,8 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE)
     private Long ID;
+    @ManyToMany
+    private List<DonneeBrute> donneeBrutes;
     
 
 

@@ -13,7 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import rssagregator.beans.DonneeBrute;
 import rssagregator.beans.Flux;
+import rssagregator.beans.Item;
 import rssagregator.services.ServiceCollecteur;
 
 /**
@@ -46,7 +48,7 @@ public class CacheHashFlux {
         DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
 //        List<Flux> listflux = daoFlux.findAllFlux(Boolean.TRUE);
         List<Flux> listflux = daoFlux.findall();
-        
+
         DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
         for (int i = 0; i < listflux.size(); i++) {
             Flux flux = listflux.get(i);
@@ -76,9 +78,9 @@ public class CacheHashFlux {
         }
         return null;
     }
-    
-        public synchronized Integer returnNbrHash(Flux flux) {
-              if (flux != null && flux.getID() != null) {
+
+    public synchronized Integer returnNbrHash(Flux flux) {
+        if (flux != null && flux.getID() != null) {
             for (Map.Entry<Flux, Set<String>> entry : cacheHash.entrySet()) {
                 Flux flux1 = entry.getKey();
                 if (flux1.getID().equals(flux.getID())) {
@@ -88,8 +90,7 @@ public class CacheHashFlux {
             }
         }
         return null;
-        }
-    
+    }
 
     /**
      * *
@@ -105,6 +106,7 @@ public class CacheHashFlux {
                 Flux flux1 = entry.getKey();
 
                 if (flux1.getID().equals(flux.getID())) {
+
                     Set<String> string = entry.getValue();
                     trouve = true;
                     string.add(hash);
@@ -117,6 +119,7 @@ public class CacheHashFlux {
                 cacheHash.put(flux, newHash);
             }
         }
+
     }
 
     /**
@@ -236,5 +239,61 @@ public class CacheHashFlux {
     }
 
     public static void main(String[] args) {
+    }
+
+    public void addAllHashDeLItem(Item itemSemblableBDD, Flux flux) {
+        System.out.println("------");
+        System.out.println("ADD ALL");
+        if (itemSemblableBDD == null) {
+            throw new NullPointerException("item null");
+        }
+        if (flux == null) {
+            throw new NullPointerException("flux null");
+        }
+
+
+        boolean trouve = false;
+        for (Map.Entry<Flux, Set<String>> entry : cacheHash.entrySet()) {
+            Flux flux1 = entry.getKey();
+            Set<String> set = entry.getValue();
+            if (flux1.getID().equals(flux.getID())) {
+                System.out.println("TROUVE FALSE");
+                trouve = true;
+                if (itemSemblableBDD.getHashContenu() != null && !itemSemblableBDD.getHashContenu().isEmpty()) {
+                    set.add(itemSemblableBDD.getHashContenu());
+                }
+                else{
+                    System.out.println("HASH BAD");
+                }
+
+                for (int i = 0; i < itemSemblableBDD.getDonneeBrutes().size(); i++) {
+//                    DonneeBrute donneeBrutes = itemSemblableBDD.getDonneeBrutes().get(i);
+                    String str = itemSemblableBDD.getDonneeBrutes().get(i).getHashContenu();
+                    if (str != null && !str.isEmpty()) {
+                        set.add(str);
+                    }
+                    else{
+                        System.out.println("HASH MAUVAIS");
+                    }
+                }
+                break;
+            }
+        }
+
+        if (!trouve) { // Si le flux n'est pas déjà présent
+            System.out.println("NE TROUVE");
+            Set<String> newSet = new HashSet<String>();
+            newSet.add(itemSemblableBDD.getHashContenu());
+            for (int i = 0; i < itemSemblableBDD.getDonneeBrutes().size(); i++) {
+                String str = itemSemblableBDD.getDonneeBrutes().get(i).getHashContenu();
+                if (str != null && !str.isEmpty()) {
+                    newSet.add(str);
+                }
+            }
+            this.cacheHash.put(flux, newSet);
+        }
+
+
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

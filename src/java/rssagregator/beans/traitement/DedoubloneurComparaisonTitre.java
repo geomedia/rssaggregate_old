@@ -5,15 +5,18 @@
 package rssagregator.beans.traitement;
 
 import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonAnyFormatVisitor;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.Entity;
+import javax.persistence.Transient;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
+import rssagregator.beans.ContentRSS;
 import rssagregator.beans.DonneeBrute;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
@@ -33,7 +36,9 @@ import rssagregator.services.ServiceCollecteur;
 @Entity(name = "DedoubloneurComparaisonTitre")
 public class DedoubloneurComparaisonTitre extends AbstrDedoublonneur {
 
-//    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DedoubloneurComparaisonTitre.class);
+    @Transient
+    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DedoubloneurComparaisonTitre.class);
+
     @Override
     public List<Item> dedoublonne(List<Item> listItemCapture, Flux flux) {
 
@@ -55,16 +60,9 @@ public class DedoubloneurComparaisonTitre extends AbstrDedoublonneur {
                 if (journal != null) {
                     try {
 
-                        List<Item> itemsSemblableBDD = daoItem.findItemPossedantTitreAppartenantAuJournal(itemCapture.getTitre(), journal);
-
-
-                        Document documentTxtItemCapture = Jsoup.parse(itemCapture.getDescription());
-
-                        documentTxtItemCapture.select("a").remove();
-                        String textItemCapture = documentTxtItemCapture.text();
+                        List<Item> itemsSemblableBDD = daoItem.findItemPossedantTitreAppartenantAuJournal(itemCapture.getTitre(), itemCapture.getLink(), journal);
 
                         List<DonneeBrute> donneeBrutesItemCapture = itemCapture.getDonneeBrutes();
-
 
                         int iItemBDD = 0;
                         while (iItemBDD < itemsSemblableBDD.size() && goNext == false) {
@@ -77,60 +75,56 @@ public class DedoubloneurComparaisonTitre extends AbstrDedoublonneur {
 
                             List<DonneeBrute> donneBrutItemBDD = itemSemblableBDD.getDonneeBrutes();
 
-
                             int iDonneeBDD = 0;
                             while (iDonneeBDD < donneBrutItemBDD.size() && !goNext) {
 
-//                            }
-//                            
-//                            for (int i = 0; i < donneBrutItemBDD.size(); i++) {
                                 DonneeBrute donneeBruteITBDD = donneBrutItemBDD.get(iDonneeBDD);
 
                                 int iDonneCapture = 0;
                                 while (iDonneCapture < donneeBrutesItemCapture.size() && !goNext) {
 
-//                                }
-//                                for (int k = 0; k < donneeBrutesItemCapture.size(); k++) {
                                     DonneeBrute donneeBruteCapture = donneeBrutesItemCapture.get(iDonneCapture);
 
                                     int retour = comparator.compare(donneeBruteCapture, donneeBruteITBDD);
-                                    System.out.println("-> Retour comparator : " + retour);
                                     if (retour == 0) { // Les donnée brutes sont strictement identique
 
                                         if (donneeBruteITBDD.getFlux().getID().equals(flux.getID())) {
-                                            logger.debug("Le comparator a dit item strictement identique");
                                             it.remove();
                                             mediatorAReferer.nbDedoubBdd++;
+                                            ServiceCollecteur.getInstance().getCacheHashFlux().addAllHashDeLItem(itemCapture, flux);
                                             goNext = true;
-                                        } else {
-                                            itemSemblableBDD.verserLesDonneeBruteAutreItem(itemCapture);
-                                            it.set(itemSemblableBDD); // On remplace     
-                                           
-                                            goNext = true;
+                                        } else { // Si qqchose a été versé on remplace l'item
+                                            boolean versement = itemSemblableBDD.verserLesDonneeBruteAutreItem(itemCapture);
+                                            if (versement) { // 
+                                                it.set(itemSemblableBDD); // On remplace   
+                                                goNext = true;
+                                            } else { // Si le versement est a false , c'est que l' item possède déjà une donnée brutes strictement identique a ce qui a été capturé
+                                                it.remove();
+                                                ServiceCollecteur.getInstance().getCacheHashFlux().addAllHashDeLItem(itemCapture, flux);
+                                                mediatorAReferer.nbDedoubBdd++;
+                                                goNext = true;
+                                            }
+
                                         }
 
                                     } else if (retour == 1) { // Les données proviennent du mm article mais ne sont pas strictement identique
 
-                                        logger.debug("versement");
-                                        itemSemblableBDD.verserLesDonneeBruteAutreItem(itemCapture);
-                                        it.set(itemSemblableBDD); // On remplace
-                                        goNext = true;
-                                      
+                                        boolean versment = itemSemblableBDD.verserLesDonneeBruteAutreItem(itemCapture);
+                                        if (versment) {
+                                            it.set(itemSemblableBDD); // On remplace
+                                            goNext = true;
+                                        } else {
+                                            mediatorAReferer.nbDedoubBdd++;
+                                            it.remove();
+                                            ServiceCollecteur.getInstance().getCacheHashFlux().addAllHashDeLItem(itemCapture, flux);
+                                            goNext = true;
+                                        }
 
                                     }
-
                                     iDonneCapture++;
                                 }
-
                                 iDonneeBDD++;
                             }
-
-
-
-
-
-
-
 
 
                             /**

@@ -5,6 +5,7 @@
 package rssagregator.beans.incident;
 
 import java.io.Serializable;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import rssagregator.services.ServiceMailNotifier;
 import rssagregator.services.TacheEnvoyerMail;
@@ -31,6 +32,7 @@ public class MailIncident extends AbstrIncident implements Serializable {
      * *
      * Le corps du message qui n'a pu être envoyé
      */
+    @Column (columnDefinition = "text")
     protected String Message;
     /**
      * *
@@ -112,9 +114,4 @@ public class MailIncident extends AbstrIncident implements Serializable {
     public Boolean doitEtreNotifieParMail() {
         return false;
     }
-
-
- 
-    
-    
 }

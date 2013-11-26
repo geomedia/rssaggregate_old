@@ -13,10 +13,14 @@ import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
 import org.eclipse.persistence.exceptions.EntityManagerSetupException;
+import rssagregator.dao.DAOConf;
+import rssagregator.dao.DAOFactory;
 
 /**
  *
  * @author clem
+ * @version 0.1
+ * 
  */
 public class TacheImpl<T> extends AbstrTacheSchedule<T> {
 
@@ -118,7 +122,11 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
      */
     protected void callCatchException(Exception e){
           this.exeption = e;
-          logger.debug("Debug exeption Tache "+this.getClass().getSimpleName(), e);
+          
+          if(!DAOFactory.getInstance().getDAOConf().getConfCourante().getProd()){
+                    logger.debug("Debug exeption Tache : "+this.getClass().getSimpleName()+"\n "+this, e);
+          }
+    
           
           if(em != null && em.isOpen()){
               if(em.isJoinedToTransaction()){
