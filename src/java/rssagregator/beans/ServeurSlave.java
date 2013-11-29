@@ -93,17 +93,8 @@ public class ServeurSlave implements Serializable {
         this.ID = ID;
     }
 
-
-    
     
 
-    //    public String getHost() {
-    //        return host;
-    //    }
-    //
-    //    public void setHost(String host) {
-    //        this.host = host;
-    //    }
     public String getServHost() {
         return servHost;
     }
@@ -121,13 +112,6 @@ public class ServeurSlave implements Serializable {
         this.url = url;
     }
 
-//    public Date getDateRecup() {
-//        return dateRecup;
-//    }
-//
-//    public void setDateRecup(Date dateRecup) {
-//        this.dateRecup = dateRecup;
-//    }
 
     @Override
     public String toString() {

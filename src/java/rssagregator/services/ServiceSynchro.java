@@ -4,6 +4,11 @@
  */
 package rssagregator.services;
 
+import rssagregator.services.tache.TacheLancerConnectionJMS;
+import rssagregator.services.tache.TacheDiffuserMessageJMS;
+import rssagregator.services.tache.TacheSynchroHebdomadaire;
+import rssagregator.services.tache.TacheSynchroRecupItem;
+import rssagregator.services.tache.AbstrTacheSchedule;
 import java.io.EOFException;
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -12,6 +17,7 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.jms.ExceptionListener;
@@ -233,7 +239,7 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
             tacheDiffuserMessageJMS.setConnection(connection);
             tacheDiffuserMessageJMS.setTopic(topic);
             tacheDiffuserMessageJMS.setSchedule(false);
-            executorService.submit(tacheDiffuserMessageJMS);
+            submit(tacheDiffuserMessageJMS);
         }
 
 
@@ -427,7 +433,8 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
                                 List<Item> items = daoItem.findCretaria();
                                 for (int i = 0; i < items.size(); i++) {
                                     Item item = items.get(i);
-                                    item.setSyncStatut(3);
+                                    Byte b = 3;
+                                    item.setSyncStatut(b);
                                     try {
                                         daoItem.beginTransaction();
                                         daoItem.modifier(item);
@@ -615,9 +622,8 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
                     }
                 }
 
-                if (t.schedule) {
+                if (t.getSchedule()) {
                     schedule(t);
-//                    executorService.schedule(t, 30, TimeUnit.SECONDS);
                 }
                 //Si la tache s'est termée correctement 
 
@@ -774,7 +780,7 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
     public static void main(String[] args) {
         ServiceSynchro serviceSynchro = ServiceSynchro.getInstance();
         TacheLancerConnectionJMS t = new TacheLancerConnectionJMS(serviceSynchro);
-        serviceSynchro.executorService.submit(t);
+        serviceSynchro.submit(t);
     }
 
     @Override

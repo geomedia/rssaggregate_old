@@ -4,10 +4,12 @@
  */
 package rssagregator.services.crud;
 
+import java.util.Date;
 import java.util.List;
 import javax.persistence.EntityManager;
 import org.joda.time.DateTime;
 import rssagregator.beans.Flux;
+import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.AnomalieCollecte;
 import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.dao.DAOFactory;
@@ -74,5 +76,37 @@ public class ServiceCrudIncident extends ServiceCRUDBeansBasique {
         // On Ajout ou l'on modifie
 
 
+    }
+    
+    
+    
+    public void cloreIncidents(List<AbstrIncident> indid, EntityManager em, Boolean persist) throws Exception{
+        
+        
+        if (em == null){
+            em =DAOFactory.getInstance().getEntityManager();
+        }
+        
+        
+        if(!em.isJoinedToTransaction()){
+            em.getTransaction().begin();
+        }
+        
+        for (int i = 0; i < indid.size(); i++) {
+
+            AbstrIncident abstrIncident = indid.get(i);
+                        System.out.println("ICID ID " + abstrIncident.getID());
+            abstrIncident.setDateFin(new Date());
+            em.merge(abstrIncident);
+            System.out.println("MERGE");
+            
+        }
+        
+        if(persist){
+            System.out.println("PERSITE");
+            em.getTransaction().commit();
+        }
+        
+        
     }
 }

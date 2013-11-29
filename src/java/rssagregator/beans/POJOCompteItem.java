@@ -363,7 +363,6 @@ public class POJOCompteItem {
             Date date = entry.getKey();
             Integer integer = entry.getValue();
             stats.addValue(integer);
-
         }
 
 

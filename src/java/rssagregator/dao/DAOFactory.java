@@ -30,7 +30,7 @@ import rssagregator.beans.incident.NotificationAjoutFlux;
 import rssagregator.beans.incident.ServerIncident;
 import rssagregator.beans.incident.SynchroIncident;
 import rssagregator.beans.traitement.MediatorCollecteAction;
-import rssagregator.services.AbstrTacheSchedule;
+import rssagregator.services.tache.AbstrTacheSchedule;
 
 /**
  *
@@ -44,9 +44,7 @@ public class DAOFactory<T extends AbstrDao> {
     private static DAOFactory instance = new DAOFactory();
     public List<EntityManager> listEm = new ArrayList<EntityManager>();
     EntityManager em;
-//    private DaoFlux daoflux = new DaoFlux(this);
-//    private DAOConf daoConf = new DAOConf(this);
-//    private DaoFlux daoflux;
+
     private DAOConf daoConf;
 //     private static DaoItem daoItem;
     EntityManagerFactory emf;

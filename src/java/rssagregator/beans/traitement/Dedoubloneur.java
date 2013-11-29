@@ -20,7 +20,7 @@ public class Dedoubloneur extends AbstrDedoublonneur {
 
     public Dedoubloneur() {
         super();
-        logger = Logger.getLogger(Dedoubloneur.class);
+
     }
 
     public String getDescription() {
@@ -118,7 +118,6 @@ public class Dedoubloneur extends AbstrDedoublonneur {
 
                 //Si on a trouvé une item
                 if (ItemBDD != null) {
-                    System.out.println("--> ITEM BDD");
                     //Si l'item BDD posséde déjà le flux observé
                     boolean present = fluxPresentDansList(ItemBDD.getListFlux(), flux);
                     if (present) {

@@ -6,7 +6,7 @@ package rssagregator.beans.incident;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import rssagregator.services.TacheDiffuserMessageJMS;
+import rssagregator.services.tache.TacheDiffuserMessageJMS;
 
 /**
  * <p>Incident générée par le service

@@ -13,7 +13,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Journal;
-import rssagregator.services.TacheDecouverteAjoutFlux;
+import rssagregator.services.tache.TacheDecouverteAjoutFlux;
 
 /**
  * Ce type d'incident permet de notifier à l'administrateur que de nouveau Flux ont été découvert et ajouté par la tâche

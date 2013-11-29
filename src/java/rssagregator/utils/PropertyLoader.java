@@ -18,14 +18,20 @@ import java.net.URL;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.servlet.UnavailableException;
+import rssagregator.beans.exception.RessourceIntrouvable;
 
 /**
- * Une classe posédant des méthode static dédiée au maniement de fichiers
- * properties.
+ * Une classe posédant des méthode static dédiée au maniement de fichiers properties.
  *
  * @author clem
  */
 public class PropertyLoader {
+
+    private static org.apache.log4j.Logger logger2 = org.apache.log4j.Logger.getLogger(PropertyLoader.class);
 
     /**
      * Charge le fichier properties QUI EST CONTENU DANS LE PROJET
@@ -44,21 +50,20 @@ public class PropertyLoader {
 
     /**
      * *
-     * Charge un fichier properties depuis un emplacement sur le disque dur
-     * (exemple : /var/lib/RSSAgregate/conf.properties)
+     * Charge un fichier properties depuis un emplacement sur le disque dur (exemple :
+     * /var/lib/RSSAgregate/conf.properties)
      *
-     * @param filename : ler path et nom de fichier exemple
-     * "/var/lib/RSSAgregate/conf.properties"
+     * @param filename : ler path et nom de fichier exemple "/var/lib/RSSAgregate/conf.properties"
      * @return L'objet properties ou null si il n'a pas été trouvé"
      * @throws FileNotFoundException
      * @throws IOException
      */
     public static Properties loadFromFile(String filename) {
         FileInputStream fis = null;
-        Properties p=null;
+        Properties p = null;
         try {
-             p = new Properties();
-             fis = new FileInputStream(filename);
+            p = new Properties();
+            fis = new FileInputStream(filename);
             p.load(fis);
 
         } catch (Exception e) {
@@ -76,11 +81,9 @@ public class PropertyLoader {
 
     /**
      * *
-     * Sauvegarde l'objet properties dans un fichier properties propre au projet
-     * NE MARCHE PAS VRAIMENT, après redémarage on ne retrouve pas les valeur et
-     * le fichier est retourné a son état initiale. On préfère utiliser la
-     * méthode saveToFile pour sauvegarder dans un répertoire a part / usr/lib.
-     * Le fichier conf.properties notamment
+     * Sauvegarde l'objet properties dans un fichier properties propre au projet NE MARCHE PAS VRAIMENT, après
+     * redémarage on ne retrouve pas les valeur et le fichier est retourné a son état initiale. On préfère utiliser la
+     * méthode saveToFile pour sauvegarder dans un répertoire a part / usr/lib. Le fichier conf.properties notamment
      *
      * @param prop
      * @param filename
@@ -104,8 +107,7 @@ public class PropertyLoader {
 
     /**
      * *
-     * Sauvegarde l'objet properties dans un fichier properties correspondant
-     * aux références envoyées en paramettre
+     * Sauvegarde l'objet properties dans un fichier properties correspondant aux références envoyées en paramettre
      *
      * @param prop : l'objet properties à sauvegarder
      * @param fileDestination : le fichier destination
@@ -128,6 +130,34 @@ public class PropertyLoader {
         Properties p = load(filename);
         String sp = p.getProperty(prop);
         return sp;
+    }
+
+    
+    
+    /***
+     * Charge une ressource depuis le context tomcat. Renvoie null si rien trouvé et emmet des erreurs avec log4j
+     * @param var  le nom de la ressource (à configurer dans context.xml)
+     * @return la ressource ou null
+     */
+    public static Object loadFromContext(String var) {
+        try {
+            Context initialCtx = new InitialContext();
+            Context localCtx = (Context) initialCtx.lookup("java:comp/env");
+            Object o = localCtx.lookup(var);
+            if (o == null) {
+                throw new RessourceIntrouvable("Impossible de trouver la ressource " + var + " dans le context");
+            } else {
+                return o;
+            }
+
+        } catch (NamingException e) {
+            logger2.error("Impossible de trouver la ressource dans le context" + var, e);
+        } catch (RessourceIntrouvable e) {
+            logger2.error("Impossible de trouver la ressource dans le context" + var, e);
+        }
+        return null;
+
+
     }
 
     /**

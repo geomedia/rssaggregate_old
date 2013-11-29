@@ -4,7 +4,7 @@
  */
 package rssagregator.beans.exception;
 
-import rssagregator.services.TacheDecouverteAjoutFlux;
+import rssagregator.services.tache.TacheDecouverteAjoutFlux;
 
 /**
  * Un incident levé par la tâche {@link TacheDecouverteAjoutFlux} lorsqu'après avoir parcouru la page d'un journal, elle ne découvre aucun flux

@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package rssagregator.services;
+package rssagregator.services.tache;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -24,6 +24,8 @@ import rssagregator.beans.incident.SynroRecupItemIncident;
 import rssagregator.beans.traitement.MediatorCollecteAction;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoItem;
+import rssagregator.services.AbstrService;
+import rssagregator.services.ServiceCollecteur;
 import rssagregator.utils.XMLTool;
 
 /**

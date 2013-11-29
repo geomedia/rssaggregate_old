@@ -2,17 +2,17 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package rssagregator.services;
+package rssagregator.services.tache;
 
+import java.util.Date;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.Callable;
-import org.eclipse.persistence.jpa.jpql.parser.DatetimeExpressionBNF;
 import org.joda.time.Days;
 import org.joda.time.Duration;
-import org.joda.time.format.ISOPeriodFormat;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
+import rssagregator.services.AbstrService;
 
 /**
  * Toutes les tâche schedule de l'application doivent hériter de cette classe abstraite
@@ -66,8 +66,21 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
      * et chaque service
      */
     Integer nbrTentative;
+    /**
+     * *
+     * Le service Controlant la tâche
+     */
+    AbstrService service;
+    /**
+     * *
+     * Temps maximal d'execution de la tache en seconde. Le service va interrompre la tache si il est dépassé voit la
+     * tache {@link CalableAntiDeadBlock}
+     */
+    protected Short maxExecuteTime = 60;
+    protected Date lasExecution;
+    protected boolean running = false;
 
-    public AbstrTacheSchedule() {
+    protected AbstrTacheSchedule() {
         this.schedule = false;
         exeption = null;
         nbrTentative = 0;
@@ -79,7 +92,7 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
      *
      * @param executorService
      */
-    public AbstrTacheSchedule(Observer s) {
+    protected AbstrTacheSchedule(Observer s) {
         this.addObserver(s);
         this.schedule = false;
         exeption = null;
@@ -124,6 +137,14 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
 
     public Integer getJourSchedule() {
         return jourSchedule;
+    }
+
+    public AbstrService getService() {
+        return service;
+    }
+
+    public void setService(AbstrService service) {
+        this.service = service;
     }
 
     /**
@@ -171,8 +192,6 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
         return heureSchedule;
     }
 
-
-
     public void setHeureSchedule(Integer heureSchedule) {
         this.heureSchedule = heureSchedule;
     }
@@ -201,14 +220,22 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
         this.annuler = annuler;
     }
 
-    /**
-     * *
-     * Methode permettant d'annuler la tache
-     */
-    public void annuler() throws Exception {
-        annuler = true;
-//        call();
-        Thread.currentThread().interrupt();
+
+//    /**
+//     * *
+//     * Methode permettant d'annuler la tache
+//     */
+//    public void annuler() throws Exception {
+//        annuler = true;
+////        call();
+//        Thread.currentThread().interrupt();
+//    }
+    public Date getLasExecution() {
+        return lasExecution;
+    }
+
+    public void setLasExecution(Date lasExecution) {
+        this.lasExecution = lasExecution;
     }
 
     protected abstract void callCorps() throws Exception;
@@ -221,4 +248,24 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
      * @return
      */
     protected abstract T callFinalyse();
+
+    public Short getMaxExecuteTime() {
+        return maxExecuteTime;
+    }
+
+    public void setMaxExecuteTime(Short maxExecuteTime) {
+        this.maxExecuteTime = maxExecuteTime;
+    }
+
+    public boolean isRunning() {
+        return running;
+    }
+
+    public void setRunning(boolean running) {
+        this.running = running;
+    }
+
+    public void forceChange() {
+        this.setChanged();
+    }
 }

@@ -22,14 +22,29 @@
         type="org.apache.activemq.command.ActiveMQTopic"
         factory="org.apache.activemq.jndi.JNDIReferenceFactory"
         physicalName="MY.TEST.FOO"/>
-  
+
+
+        <Environment name="conf/varpath"
+        type="java.lang.String"
+
+        value="/var/lib/RSSAgregate/"
+        description="Définit ou trouver les fichier de conf" />
   
 
 <!--  <ResourceLink 
                         name="testlink"
                         global="testGlobal"
                         type="java.lang.String" />-->
+
   
+      <Resource 
+                        name="testlink"
+                        value="tutu"
+                        type="java.lang.String" />
+      
+      
+      
+          
 <!--        <ResourceLink
          name="jms/ConnectionFactory"
          global="jms/ConnectionFactoryGlobal"

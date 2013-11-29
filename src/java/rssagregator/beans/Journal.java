@@ -1,9 +1,9 @@
 package rssagregator.beans;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,14 +13,14 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.Version;
 import org.apache.poi.util.Beta;
 import rssagregator.beans.traitement.MediatorCollecteAction;
-import rssagregator.services.TacheDecouverteAjoutFlux;
+import rssagregator.services.tache.TacheDecouverteAjoutFlux;
 
 /**
- * Un journal : Le monde, le Figaro... Chaque journal est instancier dans un objet. Un journal peut contenir plusieurs
- * {@link Flux}. Les journaux sont synchronisé du serveur maitre vers les serveur esclave d'ou l'implémentation de
- * l'interface {@link BeanSynchronise}
+ * Un journal : Le monde, le Figaro... Un journal peut contenir plusieurs {@link Flux}. Les journaux sont synchronisés
+ * du serveur maitre vers les serveur esclave d'ou l'implémentation de l'interface {@link BeanSynchronise}
  */
 @Entity
 //@Customizer(JournalEntityLisner.class) 
@@ -64,7 +64,7 @@ public class Journal implements Serializable, BeanSynchronise {
      * Un journal possède plusieurs flux. La suppression du journal entraine la suppression des flux par cascade.
      */
     @OneToMany(mappedBy = "journalLie", fetch = FetchType.EAGER, cascade = {CascadeType.DETACH})
-    private List<Flux> fluxLie;
+    private List<Flux> fluxLie = new ArrayList<Flux>();
     /**
      * La page d'accueil du journal. Cette variable est informative. Exemple http://www.lemonde.fr
      */
@@ -76,26 +76,20 @@ public class Journal implements Serializable, BeanSynchronise {
      */
     @Column(name = "urlHtmlRecapFlux", length = 2000)
     private String urlHtmlRecapFlux;
-    
-    
-    /***
-     * Boolean permettant de renseigner si oui ou non la liste des flux appratenant au journal doit être périodiquement mise à jour en se basant sur la tache {@link TacheDecouverteAjoutFlux}
+    /**
+     * *
+     * Boolean permettant de renseigner si oui ou non la liste des flux appratenant au journal doit être périodiquement
+     * mise à jour en se basant sur la tache {@link TacheDecouverteAjoutFlux}
      */
     @Column(name = "autoUpdateFlux")
     private Boolean autoUpdateFlux;
-    
-    
-    /***
+    /**
+     * *
      * Détermine par la tache automatique {@link TacheDecouverteAjoutFlux} doivent êter activé ou non
      */
     @Column(name = "activerFluxDecouvert")
-    private Boolean activerFluxDecouvert;
-    
-    
+    private Boolean activerFluxDecouvert = false;
     private Integer periodiciteDecouverte;
-    
-    
-    
     /**
      * *
      * Un champs texte permettant aux administrateurs de saisir des informations sur le journal. Ce champs texte permet
@@ -109,13 +103,41 @@ public class Journal implements Serializable, BeanSynchronise {
      */
     @Column(name = "typeJournal", nullable = false)
     private String typeJournal;
-    
-    
-    
-    
+    /**
+     * *
+     * Lors de la découverte de flux par la tâche {@link TacheDecouverteAjoutFlux}, il est nécessaire d'associer les
+     * {@link Flux} découvert à un {@link MediatorCollecteAction}. C'est ce comportement qui sera attribué au flux du
+     * journal présent
+     */
     @OneToOne
     private MediatorCollecteAction comportementParDefaultDesFlux;
     
+    
+    /***
+     * Dernière modification de l'entite. Permet l'Optimitic Lock
+     */
+        @Version
+    Timestamp modified;
+
+        /***
+         * @see #modified
+         * @return 
+         */
+    public Timestamp getModified() {
+        return modified;
+    }
+
+    /***
+     * @see #modified
+     * @param modified 
+     */
+    public void setModified(Timestamp modified) {
+        this.modified = modified;
+    }
+        
+        
+        
+        
 
     /**
      * Get the value of typeJournal
@@ -135,47 +157,99 @@ public class Journal implements Serializable, BeanSynchronise {
         this.typeJournal = typeJournal;
     }
 
+    /**
+     * *
+     * Constructeur
+     */
     public Journal() {
-        this.fluxLie = new ArrayList<Flux>();
     }
 
+    /**
+     * *
+     * @see #ID
+     * @param ID
+     */
     public Long getID() {
         return ID;
     }
 
+    /**
+     * *
+     * @see #ID
+     * @param ID
+     */
     public void setID(Long ID) {
         this.ID = ID;
     }
 
+    /**
+     * *
+     * @see #nom
+     * @return
+     */
     public String getNom() {
         return nom;
     }
 
+    /**
+     * *
+     * @see #nom
+     * @return
+     */
     public void setNom(String nom) {
         this.nom = nom;
     }
 
+    /**
+     * *
+     * @see #fuseauHorraire
+     * @return
+     */
     public String getFuseauHorraire() {
-
         return fuseauHorraire;
     }
 
+    /**
+     * *
+     * @see #fuseauHorraire
+     * @param fuseauHorraire
+     */
     public void setFuseauHorraire(String fuseauHorraire) {
         this.fuseauHorraire = fuseauHorraire;
     }
 
+    /**
+     * *
+     * @see #langue
+     * @return
+     */
     public String getLangue() {
         return langue;
     }
 
+    /**
+     * *
+     * @see #langue
+     * @param langue
+     */
     public void setLangue(String langue) {
         this.langue = langue;
     }
 
+    /**
+     * *
+     * @see #fluxLie
+     * @return
+     */
     public List<Flux> getFluxLie() {
         return fluxLie;
     }
 
+    /**
+     * *
+     * @see #fluxLie
+     * @return
+     */
     public void setFluxLie(List<Flux> fluxLie) {
         this.fluxLie = fluxLie;
     }
@@ -212,10 +286,20 @@ public class Journal implements Serializable, BeanSynchronise {
         this.urlAccueil = urlAccueil;
     }
 
+    /**
+     * *
+     * @see #comportementParDefaultDesFlux
+     * @return
+     */
     public MediatorCollecteAction getComportementParDefaultDesFlux() {
         return comportementParDefaultDesFlux;
     }
 
+    /**
+     * *
+     * @see #comportementParDefaultDesFlux
+     * @return
+     */
     public void setComportementParDefaultDesFlux(MediatorCollecteAction comportementParDefaultDesFlux) {
         this.comportementParDefaultDesFlux = comportementParDefaultDesFlux;
     }
@@ -243,21 +327,8 @@ public class Journal implements Serializable, BeanSynchronise {
     public void setPeriodiciteDecouverte(Integer periodiciteDecouverte) {
         this.periodiciteDecouverte = periodiciteDecouverte;
     }
-    
-    
-    
-    
-    
-    
-    
 
-//    @Override
-//    /***
-//     * Ajoute le service JMS comme observer du beans. 
-//     */
-//    public void enregistrerAupresdesService() {
-////        this.addObserver(ServiceSynchro.getInstance());
-//    }
+
     /**
      * *
      * La redéfinition de cette méthode renvoie toujour true pour un {@link Journal}. Les journaux doivent ainsi

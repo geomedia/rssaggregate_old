@@ -4,19 +4,14 @@
  */
 package rssagregator.services;
 
+import rssagregator.services.tache.TacheStillAlive;
+import rssagregator.services.tache.AbstrTacheSchedule;
 import java.util.Observable;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import rssagregator.beans.exception.UnIncidableException;
 import rssagregator.beans.incident.AliveIncident;
-import rssagregator.beans.incident.IncidentFactory;
-import rssagregator.beans.incident.ServerIncident;
-import rssagregator.dao.DAOFactory;
-import rssagregator.dao.DAOIncident;
+import rssagregator.services.tache.TacheDetectDeadLock;
 
 /**
  * Cette classe permet de gérer le lancement et le maintient des services de
@@ -234,19 +229,22 @@ public class ServiceServer extends AbstrService {
                     DateTimeFormatter fmt = DateTimeFormat.forPattern("dd MMMM yyyy à hh'h'mm");
                     incident.setMessageEreur("Il semble que l'application n'était pas ouverte entre : " + fmt.print(new DateTime(cast.getDebutRupture())) + " et : " + fmt.print(new DateTime(cast.getFinRupture())));
 
-
-
-
-
                 }
                 if (cast.getSchedule()) {
-                    executorService.schedule(cast, 15, TimeUnit.SECONDS);
+                    schedule(cast);
                 }
-            }  
+            }
+            else if(o.getClass().equals(TacheDetectDeadLock.class)){
+                TacheDetectDeadLock cast = (TacheDetectDeadLock)o;
+                schedule(cast);
+                
+                
+            }
+            
 //            gererIncident((AbstrTacheSchedule) o);
         }
 
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override

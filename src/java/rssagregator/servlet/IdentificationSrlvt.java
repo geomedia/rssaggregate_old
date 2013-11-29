@@ -40,7 +40,6 @@ public class IdentificationSrlvt extends HttpServlet {
             throws ServletException, IOException {
         
         String action = ServletTool.configAction(request, "login");
-        System.out.println("ACTION  : " + action);
         
         DAOUser dao = DAOFactory.getInstance().getDAOUser();
         
@@ -61,7 +60,6 @@ public class IdentificationSrlvt extends HttpServlet {
                     try {
                         if (u.authWithThisPass(p)) {
                             session.setAttribute("authuser", u);
-                            System.out.println("######### ASK : " + request.getParameter("askurl"));
                             ServletTool.redir(request, request.getParameter("askurl"), "Identification réussie", Boolean.FALSE);
                         } else {
                             request.setAttribute("err", "Echec de l'identification");
@@ -81,7 +79,6 @@ public class IdentificationSrlvt extends HttpServlet {
         else if(action.equals("logout")){
             HttpSession session = request.getSession();
             session.invalidate();
-            System.out.println("context : " + request.getContextPath());
             ServletTool.redir(request, request.getContextPath()+"/index", "Deconnection effectuée avec succès", Boolean.FALSE);
         }
         //====================================================================================================

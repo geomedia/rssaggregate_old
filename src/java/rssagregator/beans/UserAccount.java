@@ -7,11 +7,13 @@ package rssagregator.beans;
 import java.io.Serializable;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.sql.Timestamp;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Version;
 import org.apache.tomcat.util.buf.HexUtils;
 
 /**
@@ -37,25 +39,47 @@ public class UserAccount implements Serializable, BeanSynchronise {
     private Boolean adminstatut;
     /**
      * *
-     * Le nom d'utilisateur. Il est purement informatif, c'est le mail qui est
-     * utilisé pour l'identification des utilisateurs
+     * Le nom d'utilisateur. Il est purement informatif, c'est le mail qui est utilisé pour l'identification des
+     * utilisateurs
      */
     @Column(name = "username")
     private String username;
     /**
      * *
-     * Le root account ne peut être modifié depuis l'interface utilisateur. Pour
-     * changer son mot de pass ou un quelconque parametre, il faut passer par le
-     * fichier conf.properties. Le compte root account est celui utilisé pour la
-     * récupération des données lors de la synchronisation interserveur.
+     * Le root account ne peut être modifié depuis l'interface utilisateur. Pour changer son mot de pass ou un
+     * quelconque parametre, il faut passer par le fichier conf.properties. Le compte root account est celui utilisé
+     * pour la récupération des données lors de la synchronisation interserveur.
      */
     private Boolean rootAccount;
     /**
      * *
-     * Boolean qui permet de déterminer si ce compte doit recevoir les mails
-     * d'alerte du système.
+     * Boolean qui permet de déterminer si ce compte doit recevoir les mails d'alerte du système.
      */
     private Boolean adminMail;
+    /**
+     * *
+     * Dernière modification de l'entite. Permet l'Optimitic Lock
+     */
+    @Version
+    Timestamp modified;
+
+    /**
+     * *
+     * @see #modified
+     * @return
+     */
+    public Timestamp getModified() {
+        return modified;
+    }
+
+    /**
+     * *
+     * @see #modified
+     * @param modified
+     */
+    public void setModified(Timestamp modified) {
+        this.modified = modified;
+    }
 
     public UserAccount() {
         adminstatut = Boolean.FALSE;
@@ -117,9 +141,6 @@ public class UserAccount implements Serializable, BeanSynchronise {
     public void setRootAccount(Boolean rootAccount) {
         this.rootAccount = rootAccount;
     }
-    
-    
-    
 
     /**
      * *

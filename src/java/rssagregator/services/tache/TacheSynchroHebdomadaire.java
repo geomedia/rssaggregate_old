@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package rssagregator.services;
+package rssagregator.services.tache;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +10,7 @@ import java.util.Observer;
 import java.util.concurrent.Future;
 import rssagregator.beans.ServeurSlave;
 import rssagregator.dao.DAOFactory;
+import rssagregator.services.ServiceSynchro;
 
 /**
  * Cette tache est lancée toutes les semaines afin de récupérérer sur les serveurs esclaves les items collectées qui

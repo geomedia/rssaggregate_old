@@ -6,6 +6,7 @@ package rssagregator.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -13,12 +14,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.naming.NamingException;
 import org.jdom.Attribute;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
+import rssagregator.beans.exception.RessourceIntrouvable;
 import rssagregator.services.AbstrService;
-import rssagregator.services.AbstrTacheSchedule;
+import rssagregator.services.tache.AbstrTacheSchedule;
+import rssagregator.services.tache.TacheFactory;
 
 /**
  *
@@ -28,12 +32,10 @@ public class ServiceXMLTool {
 
     /**
      * *
-     * La méthode static doit parcourir le fichier servicedef.xml afin de
-     * générer chaque service. Pour chaque chmo vim se service, elle crée les
-     * tache définit dans le même xml et les lance suivant les parametres donnée
-     * par le XML
+     * La méthode static doit parcourir le fichier servicedef.xml afin de générer chaque service. Pour chaque chmo vim
+     * se service, elle crée les tache définit dans le même xml et les lance suivant les parametres donnée par le XML
      */
-    public static void instancierServiceEtTache() throws IOException, JDOMException, ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    public static void instancierServiceEtTache() throws IOException, JDOMException, ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NamingException, RessourceIntrouvable {
 
         String propfile = PropertyLoader.loadProperti("serv.properties", "varpath");
 
@@ -42,7 +44,68 @@ public class ServiceXMLTool {
         document = sxb.build(new File(propfile + "/servicedef.xml"));
         Element racine = document.getRootElement();
 
+
+        /**
+         * **
+         * Configuration de la factory
+         */
+        TacheFactory tacheFactory = TacheFactory.getInstance();
+//        List listTacheconf = racine.getChildren("tachedefaultconf");
+//        for (int i = 0; i < listTacheconf.size(); i++) {
+//            System.out.println("--> tachedefaultconf ");
+//            
+//            Element elementTachedefaultconf = (Element) listTacheconf.get(i);
+//            Attribute att_ClassTache = elementTachedefaultconf.getAttribute("class");
+//
+//            // récup de la propriété
+//            List listElementpropertie = elementTachedefaultconf.getChildren("propertie");
+//            for (int j = 0; j < listElementpropertie.size(); j++) {
+//                System.out.println("----> Propertie");
+//                Element elementPropertie = (Element) listElementpropertie.get(j);
+//
+//
+//                // Class
+//                Attribute att_ClassPropertie = elementPropertie.getAttribute("class");
+//                Attribute att_Key = elementPropertie.getAttribute("key");
+//                Attribute att_Value = elementPropertie.getAttribute("value");
+//
+//
+//                try {
+//                    Class cTache = Class.forName(att_ClassTache.getValue());
+//                    
+//                    
+//                    Field field = tacheFactory.getClass().getField("ATT_" + cTache.getSimpleName() + "_" + att_Key.getValue());
+//                    Class c = Class.forName(att_ClassPropertie.getValue());
+//                    
+//                    if (c.equals(Short.class)) {
+//                        
+//                        Short val = new Short(att_Value.getValue());
+////                        cast = new Short(att_Value.getValue());
+//                        field.set(TacheFactory.class, val);
+//                    }
+//
+//                } catch (NoSuchFieldException ex) {
+//                    Logger.getLogger(ServiceXMLTool.class.getName()).log(Level.SEVERE, null, ex);
+//                } catch (SecurityException ex) {
+//                    Logger.getLogger(ServiceXMLTool.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//            }
+//
+//
+//
+//        }
+
+
+
+
+
+        /**
+         * *
+         * Instanciation des services et taches
+         */
         List listService = racine.getChildren("service");
+
+
 
 
         for (int i = 0; i < listService.size(); i++) {
@@ -74,7 +137,9 @@ public class ServiceXMLTool {
                 // Récupération de la class
                 Attribute attClassTache = tacheElement.getAttribute("class");
                 Class cTache = Class.forName(attClassTache.getValue());
-                AbstrTacheSchedule castTache = (AbstrTacheSchedule) cTache.newInstance();
+//                AbstrTacheSchedule castTache = (AbstrTacheSchedule) cTache.newInstance();
+                AbstrTacheSchedule castTache = tacheFactory.getNewTask(cTache, Boolean.FALSE);
+
                 castTache.addObserver(service);
 //                AbstrTacheSchedule castTache = (AbstrTacheSchedule) tache;
 
@@ -83,7 +148,7 @@ public class ServiceXMLTool {
                 // récupération du paramettre schedule. Si on ne le trouve pas la tache est considérée comme schedulé
                 Attribute attSchedule = tacheElement.getAttribute("scheduled");
                 if (attSchedule != null) {
-                    if (attSchedule.getValue().equals("true")) { 
+                    if (attSchedule.getValue().equals("true")) {
                         castTache.setSchedule(Boolean.TRUE);
                     } else {
                         castTache.setSchedule(Boolean.FALSE);
@@ -91,7 +156,7 @@ public class ServiceXMLTool {
                 } else {
                     castTache.setSchedule(Boolean.TRUE);
                 }
-                
+
                 //Envoie de la tâche au service
 
                 Element elementJour = tacheElement.getChild("schedulejourfixe");
@@ -149,6 +214,10 @@ public class ServiceXMLTool {
         } catch (IllegalArgumentException ex) {
             Logger.getLogger(ServiceXMLTool.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InvocationTargetException ex) {
+            Logger.getLogger(ServiceXMLTool.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NamingException ex) {
+            Logger.getLogger(ServiceXMLTool.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RessourceIntrouvable ex) {
             Logger.getLogger(ServiceXMLTool.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

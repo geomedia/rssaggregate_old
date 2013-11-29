@@ -4,6 +4,8 @@
  */
 package rssagregator.services;
 
+import rssagregator.services.tache.AbstrTacheSchedule;
+
 /**
  * Une execption propre au projet géomédia. Lorsqu'un Callable est interrompu, il doit emmettre ce type d'exception
  * @author clem

@@ -9,7 +9,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import rssagregator.beans.exception.CollecteUnactiveFlux;
 import rssagregator.beans.exception.UnIncidableException;
-import rssagregator.services.AbstrTacheSchedule;
+import rssagregator.services.tache.AbstrTacheSchedule;
 
 /**
  * Permet de créer un incident

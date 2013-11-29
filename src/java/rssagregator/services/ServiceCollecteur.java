@@ -8,7 +8,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Observable;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -18,7 +20,6 @@ import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.TransactionRequiredException;
 import org.joda.time.DateTime;
-import rssagregator.beans.DonneeBrute;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.beans.Journal;
@@ -31,6 +32,11 @@ import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoFlux;
 import rssagregator.dao.DaoItem;
 import rssagregator.dao.DaoJournal;
+import rssagregator.services.tache.TacheCalculQualiteFlux;
+import rssagregator.services.tache.TacheDecouverteAjoutFlux;
+import rssagregator.services.tache.TacheFactory;
+import rssagregator.services.tache.TacheRecupCallable;
+import rssagregator.services.tache.AbstrTacheSchedule;
 
 /**
  * Cette classe permet d'instancier le service de collecte du projet. Elle est organisée autours de deux objets
@@ -54,14 +60,14 @@ public class ServiceCollecteur extends AbstrService {
      * de données
      */
     private CacheHashFlux cacheHashFlux = CacheHashFlux.getInstance();
+
     /**
      * *
      * Cette map permet au service de retrouver les les tâche lié au flux. la clé de la map est l'id du flux (un
      * {@link Long}) la valeur est la tache récoltant le flux. C'est au service de maintenir cette map
      */
-    private Map<Long, List<AbstrTacheSchedule>> mapFluxTache = new HashMap<Long, List<AbstrTacheSchedule>>();
-    private Map<Long, TacheDecouverteAjoutFlux> mapJournalTache = new HashMap<Long, TacheDecouverteAjoutFlux>();
-
+//    private Map<Long, List<AbstrTacheSchedule>> mapFluxTache = new HashMap<Long, List<AbstrTacheSchedule>>();
+//    private Map<Long, TacheDecouverteAjoutFlux> mapJournalTache = new HashMap<Long, TacheDecouverteAjoutFlux>();
     /**
      * *
      * Constructeur du singleton
@@ -125,44 +131,59 @@ public class ServiceCollecteur extends AbstrService {
         if (f.getActive()) {
             //On regarde si le flux est déjà enregistré dans la map. Il faut le supprimer si il est trouvé. On replacera ensuite de nouvelles taches
 
-            List<AbstrTacheSchedule> listTache = mapFluxTache.get(f.getID());
-            if (listTache != null) {
-                for (int i = 0; i < listTache.size(); i++) {
-                    AbstrTacheSchedule abstrTacheSchedule = listTache.get(i);
-                    if (abstrTacheSchedule != null) {
-                        abstrTacheSchedule.setAnnuler(true);
-                        try {
-                            abstrTacheSchedule.call();
-                        } catch (Exception ex) {
-                            Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    }
+            Entry<AbstrTacheSchedule, Future> entry = retriveTaskCollecte(f);
+            if (entry != null) {
+                //annulation de la tache
+                Future fut = entry.getValue();
+                try {
+                    fut.cancel(true);
+                } catch (Exception e) {
+                    logger.debug("Annulation de la tache", e);
                 }
+
             }
 
 
-            TacheRecupCallable tache = new TacheRecupCallable(f, this, Boolean.TRUE); // création de la nouvelle tache de collecte
+//            List<AbstrTacheSchedule> listTache = mapFluxTache.get(f.getID());
+//            if (listTache != null) {
+//                for (int i = 0; i < listTache.size(); i++) {
+//                    AbstrTacheSchedule abstrTacheSchedule = listTache.get(i);
+//                    if (abstrTacheSchedule != null) {
+//                        try {
+//                            abstrTacheSchedule.annuler();
+//                        } catch (Exception ex) {
+//                            Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
+//                        }
+//                    }
+//                }
+//            }
+
+            TacheRecupCallable tache = (TacheRecupCallable) TacheFactory.getInstance().getNewTask(TacheRecupCallable.class, Boolean.TRUE);
+            tache.setFlux(f);
+//            TacheRecupCallable tache = new TacheRecupCallable(f, this, Boolean.TRUE); // création de la nouvelle tache de collecte
             tache.setTimeSchedule(f.getMediatorFlux().getPeriodiciteCollecte());  // On définit son temsp de schedulation en fonction des paramettre de son comportement de collecte
+
             TacheCalculQualiteFlux tachecalcul = new TacheCalculQualiteFlux(this);// Création de la nouvelle tache de vérification.
             tachecalcul.setFlux(f);
-            tachecalcul.setTimeSchedule(f.getMediatorFlux().getPeriodiciteCollecte() * 1); // Le calcul de la qualité est effectuer tous les 5* temps de récupération. 
+            tachecalcul.setTimeSchedule(f.getMediatorFlux().getPeriodiciteCollecte() * 5); // Le calcul de la qualité est effectuer tous les 5* temps de récupération. 
 
 
-            List<AbstrTacheSchedule> nouvList = new ArrayList<AbstrTacheSchedule>();
-            nouvList.add(tache);
-
-            nouvList.add(tachecalcul);
-
+//            List<AbstrTacheSchedule> nouvList = new ArrayList<AbstrTacheSchedule>();
+//            nouvList.add(tache);
+//
+//            nouvList.add(tachecalcul);
 
             // On ajoute la tache à la map
-            mapFluxTache.put(f.getID(), nouvList);
+//            synchronized (mapFluxTache) {
+//                mapFluxTache.put(f.getID(), nouvList);
+//            }
+//            addTask(tache, null);
+
+
 
             // On lance la tâche
-//            this.executorService.schedule(tache, f.getMediatorFlux().getPeriodiciteCollecte(), TimeUnit.SECONDS);
             schedule(tache);
             schedule(tachecalcul);
-
-
         }
     }
 
@@ -177,26 +198,39 @@ public class ServiceCollecteur extends AbstrService {
 
         // .....
 
-        if (j.getAutoUpdateFlux()) {
 
-            TacheDecouverteAjoutFlux tache = mapJournalTache.get(j.getID());
+        if (j.getAutoUpdateFlux()) { // Si le journal est configuré pour autodécouvrir ses flux.
 
-            if (tache != null) { // Si le service a déjà une tache pour le journal, elle doit être annulée
+
+            Entry<AbstrTacheSchedule, Future> entry = retriveTaskJournalDiscover(j);
+            if (entry != null) {
                 try {
-                    tache.annuler();
-                } catch (Exception ex) {
-                    Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
+                    entry.getValue().cancel(true);
+                } catch (Exception e) {
+                    logger.debug("annulation de la tache de découverte des flux " + e);
                 }
             }
 
-            tache = new TacheDecouverteAjoutFlux();
+
+//            if (tache != null) { // Si le service a déjà une tache pour le journal, elle doit être annulée
+//                try {
+//                    tache.annuler();
+//                } catch (Exception ex) {
+//                    Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//            }
+
+            TacheDecouverteAjoutFlux tache = new TacheDecouverteAjoutFlux();
             tache.setJournal(j);
             tache.setPersist(true);
             tache.setActiverLesFLux(j.getActiverFluxDecouvert());
             tache.setNombredeSousTache(30); // TODO : doit être tiré du beans Journal
-            mapJournalTache.put(j.getID(), tache);
 
-            this.executorService.schedule(tache, 60, TimeUnit.SECONDS); // TODO : devra être tiré du Journal ou mieux d'une entitée modélisant le comportement
+
+//            mapJournalTache.put(j.getID(), tache);
+
+            schedule(tache); // schedulation de la tache
+//            this.executorService.schedule(tache, 60, TimeUnit.SECONDS); // TODO : devra être tiré du Journal ou mieux d'une entitée modélisant le comportement
         }
     }
 
@@ -209,15 +243,25 @@ public class ServiceCollecteur extends AbstrService {
         }
 
         // On annule l atache
-        TacheDecouverteAjoutFlux tache = mapJournalTache.get(j.getID());
-        if (tache != null) {
+
+        Entry<AbstrTacheSchedule, Future> entry = retriveTaskJournalDiscover(j);
+        if (entry != null) {
+            // Annulation de la tache
             try {
-                tache.annuler();
-            } catch (Exception ex) {
-                Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
+                entry.getValue().cancel(true);
+            } catch (Exception e) {
+                logger.debug("annulation", e);
             }
+
+            // Suppression de la tache a l'intérieur de la liste des tache du service
+            synchronized (mapTache) {
+                mapTache.remove(entry.getKey());
+            }
+
+
         }
-        this.mapJournalTache.remove(j.getID());
+
+
     }
 
     /**
@@ -238,21 +282,117 @@ public class ServiceCollecteur extends AbstrService {
 
         // On annule la tache
 
-        List<AbstrTacheSchedule> listtacheDuFLux = this.mapFluxTache.get(f.getID());
-        if (listtacheDuFLux != null) {
-            for (int i = 0; i < listtacheDuFLux.size(); i++) {
-                AbstrTacheSchedule abstrTacheSchedule = listtacheDuFLux.get(i);
-                try {
-                    abstrTacheSchedule.annuler();
-                } catch (Exception ex) {
-                    Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
-                }
+//        List<AbstrTacheSchedule> listtacheDuFLux = this.mapFluxTache.get(f.getID());
+//        if (listtacheDuFLux != null) {
+//            for (int i = 0; i < listtacheDuFLux.size(); i++) {
+//                AbstrTacheSchedule abstrTacheSchedule = listtacheDuFLux.get(i);
+//                try {
+//                    abstrTacheSchedule.annuler();
+//                } catch (Exception ex) {
+//                    Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//            }
+//        }
+
+
+
+        // Annulation et suppression de la tache de la liste des taches gérer par le service
+        Entry<AbstrTacheSchedule, Future> entry = retriveTaskCollecte(f);
+        if (entry != null) {
+            try {
+                entry.getValue().cancel(true);
+            } catch (Exception e) {
+                logger.debug("annulation de la tache de collecte", e);
             }
+
+            synchronized (mapTache) {
+                mapTache.remove(entry.getKey());
+            }
+        }
+        try {
+            this.cacheHashFlux.removeFlux(f);
+        } catch (Exception e) {
+            logger.debug("Erreur : ", e);
         }
 
 
-        this.mapFluxTache.remove(f.getID());
 
+//
+//        synchronized (mapFluxTache) {
+//            this.mapFluxTache.remove(f.getID());
+//        }
+    }
+
+    /**
+     * *
+     * Parcours la {@link #mapTache} du service Collecte et retrouve la tache correspondant au flux. Renvoi null si on
+     * ne trouve pas de tache pour le flux.
+     *
+     * @param f
+     * @return une entry avec la tache et son futur. ou null.
+     */
+    public Entry<AbstrTacheSchedule, Future> retriveTaskCollecte(Flux f) throws IncompleteBeanExeption {
+
+        if (f == null) {
+            throw new NullPointerException("Le flux envoyé en arguement est null");
+        }
+        if (f.getID() == null) {
+            throw new IncompleteBeanExeption("Le flux envoyé en arguement n'a pas d'ID");
+        }
+
+
+//        mapTache.e
+
+        for (Entry<AbstrTacheSchedule, Future> entry : mapTache.entrySet()) {
+            AbstrTacheSchedule abstrTacheSchedule = entry.getKey();
+            Future future = entry.getValue();
+
+            // Si c'est une tache de récup
+            if (abstrTacheSchedule.getClass().equals(TacheRecupCallable.class)) {
+                TacheRecupCallable tacherecup = (TacheRecupCallable) abstrTacheSchedule;
+                if (tacherecup.getFlux().getID().equals(f.getID())) {
+                    System.out.println("FIND FLUX");
+                    return entry;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * **
+     * Retrouve la tache de découverte de flux associé au journal envoyé en argument parmis la map des tâches propres au
+     * service.
+     *
+     * @param j le journal pour lequel il faut effectuer la recherche.
+     * @return Une entry comprenant le callable ainsi que le future
+     * @throws IncompleteBeanExeption Si le journal envoyé en argumetn n'a pas d'id
+     */
+    public Entry<AbstrTacheSchedule, Future> retriveTaskJournalDiscover(Journal j) throws IncompleteBeanExeption {
+
+        if (j == null) {
+            throw new NullPointerException("Le journal est null");
+        }
+        if (j.getID() == null) {
+            throw new IncompleteBeanExeption("le journal envoyé n'a pas d'id");
+        }
+
+
+        for (Entry<AbstrTacheSchedule, Future> entry : mapTache.entrySet()) {
+            AbstrTacheSchedule abstrTacheSchedule = entry.getKey();
+            Future future = entry.getValue();
+
+            if (abstrTacheSchedule.getClass().equals(TacheDecouverteAjoutFlux.class)) {
+                TacheDecouverteAjoutFlux cast = (TacheDecouverteAjoutFlux) abstrTacheSchedule;
+                if (cast.getJournal().getID().equals(j.getID())) {
+                    return entry;
+                }
+            }
+
+        }
+
+
+        return null;
     }
 
     /**
@@ -326,7 +466,7 @@ public class ServiceCollecteur extends AbstrService {
                         Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
                     }
 
-                    if (tache.getTacheSchedule() && !tache.annulerTache) { // On reschedule la tache normalement
+                    if (tache.getSchedule() && !tache.getAnnuler()) { // On reschedule la tache normalement
 //                        executorService.schedule(tache, tache.getFlux().getMediatorFlux().getPeriodiciteCollecte(), TimeUnit.SECONDS);
                         schedule(tache);
                     }
@@ -345,11 +485,12 @@ public class ServiceCollecteur extends AbstrService {
                         logger.error("erreur lors de la gestion de l'incident de la tâche de collecte", ex);
                     }
                     // TODO : On peut la reschedule dans 5 min si le nbr d'erreur est <3
-                    if (tache.getTacheSchedule() && !tache.annulerTache) { // On reschedule la tache normalement 
-//                            executorService.schedule(tache, tache.getFlux().getMediatorFlux().getPeriodiciteCollecte(), TimeUnit.SECONDS);
-                        this.schedule(tache);
-
-                    }
+//                    if (tache.getSchedule() && !tache.getAnnulerTache()) { // On reschedule la tache normalement 
+////                            executorService.schedule(tache, tache.getFlux().getMediatorFlux().getPeriodiciteCollecte(), TimeUnit.SECONDS);
+//                        this.schedule(tache);
+//
+//                    }
+                    schedule(tache);
                 }
 
             } //---------------------------Tache générale de vérification de la capture---------------------------------
@@ -387,23 +528,26 @@ public class ServiceCollecteur extends AbstrService {
             //            } 
             else if (o.getClass().equals(TacheCalculQualiteFlux.class)) {
                 TacheCalculQualiteFlux cast = (TacheCalculQualiteFlux) o;
-                if (cast.getExeption() == null) {
-                    cast.getFlux().setIndiceQualiteCaptation(cast.getIndiceCaptation());
-                    cast.getFlux().setIndiceDecileNbrItemJour(cast.getDecile());
-                    cast.getFlux().setIndiceMedianeNbrItemJour(cast.getMediane());
-                    cast.getFlux().setIndiceQuartileNbrItemJour(cast.getQuartile());
-                    cast.getFlux().setIndiceMinimumNbrItemJour(cast.getMinimum());
-                    cast.getFlux().setIndiceMaximumNbrItemJour(cast.getMaximum());
-                    try {
-                        // Il faut enregistrer le résultat. 
-                        DAOFactory.getInstance().getDAOFlux().beginTransaction();
-                        DAOFactory.getInstance().getDAOFlux().modifier(cast.getFlux());
-                        DAOFactory.getInstance().getDAOFlux().commit();
-                    } catch (Exception ex) {
-                        logger.error("Erreur de la tâche " + cast + " lors de la modification du flux " + cast.getFlux(), ex);
-
-                    }
+                if (cast.getSchedule()) {
+                    schedule(cast);
                 }
+//                if (cast.getExeption() == null) {
+//                    cast.getFlux().setIndiceQualiteCaptation(cast.getIndiceCaptation());
+//                    cast.getFlux().setIndiceDecileNbrItemJour(cast.getDecile());
+//                    cast.getFlux().setIndiceMedianeNbrItemJour(cast.getMediane());
+//                    cast.getFlux().setIndiceQuartileNbrItemJour(cast.getQuartile());
+//                    cast.getFlux().setIndiceMinimumNbrItemJour(cast.getMinimum());
+//                    cast.getFlux().setIndiceMaximumNbrItemJour(cast.getMaximum());
+//                    try {
+//                        // Il faut enregistrer le résultat. 
+//                        DAOFactory.getInstance().getDAOFlux().beginTransaction();
+//                        DAOFactory.getInstance().getDAOFlux().modifier(cast.getFlux());
+//                        DAOFactory.getInstance().getDAOFlux().commit();
+//                    } catch (Exception ex) {
+//                        logger.error("Erreur de la tâche " + cast + " lors de la modification du flux " + cast.getFlux(), ex);
+//
+//                    }
+//                }
             } else if (o.getClass().equals(TacheDecouverteAjoutFlux.class)) {
                 TacheDecouverteAjoutFlux cast = (TacheDecouverteAjoutFlux) o;
                 if (cast.getSchedule()) { // Si c'est une tâche schedulé on la replanifie.
@@ -441,7 +585,12 @@ public class ServiceCollecteur extends AbstrService {
     @Deprecated
     public void majManuelle(Flux flux) throws Exception {
         System.out.println("");
-        TacheRecupCallable task = new TacheRecupCallable(flux, this, false);
+
+
+        TacheRecupCallable task = (TacheRecupCallable) TacheFactory.getInstance().getNewTask(TacheRecupCallable.class, false);
+        task.setFlux(flux);
+//        TacheRecupCallable task = new TacheRecupCallable(flux, this, false);
+
 
         Future<TacheRecupCallable> t = this.poolPrioritaire.submit(task);
 
@@ -452,7 +601,8 @@ public class ServiceCollecteur extends AbstrService {
 
     /**
      * *
-     * Cette méthode lance la mise à jour manuelle de chacun des flux envoyés en parametres
+     * Cette méthode lance la mise à jour manuelle de chacun des flux envoyés en parametres. Attends les résultat et
+     * renvoi la liste des tâche executées pour la récupération.
      *
      * @param listFlux Liste de flux pour lequels il faut lancer une mise à jour manuelle
      * @throws Exception
@@ -460,20 +610,32 @@ public class ServiceCollecteur extends AbstrService {
     public List<TacheRecupCallable> majManuellAll(List<Flux> listFlux) throws Exception {
         int i;
 
-        List<TacheRecupCallable> listTache = new ArrayList<TacheRecupCallable>();
+        // Construction de la liste des tâches a soumettre
+        List<TacheRecupCallable> taches = new ArrayList<TacheRecupCallable>();
         for (i = 0; i < listFlux.size(); i++) {
-            TacheRecupCallable task = new TacheRecupCallable(listFlux.get(i), this, false);
-            listTache.add(task);
 
-//            listFlux.get(i).setTacheRechupManuelle(task);
+            TacheRecupCallable task = (TacheRecupCallable) TacheFactory.getInstance().getNewTask(TacheRecupCallable.class, Boolean.FALSE);
+            task.setFlux(listFlux.get(i));
+            taches.add(task);
         }
-        DateTime dtDebut = new DateTime();
+
+        // Soumission des tâche dans le pool prioritaire
+        List<Future> lf = new ArrayList<Future>();
+        for (int j = 0; j < taches.size(); j++) {
+            TacheRecupCallable tacheRecupCallable = taches.get(j);
+            Future fut = poolPrioritaire.submit(tacheRecupCallable);
+            lf.add(fut);
+            addTask(tacheRecupCallable, fut);
+        }
 
 
-        List<Future<TacheRecupCallable>> listFutur = this.poolPrioritaire.invokeAll(listTache);
+        // Attente des résultats
+        for (int j = 0; j < lf.size(); j++) { // Il faut attendre la terminaison de toutes les tache envoyé
+            Future future = lf.get(j);
+            future.get();
+        }
 
-
-        return listTache;
+        return taches;
     }
 
     /**
@@ -509,8 +671,13 @@ public class ServiceCollecteur extends AbstrService {
         this.poolPrioritaire = poolPrioritaire;
     }
 
-//    @Override
-    public void lancerCollecte() {
+    @Override
+    public void lancerService() {
+
+        super.lancerService();
+//        antiDeadBlock.setService(this);
+//        this.executorService.submit(antiDeadBlock);
+
 
         // On charge le cache
         cacheHashFlux.ChargerLesHashdesFluxdepuisBDD(); // Au démarrage du service, il faut charger les hash pour tout les flux dans le cache
@@ -736,7 +903,7 @@ public class ServiceCollecteur extends AbstrService {
         Boolean err = false;
         if (item.getID() != null) { // Une item possédant un ID n'est pas nouvelle, il faut alors changer le booleean
             itemEstNouvelle = false;
-            
+
         }
 
         // Si l'item est nouvelle, on cherche si si n'existe pas déjà dans la base de données une item possédant ce hash. 
@@ -764,23 +931,22 @@ public class ServiceCollecteur extends AbstrService {
         if (itemEstNouvelle) {  // Si l'item est nouvelle, on va effectuer une création dans la base de données
             try {
                 dao.creer(item);
-                if(comportementCollecte!=null){
+                if (comportementCollecte != null) {
                     short nb = comportementCollecte.getNbNouvelle();
                     nb++;
                     comportementCollecte.setNbNouvelle(nb);
                 }
-                
+
             } catch (Exception ex) {
                 err = true;
                 logger.debug("erreur lors de l'ajout", ex);
             }
-        }
-        else{
+        } else {
             if (comportementCollecte != null) {
                 short nb = comportementCollecte.getNbLiaisonCree();
                 nb++;
                 comportementCollecte.setNbLiaisonCree(nb);
-            } 
+            }
         }
 
 
@@ -960,11 +1126,8 @@ public class ServiceCollecteur extends AbstrService {
         tache.setNombredeSousTache(30);
         tache.setActiverLesFLux(activerFlux);
         tache.setPersist(persisterAjout);
-        Future<TacheDecouverteAjoutFlux> fut = executorService.submit(tache);
+        Future<TacheDecouverteAjoutFlux> fut = submit(tache);
         return fut;
-
-//        return tache;
-
 
     }
 

@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package rssagregator.services;
+package rssagregator.services.tache;
 
 import java.util.Observer;
 import javax.jms.DeliveryMode;
@@ -91,47 +91,7 @@ public class TacheDiffuserMessageJMS extends TacheImpl<TacheDiffuserMessageJMS> 
         return super.callFinalyse(); //To change body of generated methods, choose Tools | Templates.
     }
     
-    
-    
 
-//    @Override
-//    public TacheDiffuserMessageJMS call() throws Exception {
-//        
-//        this.exeption = null;
-//        try {
-//            if (connection != null) {
-//                Session sessionDiff = connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
-//                MessageProducer producer = sessionDiff.createProducer(topic);
-//                producer.setDeliveryMode(DeliveryMode.PERSISTENT);
-//                MapMessage mapMessage = sessionDiff.createMapMessage();
-//
-//                beanSerialise = XMLTool.serialise(bean);
-//                mapMessage.setStringProperty("bean", beanSerialise);
-//                mapMessage.setStringProperty("action", action);
-//
-//                Conf c = DAOFactory.getInstance().getDAOConf().getConfCourante();
-//
-//                mapMessage.setStringProperty("sender", c.getServname());
-//                mapMessage.setJMSCorrelationID(c.getServname());
-//                producer.send(mapMessage);
-//                mapMessage.acknowledge();
-//                sessionDiff.close();
-//                logger.debug("Diffusion du Beans effectuée");
-//                throw new Exception("test Exception");
-//            }
-//            else{
-//                throw new JMSException("La connection au service JMS est innactive.");
-//            }
-//
-//        } catch (Exception e) {
-//            this.exeption = e;
-//            logger.error("Erreur lors de la diffusion d'un message JMS : " + e);
-//        } finally {
-//            this.setChanged();
-//            this.notifyObservers();
-//            return this;
-//        }
-//    }
 
     /**
      * *
@@ -143,7 +103,6 @@ public class TacheDiffuserMessageJMS extends TacheImpl<TacheDiffuserMessageJMS> 
     @Override
     public Class getTypeIncident() {
         return JMSDiffusionIncident.class;
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public TopicConnection getConnection() {

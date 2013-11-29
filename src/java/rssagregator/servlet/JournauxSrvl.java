@@ -28,7 +28,7 @@ import rssagregator.beans.form.JournalForm;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoJournal;
 import rssagregator.services.ServiceCollecteur;
-import rssagregator.services.TacheDecouverteAjoutFlux;
+import rssagregator.services.tache.TacheDecouverteAjoutFlux;
 import rssagregator.utils.CodePays;
 import rssagregator.utils.ServletTool;
 

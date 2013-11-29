@@ -50,8 +50,9 @@ import rssagregator.dao.DaoFlux;
 import rssagregator.dao.DaoJournal;
 import rssagregator.services.crud.ServiceCRUDFactory;
 import rssagregator.services.ServiceCollecteur;
-import rssagregator.services.TacheRecupCallable;
+import rssagregator.services.tache.TacheRecupCallable;
 import rssagregator.services.crud.ServiceCRUDFlux;
+import rssagregator.services.tache.TacheFactory;
 import rssagregator.utils.ServletTool;
 
 /**
@@ -87,7 +88,7 @@ public class FluxSrvl extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
         request.setCharacterEncoding("UTF-8");
 
-
+//        System.out.println("TEST : " + TacheFactory.ATT_TacheRecupCallable_maxExecuteTime);
         //Liste des clause servant à criteria, ces variables seront envoyé dans la dao par la suite
         Journal journalLie = null;
         String order_by = null;

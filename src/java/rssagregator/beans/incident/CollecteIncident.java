@@ -7,7 +7,7 @@ import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import rssagregator.beans.Flux;
 import rssagregator.services.ServiceCollecteur;
-import rssagregator.services.TacheRecupCallable;
+import rssagregator.services.tache.TacheRecupCallable;
 
 /**
  * <p>Cet incident est généré par le service {@link ServiceCollecteur} à partir des résultats de la tâche {@link TacheRecupCallable}</p>

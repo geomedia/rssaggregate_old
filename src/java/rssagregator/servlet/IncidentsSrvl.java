@@ -25,6 +25,8 @@ import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DAOIncident;
 import rssagregator.dao.DaoFlux;
+import rssagregator.services.crud.ServiceCRUDFactory;
+import rssagregator.services.crud.ServiceCrudIncident;
 import static rssagregator.servlet.JournauxSrvl.ATT_JOURNAL;
 import rssagregator.utils.ServletTool;
 import static rssagregator.utils.ServletTool.redir;
@@ -142,87 +144,90 @@ public class IncidentsSrvl extends HttpServlet {
         //============================================================================================
         //----------------------------------ACTION : LIST
         //List permet de sélectionner une liste d'incident. Leur affichage est géré par En jSON. Voir la config des vues.
+//        if (action.equals("list")) {
+//
+//            //Récupération du type 
+//            Class c = null;
+//            DAOIncident dao = null;
+//            try {
+//                System.out.println("AAA");
+//                c = Class.forName("rssagregator.beans.incident." + request.getParameter("type"));
+//                System.out.println("CLASS : " + c);
+//                dao = (DAOIncident) DAOFactory.getInstance().getDaoFromType(c);
+//                if (!AbstrIncident.class.isAssignableFrom(c)) {
+//                    System.out.println("PAS ASSIGNABLE");
+//                    throw new Exception("non");
+//                }
+//            } catch (Exception e) {
+//
+//                System.out.println("ERR" + e);
+//            }
+//
+//            try {
+//                firstResult = new Integer(request.getParameter("firstResult"));
+//            } catch (Exception e) {
+//                firstResult = 0;
+//            }
+//            dao.setFistResult(firstResult);
+//            request.setAttribute("firstResult", firstResult);
+//
+//            try {
+//                itPrPage = new Integer(request.getParameter("itPrPage"));
+//            } catch (Exception e) {
+//                itPrPage = 25;
+//            }
+//            dao.setMaxResult(itPrPage);
+//            request.setAttribute("itPrPage", itPrPage);
+//
+//            try {
+//                clos = Boolean.valueOf(request.getParameter("clos"));
+//
+//            } catch (Exception e) {
+//                clos = false;
+//            }
+//            dao.setClos(clos);
+//            request.setAttribute("clos", clos);
+//
+//
+//
+//            //Criteria Flux lie. N'est valable que pour les incidents de collecte.
+//            if (c != null && c.equals(CollecteIncident.class)) {
+//                String[] fluxLie = request.getParameterValues("fluxSelection2");
+//                System.out.println("###" + fluxLie);
+//                System.out.println("---> RESTRICTION FLUX");
+//                DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
+//                List<Flux> listFluxLie = new ArrayList<Flux>();
+//                if (fluxLie != null && fluxLie.length > 0) {
+//                    for (int i = 0; i < fluxLie.length; i++) {
+//
+//                        String strIdFlux = fluxLie[i];
+//                        System.out.println("############FLUX : " + strIdFlux);
+//                        Flux f = (Flux) daoFlux.find(new Long(strIdFlux));
+//                        listFluxLie.add(f);
+//                    }
+//
+//                    if (!listFluxLie.isEmpty()) {
+//                        dao.setCriteriaFluxLie(listFluxLie);
+//                    }
+//                }
+//            }
+//
+//
+//            Integer nbItem = dao.findnbMax(c);
+//            request.setAttribute("nbitem", nbItem);
+//
+//            //recup de la list des incidents
+//            List<Object> listAll = dao.findCriteria(c);
+//
+//            System.out.println("°°°° LIST : " + listAll);
+//            System.out.println("°°°° LIST : " + listAll.size());
+//            System.out.println("TAILLE LISTE : " + listAll.size());
+//            request.setAttribute(ATT_LIST, listAll);
+//            //--------------------------------------------ACTION : MOD-------------------------------------
+//        } 
+        
+        
         if (action.equals("list")) {
-
-            //Récupération du type 
-            Class c = null;
-            DAOIncident dao = null;
-            try {
-                System.out.println("AAA");
-                c = Class.forName("rssagregator.beans.incident." + request.getParameter("type"));
-                System.out.println("CLASS : " + c);
-                dao = (DAOIncident) DAOFactory.getInstance().getDaoFromType(c);
-                if (!AbstrIncident.class.isAssignableFrom(c)) {
-                    System.out.println("PAS ASSIGNABLE");
-                    throw new Exception("non");
-                }
-            } catch (Exception e) {
-
-                System.out.println("ERR" + e);
-            }
-
-            try {
-                firstResult = new Integer(request.getParameter("firstResult"));
-            } catch (Exception e) {
-                firstResult = 0;
-            }
-            dao.setFistResult(firstResult);
-            request.setAttribute("firstResult", firstResult);
-
-            try {
-                itPrPage = new Integer(request.getParameter("itPrPage"));
-            } catch (Exception e) {
-                itPrPage = 25;
-            }
-            dao.setMaxResult(itPrPage);
-            request.setAttribute("itPrPage", itPrPage);
-
-            try {
-                clos = Boolean.valueOf(request.getParameter("clos"));
-
-            } catch (Exception e) {
-                clos = false;
-            }
-            dao.setClos(clos);
-            request.setAttribute("clos", clos);
-
-
-
-            //Criteria Flux lie. N'est valable que pour les incidents de collecte.
-            if (c != null && c.equals(CollecteIncident.class)) {
-                String[] fluxLie = request.getParameterValues("fluxSelection2");
-                System.out.println("###" + fluxLie);
-                System.out.println("---> RESTRICTION FLUX");
-                DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
-                List<Flux> listFluxLie = new ArrayList<Flux>();
-                if (fluxLie != null && fluxLie.length > 0) {
-                    for (int i = 0; i < fluxLie.length; i++) {
-
-                        String strIdFlux = fluxLie[i];
-                        System.out.println("############FLUX : " + strIdFlux);
-                        Flux f = (Flux) daoFlux.find(new Long(strIdFlux));
-                        listFluxLie.add(f);
-                    }
-
-                    if (!listFluxLie.isEmpty()) {
-                        dao.setCriteriaFluxLie(listFluxLie);
-                    }
-                }
-            }
-
-
-            Integer nbItem = dao.findnbMax(c);
-            request.setAttribute("nbitem", nbItem);
-
-            //recup de la list des incidents
-            List<Object> listAll = dao.findCriteria(c);
-
-            System.out.println("°°°° LIST : " + listAll);
-            System.out.println("°°°° LIST : " + listAll.size());
-            System.out.println("TAILLE LISTE : " + listAll.size());
-            request.setAttribute(ATT_LIST, listAll);
-            //--------------------------------------------ACTION : MOD-------------------------------------
-        } else if (action.equals("list2")) {
 
             try {
                 Class c = null;
@@ -295,6 +300,43 @@ public class IncidentsSrvl extends HttpServlet {
                 redir(request, ATT_SERV_NAME + "/read?id=" + request.getParameter("id"), "L'entité demandée n'existe pas !", Boolean.TRUE);
             }
         }
+        //------------------------------------------ACTION CLOSE-----------------------------------------
+        /***
+         * Permet de clore une liste d'incident
+         */
+        else if(action.equals("close")){
+            //On récupère les incident
+            List<AbstrIncident> listIncid = new ArrayList<AbstrIncident>();
+            List<Long> listId = ServletTool.parseidFromRequest(request, null);
+            System.out.println("ID : " + listId.size());
+        
+            DAOIncident dao = DAOFactory.getInstance().getDAOIncident();
+            dao.setClassAssocie(AbstrIncident.class);
+            for (int i = 0; i < listId.size(); i++) {
+                Long long1 = listId.get(i);
+                    System.out.println("ID ds servlet " + long1);
+                AbstrIncident incident = (AbstrIncident) dao.find(long1);
+                System.out.println("INCID " + incident);
+                if(incident != null){
+                    listIncid.add(incident);
+                    System.out.println("INCID DS SERVLET : " + incident.getID());
+                }
+                
+            }
+            
+            ServiceCrudIncident service = (ServiceCrudIncident) ServiceCRUDFactory.getInstance().getServiceFor(AbstrIncident.class);
+            try {
+                service.cloreIncidents(listIncid, dao.getEm(), true);
+            } catch (Exception ex) {
+                Logger.getLogger(IncidentsSrvl.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+            
+        }
+        
+        
+        
+        
 // gestion de la vue et de l'envoie vers la JSP
         if (vue.equals("jsondesc")) {
             System.out.println("JsonDesc");

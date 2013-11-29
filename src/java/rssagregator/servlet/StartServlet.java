@@ -11,10 +11,12 @@ import java.sql.DriverManager;
 import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.naming.NamingException;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import org.jdom.JDOMException;
 import rssagregator.beans.Conf;
+import rssagregator.beans.exception.RessourceIntrouvable;
 import rssagregator.dao.DAOConf;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoFlux;
@@ -106,10 +108,18 @@ public class StartServlet implements ServletContextListener {
             Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InvocationTargetException ex) {
             Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NamingException ex) {
+            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RessourceIntrouvable ex) {
+            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         // Lancement de la collecte
-        ServiceCollecteur.getInstance().lancerCollecte();
+        ServiceCollecteur.getInstance().lancerService();
+        ServiceMailNotifier.getInstance().lancerService();
+        ServiceSynchro.getInstance().lancerService();
+        ServiceServer.getInstance().lancerService();
+        
 
 //        daemonCentral = ServiceServer.getInstance();
 //        daemonCentral.instancierTaches();

@@ -6,10 +6,10 @@ package rssagregator.beans;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -18,14 +18,18 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.apache.poi.util.Beta;
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
+import org.joda.time.Interval;
+import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import rssagregator.beans.exception.DonneeInterneCoherente;
+import rssagregator.beans.exception.IncompleteBeanExeption;
+import rssagregator.beans.incident.AbstrIncident;
+import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.beans.traitement.MediatorCollecteAction;
-import rssagregator.utils.SqlDateAdapter;
 
 /**
  * Cette entitée permet de stoquer un intervale de date permettant de renseigner la ou les périodes pendant lesquel le
@@ -50,8 +54,6 @@ public class FluxPeriodeCaptation implements Serializable {
     @JsonIgnoreProperties
     @ManyToOne(optional = false)
     private Flux flux;
-    
-    
     private Long statSommeItemCapture;
     private Integer statQuartilePremier;
     private Integer statQuartileTrois;
@@ -62,9 +64,6 @@ public class FluxPeriodeCaptation implements Serializable {
     private Double statEcartType;
     private Integer statMin;
     private Integer statMax;
-    
-    
-    
     private Float statMoyLundi;
     private Float statMoyMardi;
     private Float statMoyMercredi;
@@ -86,6 +85,14 @@ public class FluxPeriodeCaptation implements Serializable {
     private Double statEcartTypeVendredi;
     private Double statEcartTypeSamedi;
     private Double statEcartTypeDimanche;
+    /**
+     * *
+     * Un indice de 0.0 à 100.0 permettant de mesurer la disponibilité du flux durant la captation. Cet indice est
+     * calculé par la tâche {@link TacheCalculQualiteFlux} qui observe la durée de la période de calpation et le cumul
+     * de la durée des incidents.
+     */
+    @Column(name = "indiceQualiteCaptation")
+    protected Float indiceQualiteCaptation;
 //    private Float[] moyenneJour = new Float[7];
     /**
      * *
@@ -94,7 +101,6 @@ public class FluxPeriodeCaptation implements Serializable {
      */
     @Beta
     @OneToOne
-
 //    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 //    @JsonIgnoreProperties
     private MediatorCollecteAction comportementDurantLaPeriode;
@@ -104,7 +110,6 @@ public class FluxPeriodeCaptation implements Serializable {
      * Constructeur par défault.
      */
     public FluxPeriodeCaptation() {
-        
     }
     /**
      * *
@@ -306,10 +311,6 @@ public class FluxPeriodeCaptation implements Serializable {
         this.statMax = statMax;
     }
 
-    
-    
-
-
     public Long getID() {
         return ID;
     }
@@ -414,6 +415,14 @@ public class FluxPeriodeCaptation implements Serializable {
         this.statEcartType = statEcartType;
     }
 
+    public Float getIndiceQualiteCaptation() {
+        return indiceQualiteCaptation;
+    }
+
+    public void setIndiceQualiteCaptation(Float indiceQualiteCaptation) {
+        this.indiceQualiteCaptation = indiceQualiteCaptation;
+    }
+
     @Override
     /**
      * *
@@ -437,5 +446,89 @@ public class FluxPeriodeCaptation implements Serializable {
         }
 
         return retour;
+    }
+
+    /***
+     * Retourne la durée de captation de la période
+     * @return Nombre de secondes de captation pour cette durée de captation
+     */
+    public Long returnCaptationDuration() throws IncompleteBeanExeption {
+        
+        if(this.getDateDebut()== null){
+            throw new IncompleteBeanExeption("La durée de captation n'a pas de date de début");
+        }
+
+        Long duration = new Long(0);
+        DateTime dt1 = new DateTime(this.getDateDebut());
+        
+        DateTime dt2;
+        if(this.datefin == null){
+            dt2 = new DateTime();
+        }
+        else{
+            dt2 = new DateTime(this.datefin);
+        }
+        
+        
+        Duration dur = new Duration(dt1, dt2);
+        return dur.getStandardSeconds();
+    }
+    
+    
+    /***
+     * Retoune la liste des incidents qui sont survenues surant la période.
+     * @return 
+     */
+    public List<AbstrIncident> returnIncidentDurantLaPeride(){
+      
+        List<AbstrIncident> returnList = new ArrayList<AbstrIncident>();
+        DateTime dt1 = new DateTime(this.getDateDebut());
+        DateTime dt2;
+        if(this.getDatefin() == null){
+            dt2 = new DateTime(this.getDatefin());
+        }
+        else{
+            dt2 = new DateTime();
+        }
+        
+        Interval intev = new Interval(dt1, dt2);
+
+        List<CollecteIncident> indidentFlux = flux.getIncidentsLie();
+        for (int i = 0; i < indidentFlux.size(); i++) {
+            CollecteIncident collecteIncident = indidentFlux.get(i);
+           DateTime dtIncid = new DateTime(collecteIncident.getDateDebut());
+  
+           if(intev.contains(dtIncid)){
+               returnList.add(collecteIncident);
+           }
+        }
+        
+        return returnList;
+    }
+    
+    /***
+     * Retourne la durée cumulée des incidents survenues durant cette période.
+     * @return 
+     */
+    public Long returnIncidentDuration(){
+        List<AbstrIncident> incids = returnIncidentDurantLaPeride();
+        Long duree = new Long(0);
+        for (int i = 0; i < incids.size(); i++) {
+            AbstrIncident abstrIncident = incids.get(i);
+            Date dateFin;
+            
+            DateTime dtDebut = new DateTime(abstrIncident.getDateDebut());
+            DateTime dtFin ;
+            if(abstrIncident.getDateFin() == null){
+                dtFin = new DateTime();
+            }
+            else{
+                dtFin = new DateTime(abstrIncident.getDateFin());
+            }
+            Duration dur = new Duration(dtDebut, dtFin);
+            duree += dur.getStandardSeconds();
+        }
+        
+        return duree;
     }
 }

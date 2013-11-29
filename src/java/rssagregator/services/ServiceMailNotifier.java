@@ -4,33 +4,28 @@
  */
 package rssagregator.services;
 
+import rssagregator.services.tache.TacheVerifFluxNotificationMail;
+import rssagregator.services.tache.TacheAlerteMail;
+import rssagregator.services.tache.TacheFactory;
+import rssagregator.services.tache.TacheEnvoyerMail;
+import rssagregator.services.tache.AbstrTacheSchedule;
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 import java.util.Observable;
 import java.util.Properties;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
 import rssagregator.beans.UserAccount;
-import rssagregator.beans.exception.AucunMailAdministateur;
 import rssagregator.beans.exception.UnIncidableException;
-import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.Incidable;
 import rssagregator.beans.incident.IncidentFactory;
 import rssagregator.beans.incident.MailIncident;
-import rssagregator.beans.incident.ServerIncident;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DAOIncident;
-import rssagregator.services.crud.AbstrServiceCRUD;
-import rssagregator.services.crud.ServiceCRUDFactory;
-import rssagregator.services.mailtemplate.TemplateMailAlertIncident;
 import rssagregator.utils.PropertyLoader;
 
 /**
@@ -48,6 +43,8 @@ public class ServiceMailNotifier extends AbstrService {
     private Properties propertiesMail;
     private final static String MAILER_VERSION = "Java";
     protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(ServiceMailNotifier.class);
+    
+    
 
     /**
      * *
@@ -249,7 +246,7 @@ public class ServiceMailNotifier extends AbstrService {
      *
      * @return
      */
-    protected InternetAddress[] returnMailAdmin() throws AddressException {
+    public InternetAddress[] returnMailAdmin() throws AddressException {
 
         List<UserAccount> list = DAOFactory.getInstance().getDAOUser().findUserANotifier();
         logger.debug("recherche de la liste des mail a joindre list size : " + list.size());
@@ -292,7 +289,7 @@ public class ServiceMailNotifier extends AbstrService {
     protected void gererIncident(AbstrTacheSchedule tache) {
 
 
-        if (tache.exeption != null && Incidable.class.isAssignableFrom(tache.getClass())) {
+        if (tache.getExeption() != null && Incidable.class.isAssignableFrom(tache.getClass())) {
             logger.debug("Gestion d'une erreur");
 
 
@@ -372,7 +369,8 @@ public class ServiceMailNotifier extends AbstrService {
     }
 
     public static void main(String[] args) throws AddressException {
-        TacheEnvoyerMail envoyerMail = new TacheEnvoyerMail(ServiceMailNotifier.getInstance());
+        TacheEnvoyerMail envoyerMail = (TacheEnvoyerMail) TacheFactory.getInstance().getNewTask(TacheEnvoyerMail.class, Boolean.FALSE);
+//        TacheEnvoyerMail envoyerMail = new TacheEnvoyerMail(ServiceMailNotifier.getInstance());
         envoyerMail.setContent("youpi");
         envoyerMail.setSubject("obj test");
         envoyerMail.setToMailAdresses(new InternetAddress[]{new InternetAddress("clement.rillon@gmail.com")});

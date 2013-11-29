@@ -6,7 +6,7 @@ package rssagregator.beans.incident;
 
 import javax.persistence.Entity;
 import rssagregator.beans.Journal;
-import rssagregator.services.TacheDecouverteAjoutFlux;
+import rssagregator.services.tache.TacheDecouverteAjoutFlux;
 
 /**
  *  Lors de l'ajout des flux des incidents peuvent se produirent. Incident de la tache {@link TacheDecouverteAjoutFlux}. Cet incident peut survenir lorsque la page du journal n'est pas accessible ou qu'aucun flux n'a pu être trouvé

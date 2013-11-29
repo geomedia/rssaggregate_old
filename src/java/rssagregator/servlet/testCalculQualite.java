@@ -17,7 +17,7 @@ import rssagregator.beans.Flux;
 import rssagregator.beans.exception.DonneeInterneCoherente;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoFlux;
-import rssagregator.services.TacheCalculQualiteFlux;
+import rssagregator.services.tache.TacheCalculQualiteFlux;
 
 /**
  *

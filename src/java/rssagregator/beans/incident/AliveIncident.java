@@ -6,7 +6,7 @@ package rssagregator.beans.incident;
 
 import javax.persistence.Entity;
 import rssagregator.services.ServiceServer;
-import rssagregator.services.TacheStillAlive;
+import rssagregator.services.tache.TacheStillAlive;
 
 /**
  * <p>Incident lié à la tâche <strong>{@link TacheStillAlive}</strong>. </p>

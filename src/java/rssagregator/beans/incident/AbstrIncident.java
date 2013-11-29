@@ -2,8 +2,8 @@ package rssagregator.beans.incident;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.Date;
-import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -13,11 +13,12 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.Temporal;
 import javax.persistence.Transient;
+import javax.persistence.Version;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import rssagregator.beans.Conf;
 import rssagregator.dao.DAOFactory;
-import rssagregator.services.TacheAlerteMail;
+import rssagregator.services.tache.TacheAlerteMail;
 
 /**
  * *
@@ -34,11 +35,12 @@ import rssagregator.services.TacheAlerteMail;
 @Inheritance(strategy = InheritanceType.JOINED) // Peu de champs supplémentaires dans les autres entités, on va conserver la stratégie la plus simple
 public abstract class AbstrIncident implements Serializable {
 
-       public static final String desc = "ddd";
-    
+    public static final String desc = "ddd";
+
     /**
      * *
-     * Constructeur par défaut d'un incident. IL FAUT PASSER PAR LA FACTORY {@link IncidentFactory} POUR INSTANCIER UN INCIDENT
+     * Constructeur par défaut d'un incident. IL FAUT PASSER PAR LA FACTORY {@link IncidentFactory} POUR INSTANCIER UN
+     * INCIDENT
      */
     protected AbstrIncident() {
 //        this.notificationImperative = true;
@@ -82,14 +84,7 @@ public abstract class AbstrIncident implements Serializable {
      */
     @Column(name = "logErreur", columnDefinition = "text")
     protected String logErreur;
-    /**
-     * *
-     * N'EST PLUS UTILISÉ !
-     * @deprecated
-     */
-    @Deprecated
-    @Column(name = "bloquant")
-    protected Boolean bloquant;
+
     /**
      * *
      * Nombre de répétition de l'incident. A chaque échec la tâche concerné va incrémenter ce compteur tant qu'elle
@@ -119,24 +114,36 @@ public abstract class AbstrIncident implements Serializable {
     @Column(name = "dateFin", nullable = true)
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     protected Date dateFin;
-    
-    
+    /**
+     * *
+     * Dernière modification de l'entite. Permet l'Optimitic Lock
+     */
+    @Version
+    Timestamp modified;
+
+    /**
+     * *
+     * @see #modified
+     * @return
+     */
+    public Timestamp getModified() {
+        return modified;
+    }
+
+    /**
+     * *
+     * @see #modified
+     * @param modified
+     */
+    public void setModified(Timestamp modified) {
+        this.modified = modified;
+    }
     /**
      * *
      * Permet de déterminer si un incident doit ou non être notifié par la tache {@link TacheAlerteMail}
      */
     @Column(name = "notificationImperative")
     protected Boolean notificationImperative;
-//    @Transient
-//    protected String duree;
-    /**
-     * /!\ N'EST PLUS UTILISÉ nombre de 1 à 5 . 0 = normal : On ne notifie l'erreur qu'une fois par jour. ( test
-     * currenttime > lastnotification + 24h) 1 = grave. On notifie toute les 12h 2 = très grave. Le notifieur doit
-     * envoyer un mail à chaque fois qu'il rencontre l'erreur. Incident.action peut aussi tester ce champs afin de
-     * forcer le lancement du notifieur pour que la notification parte instantanément.
-     */
-    @Deprecated
-    private Integer gravite;
 
     public String getMessageEreur() {
         return messageEreur;
@@ -162,17 +169,9 @@ public abstract class AbstrIncident implements Serializable {
         this.logErreur = logErreur;
     }
 
-    public Boolean getBloquant() {
-        return bloquant;
-    }
-
-    public void setBloquant(Boolean bloquant) {
-        this.bloquant = bloquant;
-    }
 
     public Integer getNombreTentativeEnEchec() {
         return nombreTentativeEnEchec;
-
     }
 
     public void setNombreTentativeEnEchec(Integer nombreTentativeEnEchec) {
@@ -203,10 +202,6 @@ public abstract class AbstrIncident implements Serializable {
         this.dateFin = dateFin;
     }
 
-    public Integer getGravite() {
-        return gravite;
-    }
-
     public Boolean getNotificationImperative() {
         return notificationImperative;
     }
@@ -215,9 +210,6 @@ public abstract class AbstrIncident implements Serializable {
         this.notificationImperative = notificationImperative;
     }
 
-    public void setGravite(Integer gravite) {
-        this.gravite = gravite;
-    }
 
     /**
      * *
@@ -277,27 +269,6 @@ public abstract class AbstrIncident implements Serializable {
         return null;
     }
 
-//    /**
-//     * *<strong>/!\ N'EST PLUS UTILISÉ. LES INCIDENTS NE SONT PLUS DES OBSERVABLES</strong>
-//     * Un incident doit être enregistré auprès des service : <ul>
-//     * <li>Mail : car lors de la création d'un inscident le service mail doit
-//     * réagir en envoyant une premiere alerte d'urgence</li>
-//     * </ul>
-//     */
-//    @Deprecated
-//    public void EnregistrerAupresdesService() {
-//        //TODO : Les incident ne sont plus des observables non ?
-//        this.addObserver(ServiceMailNotifier.getInstance());
-//    }
-//
-//    /***
-//     * <strong>/!\ N'EST PLUS UTILISÉ. LES INCIDENTS NE SONT PLUS DES OBSERVABLES</strong>
-//     * Force le changeStatut utilisé par le patern Observer
-//     */
-//    @Deprecated
-//    public void forceChangeStatut() {
-//        this.setChanged();
-//    }
     @Override
     public int hashCode() {
         int hash = 7;
@@ -333,8 +304,8 @@ public abstract class AbstrIncident implements Serializable {
 
     /**
      * *
-     *</p> Methode pourvant être redéclarer dans les incident afin d'empécher la notification de l'indident par
-     * la tache {@link TacheAlerteMail}. La méthode redéclarée peut observer la dateDebut de l'incident ou le nombre de
+     * </p> Methode pourvant être redéclarer dans les incident afin d'empécher la notification de l'indident par la
+     * tache {@link TacheAlerteMail}. La méthode redéclarée peut observer la dateDebut de l'incident ou le nombre de
      * répétition pour déterminer si il faut ou non notifier par mail.</p>
      * <p>Si elle n'est pas redéclarée, cette méthode renvoie true</p>
      *
@@ -348,15 +319,15 @@ public abstract class AbstrIncident implements Serializable {
     public String toString() {
         return this.getClass().getSimpleName();
     }
-    
-    /***
+
+    /**
+     * *
      * Retourne une description du type de l'incident.
-     * @return 
+     *
+     * @return
      */
-        public String incidDesc(){
-            return desc;
-        };
-    
-    
+    public String incidDesc() {
+        return desc;
+    }
     
 }

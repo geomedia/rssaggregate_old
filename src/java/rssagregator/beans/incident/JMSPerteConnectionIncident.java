@@ -7,7 +7,7 @@ package rssagregator.beans.incident;
 import javax.persistence.Entity;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
-import rssagregator.services.TacheLancerConnectionJMS;
+import rssagregator.services.tache.TacheLancerConnectionJMS;
 
 /**
  * <p>Incident générée par le service {@link ServerIncident} lorsque la tâche

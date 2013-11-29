@@ -13,7 +13,7 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import rssagregator.beans.Flux;
-import rssagregator.beans.RecapActivite;
+import rssagregator.beans.OLD_RecapActivite;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoItem;
 
@@ -22,21 +22,21 @@ import rssagregator.dao.DaoItem;
  * @author clem
  */
 @Deprecated
-public class RecapActiviteForm extends AbstrForm {
+public class OLD_RecapActiviteForm extends AbstrForm {
 //TODO : Refaire la visualisation de l'activité. Le formulaire sera surement à modifier.
     protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DaoItem.class);
     private Date date1;
     private Date date2;
     private List<Flux> listFlux;
 
-    public RecapActiviteForm() {
+    public OLD_RecapActiviteForm() {
     }
 
     @Override
     public Object bind(HttpServletRequest request, Object objEntre, Class type) {
 
 
-        RecapActivite recap = (RecapActivite) objEntre;
+        OLD_RecapActivite recap = (OLD_RecapActivite) objEntre;
 
         if (valide) {
             recap.setDate1(date1);

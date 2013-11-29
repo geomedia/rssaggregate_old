@@ -4,6 +4,10 @@
  */
 package rssagregator.services;
 
+import rssagregator.services.tache.TacheLancerConnectionJMS;
+import rssagregator.services.tache.TacheFactory;
+import rssagregator.services.tache.TacheEnvoyerMail;
+import rssagregator.services.tache.AbstrTacheSchedule;
 import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.ParsingFeedException;
 import java.io.IOException;
@@ -155,7 +159,10 @@ public class ServiceGestionIncident {
 
     public static void main(String[] args) throws AddressException, MessagingException, IOException, Exception {
         ServiceMailNotifier sm= ServiceMailNotifier.getInstance();
-        TacheEnvoyerMail mail = new TacheEnvoyerMail(sm);
+//        TacheEnvoyerMail mail = new TacheEnvoyerMail(sm);
+        TacheEnvoyerMail mail = (TacheEnvoyerMail) TacheFactory.getInstance().getNewTask(TacheEnvoyerMail.class, Boolean.FALSE);
+        
+        
         mail.setContent("glouglou");
         mail.setPropertiesMail(sm.getPropertiesMail());
         mail.setSubject("zouzou");

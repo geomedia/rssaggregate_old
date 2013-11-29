@@ -26,7 +26,6 @@ import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoItem;
-import rssagregator.services.ServiceCollecteur;
 
 /**
  *

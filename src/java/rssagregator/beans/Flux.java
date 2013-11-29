@@ -6,9 +6,9 @@ import com.sun.syndication.feed.opml.Outline;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashSet;
@@ -31,6 +31,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.Transient;
 import javax.persistence.Version;
+import org.apache.poi.util.Beta;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.descriptors.ClassDescriptor;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
@@ -42,7 +43,6 @@ import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.beans.traitement.MediatorCollecteAction;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoFlux;
-import rssagregator.services.TacheCalculQualiteFlux;
 //import rssagregator.services.TacheVerifComportementFLux;
 
 /**
@@ -69,15 +69,12 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
     private Long ID;
     @ManyToMany
     private List<DonneeBrute> donneeBrutes;
-    
-
 
     public Flux() {
         propertyChangeSupport = new PropertyChangeSupport(this);
         FluxChangeLisner changeLisner = new FluxChangeLisner();
         propertyChangeSupport.addPropertyChangeListener(changeLisner);
 
-        this.debug = new ArrayList<DebugRecapLeveeFlux>();
         this.item = new ArrayList<Item>();
         this.lastEmpruntes = new LinkedHashSet<String>();
 
@@ -182,7 +179,7 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
      * des items. Item
      */
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, mappedBy = "listFlux")
-    private List<Item> item;
+    private List<Item> item = new ArrayList<Item>();
     /**
      * Un objet flux peut posséder différents incidents. Un incident ne possède qu'un flux.
      *
@@ -260,45 +257,22 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
     }
     /**
      * *
-     * C'est une copie du modèle.
+     * Date de création du flux
      */
-    @Transient
-    private MediatorCollecteAction mediatorFluxAction;
-    /**
-     * On ne persiste pas ce champs
-     */
-    @Transient
-    private Boolean erreurDerniereLevee;
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     Date created;
 //    @Version
-    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
-    Date modified;
+//    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     
-    /***
-     * Utilisé pour le lock
-     */
     @Version
-    int version;
-
-    public int getVersion() {
-        return version;
-    }
-
-   
-
-    public void setVersion(int version) {
-        this.version = version;
-    }
-    
-    
-    
+    Timestamp modified;
     /**
      * *
      * Un flux peut être le sous flux d'un autre, exemple Europe est un sous flux de international. Si null, il s'agit
      * d'un flux racine
      */
     @OneToOne
+    @Beta
     Flux parentFlux;
     /**
      * *
@@ -308,55 +282,42 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
     @Column(name = "nom")
     private String nom;
     /**
-     * Retourne une la liste des rss autodécouvert. Commence par l'adresse urlRubrique. Si pas de réponse, on remonte
-     * vers la racine du site. On enlève une sous répertoire par tentative.
+     * // * * // * Un indice de 0.0 à 100.0 permettant de mesurer la disponibilité du flux durant la captation. Cet
+     * indice est // * calculé par la tâche {@link TacheCalculQualiteFlux} qui observe la durée de la période de
+     * calpation et le cumul // * de la durée des incidents. //
      */
-    // TODO : supprimer ceci à la fin
-    /**
-     * *
-     * Utilise pour le debug. A chaque levée on ajoute la date, permet de bien vérifier que les flux sont levee en
-     * permanence
-     */
-    @Transient
-    List<DebugRecapLeveeFlux> debug;
-    /**
-     * *
-     * Un indice de 0.0 à 100.0 permettant de mesurer la disponibilité du flux durant la captation. Cet indice est
-     * calculé par la tâche {@link TacheCalculQualiteFlux} qui observe la durée de la période de calpation et le cumul
-     * de la durée des incidents.
-     */
-    @Column(name = "indiceQualiteCaptation")
-    protected Float indiceQualiteCaptation;
-    /**
-     * *
-     * Médiane du nombre d'item jour capturé pour le flux. Cet indice est calculé par la tâche
-     * {@link TacheCalculQualiteFlux}
-     */
-    protected Integer indiceMedianeNbrItemJour;
-    /**
-     * *
-     * Décile du nombre d'item jour capturé pour le flux. Cet indice est calculé par la tâche
-     * {@link TacheCalculQualiteFlux}
-     */
-    protected Integer indiceDecileNbrItemJour;
-    /**
-     * *
-     * Quartile du nombre d'item jour capturé pour le flux. Cet indice est calculé par la tâche
-     * {@link TacheCalculQualiteFlux}
-     */
-    protected Integer indiceQuartileNbrItemJour;
-    /**
-     * *
-     * Maximum du nombre d'item jour capturé pour le flux. Cet indice est calculé par la tâche
-     * {@link TacheCalculQualiteFlux}
-     */
-    protected Integer indiceMaximumNbrItemJour;
-    /**
-     * *
-     * Minimum du nombre d'item jour capturé pour le flux. Cet indice est calculé par la tâche
-     * {@link TacheCalculQualiteFlux}
-     */
-    protected Integer indiceMinimumNbrItemJour;
+//    @Column(name = "indiceQualiteCaptation")
+//    protected Float indiceQualiteCaptation;
+//    /**
+//     * *
+//     * Médiane du nombre d'item jour capturé pour le flux. Cet indice est calculé par la tâche
+//     * {@link TacheCalculQualiteFlux}
+//     */
+//    protected Integer indiceMedianeNbrItemJour;
+//    /**
+//     * *
+//     * Décile du nombre d'item jour capturé pour le flux. Cet indice est calculé par la tâche
+//     * {@link TacheCalculQualiteFlux}
+//     */
+//    protected Integer indiceDecileNbrItemJour;
+//    /**
+//     * *
+//     * Quartile du nombre d'item jour capturé pour le flux. Cet indice est calculé par la tâche
+//     * {@link TacheCalculQualiteFlux}
+//     */
+//    protected Integer indiceQuartileNbrItemJour;
+//    /**
+//     * *
+//     * Maximum du nombre d'item jour capturé pour le flux. Cet indice est calculé par la tâche
+//     * {@link TacheCalculQualiteFlux}
+//     */
+//    protected Integer indiceMaximumNbrItemJour;
+//    /**
+//     * *
+//     * Minimum du nombre d'item jour capturé pour le flux. Cet indice est calculé par la tâche
+//     * {@link TacheCalculQualiteFlux}
+//     */
+//    protected Integer indiceMinimumNbrItemJour;
     /**
      * *
      * Liste des périodes durant lesquel un flux à été capturé (boolean active à true). Les période de captation sont
@@ -367,13 +328,6 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
     protected List<FluxPeriodeCaptation> periodeCaptations;
     /**
      * *
-     * Les incident en cours sont gardée en mémoire mais pas persisté. Il faut les charger au démarrage.
-     */
-//    @Transient
-//    List<FluxIncident> incidentEnCours;
-    /**
-     * *
-     *
      * Variable qui permet à l'utilisateur de qualifié le flux de stable. On considère qu'il est stable si le flux ne
      * subit pas trop d'anomalie et qu'il renvoie un nombre d'item assez régulier. Les flux qualifié de stable son sujet
      * a être vérifier par les tache de verification de comportement ({@link TacheVerifComportementFLux). On peut qualifier un flux de non stable pour éviter les
@@ -382,40 +336,11 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
      */
     protected Boolean estStable;
 
-    public List<DebugRecapLeveeFlux> getDebug() {
-        return debug;
-    }
-
-    public void setDebug(List<DebugRecapLeveeFlux> debug) {
-        this.debug = debug;
-    }
-
-    @Deprecated
-    public void autodiscovery() {
-    }
-
-    /**
-     * Test la config en récupérant les items à l'url. Le contenu n'est pas persister. Permet à l'admin de s'assurer que
-     * la config est bonne, que le parseur est adhéquat
-     */
-    public void Obsolete_test() {
-    }
-
     /**
      * Le constructeur
      */
     public void Flux() {
-        this.item = new ArrayList<Item>();
-//        this.listDernierItemCollecte = new ArrayList<Item>();
     }
-
-//    public MediatorCollecteAction getMediatorFluxAction() {
-//        return mediatorFluxAction;
-//    }
-//
-//    public void setMediatorFluxAction(MediatorCollecteAction mediatorFluxAction) {
-//        this.mediatorFluxAction = mediatorFluxAction;
-//    }
 
     public String getUrl() {
         return url;
@@ -423,42 +348,8 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
 
     public void setUrl(String url) {
         this.url = url;
-//          MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-
-//        try {
-//
-//            FluxMBean cast = this;
-//            ObjectName name = new ObjectName("rssagregator.beans:type=BeanIfs" + this.getID());
-//            mbs.registerMBean(cast, name);
-//            
-//            
-//   
-//
-//        } catch (MalformedObjectNameException ex) {
-//            Logger.getLogger(ServletTool.class.getName()).log(Level.SEVERE, null, ex);
-//        } catch (InstanceAlreadyExistsException ex) {
-//            Logger.getLogger(ServletTool.class.getName()).log(Level.SEVERE, null, ex);
-//        } catch (MBeanRegistrationException ex) {
-//            Logger.getLogger(ServletTool.class.getName()).log(Level.SEVERE, null, ex);
-//        } catch (NotCompliantMBeanException ex) {
-//            Logger.getLogger(ServletTool.class.getName()).log(Level.SEVERE, null, ex);
-//        }
     }
 
-//    public Integer getPeriodiciteCollecte() {
-//        return periodiciteCollecte;
-//    }
-//
-//    public void setPeriodiciteCollecte(Integer periodiciteCollecte) {
-//        this.periodiciteCollecte = periodiciteCollecte;
-//    }
-//    public Boolean getActive() {
-//        return active;
-//    }
-//
-//    public void setActive(Boolean active) {
-//        this.active = active;
-//    }
     public String getUrlRubrique() {
         return htmlUrl;
     }
@@ -467,42 +358,6 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
         this.htmlUrl = urlRubrique;
     }
 
-//    public Set<String> getLastEmpruntes() {
-////        System.out.println("LAST EMPRUNTE");
-////        DaoItem dao = DAOFactory.getInstance().getDaoItem();
-////        Set<String> hash = dao.findLastHash(this, 100);
-////        this.lastEmpruntes = hash;
-//        return lastEmpruntes;
-//    }
-//    public void setLastEmpruntes(Set<String> lastEmpruntes) {
-//        this.lastEmpruntes = lastEmpruntes;
-//    }
-    /**
-     * *
-     * Pointeur vers la tache schedule permettant de récupérer le flux
-     *
-     * @return
-     */
-//    public TacheRecupCallable getTacheRechup() {
-//        return tacheRechup;
-//    }
-//
-//    /**
-//     * *
-//     * Pointeur vers la tache schedule permettant de récupérer le flux
-//     *
-//     * @param tacheRechup
-//     */
-//    public void setTacheRechup(TacheRecupCallable tacheRechup) {
-//        this.tacheRechup = tacheRechup;
-//    }
-//    public List<Item> getListDernierItemCollecte() {
-//        return listDernierItemCollecte;
-//    }
-//
-//    public void setListDernierItemCollecte(List<Item> listDernierItemCollecte) {
-//        this.listDernierItemCollecte = listDernierItemCollecte;
-//    }
     public List<Item> getItem() {
         return item;
     }
@@ -511,13 +366,6 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
         this.item = items;
     }
 
-//    public String getInfoCollecte() {
-//        return infoCollecte;
-//    }
-//
-//    public void setInfoCollecte(String infoCollecte) {
-//        this.infoCollecte = infoCollecte;
-//    }
     public FluxType getTypeFlux() {
         return typeFlux;
     }
@@ -569,43 +417,11 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
     public Flux(String url) {
         this();
         this.url = url;
-//        this.debug = new ArrayList<DebugRecapLeveeFlux>();
-//        this.item = new LinkedList<Item>();
-////        this.lastEmpruntes = new ArrayList<String>();
-//        this.lastEmpruntes = new LinkedList<String>();
-//
-//        this.mediatorFlux = MediatorCollecteAction.getDefaultCollectAction();
-//        this.incidentsLie = new ArrayList<FluxIncident>();
-
-//
-////        this.periodiciteCollecte = 3600;
-//        this.active = Boolean.TRUE;
-//
-//        this.incidentEnCours = new ArrayList<FluxIncident>();
-//        this.setChanged();
-//        
-//                this.addObserver(ServiceCollecteur.getInstance());
-//        this.addObserver(ServiceSynchro.getInstance());
     }
 
     @Override
     public void update(Observable o, Object arg) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-//    /**
-//     * *
-//     * Créer une nouvelle tache de récupération pour le Flux
-//     */
-//    public void createTask() {
-//        this.tacheRechup = new TacheRecupCallable(this);
-//    }
-    public Boolean getErreurDerniereLevee() {
-        return erreurDerniereLevee;
-    }
-
-    public void setErreurDerniereLevee(Boolean erreurDerniereLevee) {
-        this.erreurDerniereLevee = erreurDerniereLevee;
     }
 
     public Long getID() {
@@ -640,11 +456,11 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
         this.created = created;
     }
 
-    public Date getModified() {
+    public Timestamp getModified() {
         return modified;
     }
 
-    public void setModified(Date modified) {
+    public void setModified(Timestamp modified) {
         this.modified = modified;
     }
 
@@ -654,54 +470,6 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
 
     public void setEstStable(Boolean estStable) {
         this.estStable = estStable;
-    }
-
-    public Float getIndiceQualiteCaptation() {
-        return indiceQualiteCaptation;
-    }
-
-    public void setIndiceQualiteCaptation(Float indiceQualiteCaptation) {
-        this.indiceQualiteCaptation = indiceQualiteCaptation;
-    }
-
-    public Integer getIndiceMedianeNbrItemJour() {
-        return indiceMedianeNbrItemJour;
-    }
-
-    public void setIndiceMedianeNbrItemJour(Integer indiceMedianeNbrItemJour) {
-        this.indiceMedianeNbrItemJour = indiceMedianeNbrItemJour;
-    }
-
-    public Integer getIndiceDecileNbrItemJour() {
-        return indiceDecileNbrItemJour;
-    }
-
-    public void setIndiceDecileNbrItemJour(Integer indiceDecileNbrItemJour) {
-        this.indiceDecileNbrItemJour = indiceDecileNbrItemJour;
-    }
-
-    public Integer getIndiceQuartileNbrItemJour() {
-        return indiceQuartileNbrItemJour;
-    }
-
-    public void setIndiceQuartileNbrItemJour(Integer indiceQuartileNbrItemJour) {
-        this.indiceQuartileNbrItemJour = indiceQuartileNbrItemJour;
-    }
-
-    public Integer getIndiceMaximumNbrItemJour() {
-        return indiceMaximumNbrItemJour;
-    }
-
-    public void setIndiceMaximumNbrItemJour(Integer indiceMaximumNbrItemJour) {
-        this.indiceMaximumNbrItemJour = indiceMaximumNbrItemJour;
-    }
-
-    public Integer getIndiceMinimumNbrItemJour() {
-        return indiceMinimumNbrItemJour;
-    }
-
-    public void setIndiceMinimumNbrItemJour(Integer indiceMinimumNbrItemJour) {
-        this.indiceMinimumNbrItemJour = indiceMinimumNbrItemJour;
     }
 
     /**
@@ -765,10 +533,10 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
             return "FLUX ";
         }
     }
-    
+
     @Override
-    public String getReadURL(){
-         
+    public String getReadURL() {
+
         Conf c = DAOFactory.getInstance().getDAOConf().getConfCourante();
         String url = c.getServurl();
         //On rajoute un / a la fin de l'url si besoin est
@@ -781,16 +549,7 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
         String retour = url + "flux/read?id=" + ID.toString();
         return retour;
     }
-            
-    
 
-//    public TacheRecupCallable getTacheRechupManuelle() {
-//        return tacheRechupManuelle;
-//    }
-//
-//    public void setTacheRechupManuelle(TacheRecupCallable tacheRechupManuelle) {
-//        this.tacheRechupManuelle = tacheRechupManuelle;
-//    }
     void addItem(Item nouvellesItems) {
         this.item.add(nouvellesItems);
     }
@@ -801,6 +560,7 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
      *
      * @return
      */
+    @Beta
     public Opml getOpml() {
         // On doit commencer par rechercher la liste des flux enfant
         DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
@@ -816,6 +576,7 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
         return opml;
     }
 
+    @Beta
     public Outline getOpmlOutline() {
 
 
@@ -856,44 +617,31 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
         return outline;
     }
 
-    /**
-     * *
-     * Enregistre le flux auprès des service JMS et Service de collecte. Cette procédure ne peut être faite dans le
-     * constructeur à cause de l'ORM
-     */
-//    @Override
-//    public void enregistrerAupresdesService() {
-//        this.deleteObservers();
-//        this.addObserver(ServiceCollecteur.getInstance());
-//    }
     @Override
     /**
-     * Ce beans ne doit être synchronisé que si le booleen haschange (du partern observer/observable) est à true. On
-     * évite ainsi de synchroniser après calcul des médiane décile et quartile qui ne change pas la nature du bean
+     * renvoie toujours true
      */
     public Boolean synchroImperative() {
-
         return true;
-//        if (hasChanged()) {
-//            return true;
-//        }
-//        return false;
     }
-    
-    public FluxPeriodeCaptation returnDerniereFluxPeriodeCaptation(){
-        FluxPeriodeCaptation last =null;
+
+    /***
+     * Retourne la dernière période de captation du flux
+     * @return La dernière période de captation ou null si le flux ne possède pas de période de captation
+     */
+    public FluxPeriodeCaptation returnDerniereFluxPeriodeCaptation() {
+        FluxPeriodeCaptation last = null;
         for (int i = 0; i < periodeCaptations.size(); i++) {
             FluxPeriodeCaptation period = periodeCaptations.get(i);
-            if(last == null){
+            if (last == null) {
                 last = period;
             }
-            if(period.getDateDebut().after(last.getDateDebut())){
+            if (period.getDateDebut().after(last.getDateDebut())) {
                 last = period;
             }
         }
         return last;
     }
-    
 
     /**
      * Retourne la durée totale de captation du flux en s'appuyant sur les entites FluxPeriodeCaptation
@@ -932,12 +680,8 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
         System.out.println("-->> CLONE USE");
         Flux clone = (Flux) super.clone();
 
-//        LinkedHashSet lastEmpruntestmp = (LinkedHashSet)this.lastEmpruntes;
-//        clone.lastEmpruntes = (Set<String>) lastEmpruntestmp.clone();
-//        System.out.println("Tailler du last : " + clone.lastEmpruntes.size());
         return clone;
 
-//        return super.clone(); //To change body of generated methods, choose Tools | Templates.
     }
 
     /**

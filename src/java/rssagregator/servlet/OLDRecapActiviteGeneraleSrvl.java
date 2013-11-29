@@ -16,8 +16,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import rssagregator.beans.RecapActivite;
-import rssagregator.beans.form.RecapActiviteForm;
+import rssagregator.beans.OLD_RecapActivite;
+import rssagregator.beans.form.OLD_RecapActiviteForm;
 import rssagregator.dao.DAOFactory;
 
 /**
@@ -25,7 +25,7 @@ import rssagregator.dao.DAOFactory;
  * @author clem
  */
 @WebServlet(name = "RecapActiviteGenerale", urlPatterns = {"/recapActiviteGenerale"})
-public class RecapActiviteGeneraleSrvl extends HttpServlet {
+public class OLDRecapActiviteGeneraleSrvl extends HttpServlet {
 
     public static final String VUE = "/WEB-INF/recapactivitegeneralejsp.jsp";
 
@@ -61,7 +61,7 @@ public class RecapActiviteGeneraleSrvl extends HttpServlet {
 
             // On recupère le recap de la session
             HttpSession session = request.getSession();
-            RecapActivite recap = (RecapActivite) session.getAttribute("recapActivite");
+            OLD_RecapActivite recap = (OLD_RecapActivite) session.getAttribute("recapActivite");
 
             //On construit le json
             int i;
@@ -71,7 +71,7 @@ public class RecapActiviteGeneraleSrvl extends HttpServlet {
             try {
                 out.println(recap.getJson());
             } catch (Exception e) {
-                Logger.getLogger(RecapActiviteGeneraleSrvl.class.getName()).log(Level.SEVERE, null, e);
+                Logger.getLogger(OLDRecapActiviteGeneraleSrvl.class.getName()).log(Level.SEVERE, null, e);
             }
         } else {
             //Capture de la liste des flux pour créer le menu
@@ -81,8 +81,8 @@ public class RecapActiviteGeneraleSrvl extends HttpServlet {
             // Liste des journaux
             request.setAttribute("listJournaux", DAOFactory.getInstance().getDaoJournal().findall());
 
-            RecapActivite recapActivite = new RecapActivite();
-            RecapActiviteForm form = new RecapActiviteForm();
+            OLD_RecapActivite recapActivite = new OLD_RecapActivite();
+            OLD_RecapActiviteForm form = new OLD_RecapActiviteForm();
 
             request.setAttribute("obj", recapActivite);
             request.setAttribute("form", form);
@@ -91,7 +91,7 @@ public class RecapActiviteGeneraleSrvl extends HttpServlet {
 
             if (request.getMethod().equals("POST")) {
 
-                recapActivite = (RecapActivite) form.bind(request, recapActivite, RecapActivite.class);
+                recapActivite = (OLD_RecapActivite) form.bind(request, recapActivite, OLD_RecapActivite.class);
                 //On passe l'objet par le biai de la session, 
                 HttpSession session = request.getSession();
                 session.setAttribute("recapActivite", recapActivite);
@@ -151,7 +151,7 @@ public class RecapActiviteGeneraleSrvl extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
-//    public JSONArray jsonGraphEncode(List<Item> items, RecapActivite recap) {
+//    public JSONArray jsonGraphEncode(List<Item> items, OLD_RecapActivite recap) {
 //        // On commence par trier la list des items par date;
 //        Collections.sort(items);
 //

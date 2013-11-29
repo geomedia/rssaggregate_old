@@ -2,19 +2,19 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package rssagregator.services;
+package rssagregator.services.tache;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Observer;
 import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
-import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.Incidable;
 import rssagregator.beans.incident.IncidentFactory;
 import rssagregator.beans.incident.JMSPerteConnectionIncident;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DAOIncident;
+import rssagregator.services.ServiceSynchro;
 import rssagregator.services.crud.AbstrServiceCRUD;
 import rssagregator.services.crud.ServiceCRUDFactory;
 
@@ -46,8 +46,7 @@ public class TacheLancerConnectionJMS extends TacheImpl<TacheLancerConnectionJMS
     @Override
     protected void callCorps() throws Exception {
           ServiceSynchro serviceJMS = ServiceSynchro.getInstance();
-        logger.debug("Vérification connectionJMS");
-        if (!serviceJMS.statutConnection) {
+        if (!serviceJMS.getStatutConnection()) {
             serviceJMS.openConnection();
         }
     }
@@ -97,24 +96,21 @@ public class TacheLancerConnectionJMS extends TacheImpl<TacheLancerConnectionJMS
      */
     @Override
     public void gererIncident() throws Exception {
-        EntityManager em = DAOFactory.getInstance().getEntityManager();
 
         try {
-            em.getTransaction().begin();
+            
+            initialiserTransaction();
 
             // On cherche si il y avait des incidents ouverts de ce type
             DAOIncident<JMSPerteConnectionIncident> dao = (DAOIncident<JMSPerteConnectionIncident>) DAOFactory.getInstance().getDAOFromTask(this);
             dao.setEm(em);
 
-//            List<JMSPerteConnectionIncident> listIncid = dao.findCriteria(JMSPerteConnectionIncident.class);
             List<JMSPerteConnectionIncident> listIncid = dao.findIncidentNonClos(JMSPerteConnectionIncident.class);
-
-
 
             JMSPerteConnectionIncident incid = null;
             if (!listIncid.isEmpty()) {
                 incid = listIncid.get(0);
-                em.lock(incid, LockModeType.PESSIMISTIC_WRITE);
+                verrouillerObjectDansLEM(incid, LockModeType.PESSIMISTIC_WRITE);
             }
 
             if (incid == null) {
@@ -128,27 +124,23 @@ public class TacheLancerConnectionJMS extends TacheImpl<TacheLancerConnectionJMS
             }
 
             // On retrouve le serviceCRUD
-            ServiceCRUDFactory facto = ServiceCRUDFactory.getInstance();
-            AbstrServiceCRUD service = facto.getServiceFor(JMSPerteConnectionIncident.class);
+            ServiceCRUDFactory factory = ServiceCRUDFactory.getInstance();
+            AbstrServiceCRUD serviceCRUD = factory.getServiceFor(JMSPerteConnectionIncident.class);
 
 
             // Enregistrement
             if (incid.getID() == null) {
-                service.ajouter(incid, em);
+                serviceCRUD.ajouter(incid, em);
             } else {
-                service.modifier(incid, em);
+                serviceCRUD.modifier(incid, em);
             }
 
         } catch (Exception e) {
             logger.debug("erreur lors de la gestion de l'incident de la tache", e);
+            commitTransaction(false);
             throw e; // On remonte l'exeption, c'est au service d'afficher et de gérer
         } finally { // On commit et ferme l'em
-            if (em != null && em.isOpen()) {
-                if (em.getTransaction() != null && em.getTransaction().isActive()) {
-                    em.getTransaction().commit();
-                }
-                em.close();
-            }
+            commitTransaction(true);
         }
     }
 

@@ -162,7 +162,7 @@ public class ServiceCRUDFlux extends ServiceCRUDBeansSynchro {
      * @param comit : Indique si la suppression doit être comité ou non. Permet notamment au {@link ServiceCRUDJournal}
      * de commiter une suppression à la place du présent service.
      * @param em : L'EntityManager manager a utiliser. Permet au service {@link ServiceCRUDJournal} de fournir l'entiti
-     * manager afin de comiter ou roolbacker l'ensemble des modif. Si ce paramettre est null, un nouvel em sera utilisé
+     * manager afin de comiter ou roolbacker l'ensemble des modif. Si ce paramettre est null, un nouvel em sera utilisé et une nouvelle transaction démarrée.
      */
     public synchronized void SupprimerListFlux(List<Flux> listFlux, Boolean comit, EntityManager em) throws Exception {
 
@@ -171,8 +171,9 @@ public class ServiceCRUDFlux extends ServiceCRUDBeansSynchro {
         DAOIncident<NotificationAjoutFlux> daoIncid = (DAOIncident<NotificationAjoutFlux>) DAOFactory.getInstance().getDaoFromType(NotificationAjoutFlux.class);
         Boolean err = false;
 
-        if (em == null) { // Si aucun em n'est envoyé on décupère un em depuis la factory
+        if (em == null) { // Si aucun em n'est envoyé on récupère un em depuis la factory
             em = DAOFactory.getInstance().getEntityManager();
+            em.getTransaction().begin();
         }
         daoFlux.setEm(em);
         daoItem.setEm(em);
@@ -255,8 +256,11 @@ public class ServiceCRUDFlux extends ServiceCRUDBeansSynchro {
                 em.getTransaction().commit();
 
                 for (int i = 0; i < listFlux.size(); i++) { // Il faut supprimer les hash des flux du collecteur
-                    Flux flux = listFlux.get(i);
-                    ServiceCollecteur.getInstance().getCacheHashFlux().removeFlux(flux);
+                    try {
+                    ServiceCollecteur.getInstance().retirerFluxDuService(listFlux.get(i)); // On retire le flux du service de collecte.              
+                    } catch (Exception e) {
+                        logger.debug("Debug", e);
+                    }
                 }
             }
         }

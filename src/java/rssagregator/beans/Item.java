@@ -1,6 +1,7 @@
 package rssagregator.beans;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -17,6 +18,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
+import javax.persistence.Version;
 import org.apache.poi.util.Beta;
 import org.eclipse.persistence.annotations.Index;
 import rssagregator.beans.exception.IncompleteBeanExeption;
@@ -117,27 +119,13 @@ public class Item implements Serializable, Comparable<Item>, ContentRSS {
      * </ul>
      */
     @Beta
-    private Integer syncStatut;
-//    /**
-//     * Lorsque la levée du flux est en echec, ce champs est à true. Ce champs permet de savoir si un flux est
-//     * nouvellement en erreur. Si le champs passe de true à false, il faut clore les incidents en cours.
-//     */
-//    private Boolean erreurDerniereLevee;
-    /**
-     * Booleen permettant de savoir si l'items est nouvelle ou non dans le flux. Il est obtenu par l'objet de
-     * dédoublonnage. Lorsque l'admin test un flux. Il faut lui présenter d'une couleur différente les flux capté et les
-     * flux déjà présent dans la base. C'est à cela que sert ce boollen
-     */
-    @Deprecated
-    private Boolean isNew;
+    private Byte syncStatut;
     /**
      * *
      * Les flux auxquelles appartiennent l'item.
      */
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.REFRESH, CascadeType.MERGE}, targetEntity = Flux.class)
-    private List<Flux> listFlux;
-    
-    
+    private List<Flux> listFlux = new LinkedList<Flux>();
     @OneToMany(cascade = CascadeType.ALL)
     private List<DonneeBrute> donneeBrutes = new ArrayList<DonneeBrute>();
 
@@ -148,161 +136,264 @@ public class Item implements Serializable, Comparable<Item>, ContentRSS {
     public void setDonneeBrutes(List<DonneeBrute> donneeBrutes) {
         this.donneeBrutes = donneeBrutes;
     }
-    
-    
-    
 
-//    @Transient
-//    private Boolean nonPresentDansBDD;
-//
-//    public Boolean getNonPresentDansBDD() {
-//        
-//        return nonPresentDansBDD;
-//    }
-//
-//    public void setNonPresentDansBDD(Boolean nonPresentDansBDD) {
-//        this.nonPresentDansBDD = nonPresentDansBDD;
-//    }
     /**
      * *
      * Constructeur vide. Initialise la liste des flux avec une {@link LinkedList}
      */
     public Item() {
-        this.listFlux = new LinkedList<Flux>();
     }
 
     /**
      * *
-     * Pour générer la clé unique, on concatene les champs titre, daterecup, description lien et ont hash en md5
+     * @see #titre
+     * @return
      */
-//    public void genererCleUnique() {
-//    }
-
+    @Override
     public String getTitre() {
         return titre;
     }
 
+    /**
+     * *
+     * @see #titre
+     * @return
+     */
+    @Override
     public void setTitre(String titre) {
         this.titre = titre;
     }
 
+    /**
+     * *
+     * @see #description
+     * @return
+     */
+    @Override
     public String getDescription() {
         return description;
     }
 
+    /**
+     * *
+     * @see #description
+     * @return
+     */
+    @Override
     public void setDescription(String description) {
         this.description = description;
     }
 
+    /**
+     * *
+     * @see #datePub
+     * @return
+     */
+    @Override
     public Date getDatePub() {
         return datePub;
     }
 
+    /**
+     * *
+     * @see #datePub
+     * @return
+     */
+    @Override
     public void setDatePub(Date datePub) {
         this.datePub = datePub;
     }
 
+    /**
+     * *
+     * @see #dateRecup
+     * @return
+     */
+    @Override
     public Date getDateRecup() {
         return dateRecup;
     }
 
+    /**
+     * *
+     * @see #dateRecup
+     * @return
+     */
+    @Override
     public void setDateRecup(Date dateRecup) {
         this.dateRecup = dateRecup;
     }
 
+    /**
+     * *
+     * @see #guid
+     * @return
+     */
+    @Override
     public String getGuid() {
         return guid;
     }
 
+    /**
+     * *
+     * @see #guid
+     * @return
+     */
+    @Override
     public void setGuid(String guid) {
         this.guid = guid;
     }
 
+    /**
+     * *
+     * @see #categorie
+     * @return
+     */
     public String getCategorie() {
         return categorie;
     }
 
+    /**
+     * *
+     * @see #categorie
+     * @return
+     */
     public void setCategorie(String categorie) {
         this.categorie = categorie;
     }
 
+    /**
+     * *
+     * @see hashContenu
+     * @return
+     */
+    @Override
     public String getHashContenu() {
         return hashContenu;
     }
 
+    /**
+     * @see hashContenu
+     * @return
+     */
+    @Override
     public void setHashContenu(String hashContenu) {
         this.hashContenu = hashContenu;
     }
 
-    public Integer getSyncStatut() {
+    /**
+     * *
+     * @see syncStatut
+     * @return
+     */
+    public Byte getSyncStatut() {
         return syncStatut;
     }
 
-    public void setSyncStatut(Integer syncStatut) {
+    /**
+     * *
+     * @see syncStatut
+     * @return
+     */
+    public void setSyncStatut(Byte syncStatut) {
         this.syncStatut = syncStatut;
     }
 
-//    public Boolean getErreurDerniereLevee() {
-//        return erreurDerniereLevee;
-//    }
-//
-//    public void setErreurDerniereLevee(Boolean erreurDerniereLevee) {
-//        this.erreurDerniereLevee = erreurDerniereLevee;
-//    }
     /**
      * *
-     * Pour tester si c'est nouveau on va utiliser l'ID
-     *
+     * @see #listFlux
      * @return
-     * @deprecated
      */
-    @Deprecated
-    public Boolean getIsNew() {
-        return isNew;
-    }
-
-    /**
-     * *
-     *     * Pour tester si c'est nouveau on va utiliser l'ID
-     *
-     * @param isNew
-     */
-    @Deprecated
-    public void setIsNew(Boolean isNew) {
-        this.isNew = isNew;
-    }
-
     public List<Flux> getListFlux() {
         return listFlux;
     }
 
+    /**
+     * *
+     * @see #listFlux
+     * @return
+     */
     public void setListFlux(List<Flux> listFlux) {
         this.listFlux = listFlux;
     }
 
+    /**
+     * *
+     * @see #link
+     * @param link
+     */
+    @Override
     public String getLink() {
         return link;
     }
 
+    /**
+     * *
+     * @see #link
+     * @param link
+     */
+    @Override
     public void setLink(String link) {
         this.link = link;
     }
 
+    /**
+     * *
+     * @see #contenu
+     * @return
+     */
     public String getContenu() {
         return contenu;
     }
 
+    /**
+     * *
+     * @see #contenu
+     * @return
+     */
     public void setContenu(String contenu) {
         this.contenu = contenu;
     }
 
+    /***
+     * @see #ID
+     * @return 
+     */
     public Long getID() {
         return ID;
     }
 
+    /***
+     * @see #ID
+     * @return 
+     */
     public void setID(Long ID) {
         this.ID = ID;
     }
+    
+        /***
+     * Dernière modification de l'entite. Permet l'Optimitic Lock
+     */
+        @Version
+    Timestamp modified;
+
+        /***
+         * @see #modified
+         * @return 
+         */
+    public Timestamp getModified() {
+        return modified;
+    }
+
+    /***
+     * @see #modified
+     * @param modified 
+     */
+    public void setModified(Timestamp modified) {
+        this.modified = modified;
+    }
+    
+    
 
     /**
      * *
@@ -322,20 +413,25 @@ public class Item implements Serializable, Comparable<Item>, ContentRSS {
         } else {
             return -1;
         }
-
     }
 
+    /***
+     * Copi les données de l'item dans une Entitée de type @{@link  DonneeBrute}. Cette nouvelle donnée brute est ensuite ajouté à l'item
+     * 
+     * @param f
+     * @throws IncompleteBeanExeption 
+     */
     public void genererDonneesBrutes(Flux f) throws IncompleteBeanExeption {
-        
-        if(f==null){
+
+        if (f == null) {
             throw new NullPointerException("impossible de verser avec un flux null");
         }
-         
-        if(f.getID()==null){
+
+        if (f.getID() == null) {
             throw new IncompleteBeanExeption("Le flux envoyé n'a pas d'id");
         }
-        
-        
+
+
         List<DonneeBrute> donneesbrutes = this.donneeBrutes;
         boolean absente = true;
         for (int i = 0; i < donneesbrutes.size(); i++) {
@@ -360,20 +456,22 @@ public class Item implements Serializable, Comparable<Item>, ContentRSS {
             newDonneeBrute.setHashContenu(hashContenu);
             newDonneeBrute.setCategorie(categorie);
             newDonneeBrute.setContenu(contenu);
-                   
+
 //            newDonneeBrute.setItem(this);
             this.donneeBrutes.add(newDonneeBrute);
         }
     }
-    
-    /***
-     * Les donnée brutes de l'item envoyée en argument sont ajouté si nécessaire aux données brutes de l'item courante
-     * @param i 
-     * @return true si un versement qqchose a pu être versé. sinon false. 
+
+    /**
+     * *
+     * Les donnée brutes de l'item envoyée en argument sont ajouté si nécessaire (comparaison des hash) aux données brutes de l'item courante
+     *
+     * @param i l'item pour laquelle on doit récupérer les données brutes
+     * @return true si un versement qqchose a pu être versé. sinon false.
      */
-    public Boolean verserLesDonneeBruteAutreItem(Item i){
-        
-        
+    public Boolean verserLesDonneeBruteAutreItem(Item i) {
+
+
         boolean versement = false;
         List<DonneeBrute> listDonneebruteAutreItem = i.donneeBrutes;
         for (int j = 0; j < listDonneebruteAutreItem.size(); j++) {
@@ -382,13 +480,13 @@ public class Item implements Serializable, Comparable<Item>, ContentRSS {
             boolean trouve = false;
             for (int k = 0; k < listdonneBrutThis.size(); k++) {
                 DonneeBrute donneeBruteThis = listdonneBrutThis.get(k);
-                if(donneeBruteAutre.getFlux().getID().equals(donneeBruteThis.getFlux().getID())){
+                if (donneeBruteAutre.getFlux().getID().equals(donneeBruteThis.getFlux().getID())) {
                     trouve = true;
                 }
             }
-            if(!trouve){
-                        this.donneeBrutes.add(donneeBruteAutre);
-                        versement = true;
+            if (!trouve) {
+                this.donneeBrutes.add(donneeBruteAutre);
+                versement = true;
 //                System.out.println("===========VERSEMENT==============");
 //                System.out.println("NOMBRE DONNEE BRUT POUR ITEM : " + this.donneeBrutes.size());
 //                for (int k = 0; k < this.donneeBrutes.size(); k++) {
@@ -396,44 +494,45 @@ public class Item implements Serializable, Comparable<Item>, ContentRSS {
 ////                    System.out.println("DESC : " + donneeBrute.getDescription());
 //                    
 //                }
-        
+
             }
         }
-        
-        
-        if(versement){
+
+
+        if (versement) {
             return true; // Si des données brutes on été versées
-        }
-        else{
+        } else {
             return false; // si rien n'a été versé.
         }
-        
+
     }
-    
-    /***
+
+    /**
+     * *
      * Ajoute un flux si nécessaire à la liste de l'item
-     * @param f 
+     *
+     * @param f
      */
-    public void addFlux(Flux f) throws IncompleteBeanExeption{
-        
-        if(f==null){
+    public void addFlux(Flux f) throws IncompleteBeanExeption {
+
+        if (f == null) {
             throw new NullPointerException("Impossible d'ajouter un flux null");
         }
-        if(f.getID()==null){
+        if (f.getID() == null) {
             throw new IncompleteBeanExeption("Le flux n'a pas d'id");
         }
-        
+
         List<Flux> flThis = this.getListFlux();
         boolean present = false;
         for (int i = 0; i < flThis.size(); i++) {
             Flux flux = flThis.get(i);
-            if(flux.getID().equals(f.getID())){
+            if (flux.getID().equals(f.getID())) {
                 present = true;
             }
         }
-        if(!present){
+        if (!present) {
             listFlux.add(f);
         }
-        
+
     }
 }

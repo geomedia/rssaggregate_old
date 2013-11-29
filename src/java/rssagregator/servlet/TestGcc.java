@@ -11,15 +11,13 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import rssagregator.services.ServiceMailNotifier;
-import rssagregator.services.TacheAlerteMail;
 
 /**
  *
  * @author clem
  */
-@WebServlet(name = "TestAlertMail", urlPatterns = {"/TestAlertMail"})
-public class TestAlertMail extends HttpServlet {
+@WebServlet(name = "TestGcc", urlPatterns = {"/TestGcc"})
+public class TestGcc extends HttpServlet {
 
     /**
      * Processes requests for both HTTP
@@ -40,17 +38,12 @@ public class TestAlertMail extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet TestAlertMail</title>");            
+            out.println("<title>Servlet TestGcc</title>");            
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet TestAlertMail at " + request.getContextPath() + "</h1>");
+            out.println("<h1>Servlet TestGcc at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
-            ServiceMailNotifier sm = ServiceMailNotifier.getInstance();
-            TacheAlerteMail alerteMail = new TacheAlerteMail(sm);
-            sm.getExecutorService().submit(alerteMail);
-            
-            
         } finally {            
             out.close();
         }

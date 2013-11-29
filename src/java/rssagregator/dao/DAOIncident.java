@@ -18,7 +18,7 @@ import rssagregator.beans.Flux;
 import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.beans.incident.JMSPerteConnectionIncident;
 import rssagregator.beans.incident.NotificationAjoutFlux;
-import rssagregator.services.TacheAlerteMail;
+import rssagregator.services.tache.TacheAlerteMail;
 
 /**
  *

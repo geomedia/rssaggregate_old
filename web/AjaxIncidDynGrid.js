@@ -6,7 +6,6 @@
 
 $(document).ready(function() {
 
-
     $('#afin').on('click', function truc() {
         rechercherGrid();
     });
@@ -62,7 +61,7 @@ $(document).ready(function() {
                     spefield: champSpe
                 };
 
-        $("#list").jqGrid('setGridParam', {url: 'http://localhost:8080/RSSAgregate/incidents/list2?type=' + type + "&vue=grid", data: [], postData: {filters: JSON.stringify(filters)}});
+        $("#list").jqGrid('setGridParam', {url: rootpath+'incidents/list?type=' + type + "&vue=grid", data: [], postData: {filters: JSON.stringify(filters)}});
         $("#list").jqGrid().trigger("reloadGrid");
 
 

@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package rssagregator.services;
+package rssagregator.services.tache;
 
 import java.util.Date;
 import java.util.List;
@@ -14,7 +14,6 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import javax.persistence.EntityManager;
 import rssagregator.beans.exception.AucunMailAdministateur;
 import rssagregator.beans.incident.Incidable;
 import rssagregator.beans.incident.IncidentFactory;
@@ -33,15 +32,15 @@ import rssagregator.services.crud.ServiceCRUDFactory;
  */
 public class TacheEnvoyerMail extends TacheImpl<TacheEnvoyerMail> implements Incidable {
 
-    public TacheEnvoyerMail(Observer s) {
-        super(s);
-    }
+
+    
     private final static String MAILER_VERSION = "Java";
     private Properties propertiesMail;
     InternetAddress[] toMailAdresses;
     String subject;
     String content;
     protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheEnvoyerMail.class);
+    
 
     /**
      * *
@@ -94,8 +93,8 @@ public class TacheEnvoyerMail extends TacheImpl<TacheEnvoyerMail> implements Inc
         // Si l'erreur vient du fait qu'il n'y a pas de mail d'admin dans la conf
         try {
             if (this.exeption != null) {
-                em = DAOFactory.getInstance().getEntityManager();
-                em.getTransaction().begin();
+  
+                initialiserTransaction();
                 AbstrServiceCRUD serviceCRUD = ServiceCRUDFactory.getInstance().getServiceFor(MailIncident.class);
 
 
@@ -134,23 +133,12 @@ public class TacheEnvoyerMail extends TacheImpl<TacheEnvoyerMail> implements Inc
                 }
             }
         } catch (Exception e) {
-            logger.error("Erreur lors du commit de l'incident", e);
-            if (em != null && em.isJoinedToTransaction()) {
-                em.getTransaction().rollback();
-            }
             
-        } finally {
-            if (em != null && em.isJoinedToTransaction()) {
-                try {
-                    em.getTransaction().commit();
-                } catch (Exception e) {
-                    logger.error("Erreur lors du commit de l'incident", e);
-                }
-                try {
-                    em.close();
-                } catch (Exception e) {
-                }
-            }
+            commitTransaction(false);           
+        } 
+        
+        finally {
+            commitTransaction(true);
         }
     }
 
@@ -190,6 +178,5 @@ public class TacheEnvoyerMail extends TacheImpl<TacheEnvoyerMail> implements Inc
         message.setSentDate(new Date());
         session.setDebug(true);
         Transport.send(message);
-
     }
 }

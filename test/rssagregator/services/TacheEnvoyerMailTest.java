@@ -4,6 +4,8 @@
  */
 package rssagregator.services;
 
+import rssagregator.services.tache.TacheFactory;
+import rssagregator.services.tache.TacheEnvoyerMail;
 import javax.mail.internet.InternetAddress;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -44,16 +46,18 @@ public class TacheEnvoyerMailTest {
         System.out.println("call");
         ServiceMailNotifier serviceMail = ServiceMailNotifier.getTestInstance();
         
-        TacheEnvoyerMail instance = new TacheEnvoyerMail(serviceMail);
+//        TacheEnvoyerMail instance = new TacheEnvoyerMail(serviceMail);
+        TacheEnvoyerMail instance = (TacheEnvoyerMail) TacheFactory.getInstance().getNewTask(TacheEnvoyerMail.class, Boolean.FALSE);
+        
+        
         instance.setContent("Ceci est un mail de test");
         instance.setPropertiesMail(serviceMail.getPropertiesMail());
         instance.setSubject("TestMail");
         InternetAddress[] addresses = new InternetAddress[]{new InternetAddress("clement.rillon@gmail.com")};
         instance.setToMailAdresses(addresses);
         
-        serviceMail.executorService.submit(instance);
+        serviceMail.submit(instance);
 
-//        serviceMail.executorService.submit(instance);
                 
         TacheEnvoyerMail expResult = null;
         TacheEnvoyerMail result = instance.call();
@@ -195,7 +199,8 @@ public class TacheEnvoyerMailTest {
         System.out.println("gererIncident");
         
         ServiceMailNotifier service = ServiceMailNotifier.getTestInstance();
-        TacheEnvoyerMail instance = new TacheEnvoyerMail(service);
+//        TacheEnvoyerMail instance = new TacheEnvoyerMail(service);
+        TacheEnvoyerMail instance = (TacheEnvoyerMail) TacheFactory.getInstance().getNewTask(TacheEnvoyerMail.class, Boolean.FALSE);
         
         instance.setExeption(new Exception("Une exeption de test"));
         instance.setContent("Un contenu qui n'a jamais existé");

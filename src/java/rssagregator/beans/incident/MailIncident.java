@@ -8,7 +8,7 @@ import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import rssagregator.services.ServiceMailNotifier;
-import rssagregator.services.TacheEnvoyerMail;
+import rssagregator.services.tache.TacheEnvoyerMail;
 
 /**
  * <p>Incident généré par le service {@link ServiceMailNotifier}, lorsqu'un mail

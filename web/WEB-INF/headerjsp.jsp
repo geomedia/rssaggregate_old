@@ -7,6 +7,7 @@
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%--<%@page contentType="text/html" pageEncoding="UTF-8"%>--%>
 <c:set var="rootpath" value="/RSSAgregate/" scope="request"></c:set>
+
     <!DOCTYPE html>
     <html>
         <head>
@@ -238,12 +239,7 @@
                     <div id="page-bgtop">
                         <div id="page-bgbtm">
 
-                            ssssss
-                        <%
-                            String testProp = "prop1";
-                            Properties sysProps = System.getProperties();
 
-                            System.out.println("Value of " + testProp + " is "
-                                    + sysProps.getProperty(testProp));
-
-                        %>
+                        <script>
+                            rootpath = ${rootpath}; // Cette variable peu être réutilisé dans les js des pages
+                        </script>

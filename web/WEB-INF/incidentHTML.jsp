@@ -165,7 +165,7 @@
                                     $(function() {
                                         $("#list").jqGrid({
                                             loadonce: false,
-                                            url: "${rootpath}incidents/list2?vue=grid&type=CollecteIncident",
+                                            url: "${rootpath}incidents/list?vue=grid&type=CollecteIncident",
 //                                            url: "${rootpath}item/list?vue=grid",
                                             datatype: "json",
                                             mtype: "GET",

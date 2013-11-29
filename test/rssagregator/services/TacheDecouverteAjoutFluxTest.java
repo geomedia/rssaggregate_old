@@ -4,6 +4,7 @@
  */
 package rssagregator.services;
 
+import rssagregator.services.tache.TacheDecouverteAjoutFlux;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

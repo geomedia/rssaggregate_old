@@ -5,6 +5,7 @@
 package rssagregator.beans;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -17,6 +18,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.UniqueConstraint;
+import javax.persistence.Version;
 import org.eclipse.persistence.annotations.Index;
 
 /**
@@ -78,6 +80,31 @@ public class DonneeBrute implements Serializable, ContentRSS{
     private Flux flux; // bidirectionnelle le flux a toute les cascades
     
 
+       /**
+     * *
+     * Dernière modification de l'entite. Permet l'Optimitic Lock
+     */
+    @Version
+    Timestamp modified;
+
+    /**
+     * *
+     * @see #modified
+     * @return
+     */
+    public Timestamp getModified() {
+        return modified;
+    }
+
+    /**
+     * *
+     * @see #modified
+     * @param modified
+     */
+    public void setModified(Timestamp modified) {
+        this.modified = modified;
+    }
+    
     
 
     public Long getID() {

@@ -26,7 +26,7 @@ import rssagregator.dao.DaoItem;
 
 //TODO : Revoir le méchanisme de recap de l'activité avec affichage javascript. N'est pas un objectif prioritaire.
 @Beta
-public class RecapActivite {
+public class OLD_RecapActivite {
 
     private List<Flux> listFlux;
     private Date date1;
@@ -34,7 +34,7 @@ public class RecapActivite {
     String json;
 //    private String jsonurl;
 
-    public RecapActivite() {
+    public OLD_RecapActivite() {
 
         this.listFlux = new ArrayList<Flux>();
     }
@@ -113,7 +113,7 @@ public class RecapActivite {
         this.json = json;
     }
     
-    public JSONArray jsonGraphEncode(List<Item> items, RecapActivite recap) {
+    public JSONArray jsonGraphEncode(List<Item> items, OLD_RecapActivite recap) {
         // On commence par trier la list des items par date;
         Collections.sort(items);
 

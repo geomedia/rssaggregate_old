@@ -4,9 +4,6 @@
  */
 package rssagregator.beans.traitement;
 
-import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonAnyFormatVisitor;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.logging.Level;
@@ -14,9 +11,6 @@ import java.util.logging.Logger;
 import javax.persistence.Entity;
 import javax.persistence.Transient;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
-import rssagregator.beans.ContentRSS;
 import rssagregator.beans.DonneeBrute;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
@@ -35,6 +29,13 @@ import rssagregator.services.ServiceCollecteur;
  */
 @Entity(name = "DedoubloneurComparaisonTitre")
 public class DedoubloneurComparaisonTitre extends AbstrDedoublonneur {
+
+    public DedoubloneurComparaisonTitre() {
+    
+    }
+    
+    
+    
 
     @Transient
     protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DedoubloneurComparaisonTitre.class);

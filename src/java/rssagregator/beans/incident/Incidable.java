@@ -5,7 +5,7 @@
 package rssagregator.beans.incident;
 
 import rssagregator.beans.exception.UnIncidableException;
-import rssagregator.services.TacheRecupCallable;
+import rssagregator.services.tache.TacheRecupCallable;
 
 /**
  * Interface permettant de définir les tâches pouvant générer des incidents, on parle alors de tâche incidable.

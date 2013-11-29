@@ -26,7 +26,7 @@ import rssagregator.beans.form.ConfForm;
 import rssagregator.dao.DAOConf;
 import rssagregator.dao.DAOFactory;
 import rssagregator.services.ServiceSynchro;
-import rssagregator.services.TacheSynchroHebdomadaire;
+import rssagregator.services.tache.TacheSynchroHebdomadaire;
 import rssagregator.utils.ServletTool;
 import rssagregator.utils.XMLTool;
 

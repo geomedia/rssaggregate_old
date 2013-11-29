@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import rssagregator.beans.Journal;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoJournal;
-import rssagregator.services.TacheDecouverteAjoutFlux;
+import rssagregator.services.tache.TacheDecouverteAjoutFlux;
 
 /**
  *
