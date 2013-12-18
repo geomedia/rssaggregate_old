@@ -63,7 +63,7 @@ import rssagregator.utils.XMLTool;
  *
  * @author clem
  */
-public class ServiceSynchro extends AbstrService implements MessageListener, Observer, ExceptionListener {
+public class ServiceSynchro extends ServiceImpl implements MessageListener, Observer, ExceptionListener {
 
     String servname; //Le nom du serveur il est dans le bean Conf dont les information sont enregistrée dans le fichier conf.properties. Cette valeur est utilisée par JMS comme clientID
     ActiveMQConnectionFactory connectionFactory;
@@ -577,81 +577,81 @@ public class ServiceSynchro extends AbstrService implements MessageListener, Obs
      * @param o
      * @param arg
      */
-    @Override
-    public void update(Observable o, Object arg) {
-        Conf conf = DAOFactory.getInstance().getDAOConf().getConfCourante();
-
-
-        // SI il s'agit d'un beans devant être diffusé qui précise bien l'action devant être diffusée par un string (add mod rem...)
-//        if ((o instanceof Flux || o instanceof MediatorCollecteAction) && arg instanceof String) {
-//            try {
-//                diffuser(o, (String) arg);
-//            } catch (JMSException ex) {
-//                Logger.getLogger(ServiceSynchro.class.getName()).log(Level.SEVERE, null, ex);
-//            } catch (IOException ex) {
-//                Logger.getLogger(ServiceSynchro.class.getName()).log(Level.SEVERE, null, ex);
+//    @Override
+//    public void update(Observable o, Object arg) {
+//        Conf conf = DAOFactory.getInstance().getDAOConf().getConfCourante();
+//
+//
+//        // SI il s'agit d'un beans devant être diffusé qui précise bien l'action devant être diffusée par un string (add mod rem...)
+////        if ((o instanceof Flux || o instanceof MediatorCollecteAction) && arg instanceof String) {
+////            try {
+////                diffuser(o, (String) arg);
+////            } catch (JMSException ex) {
+////                Logger.getLogger(ServiceSynchro.class.getName()).log(Level.SEVERE, null, ex);
+////            } catch (IOException ex) {
+////                Logger.getLogger(ServiceSynchro.class.getName()).log(Level.SEVERE, null, ex);
+////            }
+////        }
+//        // Ce sont maintenant les dao qui demande la diffusion. Les flux ne sont plus inscrit au ServiceSynchro
+//
+//        // ===================================================================================
+//        //........................Gestion des tâche ne notifiant auprès du service
+//        // ===================================================================================
+//        if (o instanceof AbstrTacheSchedule) {
+//            //--------Une tache de test qui ne sert a rien...
+////            if (o.getClass().equals(TacheTest.class)) {
+////                System.out.println(" Une Tache test bien de se notifier");
+//
+//                //--------La tâche de vérification de la connection JMS
+////            } 
+//        if (o.getClass().equals(TacheLancerConnectionJMS.class)) {
+//                TacheLancerConnectionJMS t = (TacheLancerConnectionJMS) o;
+//                // Si on a un échec
+//                if(t.getExeption()!=null){
+//                    try {
+//                        t.gererIncident();
+//                    } catch (Exception ex) {
+//                        Logger.getLogger(ServiceSynchro.class.getName()).log(Level.SEVERE, null, ex);
+//                    }
+//                }
+//                else{
+//                    try {
+//                        t.fermetureIncident();
+//                    } catch (Exception ex) {
+//                        Logger.getLogger(ServiceSynchro.class.getName()).log(Level.SEVERE, null, ex);
+//                    }
+//                }
+//
+//                if (t.getSchedule()) {
+//                    schedule(t);
+//                }
+//                //Si la tache s'est termée correctement 
+//
+//
+//            } //--------------TACHE DE RECUPERATION DES ITEMS SUR LE SERVEUR ESCLAVE
+//            else if (o.getClass().equals(TacheSynchroHebdomadaire.class)) {
+//                logger.debug("Notification d'une tache de récup esclave");
+//                TacheSynchroHebdomadaire t = (TacheSynchroHebdomadaire) o;
+//
+//                if (t.getSchedule()) {
+//                    schedule(t);
+//                }
+////                if (t.getExeption() != null) {
+////                    logger.debug("exeption durant la synchro");
+////                }
+//            } //---------------TACHE DE RÉCUPÉRATION DES ITEMS SUR SERVEUR ESCLAVE
+//            else if (o.getClass().equals(TacheSynchroRecupItem.class)) {
+//                //Cette tâche n'est jamais schedulé elle est utilisé par TacheSynchroHebdomadaire qui elle est schedulée
+//                TacheSynchroRecupItem t = (TacheSynchroRecupItem) o;
+////                if (t.getExeption() != null) {
+//////                    gererIncident(t);
+////                    //On doit créer un nouveau type d'exeption
+////                }
 //            }
+//
+////            gererIncident((AbstrTacheSchedule) o);
 //        }
-        // Ce sont maintenant les dao qui demande la diffusion. Les flux ne sont plus inscrit au ServiceSynchro
-
-        // ===================================================================================
-        //........................Gestion des tâche ne notifiant auprès du service
-        // ===================================================================================
-        if (o instanceof AbstrTacheSchedule) {
-            //--------Une tache de test qui ne sert a rien...
-//            if (o.getClass().equals(TacheTest.class)) {
-//                System.out.println(" Une Tache test bien de se notifier");
-
-                //--------La tâche de vérification de la connection JMS
-//            } 
-        if (o.getClass().equals(TacheLancerConnectionJMS.class)) {
-                TacheLancerConnectionJMS t = (TacheLancerConnectionJMS) o;
-                // Si on a un échec
-                if(t.getExeption()!=null){
-                    try {
-                        t.gererIncident();
-                    } catch (Exception ex) {
-                        Logger.getLogger(ServiceSynchro.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-                else{
-                    try {
-                        t.fermetureIncident();
-                    } catch (Exception ex) {
-                        Logger.getLogger(ServiceSynchro.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-
-                if (t.getSchedule()) {
-                    schedule(t);
-                }
-                //Si la tache s'est termée correctement 
-
-
-            } //--------------TACHE DE RECUPERATION DES ITEMS SUR LE SERVEUR ESCLAVE
-            else if (o.getClass().equals(TacheSynchroHebdomadaire.class)) {
-                logger.debug("Notification d'une tache de récup esclave");
-                TacheSynchroHebdomadaire t = (TacheSynchroHebdomadaire) o;
-
-                if (t.getSchedule()) {
-                    schedule(t);
-                }
-//                if (t.getExeption() != null) {
-//                    logger.debug("exeption durant la synchro");
-//                }
-            } //---------------TACHE DE RÉCUPÉRATION DES ITEMS SUR SERVEUR ESCLAVE
-            else if (o.getClass().equals(TacheSynchroRecupItem.class)) {
-                //Cette tâche n'est jamais schedulé elle est utilisé par TacheSynchroHebdomadaire qui elle est schedulée
-                TacheSynchroRecupItem t = (TacheSynchroRecupItem) o;
-//                if (t.getExeption() != null) {
-////                    gererIncident(t);
-//                    //On doit créer un nouveau type d'exeption
-//                }
-            }
-
-//            gererIncident((AbstrTacheSchedule) o);
-        }
-    }
+//    }
 
     /**
      * *

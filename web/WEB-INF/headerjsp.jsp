@@ -197,7 +197,14 @@
                     </li></c:if>
 
 
-                <c:if test="${admin == 'true'}"><li <c:if test="${navmenu=='config'}"> class="current_page_item"</c:if>><a href="${rootpath}config/read?id=1">Configuration</a></li></c:if>
+                <c:if test="${admin == 'true'}"><li <c:if test="${navmenu=='config'}"> class="current_page_item"</c:if>><a href="${rootpath}config/read?id=1">Configuration</a>
+                        <ul>
+                            <li><a href="${rootpath}LogView">Afficher les logs</a></li>
+                        <li><a href="${rootpath}ServiceCtrl">Gestion des services</a></li>
+                        </ul>
+                        
+                        
+                        </li></c:if>
                 <li <c:if test="${navmenu=='aide'}"> class="current_page_item"</c:if>><a href="${rootpath}aide.jsp">Aide</a></li>  
                 </ul>  
             </nav> 

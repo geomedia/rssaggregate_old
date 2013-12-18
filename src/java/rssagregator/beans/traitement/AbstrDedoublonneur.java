@@ -18,6 +18,7 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.xml.bind.annotation.XmlRootElement;
 import org.apache.log4j.Logger;
 import org.apache.tomcat.util.buf.HexUtils;
 import org.jsoup.Jsoup;
@@ -35,6 +36,7 @@ import rssagregator.dao.DaoItem;
 @Entity
 @Table(name = "tr_dedoub")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@XmlRootElement
 public abstract class AbstrDedoublonneur implements Serializable, Cloneable {
 
     public AbstrDedoublonneur() {

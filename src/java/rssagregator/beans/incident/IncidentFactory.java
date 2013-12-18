@@ -4,12 +4,16 @@
  */
 package rssagregator.beans.incident;
 
+import java.io.PrintWriter;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import rssagregator.beans.exception.CollecteUnactiveFlux;
 import rssagregator.beans.exception.UnIncidableException;
 import rssagregator.services.tache.AbstrTacheSchedule;
+import rssagregator.utils.ExceptionTool;
 
 /**
  * Permet de créer un incident
@@ -94,8 +98,8 @@ public class IncidentFactory<T extends AbstrIncident> {
             incid.setMessageEreur(message);
         }
         incid.setNombreTentativeEnEchec(1); // L'incident vient d'être créé, il faut donc 1 en nombre de tentative en échec
-        
-        incid.setDateDebut(new Date()); 
+
+        incid.setDateDebut(new Date());
 
         if (incid.getClass().equals(MailIncident.class)) {
             incid.setNotificationImperative(false);
@@ -104,7 +108,16 @@ public class IncidentFactory<T extends AbstrIncident> {
         }
 
         if (tw != null) {
-            incid.setLogErreur(tw.toString());
+           
+
+            incid.setLogErreur(ExceptionTool.stackTraceToString(tw));
+//            StringWriter sw = new StringWriter();
+//            PrintWriter pw = new PrintWriter(sw);
+//            tw.printStackTrace(pw);
+//             incid.setLogErreur(tw.toString() + "\n " + sw.toString());
+
+
+
         }
     }
 }

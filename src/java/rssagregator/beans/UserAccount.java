@@ -27,7 +27,7 @@ public class UserAccount implements Serializable, BeanSynchronise {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long ID;
-    @Column(name = "mail")
+    @Column(name = "mail",unique = true)
     private String mail;
     /**
      * *
@@ -42,7 +42,7 @@ public class UserAccount implements Serializable, BeanSynchronise {
      * Le nom d'utilisateur. Il est purement informatif, c'est le mail qui est utilisé pour l'identification des
      * utilisateurs
      */
-    @Column(name = "username")
+    @Column(name = "username", unique = true)
     private String username;
     /**
      * *

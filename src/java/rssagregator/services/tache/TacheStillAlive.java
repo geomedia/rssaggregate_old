@@ -5,18 +5,11 @@
 package rssagregator.services.tache;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import java.util.Observer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import rssagregator.beans.Conf;
 import rssagregator.beans.StillAlivePOJO;
 import rssagregator.beans.incident.AliveIncident;
-import rssagregator.beans.incident.Incidable;
 import rssagregator.beans.incident.IncidentFactory;
-import rssagregator.dao.DAOFactory;
 import rssagregator.services.crud.AbstrServiceCRUD;
 import rssagregator.services.crud.ServiceCRUDFactory;
 import rssagregator.utils.PropertyLoader;
@@ -28,9 +21,9 @@ import rssagregator.utils.PropertyLoader;
  *
  * @author clem
  */
-public class TacheStillAlive extends TacheImpl<TacheStillAlive> implements Incidable {
+public class TacheStillAlive extends TacheImpl<TacheStillAlive> {
 
-    org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheStillAlive.class);
+//    org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheStillAlive.class);
     /**
      * Le fichier still alive avec lequel il faut travailler
      */
@@ -43,15 +36,20 @@ public class TacheStillAlive extends TacheImpl<TacheStillAlive> implements Incid
     Boolean rupture = false;
     Date debutRupture;
     Date finRupture;
-
+    
     @Override
     protected void callCorps() throws Exception {
+
+
+
+        initialiserTransaction();
+
         
-        
-         // Si le fichier n'est pas configuré, on va le chercher dans la conf
+
+        // Si le fichier n'est pas configuré, on va le chercher dans la conf
         if (file == null) {
-            String varPath = PropertyLoader.loadProperti("serv.properties", "varpath");
-            file = new File(varPath + "stillalive");
+            String varPath = (String) PropertyLoader.returnConfPath() + "stillalive";
+            file = new File(varPath);
         }
 
 
@@ -80,7 +78,8 @@ public class TacheStillAlive extends TacheImpl<TacheStillAlive> implements Incid
             inci.setDateDebut(debutRupture);
             inci.setDateFin(debutRupture);
 
-            serviceCrud.ajouter(inci);
+//            serviceCrud.ajouter(inci);
+            serviceCrud.ajouter(inci, em);
         }
         alivePOJO.write(file);
     }
@@ -113,20 +112,5 @@ public class TacheStillAlive extends TacheImpl<TacheStillAlive> implements Incid
 
     public void setFinRupture(Date finRupture) {
         this.finRupture = finRupture;
-    }
-
-    @Override
-    public Class getTypeIncident() {
-        return AliveIncident.class;
-    }
-
-    @Override
-    public void gererIncident() throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void fermetureIncident() throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

@@ -28,9 +28,9 @@ public class DAOUser extends AbstrDao {
      * @return
      */
     public UserAccount findPrMail(String m) {
-        String req = "SELECT u FROM UserAccount u WHERE u.mail like(:mail)";
-        Query query = em.createQuery(req);
-        query.setParameter("mail", m);
+//        String req = ;
+        Query query = em.createQuery("SELECT u FROM UserAccount u WHERE LOWER( u.mail) = :mail");
+        query.setParameter("mail", m.toLowerCase());
 
         try {
             Object r = query.getSingleResult();
@@ -57,5 +57,19 @@ public class DAOUser extends AbstrDao {
             UserAccount userAccount = list.get(i);
             System.out.println(""+userAccount);
         }
+    }
+
+    public UserAccount findPrUsernamel(String s) {
+        //        String req = ;
+        Query query = em.createQuery("SELECT u FROM UserAccount u WHERE LOWER(u.username) = :username");
+        query.setParameter("username", s.toLowerCase());
+
+        try {
+            Object r = query.getSingleResult();
+          
+            return (UserAccount) r;
+        } catch (Exception e) {
+        }
+        return null;
     }
 }

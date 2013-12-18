@@ -361,7 +361,7 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
                                     </td>
 
                                     <td>
-
+                     
                                         <ul id="fluxSelection" name="oldid-flux" style="min-width: 300px; width: 400px" class="connectedSortable">
                                             <c:forEach items="${listflux}" var="fl">
                                                 <li value="${fl.ID}">${fl}</li>                                
@@ -597,101 +597,12 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
                                 <option value="${pCapt.ID}">${pCapt}</option>
                             </c:forEach>
                         </select>
-                        
-                        
-
-                        <p><strong title="L'indice de qualité captation est le rapport entre la période pour laquelle le flux a pu être collecté correctement et la somme des périodes pour lesquels le flux n'a pu être collecté : ">Indice Qualité captation : </strong>${bean.indiceQualiteCaptation}</p>
 
                         <div id="affichageCaptation"></div>
 
-<!--                        <h3>Nombre d'item jour captutée</h3>
-
-                        <p><strong>Mediane : </strong>${bean.indiceMedianeNbrItemJour}</p>
-                        <p><strong>Décile :</strong>${bean.indiceDecileNbrItemJour}</p>
-                        <p><strong>Quartile : </strong>${bean.indiceQuartileNbrItemJour}</p>
-                        <p><strong>Maximum : </strong>${bean.indiceMaximumNbrItemJour}</p>
-                        <p><strong>Minimum : </strong>${bean.indiceMinimumNbrItemJour}</p>-->
-
-
-
-
                         <div id="container" style="height: 400px; margin: auto; min-width: 310px; max-width: 600px"></div>
 
-                        <script>
-
-                                $(function() {
-
-//                                    $('#container').highcharts({
-//                                        chart: {
-//                                            type: 'boxplot'
-//                                        },
-//                                        title: {
-//                                            text: 'BoxPloat nombre d\'item jour sur la période'
-//                                        },
-//                                        legend: {
-//                                            enabled: false
-//                                        },
-//                                        xAxis: {
-//                                            categories: ['1', '2', '3', '4', '5'],
-//                                            title: {
-//                                                text: 'Flux ${fn:replace(bean, "'", "\\'")}.'
-//                                            }
-//                                        },
-//                                        yAxis: {
-//                                            title: {
-//                                                text: 'Nombre d\'item par jour'
-//                                            },
-//                                            plotLines: [{
-//                                                    value: 932,
-//                                                    color: 'red',
-//                                                    width: 1,
-//                                                    label: {
-//                                                        text: 'Theoretical mean: 932',
-//                                                        align: 'center',
-//                                                        style: {
-//                                                            color: 'gray'
-//                                                        }
-//                                                    }
-//                                                }]
-//                                        },
-//                                        series: [{
-//                                                name: 'Observations',
-//                                                data: [
-//                                                    [${bean.indiceMinimumNbrItemJour}, ${bean.indiceQuartileNbrItemJour}, ${bean.indiceMedianeNbrItemJour}, ${bean.indiceDecileNbrItemJour}, ${bean.indiceMaximumNbrItemJour}]
-//                                                ],
-//                                                tooltip: {
-//                                                    headerFormat: '<em>Experiment No {point.key}</em><br/>'
-//                                                }
-//                                            }
-////                                            , {
-////                                                name: 'Outlier',
-////                                                color: Highcharts.getOptions().colors[0],
-////                                                type: 'scatter',
-////                                                data: [// x, y positions where 0 is the first category
-////                                                    [0, 644],
-////                                                    [4, 718],
-////                                                    [4, 951],
-////                                                    [4, 969]
-////                                                ],
-////                                                marker: {
-////                                                    fillColor: 'white',
-////                                                    lineWidth: 1,
-////                                                    lineColor: Highcharts.getOptions().colors[0]
-////                                                },
-////                                                tooltip: {
-////                                                    pointFormat: 'Observation: {point.y}'
-////                                                }
-////                                            }
-//                                        ]
-//                                    });
-                                });
-
-                        </script>
-
-
-
-
-
+                
 
                     </c:when>
 

@@ -7,8 +7,10 @@ package rssagregator.beans;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,14 +20,14 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
+import javax.persistence.Version;
+import javax.xml.bind.annotation.XmlRootElement;
 import org.apache.poi.util.Beta;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.Interval;
-import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import rssagregator.beans.exception.DonneeInterneCoherente;
 import rssagregator.beans.exception.IncompleteBeanExeption;
 import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.CollecteIncident;
@@ -40,6 +42,7 @@ import rssagregator.beans.traitement.MediatorCollecteAction;
  */
 @Entity
 @JsonFilter("serialisePourUtilisateur")
+@XmlRootElement
 public class FluxPeriodeCaptation implements Serializable {
 
     @Id
@@ -52,8 +55,19 @@ public class FluxPeriodeCaptation implements Serializable {
 //    @JsonSerialize(include = JsonSerialize.Inclusion.NON_DEFAULT)
 //    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     @JsonIgnoreProperties
+    
+    /***
+     * Le flux auquel appartient cette période
+     */
     @ManyToOne(optional = false)
     private Flux flux;
+    
+    
+        @Version
+    Timestamp modified;
+        
+    
+    
     private Long statSommeItemCapture;
     private Integer statQuartilePremier;
     private Integer statQuartileTrois;
@@ -454,6 +468,7 @@ public class FluxPeriodeCaptation implements Serializable {
      */
     public Long returnCaptationDuration() throws IncompleteBeanExeption {
         
+//        ExceptionTool.argumentNonNull(dateDebut);
         if(this.getDateDebut()== null){
             throw new IncompleteBeanExeption("La durée de captation n'a pas de date de début");
         }
@@ -479,6 +494,7 @@ public class FluxPeriodeCaptation implements Serializable {
      * Retoune la liste des incidents qui sont survenues surant la période.
      * @return 
      */
+    @Deprecated
     public List<AbstrIncident> returnIncidentDurantLaPeride(){
       
         List<AbstrIncident> returnList = new ArrayList<AbstrIncident>();
@@ -493,9 +509,15 @@ public class FluxPeriodeCaptation implements Serializable {
         
         Interval intev = new Interval(dt1, dt2);
 
+        
         List<CollecteIncident> indidentFlux = flux.getIncidentsLie();
-        for (int i = 0; i < indidentFlux.size(); i++) {
-            CollecteIncident collecteIncident = indidentFlux.get(i);
+        for (Iterator<CollecteIncident> it = indidentFlux.iterator(); it.hasNext();) {
+            CollecteIncident collecteIncident = it.next();
+//            
+//        }
+//        
+//        for (int i = 0; i < flux.getIncidentsLie().size(); i++) {
+//            CollecteIncident collecteIncident = flux.getIncidentsLie().get(i);
            DateTime dtIncid = new DateTime(collecteIncident.getDateDebut());
   
            if(intev.contains(dtIncid)){
@@ -531,4 +553,15 @@ public class FluxPeriodeCaptation implements Serializable {
         
         return duree;
     }
+
+    public Timestamp getModified() {
+        return modified;
+    }
+
+    public void setModified(Timestamp modified) {
+        this.modified = modified;
+    }
+    
+    
+    
 }

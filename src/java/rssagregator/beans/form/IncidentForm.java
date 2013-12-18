@@ -11,10 +11,9 @@ import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.dao.AbstrDao;
 
 /**
- * Le formulaire permettant de valider et binder des donnée tirées de la requête
- * dans un beans <strong> Incident</strong>. Il y a de nombreux type d'incident
- * (par généricité). Mais les seules paramètre modifiable sont tous dans la
- * class AbstrIncident ce sont: <ul>
+ * Le formulaire permettant de valider et binder des donnée tirées de la requête dans un beans <strong>
+ * Incident</strong>. Il y a de nombreux type d'incident (par généricité). Mais les seules paramètre modifiable sont
+ * tous dans la class AbstrIncident ce sont: <ul>
  * <li>note d'incident </li>
  * <li>date fin : pour clore manuellement un incident</li>
  * </ul>
@@ -30,15 +29,17 @@ public class IncidentForm extends AbstrForm {
     //----------------------------------------
     protected IncidentForm() {
     }
-    
-    
 
     @Override
     public Object bind(HttpServletRequest request, Object objEntre, Class type) {
         if (valide) {
             AbstrIncident incident = (AbstrIncident) objEntre;
             incident.setNoteIndicent(noteIndicent);
-            incident.setDateFin(dateFin);
+            
+            if (dateFin != null) {
+                incident.setDateFin(dateFin);
+            }
+
             return incident;
         }
         return null;
@@ -71,10 +72,7 @@ public class IncidentForm extends AbstrForm {
     public void parseListeRequete(HttpServletRequest request, AbstrDao dao) throws Exception {
         super.parseListeRequete(request, dao); //To change body of generated methods, choose Tools | Templates
 
-        
+
         // Recup du spe
     }
-    
-    
-    
 }

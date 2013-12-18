@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
 import javax.persistence.Entity;
-import org.apache.log4j.Logger;
 import rssagregator.beans.DonneeBrute;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;

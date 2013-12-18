@@ -44,6 +44,23 @@
 
                 <p>Description ${item.description}</p>
                 <p></p>
+
+                <hr />
+                <h2>Données brutes</h2>
+                <select name="donneeBrutes" id="donneeBrutes">
+                    <option value="Selection">Données brutes </option>
+                    <c:forEach items="${item.donneeBrutes}" var="brute">
+                        <option value="${brute.ID}">${brute}</option>
+                    </c:forEach>
+                </select>
+
+
+
+
+                <div id="divDonneeBrutes"></div>
+                <script src="${rootpath}AjaxItemDynGrid.js"></script>
+
+
             </div>
         </c:when>
 
@@ -95,11 +112,11 @@
                                         </select>
                                     </td>
                                     <td>
-                                        
+
                                         <ul id="fluxSelection" name="oldid-flux" style="min-width: 300px; width: 400px" class="connectedSortable">
                                             <c:forEach items="${listflux}" var="fl">
                                                 <li class="boxelement" value="${fl.ID}">${fl}</li>                                
-                                            </c:forEach>
+                                                </c:forEach>
                                             </li>
                                         </ul>
 
@@ -195,17 +212,17 @@
                     return '<a href = "/RSSAgregate/item/read?id=' + rowObjcet[0] + '">' + rowObjcet[1] + '</a>';
                 }
                 function  fluxFormatter(cellvalue, options, rowObjcet, l4) {
-//                    alert(JSON.stringify(cellvalue))
+                    //                    alert(JSON.stringify(cellvalue))
                     txt = "<ul>";
-                    pp="";
+                    pp = "";
                     for (i = 0; i < cellvalue.length; i++) {
                         txt = +"<li>" + cellvalue[i]['val'] + "</li>";
-                        pp+= "<div class=\"boxelement\">"+cellvalue[i]['val']+"</div>  ";
+                        pp += "<div class=\"boxelement\">" + cellvalue[i]['val'] + "</div>  ";
 
                     }
                     txt += "</ul>";
-//return "AA";
-return pp;
+                    //return "AA";
+                    return pp;
                     return txt;
                 }
                 /***
@@ -222,20 +239,26 @@ return pp;
                     $(odv).append(cellvalue);
                     return $(odv).text();
                 }
+                function  dateFormatter(cellvalue, options, rowObjcet, l4) {
+
+
+                    var datePub = $.datepicker.formatDate('yy-mm-dd', new Date(cellvalue));
+                    return datePub;
+                }
 
 
 
                 $(document).ready(function() {
-//                    var myfilter = {groupOp: "AND", rules: []};
-//
-//// addFilteritem("invdate", "gt", "2007-09-06");
-//                    myfilter.rules.push({field: "invdate", op: "gt", data: "2007-09-06"});
-//
-//// addFilteritem("invdate", "lt", "2007-10-04");
-//                    myfilter.rules.push({field: "invdate", op: "lt", data: "2007-10-04"});
-//
-//// addFilteritem("name", "bw", "test");
-//                    myfilter.rules.push({field: "name", op: "bw", data: "test"});
+                    //                    var myfilter = {groupOp: "AND", rules: []};
+                    //
+                    //// addFilteritem("invdate", "gt", "2007-09-06");
+                    //                    myfilter.rules.push({field: "invdate", op: "gt", data: "2007-09-06"});
+                    //
+                    //// addFilteritem("invdate", "lt", "2007-10-04");
+                    //                    myfilter.rules.push({field: "invdate", op: "lt", data: "2007-10-04"});
+                    //
+                    //// addFilteritem("name", "bw", "test");
+                    //                    myfilter.rules.push({field: "name", op: "bw", data: "test"});
 
                     var grid = $("#list");
 
@@ -244,15 +267,19 @@ return pp;
                         url: "${rootpath}item/list?vue=grid",
                         datatype: "json",
                         mtype: "GET",
-                        colNames: ["ID", "titre", "description", "flux"],
+                        colNames: ["ID", "titre", "description", "flux", "date"],
                         colModel: [
                             {name: "ID", width: 55, hidden: true},
                             {name: "titre", width: 90, formatter: myLinkFormatter, searchoptions: {sopt: ['cn', 'eq']}},
                             {name: "description", index: 'description', key: true, formatter: descFormatter, search: true, width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
-                            {name: "flux", index: 'flux', key: true, search: true, width: 80, formatter: fluxFormatter, align: "right", searchoptions: {sopt: ['cn', 'eq']}}
-//                            {name: "pays", width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
-//                            {name: "typeJournal", width: 80, align: "right", stype: 'select', editoptions: {value: {'': 'tous', 'autre': 'autre', 'quotidien': 'quotidien'}}},
-//                            {name: "urlAccueil", width: 150, sortable: true, searchoptions: {sopt: ['cn', 'eq']}}
+                            {name: "flux", index: 'flux', key: true, search: true, width: 80, formatter: fluxFormatter, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
+                            {name: "date répub", formatter: dateFormatter}
+
+
+
+                            //                            {name: "pays", width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
+                            //                            {name: "typeJournal", width: 80, align: "right", stype: 'select', editoptions: {value: {'': 'tous', 'autre': 'autre', 'quotidien': 'quotidien'}}},
+                            //                            {name: "urlAccueil", width: 150, sortable: true, searchoptions: {sopt: ['cn', 'eq']}}
                         ],
                         pager: '#pager',
                         rowNum: 10,
@@ -271,12 +298,12 @@ return pp;
                         ident: "\t",
                         height: 500,
                         search: true,
-//                        search: {
-//                            modal: true,
-//                            Find: 'txt recherche',
-//                            multipleSearch: true,
-//                            sFilter: 'lalalalaa'
-//                        },
+                        //                        search: {
+                        //                            modal: true,
+                        //                            Find: 'txt recherche',
+                        //                            multipleSearch: true,
+                        //                            sFilter: 'lalalalaa'
+                        //                        },
                         multipleSearch: true,
                         postData: {
                             filters: {groupOp: "AND", rules: [/*{field: "titre", op: "gt", data: "truc"}, {field: "nom", op: "lt", data: "ss"}*/]}
@@ -360,23 +387,23 @@ return pp;
 
 
 
-<!--<script>
-
-
-                                $(document).ready(function() {
-
-                                    $('.pagination').jqPagination({
-                                        link_string: 'item?page={page_number}',
-                                        max_page: ${maxPage},
-                                        current_page: ${pageCourante},
-                                        paged: function(page) {
-                                            $('.log').prepend('<li>Requested page ' + page + '</li>');
-                                            document.location.href = "item?page=" + page;
-                                        }
+    <!--<script>
+    
+    
+                                    $(document).ready(function() {
+    
+                                        $('.pagination').jqPagination({
+                                            link_string: 'item?page={page_number}',
+                                            max_page: ${maxPage},
+                                            current_page: ${pageCourante},
+                                            paged: function(page) {
+                                                $('.log').prepend('<li>Requested page ' + page + '</li>');
+                                                document.location.href = "item?page=" + page;
+                                            }
+                                        });
+    
                                     });
-
-                                });
-
-
-</script>-->
-<c:import url="/WEB-INF/footerjsp.jsp" />
+    
+    
+    </script>-->
+    <c:import url="/WEB-INF/footerjsp.jsp" />

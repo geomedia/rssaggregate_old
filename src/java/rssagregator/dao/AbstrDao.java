@@ -315,7 +315,6 @@ public abstract class AbstrDao<T> {
      * @return
      */
     public Object find(Long id) {
-        System.out.println("FIND ABSTR");
         Class laclass = this.getClassAssocie();
         try {
             Object resu = em.find(laclass, id);

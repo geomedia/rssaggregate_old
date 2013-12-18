@@ -32,9 +32,7 @@ public class ServiceCrudIncident extends ServiceCRUDBeansBasique {
 
         try {
             if (incid.getClass().equals(AnomalieCollecte.class)) {
-                
-                System.out.println("-------------");
-                System.out.println("AJOUT d'un incident");
+
 
                 // Le service va chercher les anomalie de collecte pour l'incident envoyé
                 DAOIncident<AnomalieCollecte> daof = (DAOIncident<AnomalieCollecte>) DAOFactory.getInstance().getDaoFromType(AnomalieCollecte.class);
@@ -49,11 +47,9 @@ public class ServiceCrudIncident extends ServiceCRUDBeansBasique {
                     DateTime dtDebutNouvelAnomalie = new DateTime(incid.getDateDebut()).withTimeAtStartOfDay();
                     if (dtDebutAnomalieBDD.isEqual(dtDebutNouvelAnomalie)) {
                         trouve = true;
-                        System.out.println(" trouve");
                     }
                 }
                 if (!trouve) {
-                    System.out.println("CREATION");
                     em.persist(incid);
                 }
 
@@ -65,48 +61,43 @@ public class ServiceCrudIncident extends ServiceCRUDBeansBasique {
             }
         }
 
-
-
-
-
-
-        // On commence par rechercher si un incident de type similaire s'est déjà produit
-
-
-        // On Ajout ou l'on modifie
-
-
     }
-    
-    
-    
-    public void cloreIncidents(List<AbstrIncident> indid, EntityManager em, Boolean persist) throws Exception{
-        
-        
-        if (em == null){
-            em =DAOFactory.getInstance().getEntityManager();
+
+    /**
+     * *
+     * Complete la date de fin de tout les incidents envoyés en arguement.
+     *
+     * @param indid
+     * @param em
+     * @param persist
+     * @throws Exception
+     */
+    public void cloreIncidents(List<AbstrIncident> indid, EntityManager em, Boolean persist) throws Exception {
+
+        if (em == null) {
+            em = DAOFactory.getInstance().getEntityManager();
         }
-        
-        
-        if(!em.isJoinedToTransaction()){
+
+        if (!em.isJoinedToTransaction()) {
             em.getTransaction().begin();
         }
-        
+
         for (int i = 0; i < indid.size(); i++) {
 
             AbstrIncident abstrIncident = indid.get(i);
-                        System.out.println("ICID ID " + abstrIncident.getID());
-            abstrIncident.setDateFin(new Date());
-            em.merge(abstrIncident);
-            System.out.println("MERGE");
-            
+            System.out.println("ICID ID " + abstrIncident.getID());
+
+
+            if (abstrIncident.getDateFin() == null) {
+                abstrIncident.setDateFin(new Date());
+                em.merge(abstrIncident);
+            }
+
+
         }
-        
-        if(persist){
-            System.out.println("PERSITE");
+        if (persist) {
             em.getTransaction().commit();
         }
-        
-        
+
     }
 }

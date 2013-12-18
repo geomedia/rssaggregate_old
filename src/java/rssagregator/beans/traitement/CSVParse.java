@@ -58,6 +58,9 @@ public class CSVParse extends AbstrParseur {
 
         List<Item> listItem = new ArrayList<Item>();
 
+        
+        
+        
 //        FileInputStream fileInputStream = new FileInputStream(csvFile);
 
 //        CSVReader cSVReader = new CSVReader(new InputStreamReader(xml));
@@ -115,6 +118,9 @@ public class CSVParse extends AbstrParseur {
 
 
 //        return super.execute(xml); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public CSVParse() {
     }
 
 //    public File getCsvFile() {

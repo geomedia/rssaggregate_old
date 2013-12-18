@@ -5,6 +5,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
+import javax.xml.bind.annotation.XmlRootElement;
 import rssagregator.beans.Flux;
 import rssagregator.services.ServiceCollecteur;
 import rssagregator.services.tache.TacheRecupCallable;
@@ -14,8 +15,15 @@ import rssagregator.services.tache.TacheRecupCallable;
  * <p>Les erreurs de collecte sont due à une incapacité de la tache à récupérer le contenu (site indisponible, changement d'adresse...)</p>
  */
 @Entity(name = "i_collecteincident")
+@XmlRootElement
 public class CollecteIncident extends AbstrIncident implements Serializable {
 
+    public CollecteIncident() {
+    }
+
+    
+    
+    
     /**
      * Une erreur de collecte est forcement lié à un flux. Un incident ne
      * possède qu'un flux. Un flux peut posséder plusieurs incidents.

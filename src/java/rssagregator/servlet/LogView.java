@@ -4,30 +4,24 @@
  */
 package rssagregator.servlet;
 
+import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import rssagregator.beans.Flux;
-import rssagregator.beans.Item;
-import rssagregator.beans.exception.ArgumentIncorrect;
-import rssagregator.beans.exception.IncompleteBeanExeption;
-import rssagregator.dao.DAOFactory;
-import rssagregator.dao.DaoFlux;
-import rssagregator.dao.DaoItem;
+import org.apache.commons.io.IOUtils;
 
 /**
  *
  * @author clem
  */
-@WebServlet(name = "TestReqLastPeriode", urlPatterns = {"/TestReqLastPeriode"})
-public class TestReqLastPeriode extends HttpServlet {
+@WebServlet(name = "LogView", urlPatterns = {"/LogView"})
+public class LogView extends HttpServlet {
 
     /**
      * Processes requests for both HTTP
@@ -42,44 +36,33 @@ public class TestReqLastPeriode extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        PrintWriter out = response.getWriter();
-
-
-        DaoFlux daof = DAOFactory.getInstance().getDAOFlux();
-        DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
-        Flux f = (Flux) daof.find(new Long(27202));
-
-
-        List<Item> lItem;
+        
+//        String file = request.getParameter("file");
+//      String path =  System.getProperty("confpath");
+         String fileLog = null;
+         String nbligne = request.getParameter("nbrLigne");
         try {
-            lItem = daoItem.itemCaptureParleFluxDurantlaDernierePeriodeCollecte(f);
-            for (int i = 0; i < lItem.size(); i++) {
-                Item item = lItem.get(i);
-                System.out.println("" + item);
-            }
-
-
-
-        } catch (ArgumentIncorrect ex) {
-            Logger.getLogger(TestReqLastPeriode.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IncompleteBeanExeption ex) {
-            Logger.getLogger(TestReqLastPeriode.class.getName()).log(Level.SEVERE, null, ex);
+             fileLog = System.getProperty("confpath")+"log/"+request.getParameter("file");
+        } catch (Exception e) {
         }
+       
+        
+         try {
+ 
+        Process p = Runtime.getRuntime().exec("tail -n "+nbligne +" "+fileLog);
+        InputStream out = new BufferedInputStream(p.getInputStream());
+       String s = IOUtils.toString(out);
+       request.setAttribute("log", s);
+  
+ 
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+         
+               
+        
 
-        try {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet TestReqLastPeriode</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet TestReqLastPeriode at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        } finally {
-            out.close();
-        }
+        this.getServletContext().getRequestDispatcher("/WEB-INF/viewlog.jsp").forward(request, response);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

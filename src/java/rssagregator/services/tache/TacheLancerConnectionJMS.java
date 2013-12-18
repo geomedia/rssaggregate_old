@@ -27,7 +27,7 @@ import rssagregator.services.crud.ServiceCRUDFactory;
  */
 public class TacheLancerConnectionJMS extends TacheImpl<TacheLancerConnectionJMS> implements Incidable {
 
-    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheLancerConnectionJMS.class);
+//    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheLancerConnectionJMS.class);
 
     /**
      * *
@@ -53,33 +53,7 @@ public class TacheLancerConnectionJMS extends TacheImpl<TacheLancerConnectionJMS
 
 
 
-    /**
-     * *
-     * Lance la tâche. Cette tâche peut être périodique regarder le statut du boolean périodique pour fixer ce
-     * comportement.
-     *
-     * @return true si la connection à pu être initialisé ou si elle était déjà ok. False en cas d'erreur
-     * @throws Exception
-     */
-//    @Override
-//    public TacheLancerConnectionJMS call() throws Exception {
-//
-//        this.exeption = null;
-//        ServiceSynchro serviceJMS = ServiceSynchro.getInstance();
-//        try {
-//            logger.debug("Vérification connectionJMS");
-//            if (!serviceJMS.statutConnection) {
-//                serviceJMS.openConnection();
-//            }
-//        } catch (Exception e) {
-//            this.exeption = e;
-//        } finally {
-//            // A la fin de son execution, la tâche se notifie auprès de son ou ses observer
-//            this.setChanged();
-//            this.notifyObservers();
-//            return this;
-//        }
-//    }
+
 
     @Override
     public Class getTypeIncident() {

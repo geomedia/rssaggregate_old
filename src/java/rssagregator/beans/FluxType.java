@@ -13,6 +13,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Version;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
 
 /**
@@ -23,6 +25,7 @@ import org.eclipse.persistence.annotations.CascadeOnDelete;
  */
 @Entity
 //@Cacheable(value = false)
+@XmlRootElement
 public class FluxType implements Serializable, BeanSynchronise {
 
     
@@ -116,6 +119,7 @@ public class FluxType implements Serializable, BeanSynchronise {
      *
      * @return
      */
+    @XmlTransient
     public List<Flux> getFluxLie() {
         return fluxLie;
     }

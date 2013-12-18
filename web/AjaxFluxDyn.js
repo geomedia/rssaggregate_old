@@ -272,6 +272,7 @@ $(document).ready(function() {
 
         for (i = 0; i < options.length; i++) {
             idFlux['data'].push(options[i]['value']);
+            
         }
 
 

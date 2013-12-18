@@ -20,7 +20,7 @@ Cette JSP permet de mettre en forme les données afficher par la grid de présen
     export.put("page", request.getAttribute("page"));
     export.put("total", request.getAttribute("total")); //the total pages of the query
     export.put("records", request.getAttribute("records")); //the total records from the query
-    
+
 
     JSONArray rows = new JSONArray();
     export.put("rows", rows);
@@ -37,12 +37,18 @@ Cette JSP permet de mettre en forme les données afficher par la grid de présen
         o1array.add(j.getID());
         o1array.add(j.getTitre());
         o1array.add(Jsoup.parse(j.getDescription()).text()); // TODO : potentiellement pompeur de ressource si beaucoup de client font des requetes en ajax. ?
-        
-        
+
+
         JSONArray fluxs = new JSONArray();
 //        export.put("flux", fluxs);
         o1array.add(fluxs);
-        for(int k=0;k<j.getListFlux().size();k++){
+
+        if (j.getDateRecup() != null) {
+            o1array.add(j.getDateRecup().getTime());
+            
+        }
+
+        for (int k = 0; k < j.getListFlux().size(); k++) {
             Flux fl = j.getListFlux().get(k);
             JSONObject fljson = new JSONObject();
             fljson.put("ID", fl.getID());
@@ -50,7 +56,7 @@ Cette JSP permet de mettre en forme les données afficher par la grid de présen
             fluxs.add(fljson);
         }
 //        journal.put("ID", j.get)
-        
+
         o1.put("cell", o1array);
     }
 

@@ -24,12 +24,17 @@
         physicalName="MY.TEST.FOO"/>
 
 
-        <Environment name="conf/varpath"
+<!--        <Environment name="conf/varpath"
+        type="java.lang.String"
+
+        value="/var/lib/RSSAgregate/"
+        description="Définit ou trouver les fichier de conf" />-->
+  
+                <Environment name="confpath"
         type="java.lang.String"
 
         value="/var/lib/RSSAgregate/"
         description="Définit ou trouver les fichier de conf" />
-  
 
 <!--  <ResourceLink 
                         name="testlink"
@@ -37,12 +42,12 @@
                         type="java.lang.String" />-->
 
   
-      <Resource 
+
+      
+      <ResourceLink 
                         name="testlink"
-                        value="tutu"
+                        global="testGlobal"
                         type="java.lang.String" />
-      
-      
       
           
 <!--        <ResourceLink

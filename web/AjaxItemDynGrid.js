@@ -42,8 +42,8 @@ $(document).ready(function() {
 //            strId += strId+", "
             idFlux['data'].push(options[i]['value']);
         }
-        if(strId.length>0){
-            strId = strId.substr(0, strId.length-2);
+        if (strId.length > 0) {
+            strId = strId.substr(0, strId.length - 2);
         }
 //        idFlux['data'].push(strId);
 
@@ -53,7 +53,7 @@ $(document).ready(function() {
         $itPrPage = $('#itPrPage');
         $firstResult = $('#firstResult');
         $order = $('#order');
-    
+
 
 
         // Récupération des flux sélectionne
@@ -62,14 +62,14 @@ $(document).ready(function() {
 
 
         //Gestion des date
-        $date1 = $('#date1').val()+" 00:00:00";
+        $date1 = $('#date1').val() + " 00:00:00";
         d1 = {
             field: "dateRecup",
             op: "gt",
             data: $date1
         };
 
-    $date2 = $('#date2').val()+' 23:59:59';
+        $date2 = $('#date2').val() + ' 23:59:59';
         d2 = {
             field: "dateRecup",
             op: "lt",
@@ -182,4 +182,42 @@ $(document).ready(function() {
 
 //    }
 //    )
+
+
+
+    $('#donneeBrutes').on('change', function truc3() {
+
+        // récupération de l'id
+
+        id = $('#donneeBrutes').val();
+
+        $.ajax({
+            url: "/RSSAgregate/item/donneesbrutes", // le nom du fichier indiqué dans le formulaire
+            type: "POST", // la méthode indiquée dans le formulaire (get ou post)
+            data: 'id=' + id, // je sérialise les données (voir plus loin), ici les $_POST
+            dataType: 'json',
+            success: function(html) { // je récupère la réponse du fichier PHP
+                $('#divDonneeBrutes').empty();
+
+var datePub = $.datepicker.formatDate('MM dd, yy', new Date(html['datePub'] * 1000));
+var dateReq = $.datepicker.formatDate('MM dd, yy', new Date(html['dateRecup'] * 1000));
+
+
+
+                $('#divDonneeBrutes').append("<p>titre :  " + html['titre'] + "</p>")
+                $('#divDonneeBrutes').append("<p id=\"datePub\">Date publication :  " + datePub + "</p>")
+                $('#divDonneeBrutes').append("<p>Date récupération :  " + dateReq + "</p>")
+                $('#divDonneeBrutes').append("<p>guid :  " + html['guid'] + "</p>")
+                $('#divDonneeBrutes').append("<p>Lien :  " + html['link'] + "</p>")
+
+                $('#QComment').text(html['description']);
+                $('#divDonneeBrutes').append($('<code id=\"co\"> </code>'));
+                $('#co').text(html['description']);
+                
+
+            }
+        });
+
+    });
+
 });

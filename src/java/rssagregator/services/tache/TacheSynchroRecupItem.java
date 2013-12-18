@@ -36,7 +36,7 @@ import rssagregator.utils.XMLTool;
  */
 public class TacheSynchroRecupItem extends TacheImpl<TacheSynchroRecupItem> implements Incidable {
 
-    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheSynchroRecupItem.class);
+//    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheSynchroRecupItem.class);
     private List<Item> itemTrouvees;
     private ServeurSlave serveurSlave;
     private DataOutputStream output = null;

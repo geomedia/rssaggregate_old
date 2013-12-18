@@ -27,6 +27,8 @@ import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Predicate;
 import org.eclipse.persistence.config.CacheUsage;
 import org.eclipse.persistence.config.QueryHints;
+import rssagregator.beans.FluxPeriodeCaptation;
+import rssagregator.utils.ExceptionTool;
 
 /**
  *
@@ -51,7 +53,7 @@ public class DaoFlux extends AbstrDao {
         this.classAssocie = Flux.class;
         this.dAOFactory = dAOFactory;
         em.setProperty("javax.persistence.cache.storeMode", "CheckCacheOnly");
-    
+
 
     }
 
@@ -182,7 +184,7 @@ public class DaoFlux extends AbstrDao {
             DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
             Set<String> dernierHash = daoItem.findLastHash(fl, 100, false);
 //            fl.setLastEmpruntes(dernierHash);
-                   
+
 
 
 
@@ -274,14 +276,14 @@ public class DaoFlux extends AbstrDao {
      * @return Une liste de flux résultat de la recherche
      */
     public List<Flux> findFluxParJournaux(Journal j) {
-        
+
         String req = "SELECT f FROM Flux f JOIN f.journalLie j where j.ID=:journalid";
         Query query = em.createQuery(req);
         query.setParameter("journalid", j.getID());
-       return  query.getResultList();
-       
-       
-       
+        return query.getResultList();
+
+
+
 //        List<Flux> listFlux = findAllFlux(Boolean.FALSE);
 //        int i;
 //        List<Flux> retourList = new ArrayList<Flux>();
@@ -497,26 +499,25 @@ public class DaoFlux extends AbstrDao {
     public void setCriteriaJournalLie(Journal criteriaJournalLie) {
         this.criteriaJournalLie = criteriaJournalLie;
     }
-    
-    
-    public void testCache(){
-        
+
+    public void testCache() {
+
         String req = "SELECT f FROM Flux f";
         Query query = em.createQuery(req);
         query.setHint(QueryHints.CACHE_USAGE, CacheUsage.NoCache);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         List resu = query.getResultList();
         System.out.println("RESU 1 : " + resu.size());
-        
+
         for (int i = 0; i < resu.size(); i++) {
             Flux object = (Flux) resu.get(i);
             System.out.println("COUNTAIN " + em.contains(object));
             System.out.println("CACHE 2 : " + em.getEntityManagerFactory().getCache().contains(Flux.class, object.getID()));
-            
+
             System.out.println("ID : " + object.getID());
         }
-        
-        
+
+
         String req2 = "SELECT f FROM Flux f where f.ID is not null";
         Query query2 = em.createQuery(req2);
 //        query2.setParameter("id", new Long(160))
@@ -524,7 +525,7 @@ public class DaoFlux extends AbstrDao {
         List resu2 = query2.getResultList();
         System.out.println("NBR RESU : " + resu2.size());
     }
-    
+
 //    /***
 //     * Retourne les dernier hash concervé en mémoire pour le flux envoyé en argument
 //     * @param fl
@@ -539,10 +540,10 @@ public class DaoFlux extends AbstrDao {
 //         CacheHashFlux cache = CacheHashFlux.getInstance();
 //         cache.addHash(flux, emprunte);
 //    }
-
-    
-    /***
+    /**
+     * *
      * Recherche un flux à partir de son URL. Si aucun flux n'est retrouvé, la DAO renvoie null
+     *
      * @param url l'url sur laquelle doit d'appuyer la recherche
      * @return Le flux ou null si aucun flux n'a été trouvé
      */
@@ -550,13 +551,36 @@ public class DaoFlux extends AbstrDao {
         String req = "SELECT f from Flux f WHERE f.url LIKE(:u)";
         Query q = em.createQuery(req);
         q.setParameter("u", url);
-        Flux f =null;
+        Flux f = null;
         try {
-        f = (Flux) q.getSingleResult();    
+            f = (Flux) q.getSingleResult();
         } catch (Exception e) {
         }
-        
+
 
         return f;
+    }
+
+    /**
+     * *
+     * Retourne la dernière période de captation du flux ou null si le flux n'a pas de période de captation
+     *
+     * @param f le flux
+     * @return La période de captation ou null si le flux n'a pas de période de captation
+     */
+    public FluxPeriodeCaptation findDernierePeriodeCaptation(Flux f) {
+
+        ExceptionTool.argumentNonNull(f);
+
+        Query query = em.createQuery("SELECT p FROM FluxPeriodeCaptation AS p JOIN p.flux AS f WHERE f.ID = :fid ORDER BY p.datefin DESC");
+        query.setParameter("fid", f.getID());
+        List<FluxPeriodeCaptation> listPeriode = query.getResultList();
+        FluxPeriodeCaptation period = null;
+        if (listPeriode != null && !listPeriode.isEmpty()) {
+            period = listPeriode.get(0);
+        }
+        return period;
+
+
     }
 }

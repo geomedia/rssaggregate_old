@@ -4,17 +4,16 @@
  */
 package rssagregator.beans;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import java.io.Serializable;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.UniqueConstraint;
@@ -25,12 +24,14 @@ import org.eclipse.persistence.annotations.Index;
  *
  * @author clem
  */
-@Table(uniqueConstraints =  {@UniqueConstraint(columnNames = {"hashContenu", "flux"})})
+@Table(uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"hashContenu", "flux"})})
+@JsonFilter("serialisePourUtilisateur")
 @Entity
-public class DonneeBrute implements Serializable, ContentRSS{
+public class DonneeBrute implements Serializable, ContentRSS {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.TABLE)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long ID;
     @Index
     @Column(name = "titre", length = 1000)
@@ -56,15 +57,10 @@ public class DonneeBrute implements Serializable, ContentRSS{
     private String link;
     @Column(name = "guid", length = 1000)
     private String guid;
-    
-    
-    
-        @Column(name = "contenu", columnDefinition = "text")
+    @Column(name = "contenu", columnDefinition = "text")
     private String contenu;
-            @Column(name = "categorie", length = 1500)
+    @Column(name = "categorie", length = 1500)
     private String categorie;
-    
-    
     /**
      * *
      * Le hash permettant d'identifier de manière unique l'item. Ce champs ne peut être null et doit être unique dans la
@@ -73,19 +69,18 @@ public class DonneeBrute implements Serializable, ContentRSS{
     @Index
     @Column(name = "hashContenu", nullable = false)
     private String hashContenu;
-////    @ManyToOne(optional = false)
-//    @ManyToOne
-//    private Item item; // Bidirectionnelle l'item a toute les cascades 
-    @OneToOne(optional = false)
+//    @OneToOne(optional = false)
+    @ManyToOne
     private Flux flux; // bidirectionnelle le flux a toute les cascades
-    
-
-       /**
-     * *
+    /**
      * Dernière modification de l'entite. Permet l'Optimitic Lock
      */
     @Version
     Timestamp modified;
+    
+    
+    @ManyToOne
+    Item item;
 
     /**
      * *
@@ -104,8 +99,6 @@ public class DonneeBrute implements Serializable, ContentRSS{
     public void setModified(Timestamp modified) {
         this.modified = modified;
     }
-    
-    
 
     public Long getID() {
         return ID;
@@ -145,13 +138,6 @@ public class DonneeBrute implements Serializable, ContentRSS{
         this.guid = guid;
     }
 
-//    public Item getItem() {
-//        return item;
-//    }
-//
-//    public void setItem(Item item) {
-//        this.item = item;
-//    }
     public Flux getFlux() {
         return flux;
     }
@@ -160,34 +146,42 @@ public class DonneeBrute implements Serializable, ContentRSS{
         this.flux = flux;
     }
 
+    @Override
     public String getTitre() {
         return titre;
     }
 
+    @Override
     public void setTitre(String titre) {
         this.titre = titre;
     }
 
+    @Override
     public Date getDatePub() {
         return datePub;
     }
 
+    @Override
     public void setDatePub(Date datePub) {
         this.datePub = datePub;
     }
 
+    @Override
     public Date getDateRecup() {
         return dateRecup;
     }
 
+    @Override
     public void setDateRecup(Date dateRecup) {
         this.dateRecup = dateRecup;
     }
 
+    @Override
     public String getHashContenu() {
         return hashContenu;
     }
 
+    @Override
     public void setHashContenu(String hashContenu) {
         this.hashContenu = hashContenu;
     }
@@ -207,6 +201,46 @@ public class DonneeBrute implements Serializable, ContentRSS{
     public void setCategorie(String categorie) {
         this.categorie = categorie;
     }
+
+    @Override
+    public String toString() {
+        return "DonneeBrute{" + "titre=" + titre + ", dateRecup=" + dateRecup + '}';
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 29 * hash + (this.ID != null ? this.ID.hashCode() : 0);
+        hash = 29 * hash + (this.hashContenu != null ? this.hashContenu.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final DonneeBrute other = (DonneeBrute) obj;
+        if (this.ID != other.ID && (this.ID == null || !this.ID.equals(other.ID))) {
+            return false;
+        }
+        if ((this.hashContenu == null) ? (other.hashContenu != null) : !this.hashContenu.equals(other.hashContenu)) {
+            return false;
+        }
+        return true;
+    }
+
+    public Item getItem() {
+        return item;
+    }
+
+    public void setItem(Item item) {
+        this.item = item;
+    }
+    
     
     
     

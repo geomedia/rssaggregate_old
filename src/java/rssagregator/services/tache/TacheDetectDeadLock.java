@@ -15,7 +15,7 @@ import java.lang.management.ThreadMXBean;
  */
 public class TacheDetectDeadLock extends TacheImpl<TacheDetectDeadLock> {
 
-    org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheDetectDeadLock.class);
+//    org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheDetectDeadLock.class);
 
     @Override
     protected void callCorps() throws Exception {

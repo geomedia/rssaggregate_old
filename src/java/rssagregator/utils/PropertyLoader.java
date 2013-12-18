@@ -156,9 +156,18 @@ public class PropertyLoader {
             logger2.error("Impossible de trouver la ressource dans le context" + var, e);
         }
         return null;
-
-
     }
+    
+    /***
+     * Retoune le répertoire contenant les fichiers de conf ainsi que les log... en dehors du class path de l'application. Un point unique pour trouver cette ressource. 
+     * @return string exemple /var/lib/RSSAgregate
+     */
+    public static String returnConfPath(){
+        
+        String ress = System.getProperty("confpath");
+        return ress;
+    }
+    
 
     /**
      * *

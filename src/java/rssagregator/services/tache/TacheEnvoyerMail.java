@@ -6,7 +6,6 @@ package rssagregator.services.tache;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Observer;
 import java.util.Properties;
 import javax.mail.Message;
 import javax.mail.PasswordAuthentication;
@@ -39,7 +38,7 @@ public class TacheEnvoyerMail extends TacheImpl<TacheEnvoyerMail> implements Inc
     InternetAddress[] toMailAdresses;
     String subject;
     String content;
-    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheEnvoyerMail.class);
+//    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheEnvoyerMail.class);
     
 
     /**
@@ -145,7 +144,7 @@ public class TacheEnvoyerMail extends TacheImpl<TacheEnvoyerMail> implements Inc
     @Override
     public void fermetureIncident() throws Exception {
 
-        throw new UnsupportedOperationException("Not supported yet. La tache n'a pas a fermer automatiquement ses incident."); //To change body of generated methods, choose Tools | Templates.
+//        throw new UnsupportedOperationException("Not supported yet. La tache n'a pas a fermer automatiquement ses incident."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
@@ -176,7 +175,7 @@ public class TacheEnvoyerMail extends TacheImpl<TacheEnvoyerMail> implements Inc
         message.setSentDate(new Date());
 
         message.setSentDate(new Date());
-        session.setDebug(true);
+//        session.setDebug(true);
         Transport.send(message);
     }
 }

@@ -11,6 +11,9 @@ import rssagregator.beans.Item;
  * @author clem
  */
 public abstract class AbstrRaffineur {
+
+    public AbstrRaffineur() {
+    }
     
     
     

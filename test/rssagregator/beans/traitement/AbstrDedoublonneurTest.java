@@ -107,6 +107,7 @@ public class AbstrDedoublonneurTest {
         listItemCapture.add(itemCapture);
 
         AbstrDedoublonneur instance = new Dedoubloneur();
+        
 
         
         // Les les items dans les deux listes possèdent des items de avec le même hash. Le dédoubloneur doit renvoyer une liste vide

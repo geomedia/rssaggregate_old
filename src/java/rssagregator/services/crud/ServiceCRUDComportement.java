@@ -35,7 +35,6 @@ public class ServiceCRUDComportement extends ServiceCRUDBeansSynchro {
             
             
             if(comportement.getListeFlux()!=null && comportement.getListeFlux().size()!=0){
-                System.out.println("NON -- ON NE SUpprimer pas un comportement avec des flux");
                 throw new HasChildren("Le comportement gère encore des flux. Avant de le supprimer vous devez attribuer un autre comportement à tous les flux gérés par ce comportement");
             }
             
@@ -47,8 +46,5 @@ public class ServiceCRUDComportement extends ServiceCRUDBeansSynchro {
         } else {
             throw new NullPointerException("On cherche a supprimer un comportement null");
         }
-
-
-//        super.supprimer(obj); //To change body of generated methods, choose Tools | Templates.
     }
 }

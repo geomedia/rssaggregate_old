@@ -18,6 +18,8 @@ import java.util.logging.Logger;
  * @author clem
  */
 public class POJOCompteurFluxItem {
+     protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(POJOCompteurFluxItem.class);
+
 
     /**
      * *
@@ -40,10 +42,7 @@ public class POJOCompteurFluxItem {
      * date de fin cf {@link #date1} pour date début
      */
     Date date2;
-
     List<Flux> listFlux = new ArrayList<Flux>();
-    
-    
 
     public List<POJOCompteItem> getListCompteItem() {
         return listCompteItem;
@@ -67,17 +66,31 @@ public class POJOCompteurFluxItem {
      * les items. Puis lance le compte pour chaque{@link POJOCompteItem}
      */
     public void compter() {
-                    
-            for (int j = 0; j < listFlux.size(); j++) {
-                Flux flux = listFlux.get(j);
-                POJOCompteItem compteItem = new POJOCompteItem();
-                compteItem.setDate1(date1);
-                compteItem.setDate2(date2);
-                compteItem.setItems(listItem);
-                compteItem.setFlux(flux);
-                this.listCompteItem.add(compteItem);
+
+        for (int j = 0; j < listFlux.size(); j++) {
+            Flux flux = listFlux.get(j);
+            POJOCompteItem compteItem = new POJOCompteItem();
+            compteItem.setDate1(date1);
+            compteItem.setDate2(date2);
+
+
+            List<Item> itemduFlux = new ArrayList<Item>();
+            for (int i = 0; i < listItem.size(); i++) {
+                Item item = listItem.get(i);
+                try {
+                    if (item.appartientAuFlux(flux)) {
+                        itemduFlux.add(item);
+                    }
+                } catch (Exception e) {
+                    logger.debug("Erreur", e);
+                }
+
             }
-        
+            compteItem.setItems(itemduFlux);
+            compteItem.setFlux(flux);
+            this.listCompteItem.add(compteItem);
+        }
+
 
         // Pour chaque compte item on demande le trie et le compte par jour 
         for (int i = 0; i < listCompteItem.size(); i++) {
@@ -137,5 +150,4 @@ public class POJOCompteurFluxItem {
     public void setListFlux(List<Flux> listFlux) {
         this.listFlux = listFlux;
     }
-    
 }

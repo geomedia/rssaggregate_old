@@ -30,7 +30,7 @@ import rssagregator.services.mailtemplate.VelocityTemplateLoad;
  */
 public class TacheAlerteMail extends TacheImpl<TacheAlerteMail> {
 
-    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheAlerteMail.class);
+//    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheAlerteMail.class);
     /**
      * *
      * Les incidents relevés par la tâche et devant être notifié par mail.

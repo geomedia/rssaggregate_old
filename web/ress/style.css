@@ -7,7 +7,7 @@
 */
 
 /*CSS basée sur http://www.freecsstemplates.org/preview/greenexposure/*/
- 
+
 
 root { 
     display: block;
@@ -472,7 +472,7 @@ form{
     margin-top: 1em;
     padding: 1em;
     border-radius: 10px;
-    
+
 }
 
 .requis{
@@ -486,45 +486,106 @@ form{
     padding-top: 10px;
     padding-bottom: 10px;
     border-width: thin;
-    
+    width: 300px; height: 200px; overflow: auto
+
 }
 
 
-    .ui-jqgrid tr.jqgrow td {
-        word-wrap: break-word; /* IE 5.5+ and CSS3 */
-        white-space: pre-wrap; /* CSS3 */
-        white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
-        white-space: -pre-wrap; /* Opera 4-6 */
-        white-space: -o-pre-wrap; /* Opera 7 */
-        overflow: hidden;
-        height: auto;
-        vertical-align: middle;
-        padding-top: 3px;
-        padding-bottom: 3px
-    }
-    
-    div.boxelement{
-       
-        /*white-space: nowrap;*/
-        float: left;
-            
-    }
-    
-    .boxelement{
-         color: black;
-         margin-top: 1px;
-        
-        border:#000000;
-        border-style: solid;
-        border-width: thin;
-        background-color: #418341;
-        border-radius: 10px;
-        padding-right: 5px;
-        padding-left: 5px;
-    }
-    li.boxelement{
-         list-style-type:none; 
-    }
+.ui-jqgrid tr.jqgrow td {
+    word-wrap: break-word; /* IE 5.5+ and CSS3 */
+    white-space: pre-wrap; /* CSS3 */
+    white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+    white-space: -pre-wrap; /* Opera 4-6 */
+    white-space: -o-pre-wrap; /* Opera 7 */
+    overflow: hidden;
+    height: auto;
+    vertical-align: middle;
+    padding-top: 3px;
+    padding-bottom: 3px
+}
+
+div.boxelement{
+
+    /*white-space: nowrap;*/
+    float: left;
+
+}
+
+.boxelement{
+    color: black;
+    margin-top: 1px;
+
+    border:#000000;
+    border-style: solid;
+    border-width: thin;
+    background-color: #418341;
+    border-radius: 10px;
+    padding-right: 5px;
+    padding-left: 5px;
+}
+li.boxelement{
+    list-style-type:none; 
+}
+
+
+
+
+
+
+/*****************************************************
+* generic styling for ALS elements: outer container
+******************************************************/
+
+.als-container {
+    position: relative;
+    width: 100%;
+    margin: 0px auto;
+    z-index: 0;
+}
+
+/****************************************
+ * viewport styling
+ ***************************************/
+
+.als-viewport {
+    position: relative;
+    overflow: hidden;
+    margin: 0px auto;
+}
+
+/***************************************************
+ * wrapper styling
+ **************************************************/
+
+.als-wrapper {
+    position: relative;
+    /* if you are using a list with <ul> <li> */
+    list-style: none;
+}
+
+/*************************************
+ * item: single list element
+ ************************************/
+
+.als-item {
+    position: relative;
+    display: block;
+    text-align: center;
+    cursor: pointer;
+    float: left;
+}
+
+/***********************************************
+ * prev, next: buttons styling
+ **********************************************/
+
+.als-prev, .als-next {
+    position: absolute;
+    cursor: pointer;
+    clear: both;
+}
+
+
 
 
 

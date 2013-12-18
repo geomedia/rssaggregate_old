@@ -24,11 +24,17 @@ import rssagregator.beans.Item;
  */
 @Entity
 public class RomeParse extends AbstrParseur implements Cloneable {
-    /* {author=clem}*/
 
+    /* {author=clem}*/
     /***
      * Le input stream provenant du requester
      */
+    public RomeParse() {
+    }
+
+    
+    
+    
     
     @Transient
     org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(RomeParse.class);

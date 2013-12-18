@@ -4,18 +4,21 @@
  */
 package rssagregator.services;
 
+import java.util.ArrayList;
 import rssagregator.services.tache.AbstrTacheSchedule;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Observer;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import org.apache.log4j.Logger;
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
+import java.util.logging.Level;
 import rssagregator.beans.exception.ArgumentIncorrect;
+import rssagregator.services.tache.TacheActionableSurUnBean;
+import rssagregator.services.tache.TacheRecupCallable;
+import rssagregator.utils.BeansUtils;
 
 /**
  *
@@ -23,6 +26,7 @@ import rssagregator.beans.exception.ArgumentIncorrect;
  */
 public abstract class AbstrService implements Observer {
 
+    org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
     protected ScheduledExecutorService executorService;
 //    List<AbstrTacheSchedule> listTache = new ArrayList<AbstrTacheSchedule>();
     /**
@@ -90,46 +94,89 @@ public abstract class AbstrService implements Observer {
      * nombre de seconde soit grace aux variable jour heure minute qui définissent la prochaine execution.
      *
      * @param tache
+     * @return true si la tache a pu être schedule sinon false;
      */
-    public void schedule(AbstrTacheSchedule tache) {
+    public Boolean schedule(AbstrTacheSchedule tache) {
         Future fut = null;
-        if (!tache.getAnnuler()) { // Si la tache a été annulée il ne faut pas la rescheduler
-            // pour une tache devant être schedulé suivant un nombre fixe de seconde
-            if (tache.getTimeSchedule() != null) {
-                fut = this.executorService.schedule(tache, tache.getTimeSchedule(), TimeUnit.SECONDS);
-                // Pour une tache devant être schedule une fois pas semaine (jour heure et minute non null dans la tache
-            } else if (tache.getHeureSchedule() != null && tache.getJourSchedule() != null && tache.getMinuteSchedule() != null) {
 
-                DateTime dtCurrent = new DateTime();
-                DateTime next = dtCurrent.withDayOfWeek(new Integer(tache.getJourSchedule()));
-                Duration dur = new Duration(dtCurrent, next);
-                fut = this.executorService.schedule(tache, dur.getStandardSeconds(), TimeUnit.SECONDS);
-            } //Si c'est une tache devant être schedulé tous les jours à la meme heure (jour null mais heure et minute non null
-            else if (tache.getJourSchedule() == null && tache.getHeureSchedule() != null && tache.getMinuteSchedule() != null) {
-                DateTime dtCurrent = new DateTime();
-                DateTime next = dtCurrent.withTime(tache.getHeureSchedule(), tache.getMinuteSchedule(), 0, 0);
-                Duration dur = new Duration(dtCurrent, next);
-                fut = this.executorService.schedule(tache, dur.getStandardSeconds(), TimeUnit.SECONDS);
+
+        // Les taches de collecte ont une schedulation particulière. Il suffit de les poser dans la map. C'est le CalableCollecteSubmitter qui vient les chercher
+        if (tache.getClass().equals(TacheRecupCallable.class)) {
+            if (!tache.getAnnuler()) {
+                addTask(tache, fut);
+                return true;
             }
+        } else {
+            if (!tache.getAnnuler()) { // Si la tache a été annulée il ne faut pas la rescheduler
+                // pour une tache devant être schedulé suivant un nombre fixe de seconde
 
-            if (fut != null) {
-                addTask(tache, fut); // Ajout de la tache au map permettant au service de retrouver et gérer l'ensemble de ses tâches.
-            } else {
-                throw new UnsupportedOperationException("Il n'est pas possible de schedulé la tache envoyé en argument");
+                try {
+                    System.out.println("TACHE : " + tache);
+//                    tache.initTask();
+                    tache.completerNextExecution();
+                    fut = this.executorService.schedule(tache, tache.returnNextDuration(), TimeUnit.SECONDS);
+                } catch (Exception e) {
+                    logger.debug("Impossible de déterminer la prochaine execution de " + tache, e);
+                }
+
+
+
+//                if(tache.getTypeSchedule().equals(1)){ // Schedulation par temps fixe
+//                    
+//                }
+//                else if(tache.getTypeSchedule().equals(2)){ // Schedule par tous les jours à 
+//                    
+//                }
+//                else if(tache.getTypeSchedule().equals(3)){ // Schedule 1X par semaine
+//                    
+//                }
+
+
+//                if (tache.getTimeSchedule() != null) {
+//                    fut = this.executorService.schedule(tache, tache.getTimeSchedule(), TimeUnit.SECONDS);
+//                    // Pour une tache devant être schedule une fois pas semaine (jour heure et minute non null dans la tache
+//                } else if (tache.getHeureSchedule() != null && tache.getJourSchedule() != null && tache.getMinuteSchedule() != null) {
+//
+//                    DateTime dtCurrent = new DateTime();
+//                    DateTime next = dtCurrent.withDayOfWeek(new Integer(tache.getJourSchedule()));
+//                    Duration dur = new Duration(dtCurrent, next);
+//                    fut = this.executorService.schedule(tache, dur.getStandardSeconds(), TimeUnit.SECONDS);
+//                } //Si c'est une tache devant être schedulé tous les jours à la meme heure (jour null mais heure et minute non null
+//                else if (tache.getJourSchedule() == null && tache.getHeureSchedule() != null && tache.getMinuteSchedule() != null) {
+//                    DateTime dtCurrent = new DateTime();
+//                    DateTime next = dtCurrent.withTime(tache.getHeureSchedule(), tache.getMinuteSchedule(), 0, 0);
+//                    Duration dur = new Duration(dtCurrent, next);
+//                    fut = this.executorService.schedule(tache, dur.getStandardSeconds(), TimeUnit.SECONDS);
+//                }
+
+                if (fut != null) {
+                    addTask(tache, fut); // Ajout de la tache au map permettant au service de retrouver et gérer l'ensemble de ses tâches.
+                    return true;
+                } else {
+                    logger.debug("La tache n'a pas été schedule");
+                    return false;
+//                throw new UnsupportedOperationException("Il n'est pas possible de schedulé la tache envoyé en argument");
+                }
+
             }
         }
+
+        logger.debug("La tache n'a pas été schedule");
+        return false;
     }
 
-    /***
+    /**
+     * *
      * Soumission de la tâche dans le pool du service.
+     *
      * @param tache
-     * @return 
+     * @return
      */
     public Future submit(AbstrTacheSchedule tache) {
-        if(tache == null){
+        if (tache == null) {
             throw new NullPointerException("Impossible de soumettre une tache null");
         }
-        
+
         Future fut = executorService.submit(tache);
         addTask(tache, fut); // Ajout de la tache au map permettant au service de retrouver et gérer l'ensemble de ses tâches.
         return fut;
@@ -164,7 +211,8 @@ public abstract class AbstrService implements Observer {
 
     /**
      * *
-     * Ajoute une tâche et son future dans la map permettant au service de gérer ses tâches lancées. Les tache n'ont pas forcément à être schedulée.
+     * Ajoute une tâche et son future dans la map permettant au service de gérer ses tâches lancées. Les tache n'ont pas
+     * forcément à être schedulée.
      *
      * @param tache
      * @param fut
@@ -177,7 +225,6 @@ public abstract class AbstrService implements Observer {
 
     }
 
-    
     public void remTask(AbstrTacheSchedule tache) {
         synchronized (mapTache) {
             mapTache.remove(tache);
@@ -214,12 +261,10 @@ public abstract class AbstrService implements Observer {
         }
 
 
-        // On trouve le futur de la tache
+        // On trouve la tache dans la map
         Entry<AbstrTacheSchedule, Future> entr = null;
         for (Map.Entry<AbstrTacheSchedule, Future> entry : mapTache.entrySet()) {
             AbstrTacheSchedule abstrTacheSchedule = entry.getKey();
-            Future future = entry.getValue();
-
             if (abstrTacheSchedule.equals(tache)) {
                 entr = entry;
                 break;
@@ -228,32 +273,134 @@ public abstract class AbstrService implements Observer {
 
         if (entr != null) {
 
-            System.out.println("ON A UNE ENTRY");
-            // Call de la tache
-            try {
-                entr.getValue().cancel(true);
-                int i = 0; // Il faut attendre que la tache ne soit plus en running pour la rescheduler
-                while (i < 100) {
-                    System.out.println("EXECUTING : " + tache.isRunning());
-                   
-                    if (!tache.isRunning()) {
-                        break;
-                    }
-                     Thread.sleep(100);
-                    i++;
+            boolean end = annulerTache(entr);
+
+            if (end == false) {
+                logger.error("La tache : " + entr.getKey() + " n'a jamais pu être annulé");
+            } else {
+                if (tache.getSchedule()) {
+//                    tache.initTask();
+                    System.out.println("Reschedule");
+                    schedule(tache);
                 }
-
-
-            } catch (Exception e) {
             }
-            if (tache.getSchedule()) {
-                tache.setAnnuler(false);
-                System.out.println("Reschedule");
-                schedule(tache);
-            }
+        }
+    }
 
+    /**
+     * *
+     * Annule la tache envoyé
+     *
+     * @param entry Une entry tache// future tel qu'on trouve dans la {@link #mapTache}
+     * @return true si l'annulation a fonctionné tache interrompu
+     */
+    public boolean annulerTache(Entry<AbstrTacheSchedule, Future> entry) throws ArgumentIncorrect {
+
+        if (entry == null) {
+            throw new NullPointerException("l'entry envoyé est null");
         }
 
+        Future fut = entry.getValue();
+        AbstrTacheSchedule tache = entry.getKey();
 
+        if (fut == null) {
+            throw new ArgumentIncorrect("La tache envoyé n'a pas de future");
+        }
+        if (tache == null) {
+            throw new ArgumentIncorrect("l'entry envoyé n'a pas de tache !!");
+        }
+
+        logger.debug("annulation de " + tache);
+        try {
+            tache.setAnnuler(true);
+            fut.cancel(true);
+
+            int i = 0; // Il faut attendre que la tache ne soit plus en running pour la rescheduler
+
+            boolean end = false;
+
+            while (i < 1000 && !end) {
+//                    System.out.println("EXECUTING : " + tache.isRunning());
+
+                if (!tache.isRunning()) {
+                    end = true;
+                }
+                Thread.sleep(100);
+                i++;
+            }
+            if (end) {
+                return true;
+            }
+
+        } catch (Exception e) {
+            logger.error("Erreur lors de l'annulation de la tâche" + tache);
+        }
+        return false;
+    }
+
+    /**
+     * *
+     * Retourne toute les taches associé au bean envoyé en argument
+     *
+     * @param bean
+     * @return
+     */
+    protected List< Entry<AbstrTacheSchedule, Future>> retriveAllForBeans(Object bean) {
+
+        List< Entry<AbstrTacheSchedule, Future>> listRetourn = new ArrayList< Entry<AbstrTacheSchedule, Future>>();
+        for (Entry<AbstrTacheSchedule, Future> entry : mapTache.entrySet()) {
+            AbstrTacheSchedule abstrTacheSchedule = entry.getKey();
+            Future future = entry.getValue();
+
+            if (TacheActionableSurUnBean.class.isAssignableFrom(abstrTacheSchedule.getClass())) {
+                TacheActionableSurUnBean cast = (TacheActionableSurUnBean) abstrTacheSchedule;
+                Object beanCible = cast.returnBeanCible();
+                if (beanCible != null && beanCible.getClass().equals(bean.getClass())) {
+                    try {
+                        boolean retour = BeansUtils.compareBeanFromId(bean, beanCible);
+                        if (retour) {
+                            listRetourn.add(entry);
+                        }
+                    } catch (Exception e) {
+                    }
+                }
+            }
+        }
+        return listRetourn;
+    }
+
+    /**
+     * *
+     * Supprime toutes les taches associé au bean envoyé en argument. Les taches sont annulées puis supprimé de la
+     * liste.
+     *
+     * @param beans
+     */
+    public void cancelAndRemoveTaskFromAssociedWithBeans(Object beans) {
+
+        if (beans == null) {
+            throw new NullPointerException("Le beans est null");
+        }
+
+        // On retrouve les tache
+        List< Entry<AbstrTacheSchedule, Future>> list = retriveAllForBeans(beans);
+
+
+        for (int i = 0; i < list.size(); i++) {
+            Entry<AbstrTacheSchedule, Future> entry = list.get(i);
+            AbstrTacheSchedule tache = entry.getKey();
+            Future fut = entry.getValue();
+
+            try {
+                // Annulation
+                annulerTache(entry);
+            } catch (ArgumentIncorrect ex) {
+                java.util.logging.Logger.getLogger(AbstrService.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            // Suppression de la tache de la map.
+            remTask(tache);
+
+        }
     }
 }

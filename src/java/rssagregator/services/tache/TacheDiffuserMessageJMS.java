@@ -29,7 +29,7 @@ import rssagregator.utils.XMLTool;
  */
 public class TacheDiffuserMessageJMS extends TacheImpl<TacheDiffuserMessageJMS> implements Incidable {
 
-    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheDiffuserMessageJMS.class);
+//    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheDiffuserMessageJMS.class);
     /**
      * *
      * Le topic connection devant être utilisé pour diffuser le message.

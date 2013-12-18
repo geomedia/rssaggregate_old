@@ -27,6 +27,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.ws.http.HTTPException;
 import org.apache.poi.util.Beta;
 import rssagregator.beans.BeanSynchronise;
@@ -48,6 +50,7 @@ import rssagregator.dao.DaoItem;
 @Table(name = "tr_mediatocollecteaction")
 //@Cacheable(true)
 //@Cache(type = CacheType.FULL, coordinationType = CacheCoordinationType.INVALIDATE_CHANGED_OBJECTS, isolation = CacheIsolationType.SHARED)
+@XmlRootElement
 public class MediatorCollecteAction implements Serializable, Cloneable, BeanSynchronise {
 
     @Transient
@@ -566,6 +569,7 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
         this.listItem = listItem;
     }
 
+    @XmlTransient
     public List<Flux> getListeFlux() {
         return listeFlux;
     }

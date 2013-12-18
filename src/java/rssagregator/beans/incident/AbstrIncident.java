@@ -42,7 +42,7 @@ public abstract class AbstrIncident implements Serializable {
      * Constructeur par défaut d'un incident. IL FAUT PASSER PAR LA FACTORY {@link IncidentFactory} POUR INSTANCIER UN
      * INCIDENT
      */
-    protected AbstrIncident() {
+    public AbstrIncident() {
 //        this.notificationImperative = true;
     }
     @Transient
@@ -70,13 +70,13 @@ public abstract class AbstrIncident implements Serializable {
      * Message destiné aux administrateurs afin d'expliquer l'erreur. Il ne s'agit pas d'un log mais d'une explication
      * en français pouvant être comprise par un non-informatien
      */
-    @Column(name = "messageEreur")
+    @Column(name = "messageEreur", columnDefinition = "text")
     protected String messageEreur;
     /**
      * *
      * Un espace de note permettant aux administrateurs de commenter l'erreur depuis l'interface web.
      */
-    @Column(name = "noteIndicent", length = 3000)
+    @Column(name = "noteIndicent", columnDefinition = "text")
     protected String noteIndicent;
     /**
      * *
@@ -218,7 +218,6 @@ public abstract class AbstrIncident implements Serializable {
      *
      * @return
      * @throws IOException Emmet une exeption si la variable servurl n'a pu être chargée depuis le fichier
-     * serv.properties
      */
     public String getUrlAdmin() throws IOException {
         Conf c = DAOFactory.getInstance().getDAOConf().getConfCourante();

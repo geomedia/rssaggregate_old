@@ -6,6 +6,7 @@ package rssagregator.services.tache;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Observer;
 import javax.persistence.LockModeType;
 import rssagregator.beans.DonneeBrute;
 import rssagregator.beans.Flux;
@@ -22,6 +23,7 @@ import rssagregator.dao.DAOIncident;
 import rssagregator.services.ServiceCollecteur;
 import rssagregator.services.crud.AbstrServiceCRUD;
 import rssagregator.services.crud.ServiceCRUDFactory;
+import rssagregator.utils.ThreadUtils;
 
 /**
  * La tâche permettant au {@link Flux} d'être collecté périodiquement. Elle est gérée par le service
@@ -29,10 +31,15 @@ import rssagregator.services.crud.ServiceCRUDFactory;
  *
  * @author clem
  */
-public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements Incidable {
+public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements Incidable, TacheActionableSurUnBean {
 
 
-    org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheRecupCallable.class);
+
+
+    
+    
+    
+//    org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheRecupCallable.class);
     /**
      * *
      * Les items capturées par la tache
@@ -58,11 +65,11 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
      * Le boolenn persit indique si la tâche doit ou non enregistrer ses données dans la base de données
      */
 //    Boolean persit;
-    /**
-     * *
-     * Permet d'annuler la tâche. Lors de son déclanchement, elle ne va rien faire et ne plus être ajouté au scheduler
-     */
-    Boolean annulerTache;
+//    /**
+//     * *
+//     * Permet d'annuler la tâche. Lors de son déclanchement, elle ne va rien faire et ne plus être ajouté au scheduler
+//     */
+//    Boolean annulerTache;
     /**
      * *
      * Un pointeur permettant de retrouver le comportement utilisé (un clone de celui servant de modèle dans le flux)
@@ -145,7 +152,7 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
 
 
                 ServiceCRUDFactory cRUDFactory = ServiceCRUDFactory.getInstance();
-                AbstrServiceCRUD service = cRUDFactory.getServiceFor(CollecteIncident.class);
+                AbstrServiceCRUD serviceCrud = cRUDFactory.getServiceFor(CollecteIncident.class);
 
 
                 for (int i = 0; i < listIncid.size(); i++) {
@@ -154,7 +161,7 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
                     em.lock(abstrIncident, LockModeType.PESSIMISTIC_WRITE);
                     abstrIncident.setDateFin(new Date());
 
-                    service.modifier(abstrIncident, em); // On utilise le service pour modifier le beans
+                    serviceCrud.modifier(abstrIncident, em); // On utilise le service pour modifier le beans
 
 //                            em.merge(abstrIncident);
                 }
@@ -167,27 +174,6 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
         }
     }
 
-
-
-    /**
-     * *
-     * Permet d'annuler la tâche. Lors de son déclanchement, elle ne va rien faire et ne plus être ajouté au scheduler
-     *
-     * @return
-     */
-    public Boolean getAnnulerTache() {
-        return annulerTache;
-    }
-
-    /**
-     * *
-     * Permet d'annuler la tâche. Lors de son déclanchement, elle ne va rien faire et ne plus être ajouté au scheduler
-     *
-     * @param annulerTache
-     */
-    public void setAnnulerTache(Boolean annulerTache) {
-        this.annulerTache = annulerTache;
-    }
 
     @Override
     public Class getTypeIncident() {
@@ -204,7 +190,6 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
 
     @Override
     protected synchronized TacheRecupCallable callFinalyse() {
-        System.out.println("FINALYSE RECUP");
         try {
 
             // Il faut aussi supprimer des hash si ils sont trop nombreux
@@ -248,7 +233,7 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
             }
 
         } catch (Exception e) {
-            logger.error("Erreur lors du commit des flux", e); // Cette erreur ne devrait pas survenir. On recevra un mail si c'est le cas grace a l'appender de Log4J
+            logger.error("Erreur sur le flux " + flux, e); // Cette erreur ne devrait pas survenir. On recevra un mail si c'est le cas grace a l'appender de Log4J
         }
         return (TacheRecupCallable) super.callFinalyse();
 
@@ -258,13 +243,18 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
     }
 
     @Override
-    protected void callCorps() throws Exception {    
+    protected void callCorps() throws InterruptedException, Exception {    
         
         if (!flux.getActive()) {
             throw new CollecteUnactiveFlux("Ce flux doit être activé pour être récolté");
         }
 
         initialiserTransaction();
+        
+  
+        
+//        Thread.sleep(300000);
+        
 
         this.verrouillerObjectDansLEM(flux, LockModeType.PESSIMISTIC_WRITE);
 
@@ -277,14 +267,21 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
 
         MediatorCollecteAction cloneComportement = this.flux.getMediatorFlux().genererClone(); //On crée une copie du mediator devant être employé. Cela permet de faire travailler plusieurs flux avec le même modèle de Comportement
         this.comportementDuFlux = cloneComportement;
+        
+        ThreadUtils.interruptCheck(); // On lance l'execution si la thread n'est pas déjà interrompu
 
         nouvellesItems = cloneComportement.executeActions(this.flux); // On exécute la collecte en utilisant le Comportement de Collecte cloné
 
+        
+        ThreadUtils.interruptCheck(); 
+        
         //On enregistre chaque item trouvé
         ServiceCollecteur collecteur = ServiceCollecteur.getInstance();
         for (int i = 0; i < nouvellesItems.size(); i++) {
             Item item = nouvellesItems.get(i);
             collecteur.ajouterItemAuFlux(flux, item, em, false, cloneComportement); // Il faut préciser au collecteur l'em qu'il doit utiliser, on lui donne celui qui block actuellement le flux. Les enregistrements ne sont alors pas encore commités
+            System.out.println("Et dans la tache l'item a " + item.getDonneeBrutes().size());
+        
         }
 
         logger.debug("Recup du Flux " + flux.getID() + " " + flux + "\n Découverte : " + cloneComportement.getNbrItemCollecte() + "; Mem Dedoub :" + cloneComportement.getNbDedoubMemoire() + "; dedoubBDD" + cloneComportement.getNbDedoubBdd() + "; interneFlux : " + cloneComportement.getNbDoublonInterneAuflux() + "; Liaison : " + cloneComportement.getNbLiaisonCree() + "; it crée : " + cloneComportement.getNbNouvelle());
@@ -328,6 +325,18 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
     protected void finalize() throws Throwable {
         super.finalize(); //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    public Object returnBeanCible() {
+        return flux;
+    }
+
+    @Override
+    public String toString() {
+        return "TacheRecupCallable{" + "flux=" + flux + ", DateDerniereRecup=" + DateDerniereRecup + ", incident=" + incident + '}';
+    }
+    
+    
     
     
     

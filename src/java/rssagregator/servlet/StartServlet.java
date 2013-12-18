@@ -5,18 +5,14 @@
 package rssagregator.servlet;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.naming.NamingException;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-import org.jdom.JDOMException;
 import rssagregator.beans.Conf;
-import rssagregator.beans.exception.RessourceIntrouvable;
 import rssagregator.dao.DAOConf;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoFlux;
@@ -24,10 +20,13 @@ import rssagregator.services.ServiceCollecteur;
 import rssagregator.services.ServiceMailNotifier;
 import rssagregator.services.ServiceServer;
 import rssagregator.services.ServiceSynchro;
+import rssagregator.utils.PropertyLoader;
 import rssagregator.utils.ServiceXMLTool;
 
 /**
- * Servlet utilisé au démarrage de l'application pour lancer les service. Elle est aussi chargé de les clore à la fermeture de l'application.
+ * Servlet utilisé au démarrage de l'application pour lancer les service. Elle est aussi chargé de les clore à la
+ * fermeture de l'application.
+ *
  * @author clem
  */
 public class StartServlet implements ServletContextListener {
@@ -35,19 +34,22 @@ public class StartServlet implements ServletContextListener {
     private static final String ATT_LIST_FLUX = "listflux";
 //    private ListeFluxCollecteEtConfigConrante listflux;
     private static final String ATT_SERVICE_COLLECTE = "collecte";
-    private ServiceCollecteur collecte;
+//    private ServiceCollecteur collecte;
     org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(StartServlet.class);
     ServiceServer daemonCentral;
 
     /**
      * *
-     * Méthode lancée au démarrage de l'application. permet d'initialiser les
-     * différents services
+     * Méthode lancée au démarrage de l'application. permet d'initialiser les différents services
      *
      * @param sce
      */
     @Override
-    public void contextInitialized(ServletContextEvent sce){
+    public void contextInitialized(ServletContextEvent sce) {
+        String confpath = (String) PropertyLoader.loadFromContext("confpath");
+        System.setProperty("confpath", confpath);
+
+
         try {
             Class.forName("com.mysql.jdbc.Driver");
         } catch (ClassNotFoundException ex) {
@@ -55,7 +57,17 @@ public class StartServlet implements ServletContextListener {
         }
 
 
-        DAOFactory.getInstance();
+
+        try {
+            Thread.sleep(3000);
+            DAOFactory.getInstance();
+
+        } catch (Exception e) {
+            logger.debug("ERREUR DAO FACTORY", e);
+        }
+
+
+
         DAOConf daoconf = DAOFactory.getInstance().getDAOConf();
         try {
             daoconf.charger();
@@ -84,34 +96,34 @@ public class StartServlet implements ServletContextListener {
             Logger.getLogger(ServiceServer.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-
-
-
         //============================================================================
         //...........Instanciation des services en utilisant le fichier de conf XML
         //============================================================================
         try {
             ServiceXMLTool.instancierServiceEtTache();
-        } catch (IOException ex) {
-            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (JDOMException ex) {
-            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NoSuchMethodException ex) {
-            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalArgumentException ex) {
-            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvocationTargetException ex) {
-            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NamingException ex) {
-            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (RessourceIntrouvable ex) {
-            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } //        catch (IOException ex) {
+        //            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+        //        } catch (JDOMException ex) {
+        //            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+        //        } catch (ClassNotFoundException ex) {
+        //            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+        //        } catch (NoSuchMethodException ex) {
+        //            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+        //        } catch (InstantiationException ex) {
+        //            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+        //        } catch (IllegalAccessException ex) {
+        //            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+        //        } catch (IllegalArgumentException ex) {
+        //            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+        //        } catch (InvocationTargetException ex) {
+        //            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+        //        } catch (NamingException ex) {
+        //            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+        //        } catch (RessourceIntrouvable ex) {
+        //            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
+        //        }
+        catch (Exception e) {
+            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, e);
         }
 
         // Lancement de la collecte
@@ -119,108 +131,15 @@ public class StartServlet implements ServletContextListener {
         ServiceMailNotifier.getInstance().lancerService();
         ServiceSynchro.getInstance().lancerService();
         ServiceServer.getInstance().lancerService();
-        
 
-//        daemonCentral = ServiceServer.getInstance();
-//        daemonCentral.instancierTaches();
-//        es = Executors.newFixedThreadPool(1);
-//        es.submit(daemonCentral);
-//        daemonCentral.instancierTaches();
 
-//        daemonCentral.run();
-
-//        logger.info("Chargement du context initial");
-//        try {
-//            Class.forName("com.mysql.jdbc.Driver");
-
-//            DAOFactory.getInstance();
-//
-//            DaoFlux daoflux = DAOFactory.getInstance().getDAOFlux();
-//            DAOConf daoconf = DAOFactory.getInstance().getDAOConf();
-//
-//            daoflux.chargerDepuisBd();
-//
-//            try {
-//                daoconf.charger();
-//            } catch (IOException ex) {
-//                Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
-//            } catch (Exception ex) {
-//                Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//
-//            // Initialisation du  collecteur
-//            collecte = ServiceCollecteur.getInstance();
-//
-//            // On charge la conf et on notifi le collecteur
-//            Conf conf = daoconf.getConfCourante();
-//            conf.addObserver(collecte);
-//            conf.forceNotifyObserver();
-//
-//            // Pour chaque flux, on inscrit le collecteur comme observeur
-//            List<Flux> listflux = daoflux.findAllFlux(true);
-//            int i;
-//            for (i = 0; i < listflux.size(); i++) {
-//                listflux.get(i).addObserver(collecte);
-//                listflux.get(i).forceNotifyObserver();
-//            }
-//
-//            //TODO : On sésactive JMS pour l'instant
-//            ServiceJMS jMS = ServiceJMS.getInstance();
-//            ExecutorService es = Executors.newFixedThreadPool(1);
-//            es.submit(jMS);
-//            
-//
-//
-//
-//            // On enregistre les service comme observer et la liste des flux comme observable
-////            listflux.addObserver(collecte);
-////            daoflux.addObserver(collecte);
-//
-//
-//
-//            // On charge la liste des flux depuis la base de donnée
-////            daoflux.chargerDepuisBd();
-//
-//
-////            daoconf.chargerDepuisBd();
-//
-////            try {
-////                daoconf.charger();
-////                
-////    //            Object fl = daoflux.find(new Long(451));
-////    //            DAOFactory.getInstance().getEntityManager().;
-////    //            DAOFactory.getInstance().getEntityManager().;
-////            } catch (IOException ex) {
-////                Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
-////            } catch (Exception ex) {
-////                Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
-////            }
-//
-//
-//
-//            //        listflux.chargerDepuisBd();
-////            daoflux.notifyObservers();
-////            daoconf.notifyObservers();
-//
-//
-//
-////            try {
-//////                ServiceJMS.getInstance().startService();
-////            } catch (IOException ex) {
-////                Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
-////            }
-//
-//
-//        } catch (ClassNotFoundException ex) {
-//            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
-//        }
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         // On arrete les taches de collecte
         logger.debug("Fermeture de l'Application");
-          // Il faut fermer chacun des services.
+        // Il faut fermer chacun des services.
         ServiceCollecteur.getInstance().stopService();
         ServiceServer.getInstance().stopService();
         ServiceMailNotifier.getInstance().stopService();
@@ -236,7 +155,7 @@ public class StartServlet implements ServletContextListener {
 
     public void destroyDriver() {
 
-      
+
 
         String prefix = getClass().getSimpleName() + " destroy() ";
 

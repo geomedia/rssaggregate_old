@@ -9,15 +9,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Observer;
 import javax.persistence.LockModeType;
+import javax.persistence.Query;
 import org.joda.time.DateTime;
-import org.joda.time.Duration;
 import rssagregator.beans.Flux;
 import rssagregator.beans.FluxPeriodeCaptation;
 import rssagregator.beans.Item;
 import rssagregator.beans.POJOCompteItem;
-import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.AnomalieCollecte;
-import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.beans.incident.IncidentFactory;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DAOIncident;
@@ -26,6 +24,7 @@ import rssagregator.dao.DaoItem;
 import rssagregator.services.ServiceCollecteur;
 import rssagregator.services.crud.ServiceCRUDFactory;
 import rssagregator.services.crud.ServiceCrudIncident;
+import rssagregator.utils.ThreadUtils;
 
 /**
  * <p>Cette tâche effectue différents calculs observant le nombre d'item /jour capturés par un flux. Les calculs sont
@@ -34,25 +33,26 @@ import rssagregator.services.crud.ServiceCrudIncident;
  * captation.</p>
  * <p> La tache est controlé par le service : {@link ServiceCollecteur}</P>
  *
+ * <p>A la fin de la tache on verifie si il n'y a pas de anomalie de collecte</p>
+ *
  * @author clem
  */
-public class TacheCalculQualiteFlux extends TacheImpl<TacheCalculQualiteFlux> {
+public class TacheCalculQualiteFlux extends TacheImpl<TacheCalculQualiteFlux> implements TacheActionableSurUnBean {
 
     private Flux flux;
-    Float indiceCaptation;
-    Integer mediane;
-    Integer decile;
-    Integer quartile;
-    Integer maximum;
-    Integer minimum;
-    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheCalculQualiteFlux.class);
+
+    //    Float indiceCaptation;
+    //    Integer mediane;
+    //    Integer decile;
+    //    Integer quartile;
+    //    Integer maximum;
+    //    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheCalculQualiteFlux.class);
+    //    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheCalculQualiteFlux.class);
+    public TacheCalculQualiteFlux() {
+    }
 
     public TacheCalculQualiteFlux(Observer s) {
         super(s);
-    }
-
-    public TacheCalculQualiteFlux() {
-        super();
     }
 
     public Flux getFlux() {
@@ -63,124 +63,47 @@ public class TacheCalculQualiteFlux extends TacheImpl<TacheCalculQualiteFlux> {
         this.flux = flux;
     }
 
-    public Float getIndiceCaptation() {
-        return indiceCaptation;
-    }
-
-    public void setIndiceCaptation(Float indiceCaptation) {
-        this.indiceCaptation = indiceCaptation;
-    }
-
-    public Integer getMediane() {
-        return mediane;
-    }
-
-    public void setMediane(Integer mediane) {
-        this.mediane = mediane;
-    }
-
-    public Integer getDecile() {
-        return decile;
-    }
-
-    public void setDecile(Integer decile) {
-        this.decile = decile;
-    }
-
-    public Integer getQuartile() {
-        return quartile;
-    }
-
-    public void setQuartile(Integer quartile) {
-        this.quartile = quartile;
-    }
-
-    public Integer getMaximum() {
-        return maximum;
-    }
-
-    public void setMaximum(Integer maximum) {
-        this.maximum = maximum;
-    }
-
-    public Integer getMinimum() {
-        return minimum;
-    }
-
-    public void setMinimum(Integer minimum) {
-        this.minimum = minimum;
-    }
-
     @Override
     protected void callCorps() throws Exception {
 
         initialiserTransaction();
 
-        verrouillerObjectDansLEM(flux, LockModeType.PESSIMISTIC_WRITE);
-
+//        verrouillerObjectDansLEM(flux, LockModeType.PESSIMISTIC_WRITE);
         DaoFlux daof = DAOFactory.getInstance().getDAOFlux();
+        daof.setEm(em);
         DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
         daoItem.setEm(em);
 
 
+        // On charge le flux en fetchant les ressources dont on va avoir besoin
+        Query q = em.createQuery("SELECT f FROM Flux AS f JOIN FETCH f.incidentsLie, f.periodeCaptations p WHERE f.ID = :idfl");
+        q.setParameter("idfl", flux.getID());
+        flux = (Flux) q.getSingleResult();
+
+
+        FluxPeriodeCaptation period = flux.returnDerniereFluxPeriodeCaptation();// daof.findDernierePeriodeCaptation(flux);
+
+        verrouillerObjectDansLEM(period, LockModeType.PESSIMISTIC_WRITE);
+
+
+
         //------------------------------CALCUL DE L'incide de captation
 
-        FluxPeriodeCaptation period = flux.returnDerniereFluxPeriodeCaptation();
         try {
             Long nbSecCaptation = period.returnCaptationDuration();
-            Long nbSecIncid = period.returnIncidentDuration();
+            Long nbSecIncid = flux.returnIncidentDurationDurantLaPeride(period);// period.returnIncidentDuration();
             if (nbSecCaptation > 0) {
                 Float indice = (100 - (nbSecIncid.floatValue() / nbSecCaptation.floatValue()));
                 period.setIndiceQualiteCaptation(indice);
-            }
-            else{
+            } else {
                 period.setIndiceQualiteCaptation(new Float(100.00));
             }
 
         } catch (Exception e) {
             logger.error("Erreur lors du calcul de l'indice ", e);
+
         }
-
-
-//        Long nbrSecondCaptation = flux.returnCaptationDuration();
-//        // On doit ensuite chercher tous les incident de collecte lié à ce flux. On obtient un nombre d'heure. 
-//        List<CollecteIncident> listIncid = flux.getIncidentsLie();
-//        Long timeIncid = new Long(0);
-//        for (int i = 0; i < listIncid.size(); i++) {
-//            CollecteIncident collecteIncident = listIncid.get(i);
-//
-//            // Certaines exeption ne doivent pas être relevée dans le calcul.
-//            if (collecteIncident.getClass().equals(AnomalieCollecte.class)) {
-//                AnomalieCollecte cast = (AnomalieCollecte) collecteIncident;
-//                if (cast.getCauseChangementLigneEditoriale() != null && cast.getCauseChangementLigneEditoriale()) { // Si l'anomalie est due a un changement de ligne éditoriale
-//                    continue;
-//                }
-//            }
-//
-//            if (collecteIncident.getDateDebut() != null && collecteIncident.getDateFin() == null) {
-//                DateTime dtDebut = new DateTime(collecteIncident.getDateDebut());
-//                DateTime dtFin = new DateTime(collecteIncident.getDateFin());
-//                Duration dur = new Duration(dtDebut, dtFin);
-//                timeIncid += dur.getStandardSeconds();
-//            } else if (collecteIncident.getDateDebut() != null && collecteIncident.getDateFin() == null) {
-//                DateTime dtDebut = new DateTime(collecteIncident.getDateDebut());
-//                DateTime dtFin = new DateTime();
-//                Duration dur = new Duration(dtDebut, dtFin);
-//                timeIncid += dur.getStandardSeconds();
-//            }
-//        }
-//
-//
-//
-//        if (timeIncid != 0) {
-//            Float indice = (100 - (timeIncid.floatValue() / nbrSecondCaptation.floatValue()));
-//            period.setIndiceQualiteCaptation(indiceCaptation);
-////            flux.setIndiceQualiteCaptation(indice.intValue());
-//        } else {
-//            period.setIndiceQualiteCaptation(new Float(100.00));
-//        }
-
-
+        ThreadUtils.interruptCheck();
 
 
         //-----------------Calcul de la moyenne médiane quartiele décile....
@@ -195,13 +118,15 @@ public class TacheCalculQualiteFlux extends TacheImpl<TacheCalculQualiteFlux> {
         }
 
 
+        List<Item> items = daoItem.itemCaptureParleFluxDurantlaCollecte(flux, period);
 
-        List<Item> items = daoItem.itemCaptureParleFluxDurantlaDernierePeriodeCollecte(flux);
+
         POJOCompteItem compteItem = new POJOCompteItem();
         compteItem.setFlux(flux);
         compteItem.setItems(items);
         compteItem.setDate1(date1);
         compteItem.setDate2(date2);
+        
         compteItem.compte();
         compteItem.calculterBoxPloat();
 
@@ -215,11 +140,7 @@ public class TacheCalculQualiteFlux extends TacheImpl<TacheCalculQualiteFlux> {
         period.setStatEcartType(compteItem.getEcartType());
         period.setStatSommeItemCapture(compteItem.getSomme());
 
-        // Stat par jour
-//        for (int i = 1; i < 8; i++) {
-//            period.sets
-//            
-//        }
+
         period.setStatEcartTypeLundi(compteItem.getStatEcartypeDayOfWeek()[0]);
         period.setStatMedLundi(compteItem.getStatMoyDayOfWeek()[0]);
         period.setStatMoyLundi(compteItem.getStatMoyDayOfWeek()[0]);
@@ -272,11 +193,22 @@ public class TacheCalculQualiteFlux extends TacheImpl<TacheCalculQualiteFlux> {
             anomalieIncident.setFluxLie(flux);
             anomalieIncident.setMoyenneDesCapture(compteItem.getMoyenne());
             anomalieIncident.setSeuil(33);
-
+            ThreadUtils.interruptCheck();
             serviceCrud.ajouterIncidentdeCollecte(anomalieIncident, flux, em, false);
         }
 
         //------------Enregistrement
-        em.merge(flux); // On modifi le flux sans passer par le service, on ne veut pas que ces chiffre donnenen tlieu à une synchronisation
+        em.merge(period); // On modifi la période
+
+    }
+
+    @Override
+    public Object returnBeanCible() {
+        return flux;
+    }
+
+    @Override
+    public String toString() {
+        return "TacheCalculQualiteFlux{" + "flux=" + flux + '}';
     }
 }

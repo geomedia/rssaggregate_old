@@ -4,16 +4,12 @@
  */
 package rssagregator.dao;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.Query;
-import rssagregator.beans.Flux;
 import rssagregator.beans.Journal;
-import rssagregator.services.ServiceCollecteur;
 
 /**
  * @author clem

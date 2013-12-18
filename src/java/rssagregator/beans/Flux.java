@@ -11,11 +11,10 @@ import java.net.URL;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedHashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -29,16 +28,18 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
-import javax.persistence.Transient;
 import javax.persistence.Version;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import org.apache.poi.util.Beta;
-import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.descriptors.ClassDescriptor;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.eclipse.persistence.descriptors.DescriptorEventAdapter;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
+import org.joda.time.Interval;
 import rssagregator.beans.exception.DonneeInterneCoherente;
+import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.beans.traitement.MediatorCollecteAction;
 import rssagregator.dao.DAOFactory;
@@ -62,26 +63,21 @@ import rssagregator.dao.DaoFlux;
 @Table(name = "flux")
 //@Cacheable(value = true)
 //@Cache(type = CacheType.FULL, coordinationType = CacheCoordinationType.SEND_NEW_OBJECTS_WITH_CHANGES, isolation = CacheIsolationType.SHARED )
+@XmlRootElement
 public class Flux extends Bean implements Observer, Serializable, BeanSynchronise, Cloneable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.TABLE)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long ID;
-    @ManyToMany
+
+    @OneToMany(mappedBy = "flux", cascade = CascadeType.ALL)
     private List<DonneeBrute> donneeBrutes;
 
     public Flux() {
         propertyChangeSupport = new PropertyChangeSupport(this);
         FluxChangeLisner changeLisner = new FluxChangeLisner();
         propertyChangeSupport.addPropertyChangeListener(changeLisner);
-
-        this.item = new ArrayList<Item>();
-        this.lastEmpruntes = new LinkedHashSet<String>();
-
-//        this.mediatorFlux = MediatorCollecteAction.getDefaultCollectAction();
-        this.incidentsLie = new ArrayList<CollecteIncident>();
-        this.periodeCaptations = new ArrayList<FluxPeriodeCaptation>();
-
+        incidentsLie = new ArrayList<CollecteIncident>();
 
 //        this.setChanged();
     }
@@ -151,8 +147,8 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
      * Les dernières empruntes md5 des items du flux. On les garde en mémoire pour faire du dédoublonage sans effectuer
      * de requetes dans la base de données. On ne persiste pas dans la base de donnée (TRANSISIENT NORMAL)
      */
-    @Transient
-    private Set<String> lastEmpruntes;
+//    @Transient
+//    private Set<String> lastEmpruntes  = new LinkedHashSet<String>();
     /**
      * L'objet Callable qui permet d'être lancé pour effectuer la récupération du flux. Cet objet doit être ajouté dans
      * le pool de thread du service de récupération. Il n'est pas persisté
@@ -188,7 +184,7 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
 //    @OneToMany(mappedBy = "flux", cascade = CascadeType.ALL)
 //    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true,fetch = FetchType.LAZY)
     @OneToMany(mappedBy = "fluxLie", cascade = {CascadeType.ALL}, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<CollecteIncident> incidentsLie;
+    protected List<CollecteIncident> incidentsLie;
     /**
      *
      * @element-type InfoCollecte
@@ -209,14 +205,13 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
      * base de données
      */
 //    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.DETACH})
-    @CascadeOnDelete
-    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST}, fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.EAGER)
     private FluxType typeFlux;
     /**
      * Un flux peut appratenir à un journal. Un journal peut contenir plusieurs flux
      */
 // On veut que le flux ne puisse pas créer de journaux mais simplment se lier. Ce n'est pas à la dao du flux de de créer des journaux.
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToOne(fetch = FetchType.LAZY)
     private Journal journalLie;
     /**
      * Le mediator flux permet d'assigner un flux un comportement de collecte. Un médiator est une configuration de
@@ -232,7 +227,8 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
      */
 //    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
 //    @ManyToOne
-    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+//    @ManyToOne(cascade = {CascadeType.MERGE})
+    @ManyToOne()
     private MediatorCollecteAction mediatorFlux;
     public static final String PROP_MEDIATORFLUX = "mediatorFlux";
 
@@ -325,7 +321,7 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
      * être en échec (posséder des incident {@link CollecteIncident}
      */
     @OneToMany(mappedBy = "flux", cascade = CascadeType.ALL, orphanRemoval = true)
-    protected List<FluxPeriodeCaptation> periodeCaptations;
+    protected List<FluxPeriodeCaptation> periodeCaptations = new ArrayList<FluxPeriodeCaptation>();
     /**
      * *
      * Variable qui permet à l'utilisateur de qualifié le flux de stable. On considère qu'il est stable si le flux ne
@@ -336,11 +332,6 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
      */
     protected Boolean estStable;
 
-    /**
-     * Le constructeur
-     */
-    public void Flux() {
-    }
 
     public String getUrl() {
         return url;
@@ -358,6 +349,7 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
         this.htmlUrl = urlRubrique;
     }
 
+    @XmlTransient
     public List<Item> getItem() {
         return item;
     }
@@ -398,6 +390,7 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
         this.nom = nom;
     }
 
+    @XmlTransient
     public List<FluxPeriodeCaptation> getPeriodeCaptations() {
         return periodeCaptations;
     }
@@ -432,6 +425,7 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
         this.ID = ID;
     }
 
+    @XmlTransient
     public List<CollecteIncident> getIncidentsLie() {
         return incidentsLie;
     }
@@ -439,6 +433,8 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
     public void setIncidentsLie(List<CollecteIncident> incidentsLie) {
         this.incidentsLie = incidentsLie;
     }
+
+
 
     public String getHtmlUrl() {
         return htmlUrl;
@@ -470,6 +466,14 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
 
     public void setEstStable(Boolean estStable) {
         this.estStable = estStable;
+    }
+
+    public List<DonneeBrute> getDonneeBrutes() {
+        return donneeBrutes;
+    }
+
+    public void setDonneeBrutes(List<DonneeBrute> donneeBrutes) {
+        this.donneeBrutes = donneeBrutes;
     }
 
     /**
@@ -804,6 +808,59 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
 
         }
     }
+    
+    
+    
+    public List<AbstrIncident> returnIncidentDurantLaPeride(FluxPeriodeCaptation period){
+                List<AbstrIncident> returnList = new ArrayList<AbstrIncident>();
+        DateTime dt1 = new DateTime(period.getDateDebut());
+        DateTime dt2;
+        if(period.getDatefin() == null){
+            dt2 = new DateTime(period.getDatefin());
+        }
+        else{
+            dt2 = new DateTime();
+        }
+        
+        Interval intev = new Interval(dt1, dt2);
+
+//        List<CollecteIncident> indidentFlux = this.incidentsLie;
+        for (Iterator<CollecteIncident> it = incidentsLie.iterator(); it.hasNext();) {
+            CollecteIncident collecteIncident = it.next();
+//            
+//        }
+//        
+//        for (int i = 0; i < flux.getIncidentsLie().size(); i++) {
+//            CollecteIncident collecteIncident = flux.getIncidentsLie().get(i);
+           DateTime dtIncid = new DateTime(collecteIncident.getDateDebut());
+  
+           if(intev.contains(dtIncid)){
+               returnList.add(collecteIncident);
+           }
+        }
+        
+        return returnList;
+        
+    }
+    
+     public long returnIncidentDurationDurantLaPeride(FluxPeriodeCaptation period){
+         
+         List<AbstrIncident> listIncid =returnIncidentDurantLaPeride(period);
+         long time =0;
+         
+         for (Iterator<AbstrIncident> it = listIncid.iterator(); it.hasNext();) {
+             AbstrIncident abstrIncident = it.next();
+             DateTime dtdebut = new DateTime(abstrIncident.getDateDebut());
+             DateTime dtFin = new DateTime(abstrIncident.getDateFin());
+             Duration dur = new Duration(dtdebut, dtFin);
+             time = time + dur.getStandardSeconds();
+         }
+         
+         return time;
+         
+     }
+    
+    
 
     public class CutoClem extends ClassDescriptor {
     }

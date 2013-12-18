@@ -46,7 +46,7 @@
 
                                 <input type="hidden" name="firstResult" id="firstResult" value="0"/> 
 
-                                
+
                                 <label>Type D'incident :</label>
                                 <label>Tous : </label><input type="radio" name="type" value="AbstrIncident" /><br />
                                 <label>Collecte </label>:<input type="radio" name="type" value="CollecteIncident" checked="checked" id="type" /><br />
@@ -57,12 +57,12 @@
 
 
                                 <br />
-<!--                                <label>Entité par page</label>
-                                <select id="itPrPage" name="itPrPage" onChange="this.form.submit();"> 
-                                    <c:forEach var="i" begin="25" end="150" step="25">
-                                        <option value="${i}" <c:if test="${itPrPage==i}"> selected="selected"</c:if>>${i}</option>
-                                    </c:forEach>
-                                </select><br />-->
+                                <!--                                <label>Entité par page</label>
+                                                                <select id="itPrPage" name="itPrPage" onChange="this.form.submit();"> 
+                                <c:forEach var="i" begin="25" end="150" step="25">
+                                    <option value="${i}" <c:if test="${itPrPage==i}"> selected="selected"</c:if>>${i}</option>
+                                </c:forEach>
+                            </select><br />-->
                                 <label>Voir : </label>
                                 <input type="radio" id="clos" name="clos" value="true"<c:if test="${clos}"> checked="checked"</c:if> onclick="$('afin').click();">Incident clos
                                 <input type="radio" name="clos" value="false"<c:if test="${!clos}"> checked="checked"</c:if> onclick="$('afin').click();">Incident non clos
@@ -70,52 +70,52 @@
 
                                     <br />
                                     <!--<button value="0" name="limiterFlux" id="limiterFlux" type="button">Limiter aux flux</button>-->
-<!--                                    <div id="divLimiterFluxContener">
-                                        <div id="divLimiterFlux">
-                                            <label>Flux lie : </label>
-                                            <table>
-                                                <caption>Flux de provenance</caption>
-                                                <tr>
-                                                    <th>Journaux</th>
-                                                    <th>Flux disponibles</th>
-                                                    <th></th>
-                                                    <th>Flux sélectionnés</th>
-                                                </tr>
-                                                <tr>
-                                                    <td>
-                                                        <select id="journalSelection" style="width: 300px">
-                                                            <option value="null">Journal : </option>
-                                                            <option id="tous">tous</option>
-                                                        <c:forEach items="${listJournaux}" var="j">
-                                                            <option value="${j.ID}">${j.nom}</option>
-                                                        </c:forEach>
-                                                    </select>
-                                                </td>
-                                                <td>
-                                                    <select id="fluxSelection" name="oldid-flux" style="min-width: 300px; width: 400px" multiple="true">
-                                                        <option value="all">Tous</option>
-                                                        <c:forEach items="${listflux}" var="fl">
-                                                            <option value="${fl.ID}">${fl}</option>                                
-                                                        </c:forEach>
-                                                    </select>
+                                    <!--                                    <div id="divLimiterFluxContener">
+                                                                            <div id="divLimiterFlux">
+                                                                                <label>Flux lie : </label>
+                                                                                <table>
+                                                                                    <caption>Flux de provenance</caption>
+                                                                                    <tr>
+                                                                                        <th>Journaux</th>
+                                                                                        <th>Flux disponibles</th>
+                                                                                        <th></th>
+                                                                                        <th>Flux sélectionnés</th>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <td>
+                                                                                            <select id="journalSelection" style="width: 300px">
+                                                                                                <option value="null">Journal : </option>
+                                                                                                <option id="tous">tous</option>
+                                <c:forEach items="${listJournaux}" var="j">
+                                    <option value="${j.ID}">${j.nom}</option>
+                                </c:forEach>
+                            </select>
+                        </td>
+                        <td>
+                            <select id="fluxSelection" name="oldid-flux" style="min-width: 300px; width: 400px" multiple="true">
+                                <option value="all">Tous</option>
+                                <c:forEach items="${listflux}" var="fl">
+                                    <option value="${fl.ID}">${fl}</option>                                
+                                </c:forEach>
+                            </select>
 
-                                                </td>
-                                                <td>
+                        </td>
+                        <td>
 
-                                                    <button type="button" onclick="selectflux();"></button><br />
-                                                    <button type="button" onclick="supp();"><--</button>
-                                                </td>
-                                                <td><select multiple="true" style="max-width: 300px; width: 300px" name="fluxSelection2" id="fluxSelection2">
-                                                        <c:forEach items="${fluxsel}" var="f">
-                                                            <option value="${f.ID}">${f}</option>
-                                                        </c:forEach>
+                            <button type="button" onclick="selectflux();"></button><br />
+                            <button type="button" onclick="supp();"><--</button>
+                        </td>
+                        <td><select multiple="true" style="max-width: 300px; width: 300px" name="fluxSelection2" id="fluxSelection2">
+                                <c:forEach items="${fluxsel}" var="f">
+                                    <option value="${f.ID}">${f}</option>
+                                </c:forEach>
 
-                                                    </select></td>
-                                            </tr>
+                            </select></td>
+                    </tr>
 
-                                        </table>
-                                    </div>
-                                </div>-->-->
+                </table>
+            </div>
+        </div>-->-->
 
                                 <input type="hidden" name="requestOnStart" id="requestOnStart" value="${requestOnStart}"/>
                                 <script src="${rootpath}AjaxIncidDynGrid.js"></script>
@@ -159,7 +159,7 @@
 //        alert("0" + rowObjcet[0]);
 //        alert("1" + rowObjcet[1])
 //        alert("2"+ rowObjcet[2])
-        return '<a href = "/RSSAgregate/incidents/read?id=' + rowObjcet[0]+"&type=" +rowObjcet[2]+ '">' + rowObjcet[1] + '</a>';
+                                        return '<a href = "/RSSAgregate/incidents/read?id=' + rowObjcet[0] + "&type=" + rowObjcet[2] + '">' + rowObjcet[1] + '</a>';
                                     }
 
                                     $(function() {
@@ -169,18 +169,18 @@
 //                                            url: "${rootpath}item/list?vue=grid",
                                             datatype: "json",
                                             mtype: "GET",
-                                            colNames: ["ID", "intitulé","type", "messageEreur", "dateDebut", "dateFin"],
+                                            colNames: ["ID", "intitulé", "type", "messageEreur", "dateDebut", "dateFin"],
                                             colModel: [
-                                                {name: "ID", width: 55, hidden: true, searchoptions: {sopt: ['cn', 'eq']}},
+                                                {name: "ID", width: 55, key: true, hidden: true, searchoptions: {sopt: ['cn', 'eq']}},
                                                 {name: "intitulé", classtype: 'clem', sorttype: 'float', width: 90, formatter: myLinkFormatter, searchoptions: {sopt: ['cn', 'eq']}},
                                                 {name: "type", index: 'type', key: false, search: false, width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
-                                                {name: "messageEreur", index: 'langue', key: true, search: true, width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
+                                                {name: "messageEreur", index: 'langue', key: false, search: true, width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
                                                 {name: "dateDebut", width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
                                                 {name: "dateFin", width: 80, align: "right", stype: 'select', editoptions: {value: {'': 'tous', 'autre': 'autre', 'quotidien': 'quotidien'}}},
                                             ],
                                             pager: "#pager",
                                             rowNum: 10,
-                                            rowList: [10, 20, 30],
+                                            rowList: [10, 20, 30, 50, 100, 200],
                                             sortname: "invid",
                                             sortorder: "desc",
                                             viewrecords: true,
@@ -192,6 +192,8 @@
                                             autowidth: true,
                                             exptype: "csvstring",
                                             root: "grid",
+                                            height: 500,
+                                            multiselect: true,
                                             ident: "\t"
 //                                    filterToolbar: {searchOperators: true},
 //                                    search: {
@@ -219,7 +221,55 @@
                                                 $("#list").jqGrid('excelExport', {tag: 'csv', url: '${rootpath}journaux/list?vue=csv'});
                                             },
                                             position: "last"
-                                        });
+                                        })
+                                                .navButtonAdd('#pager', {
+                                            caption: "'Clore ",
+                                                    onClickButton: function() {
+                                                 reponse = confirm('Vous vous apprétez à Clore des incidents manuellement. Confirmez vous votre choix ?');
+                                                if (reponse) {
+                                                    selRowId = $('#list').jqGrid('getGridParam', 'selarrrow');
+                                                    alert('' + selRowId);
+                                                    //chaine = "";
+                                                    //for (i = 0; i < selRowId.length; i++) {
+                                                    //    chaine += 'id=' + selRowId[i] + ',';
+                                                    //}
+                                                    //if (chaine.length > 2) {
+                                                    //    chaine = chaine.substr(0, chaine.length - 1);
+                                                    //}
+                                                    //url = ${rootpath} + 'flux/rem?' + chaine;
+                                                    url = ${rootpath} + 'incidents/close?id=' + selRowId;
+                                                    location.href = url;
+                                                }
+                                                    }
+                                                    
+                                        }
+
+
+
+
+                                        ).navButtonAdd('#pager', {
+                                            caption: "'Supprimer ",
+                                            onClickButton: function() {
+                                                reponse = confirm('Vous vous apprétez à supprimer un flux. Toutes les items associées seront supprimée. Cette manipulation est irréverssible. Confirmez vous votre choix ?');
+                                                if (reponse) {
+                                                    selRowId = $('#list').jqGrid('getGridParam', 'selarrrow');
+                                                    alert('' + selRowId);
+                                                    //chaine = "";
+                                                    //for (i = 0; i < selRowId.length; i++) {
+                                                    //    chaine += 'id=' + selRowId[i] + ',';
+                                                    //}
+                                                    //if (chaine.length > 2) {
+                                                    //    chaine = chaine.substr(0, chaine.length - 1);
+                                                    //}
+                                                    //url = ${rootpath} + 'flux/rem?' + chaine;
+                                                    url = ${rootpath} + 'incidents/rem?id=' + selRowId;
+                                                    location.href = url;
+                                                }
+                                            }
+                                        })
+
+
+                                                ;
                                     });
                         </script>
 
@@ -263,6 +313,17 @@
                         <c:if test="${bean['class'].simpleName=='ServerIncident'}">
 
                         </c:if>
+
+                        <c:if test="${bean['class'].simpleName=='NotificationAjoutFlux'}">
+                            <p>Des flux ont automatiquement été ajouté pour le journal : <a href="${bean.journal.readURL}"> ${bean.journal}</a></p>
+                            <h2>Flux ajouté :</h2> 
+                            <ul>
+                                <c:forEach items="${bean.fluxAjoute}" var="fl">
+                                    <li><a href="${fl.readURL}">${fl}</a></li>
+                                    </c:forEach>
+                            </ul>
+                        </c:if>
+
 
 
 

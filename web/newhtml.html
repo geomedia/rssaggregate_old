@@ -1,0 +1,167 @@
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    </head>
+    <body>
+        <div>TODO write content</div>
+        <!-- define a container with class "als-container": this will be the object binded to ALS; we suggest to give it an ID
+to retrieve it easily during ALS inizialization -->
+
+        <style>
+            /*****************************************************
+         * generic styling for ALS elements: outer container
+         ******************************************************/
+
+            .als-container {
+                position: relative;
+                width: 100%;
+                margin: 0px auto;
+                z-index: 0;
+            }
+
+            /****************************************
+             * viewport styling
+             ***************************************/
+
+            .als-viewport {
+                position: relative;
+                overflow: hidden;
+                margin: 0px auto;
+            }
+
+            /***************************************************
+             * wrapper styling
+             **************************************************/
+
+            .als-wrapper {
+                position: relative;
+                /* if you are using a list with <ul> <li> */
+                list-style: none;
+            }
+
+            /*************************************
+             * item: single list element
+             ************************************/
+
+            .als-item {
+                position: relative;
+                display: block;
+                text-align: center;
+                cursor: pointer;
+                float: left;
+            }
+
+            /***********************************************
+             * prev, next: buttons styling
+             **********************************************/
+
+            .als-prev, .als-next {
+                position: absolute;
+                cursor: pointer;
+                clear: both;
+            }
+
+        </style>
+
+        <div class="als-container" id="my-als-list">
+
+            <!-- if you choose manual scrolling (which is set by default), insert <span> with class "als-prev"  and "als-next": 
+            they define the buttons "previous" and "next"; within the <span> you can use images or simple text -->	
+
+            <span class="als-prev"><--</span>
+
+            <!-- define a container with class "als-viewport": this will be the viewport for the list visible elements -->
+
+            <div class="als-viewport">
+
+                <!-- define a container with class "als-wrapper": this will be the wrapper for the list elements, 
+                it can be a classic <ul> element or even a <div> element -->
+
+                <ul class="als-wrapper">
+
+                    <!-- define the list elements, each must have class "als-item"; they can be classic <li> elements 
+                    or generic <div> elements and they can contain anything: text, images, ... -->
+
+                    <li class="als-item"><p>Item 1</p></li> <!-- text only -->
+                    <li class="als-item"><p>Iterm 2</p></li> <!-- image -->
+                    <li class="als-item"><p>Item 3</p></li> <!-- image + text -->
+
+                </ul> <!-- als-wrapper end -->
+            </div> <!-- als-viewport end -->
+            <span class="als-next">--></span> <!-- "next" button -->
+        </div> <!-- als-container end -->
+
+
+        <!-- basic ALS css -->
+        <!--<link rel="stylesheet" type="text/css" media="screen" href="path/css/als_style.css" />-->
+
+        <!-- your jQuery version -->
+        <link rel="stylesheet" href="/RSSAgregate/ress/jquery-ui.css" />
+        <script src="/RSSAgregate/ress/jquery-1.10.2.min.js"></script>
+        <!-- your ALS version -->
+        <!--<script type="text/javascript" src="path/js/jquery.als-1.1 .min.js" ></script>-->
+        <script type="text/javascript" src="/RSSAgregate/ress/jquery.als-1.1.min.js" ></script>
+
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $("#my-als-list").als({
+                    visible_items: 4,
+                    scrolling_items: 2,
+                    orientation: "horizontal",
+                    circular: "yes",
+                    autoscroll: "yes",
+                    interval: 6000,
+                    direction: "right",
+                    start_from: 1
+                });
+                alert('fin');
+            });
+        </script>
+
+        
+        <ul style="width: 300px; height: 200px; overflow: auto">
+            <li>IT1</li>
+            <li>IT2</li>
+            <li>IT3</li>
+            <li>IT4</li>
+            <li>IT8</li>
+            <li>IT6</li>
+            <li>IT6</li>
+            <li>IT7</li>
+            <li>IT8</li>
+            <li>IT9</li>
+            <li>IT11</li>
+            <li>IT12</li>
+            <li>IT13</li>
+            <li>IT14</li>
+            <li>IT15</li>
+            <li>IT16</li>
+            <li>IT1</li>
+            <li>IT1</li>
+            <li>IT1</li>
+            <li>IT1</li>
+            <li>IT1</li>
+            <li>IT1</li>
+            <li>IT1</li>
+            <li>IT1</li>
+            <li>IT1</li>
+            <li>IT1</li>
+            <li>IT1</li>
+            <li>IT1</li>
+            
+            
+        </ul>
+        
+        
+
+    </body>
+    
+    
+    
+</html>

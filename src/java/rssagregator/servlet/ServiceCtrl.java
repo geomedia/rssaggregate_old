@@ -6,19 +6,24 @@ package rssagregator.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import rssagregator.services.AbstrService;
 
 /**
  *
  * @author clem
  */
-@WebServlet(name = "TestGcc", urlPatterns = {"/TestGcc"})
-public class TestGcc extends HttpServlet {
-
+@WebServlet(name = "ServiceCtrl", urlPatterns = {"/ServiceCtrl"})
+public class ServiceCtrl extends HttpServlet {
+    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(ServiceCtrl.class);
     /**
      * Processes requests for both HTTP
      * <code>GET</code> and
@@ -33,20 +38,49 @@ public class TestGcc extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
+        
+        
+        
+        
+        // On récupère le nom du service.
+        String servicename = request.getParameter("servicename");
+        Class c = null;
         try {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet TestGcc</title>");            
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet TestGcc at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        } finally {            
-            out.close();
+        c = Class.forName("rssagregator.services." + servicename);            
+        } catch (Exception e) {
+
+            logger.debug("Impossible de récupérer la class " , e);
         }
+
+        
+        if(c != null){
+            try {
+                // Récupération de l'instance
+                Method methode = c.getMethod("getInstance");
+                
+                AbstrService instance = (AbstrService) methode.invoke(c);
+                request.setAttribute("service", instance);
+//                instance.getMapTache().keySet()
+//                instance.getMapTache().keySet()
+                
+                System.out.println("OBJ : " + instance);
+            } catch (NoSuchMethodException ex) {
+                Logger.getLogger(ServiceCtrl.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (SecurityException ex) {
+                Logger.getLogger(ServiceCtrl.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IllegalAccessException ex) {
+                Logger.getLogger(ServiceCtrl.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IllegalArgumentException ex) {
+                Logger.getLogger(ServiceCtrl.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InvocationTargetException ex) {
+                Logger.getLogger(ServiceCtrl.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+        }
+        this.getServletContext().getRequestDispatcher("/WEB-INF/serviceCtrl.jsp").forward(request, response);
+        
+        
+
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

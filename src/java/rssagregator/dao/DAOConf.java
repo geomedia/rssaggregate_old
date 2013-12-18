@@ -73,9 +73,8 @@ public class DAOConf extends AbstrDao {
      */
     public void charger() throws IOException, Exception {
         Conf conf = new Conf();
-//        Properties prop = PropertyLoader.load("conf.properties");
-        String propfile = PropertyLoader.loadProperti("serv.properties", "conf"); // On commence par charger le nom du fichier properties externe à partir du fichier serv.properties
-        Properties prop = PropertyLoader.loadFromFile(propfile);
+        String varPath = (String) PropertyLoader.returnConfPath()+"conf.properties";
+        Properties prop = PropertyLoader.loadFromFile(varPath);
 
         // Chargement de la valeur active dans le fichier properties
         String active = prop.getProperty("active");
@@ -86,10 +85,6 @@ public class DAOConf extends AbstrDao {
         } else {
             throw new Exception("Impossible de lire la valeur de active");
         }
-
-        //Chargement du varpath (Ou sont normalement les fichier log et properties)
-        String varpath = PropertyLoader.loadProperti("serv.properties", "varpath");
-        conf.setVarpath(varpath);
 
         //Chargement du nom du serveur
         String servname = prop.getProperty("servname");
@@ -228,8 +223,11 @@ public class DAOConf extends AbstrDao {
     public void modifierConf(Conf conf) throws Exception {
         System.out.println("MOF DE LA CONFF");
 //        Properties prop = PropertyLoader.load("conf.properties");
-        String propfile = PropertyLoader.loadProperti("serv.properties", "conf");
+        
 //        Properties prop = PropertyLoader.loadFromFile(propfile);
+        String varPath = (String) PropertyLoader.returnConfPath();
+        String propfile = varPath+"conf.properties";
+        
         Properties prop = new Properties();
 
         //-----------------NOM DU SERVER
@@ -303,7 +301,8 @@ public class DAOConf extends AbstrDao {
      * @throws Exception
      */
     public void verifRootAccount() throws IOException, Exception {
-        String propfile = PropertyLoader.loadProperti("serv.properties", "conf");
+        String varPath = (String) PropertyLoader.returnConfPath();
+        String propfile = varPath+"conf.properties";
         Properties prop = PropertyLoader.loadFromFile(propfile);
         //--------------Chargement de l'utilisateur root par default
         String m = prop.getProperty("rootuser");

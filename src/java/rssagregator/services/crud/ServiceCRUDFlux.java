@@ -4,19 +4,13 @@
  */
 package rssagregator.services.crud;
 
-import rssagregator.services.crud.ServiceCRUDBeansSynchro;
-import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
-import javax.persistence.TransactionRequiredException;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.beans.incident.NotificationAjoutFlux;
@@ -33,19 +27,25 @@ import rssagregator.services.ServiceCollecteur;
  * @author clem
  */
 public class ServiceCRUDFlux extends ServiceCRUDBeansSynchro {
-
+    
+    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(AbstrServiceCRUD.class);
+    
     @Override
     public void ajouter(Object obj) throws Exception {
-        super.ajouter(obj); //To change body of generated methods, choose Tools | Templates.
-
-        // Le flux doit être enregistré dans le service de collecte
         Flux cast = (Flux) obj;
+        cast.setCreated(new Date());
+        super.ajouter(obj); //To change body of generated methods, choose Tools | Templates.
+ 
+        // Le flux doit être enregistré dans le service de collecte
+
         ServiceCollecteur collecteur = ServiceCollecteur.getInstance();
         collecteur.enregistrerFluxAupresDuService(cast);
-
-
     }
-
+    
+    
+    
+    
+    
     @Override
     public void modifier(Object obj) throws Exception {
         super.modifier(obj); //To change body of generated methods, choose Tools | Templates.
@@ -59,99 +59,108 @@ public class ServiceCRUDFlux extends ServiceCRUDBeansSynchro {
 //        cast.notifyObservers("mod");
 
     }
-
+    
     protected ServiceCRUDFlux() {
     }
-    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(AbstrServiceCRUD.class);
 
+    /**
+     * *
+     * Cette méthode n'est pas utilisé au profit de la méthode {@link #SupprimerListFlux(java.util.List, java.lang.Boolean, javax.persistence.EntityManager)
+     * }
+     *
+     * @param obj
+     * @throws Exception
+     */
     @Override
     public void supprimer(Object obj) throws Exception {
-
-        Flux flux = (Flux) obj;
-        DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
-        daoItem.beginTransaction();
-        DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
-        daoFlux.setEm(daoItem.getEm()); // On donne a la daoflux le même Entity manager afin d'avoir une trasaction unique pour toute la procédure
-
-        Boolean err = false;
-        List<Item> items = daoItem.itemLieAuFlux(flux);
-
-        int i;
-        for (i = 0; i < items.size(); i++) {
-            Item item = items.get(i);
-
-            //Supppression des items qui vont devenir orphelines
-            if (item.getListFlux().size() < 2) {
-                // On supprimer la relation 
-                item.getListFlux().clear();
-                try {
-                    daoItem.modifier(item);
-                    daoItem.remove(item);
-                } catch (Exception e) {
-                    err = true;
-                    logger.debug("Erreur lors de la suppression", e);
-                }
-
-            } else { // Sinon on détach le flux
-                item.getListFlux().remove(flux);
-
-                try {
-                    daoItem.modifier(item);
-                } catch (Exception ex) {
-                    err = true;
-                    logger.debug("Erreur lors de la modification", ex);
-                }
-            }
-        }
-        // On va supprimer le flux si la procédure de suppression des items s'est déroulée correctement
-        flux.setItem(new ArrayList<Item>());
-
+        
+        throw new UnsupportedOperationException("Pas implémenter utilisez plutot SupprimerListFlux");
+//
+//        Flux flux = (Flux) obj;
+//        DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
+//        daoItem.beginTransaction();
 //        DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
-//        daoFlux.beginTransaction();
-        daoFlux.setEm(daoItem.getEm());
-//        daoFlux.setTr(daoItem.getTr());
-
-        try {
-            daoFlux.remove(flux);
-        } catch (IllegalArgumentException ex) {
-            err = true;
-            Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (TransactionRequiredException ex) {
-            err = true;
-            Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
-            err = true;
-            Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        // Tous le monde est OK, Alors on commit
-        if (!err) {
-            System.out.println("COMMIT");
-            try {
-                daoItem.commit();
-                System.out.println("1");
-            } catch (Exception e) {
-                logger.debug("Erreur lors du comit de l'item", e);
-            }
-
-
-            try {
-                daoFlux.commit();
-                ServiceCollecteur.getInstance().getCacheHashFlux().removeFlux(flux);
-                System.out.println("2");
-                // Le flux doit se notifier auprès du service de collecte
-                ServiceCollecteur collecteur = ServiceCollecteur.getInstance();
-                collecteur.retirerFluxDuService(flux);
-//                flux.enregistrerAupresdesService();
-//                flux.forceChangeStatut();
-//                flux.notifyObservers("rem");
-            } catch (Exception e) {
-                logger.debug("erreur", e);
-            }
-
-        } else {
-            throw new Exception("Erreur lors de la suppression");
-        }
+//        daoFlux.setEm(daoItem.getEm()); // On donne a la daoflux le même Entity manager afin d'avoir une trasaction unique pour toute la procédure
+//
+//        Boolean err = false;
+//        List<Item> items = daoItem.itemLieAuFlux(flux);
+//
+//        int i;
+//        for (i = 0; i < items.size(); i++) {
+//            Item item = items.get(i);
+//
+//            //Supppression des items qui vont devenir orphelines
+//            if (item.getListFlux().size() < 2) {
+//                // On supprimer la relation 
+//                item.getListFlux().clear();
+//                try {
+//                    daoItem.modifier(item);
+//                    daoItem.remove(item);
+//                } catch (Exception e) {
+//                    err = true;
+//                    logger.debug("Erreur lors de la suppression", e);
+//                }
+//
+//            } else { // Sinon on détach le flux
+//                item.getListFlux().remove(flux);
+//
+//                try {
+//                    daoItem.modifier(item);
+//                } catch (Exception ex) {
+//                    err = true;
+//                    logger.debug("Erreur lors de la modification", ex);
+//                }
+//            }
+//        }
+//        // On va supprimer le flux si la procédure de suppression des items s'est déroulée correctement
+//        flux.setItem(new ArrayList<Item>());
+//
+////        DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
+////        daoFlux.beginTransaction();
+//        daoFlux.setEm(daoItem.getEm());
+////        daoFlux.setTr(daoItem.getTr());
+//
+//        try {
+//            daoFlux.remove(flux);
+//        } catch (IllegalArgumentException ex) {
+//            err = true;
+//            Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (TransactionRequiredException ex) {
+//            err = true;
+//            Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (Exception ex) {
+//            err = true;
+//            Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//
+//        // Tous le monde est OK, Alors on commit
+//        if (!err) {
+//            System.out.println("COMMIT");
+//            try {
+//                daoItem.commit();
+//                System.out.println("1");
+//            } catch (Exception e) {
+//                logger.debug("Erreur lors du comit de l'item", e);
+//            }
+//
+//
+//            try {
+//                daoFlux.commit();
+//                ServiceCollecteur.getInstance().getCacheHashFlux().removeFlux(flux);
+//                System.out.println("2");
+//                // Le flux doit se notifier auprès du service de collecte
+//                ServiceCollecteur collecteur = ServiceCollecteur.getInstance();
+//                collecteur.retirerFluxDuService(flux);
+////                flux.enregistrerAupresdesService();
+////                flux.forceChangeStatut();
+////                flux.notifyObservers("rem");
+//            } catch (Exception e) {
+//                logger.debug("erreur", e);
+//            }
+//
+//        } else {
+//            throw new Exception("Erreur lors de la suppression");
+//        }
     }
 
     /**
@@ -162,15 +171,16 @@ public class ServiceCRUDFlux extends ServiceCRUDBeansSynchro {
      * @param comit : Indique si la suppression doit être comité ou non. Permet notamment au {@link ServiceCRUDJournal}
      * de commiter une suppression à la place du présent service.
      * @param em : L'EntityManager manager a utiliser. Permet au service {@link ServiceCRUDJournal} de fournir l'entiti
-     * manager afin de comiter ou roolbacker l'ensemble des modif. Si ce paramettre est null, un nouvel em sera utilisé et une nouvelle transaction démarrée.
+     * manager afin de comiter ou roolbacker l'ensemble des modif. Si ce paramettre est null, un nouvel em sera utilisé
+     * et une nouvelle transaction démarrée.
      */
     public synchronized void SupprimerListFlux(List<Flux> listFlux, Boolean comit, EntityManager em) throws Exception {
-
+        
         DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
         DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
         DAOIncident<NotificationAjoutFlux> daoIncid = (DAOIncident<NotificationAjoutFlux>) DAOFactory.getInstance().getDaoFromType(NotificationAjoutFlux.class);
         Boolean err = false;
-
+        
         if (em == null) { // Si aucun em n'est envoyé on récupère un em depuis la factory
             em = DAOFactory.getInstance().getEntityManager();
             em.getTransaction().begin();
@@ -178,8 +188,8 @@ public class ServiceCRUDFlux extends ServiceCRUDBeansSynchro {
         daoFlux.setEm(em);
         daoItem.setEm(em);
         daoIncid.setEm(em);
-
-
+        
+        
         try {
 
             // Blockage des ressources impacté par la transaction
@@ -201,16 +211,16 @@ public class ServiceCRUDFlux extends ServiceCRUDBeansSynchro {
                 List<Item> items = daoItem.itemLieAuFlux(flux);
                 listItemConcerne.addAll(items);
             }
-
+            
             for (Iterator<Item> it2 = listItemConcerne.iterator(); it2.hasNext();) {
                 Item item = it2.next();
-
+                
                 item.getListFlux().removeAll(listFlux);
-
+                
                 List<Flux> fluxDeLitem = item.getListFlux();
                 for (Iterator<Flux> it = fluxDeLitem.iterator(); it.hasNext();) {
                     Flux flux = it.next();
-
+                    
                     for (int k = 0; k < listFlux.size(); k++) {
                         Flux flux1 = listFlux.get(k);
                         if (flux.getID().equals(flux1.getID())) {
@@ -218,7 +228,7 @@ public class ServiceCRUDFlux extends ServiceCRUDBeansSynchro {
                         }
                     }
                 }
-
+                
                 if (item.getListFlux().isEmpty()) {
                     daoItem.remove(item);
                 } else {
@@ -232,7 +242,7 @@ public class ServiceCRUDFlux extends ServiceCRUDBeansSynchro {
 
             for (int i = 0; i < listFlux.size(); i++) {
                 Flux flux = listFlux.get(i);
-
+                
                 List listNotification = daoIncid.findNotificationAjoutFluxFromFlux(flux);// On doit supprimer les incidentdeNotification qui pourrait être orpheline. Les incident normaux sont gérée par la cascade
                 for (int j = 0; j < listNotification.size(); j++) {
                     Object object = listNotification.get(j);
@@ -243,62 +253,27 @@ public class ServiceCRUDFlux extends ServiceCRUDBeansSynchro {
 
             // Si il n'y a pas eu d'erreur et qu'il faut commiter
 
-
+            
         } catch (Exception e) { // Roolback si il y a des erreur
 
             if (em != null && em.isJoinedToTransaction()) {
                 em.getTransaction().rollback();
             }
-
+            
             throw e;
         } finally { // COMIT de la transaction si tout s'est bien passé
             if (em != null && em.isJoinedToTransaction() && comit) {
                 em.getTransaction().commit();
-
+                
                 for (int i = 0; i < listFlux.size(); i++) { // Il faut supprimer les hash des flux du collecteur
                     try {
-                    ServiceCollecteur.getInstance().retirerFluxDuService(listFlux.get(i)); // On retire le flux du service de collecte.              
+                        ServiceCollecteur.getInstance().retirerFluxDuService(listFlux.get(i)); // On retire le flux du service de collecte.              
                     } catch (Exception e) {
                         logger.debug("Debug", e);
                     }
                 }
             }
         }
-
+        
     }
-    //    @Override
-    //    /**
-    //     * *
-    //     * Ajoute le flux et procède a sa synchronisation
-    //     */
-    //    public void ajouter(Object obj) throws Exception {
-    ////        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    //        // On récupère la dao
-    //        if (obj != null) {
-    //            if (!obj.getClass().equals(Flux.class)) {
-    //                throw new Exception("Ce service ne eput gérer ce type de beans");
-    //            }
-    //
-    //            Flux cast = (Flux) obj;
-    //
-    //            DaoFlux dao = DAOFactory.getInstance().getDAOFlux();
-    //            dao.beginTransaction();
-    //            dao.creer(cast);
-    //            dao.commit();
-    //
-    //            // Le flux doit se notifier auprès du service de collecte
-    //            cast.enregistrerAupresdesService();
-    //            cast.forceChangeStatut();
-    //            cast.notifyObservers();
-    //        }
-    //    }
-    //    @Override
-    //    public void modifier(Object obj) throws Exception {
-    //
-    //        DaoFlux dao = DAOFactory.getInstance().getDAOFlux();
-    //        dao.beginTransaction();
-    //        dao.modifier(obj);
-    //        dao.commit();
-    //    }
-    //    }
 }

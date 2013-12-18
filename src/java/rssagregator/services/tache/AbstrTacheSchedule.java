@@ -4,15 +4,24 @@
  */
 package rssagregator.services.tache;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import javax.persistence.EntityManager;
+import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.Duration;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
+import rssagregator.beans.exception.ActionNonEffectuee;
+import rssagregator.beans.incident.ObjectIncompatible;
 import rssagregator.services.AbstrService;
+import rssagregator.utils.ExceptionTool;
 
 /**
  * Toutes les tâche schedule de l'application doivent hériter de cette classe abstraite
@@ -28,6 +37,11 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
      * Détermine si l'instance de la tache doit avoir ou non un comportment périodique
      */
     Boolean schedule;
+    /**
+     * *
+     * 1 = temps fixe 2 : tous les jour à 3 : un jour par semaine
+     */
+    Byte typeSchedule;
     /**
      * *
      * Jour auquella tâche doit être executé
@@ -53,7 +67,7 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
      * si il y a eu une erreur lors de l'execuption de la tâche, On inclu cette erreur ici. La runnable se retourne avec
      * son erreur auprès du service qui le gère.
      */
-    Throwable exeption;
+    Throwable exeption = null;
     /**
      * *
      * Boollean permettant d'annuler la tache
@@ -65,7 +79,17 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
      * erreur. Il peuvent relancer la tâche ou alors créer un incident. La gestion des erreur est propre à chaque tâche
      * et chaque service
      */
-    Integer nbrTentative;
+    Integer nbrTentative = 0;
+    /**
+     * *
+     * Permet de savoir combien de fois la tache doit être réexecuté en cas d'erreur
+     */
+    short nbMaxReExecution = 1;
+    /**
+     * *
+     * Temps d'attente en seconde avant une réexecution
+     */
+    short nbSleepError = 1;
     /**
      * *
      * Le service Controlant la tâche
@@ -74,11 +98,42 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
     /**
      * *
      * Temps maximal d'execution de la tache en seconde. Le service va interrompre la tache si il est dépassé voit la
-     * tache {@link CalableAntiDeadBlock}
+     * tache {@link CalableAntiDeadBlock} . Il faut prévoir 5 x ou plus le temps normal.
      */
     protected Short maxExecuteTime = 60;
-    protected Date lasExecution;
+    /**
+     * *
+     * Date de la dernière execution
+     */
+    protected Date lasExecution = null;
+    /**
+     * *
+     * Permet de déterminer le log4j level qui doit être utilisé lorsque survient une erreur lors du traitement de la
+     * tache. Par défault c'est info. Pour certaine tâche, on peut vouloir un erreur afin que log4j envoi
+     * automatiquement un mail.
+     */
+    protected int logErrorLevel = org.apache.log4j.Level.INFO_INT;
+    /**
+     * *
+     * De noubreuse tache utilise un entitymanager et gère une transaction
+     */
+    protected EntityManager em = null;
+    org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
+    /**
+     * *
+     * La date de prochaine execution
+     */
+    protected Date nextExecution = null;
+    /**
+     * *
+     * indique si la tache est en cours d'execution
+     */
     protected boolean running = false;
+    /**
+     * *
+     * Liste contenant les références aux objets locké par la tache
+     */
+    List<Object> listRessourcesLocke = new ArrayList<Object>();
 
     protected AbstrTacheSchedule() {
         this.schedule = false;
@@ -180,6 +235,192 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
 
     /**
      * *
+     * Initialise la tache pour qu'elle soit prete a lancer. Modifi le statut anuller last exe,
+     */
+    public void initTask() {
+
+        this.annuler = false;
+        this.exeption = null;
+        this.running = false;
+        this.lasExecution = null;
+        this.nbrTentative = 0;
+
+    }
+
+    /**
+     * *
+     * Initialise les variables de la tâche en début de traitement. - annuler = false exeption = null running = true
+     * last
+     */
+    public void initLancementTache() {
+        annuler = false;
+        exeption = null;
+        running = true;
+        lasExecution = new Date();
+        nbrTentative = 0;
+        listRessourcesLocke = new ArrayList<Object>();
+
+    }
+
+    public void finTache() {
+        running = false;
+        if (this.schedule) {
+            try {
+
+                completerNextExecution();
+
+            } catch (NullPointerException ex) {
+                logger.error("Fin tache");
+                java.util.logging.Logger.getLogger(AbstrTacheSchedule.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ObjectIncompatible ex) {
+                java.util.logging.Logger.getLogger(AbstrTacheSchedule.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ActionNonEffectuee ex) {
+                java.util.logging.Logger.getLogger(AbstrTacheSchedule.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        
+        closeEM();
+        
+    }
+
+    public static void main(String[] args) {
+        Byte b;
+        b = 10;
+        if (b == 110) {
+            System.out.println("TRUE");
+        } else {
+            System.out.println("FALSE");
+        }
+
+    }
+
+    /**
+     * *
+     * Complete la variable {@link #nextExecution} en fonction du type de Schedul ({@link #typeSchedule}) de
+     * {@link #timeSchedule} , {@link #heureSchedule}...
+     *
+     * @throws NullPointerException Si la var schedule ou typeschedull == null
+     * @throws ObjectIncompatible Si la tache n'est pas schedule ou si la schedulation n'est pas normale.
+     * @throws ActionNonEffectuee : Si le traitement n'a pu aboutir a a la programmation dune tache bien que les
+     * arguments soient correct
+     */
+    public void completerNextExecution() throws NullPointerException, ObjectIncompatible, ActionNonEffectuee {
+        ExceptionTool.argumentNonNull(schedule);
+        ExceptionTool.argumentNonNull(typeSchedule);
+        if (!schedule) {
+            throw new ObjectIncompatible("La tache n'est pas schedulée. ");
+        }
+        if (typeSchedule < 0 || typeSchedule > 3) {
+            throw new ObjectIncompatible("Le type de schedulation n'est pas connu");
+        }
+
+
+        boolean act = false;
+        if (schedule) {
+            // Si c'est une tache schedulea temps de schedule fixe
+
+            if (typeSchedule != null && typeSchedule == 1) {
+                DateTime now = new DateTime();
+                DateTime next = now.plusSeconds(timeSchedule.intValue());
+                this.nextExecution = next.toDate();
+                act = true;
+            } else if (typeSchedule != null && typeSchedule == 2) { // Tous les jours a 
+                ExceptionTool.argumentNonNull(this.heureSchedule);
+                ExceptionTool.argumentNonNull(this.minuteSchedule);
+
+                DateTime next = new DateTime().withHourOfDay(this.heureSchedule).withMinuteOfHour(this.minuteSchedule);
+
+                if (next.isBefore(new DateTime())) {
+                    next = next.plusDays(1);
+                }
+                this.nextExecution = next.toDate();
+                act = true;
+
+            } else if (typeSchedule != null && typeSchedule == 3) {
+                DateTime next = new DateTime();
+
+                next = next.withHourOfDay(this.heureSchedule);
+                next = next.withMinuteOfHour(this.minuteSchedule);
+
+                if (next.getDayOfWeek() < this.jourSchedule) {
+                    next = next.withDayOfWeek(this.jourSchedule);
+                } else {
+                    next = next.plusWeeks(1);
+                    next = next.withDayOfWeek(this.jourSchedule);
+                }
+                this.nextExecution = next.toDate();
+                act = true;
+
+            }
+        }
+        if (!act) {
+            throw new ActionNonEffectuee("Aucune schedul n'a été éffectué");
+        }
+    }
+
+    public Date getLasExecution() {
+        return lasExecution;
+    }
+
+    public void setLasExecution(Date lasExecution) {
+        this.lasExecution = lasExecution;
+    }
+
+    protected abstract void callCorps() throws Exception;
+
+    /**
+     * *
+     * Le bloc exécuté a la fin de l'appel de la tache. Il faut notifier le service. Libérer les ressources, Retourner
+     * la tache elle meme.
+     *
+     * @return
+     */
+    protected abstract T callFinalyse();
+
+    public abstract T executeProcessus() throws InterruptedException;
+
+    public Short getMaxExecuteTime() {
+        return maxExecuteTime;
+    }
+
+    public void setMaxExecuteTime(Short maxExecuteTime) {
+        this.maxExecuteTime = maxExecuteTime;
+    }
+
+    public boolean isRunning() {
+        return running;
+    }
+
+    public Boolean getRunning() {
+        return running;
+    }
+
+    public void setRunning(boolean running) {
+        this.running = running;
+    }
+
+    public void forceChange() {
+        this.setChanged();
+    }
+
+    public short getNbMaxReExecution() {
+        return nbMaxReExecution;
+    }
+
+    public void setNbMaxReExecution(short nbMaxReExecution) {
+        this.nbMaxReExecution = nbMaxReExecution;
+    }
+
+    public short getNbSleepError() {
+        return nbSleepError;
+    }
+
+    public void setNbSleepError(short nbSleepError) {
+        this.nbSleepError = nbSleepError;
+    }
+
+    /**
+     * *
      * Le jour de la schedul. Suivant les constante de datetime. 1 = monday; 2 = tuesday...
      *
      * @param jourSchedule
@@ -220,52 +461,95 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
         this.annuler = annuler;
     }
 
-
-//    /**
-//     * *
-//     * Methode permettant d'annuler la tache
-//     */
-//    public void annuler() throws Exception {
-//        annuler = true;
-////        call();
-//        Thread.currentThread().interrupt();
-//    }
-    public Date getLasExecution() {
-        return lasExecution;
+    public Date getNextExecution() {
+        return nextExecution;
     }
 
-    public void setLasExecution(Date lasExecution) {
-        this.lasExecution = lasExecution;
+    public void setNextExecution(Date nextExecution) {
+        this.nextExecution = nextExecution;
     }
-
-    protected abstract void callCorps() throws Exception;
 
     /**
      * *
-     * Le bloc exécuté a la fin de l'appel de la tache. Il faut notifier le service. Libérer les ressources, Retourner
-     * la tache elle meme.
+     * Donne le nombre de seconde depuis la dernière execution
      *
      * @return
      */
-    protected abstract T callFinalyse();
+    public long returnExecutionDuration() {
 
-    public Short getMaxExecuteTime() {
-        return maxExecuteTime;
+        DateTime now = new DateTime();
+        DateTime lastExe = new DateTime(this.lasExecution);
+        Duration dur = new Duration(lastExe, now);
+        return dur.getStandardSeconds();
+
     }
 
-    public void setMaxExecuteTime(Short maxExecuteTime) {
-        this.maxExecuteTime = maxExecuteTime;
+    /**
+     * *
+     * Donne le nombre de seconde avant la prochaine execution de la Tâche
+     *
+     * @return
+     * @throws NullPointerException : Si la {@link #nextExecution} est null le calcul est impossible.
+     */
+    public long returnNextDuration() throws NullPointerException {
+
+        ExceptionTool.argumentNonNull(this.nextExecution);
+
+        DateTime now = new DateTime();
+        System.out.println("NOW : " + now);
+        DateTime next = new DateTime(this.nextExecution);
+        System.out.println("NEXT : " + next);
+
+        Duration dur = new Duration(now, next);
+        System.out.println("Duration de sched : " + dur.getStandardSeconds());
+
+        return dur.getStandardSeconds();
     }
 
-    public boolean isRunning() {
-        return running;
+    public int getLogErrorLevel() {
+        return logErrorLevel;
     }
 
-    public void setRunning(boolean running) {
-        this.running = running;
+    public void setLogErrorLevel(int logErrorLevel) {
+        this.logErrorLevel = logErrorLevel;
     }
 
-    public void forceChange() {
-        this.setChanged();
+    public Logger getLogger() {
+        return logger;
+    }
+
+    public void setLogger(Logger logger) {
+        this.logger = logger;
+    }
+
+    /**
+     * Ferme l'Entiti Manager manage de la tache
+     */
+    public synchronized void closeEM() {
+
+        if (em != null) {
+            if (em.isOpen()) {
+                em.close();
+            }
+        }
+        em = null; // supprime la référence à l'em
+    }
+
+    /**
+     * *
+     * @see #typeSchedule
+     * @return
+     */
+    public Byte getTypeSchedule() {
+        return typeSchedule;
+    }
+
+    /**
+     * *
+     * @see #typeSchedule
+     * @param typeSchedule
+     */
+    public void setTypeSchedule(Byte typeSchedule) {
+        this.typeSchedule = typeSchedule;
     }
 }

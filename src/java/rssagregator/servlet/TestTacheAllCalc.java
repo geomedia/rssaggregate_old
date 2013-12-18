@@ -6,24 +6,20 @@ package rssagregator.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import rssagregator.beans.Journal;
-import rssagregator.dao.DAOFactory;
-import rssagregator.dao.DaoJournal;
-import rssagregator.services.tache.TacheDecouverteAjoutFlux;
+import rssagregator.services.ServiceCollecteur;
+import rssagregator.services.tache.TacheCalculQualiteFluxLancementTous;
 
 /**
  *
  * @author clem
  */
-@WebServlet(name = "TestAjoutFlux", urlPatterns = {"/TestAjoutFlux"})
-public class TestAjoutFlux extends HttpServlet {
+@WebServlet(name = "TestTacheAllCalc", urlPatterns = {"/TestTacheAllCalc"})
+public class TestTacheAllCalc extends HttpServlet {
 
     /**
      * Processes requests for both HTTP
@@ -40,33 +36,22 @@ public class TestAjoutFlux extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
         
+        ServiceCollecteur collecteur = ServiceCollecteur.getInstance();
         
         
-          TacheDecouverteAjoutFlux instance = new TacheDecouverteAjoutFlux();
+        TacheCalculQualiteFluxLancementTous tache = new TacheCalculQualiteFluxLancementTous();
+        collecteur.submit(tache);
         
-        
-
-        
-        DaoJournal daoj = DAOFactory.getInstance().getDaoJournal();
-        Journal j = (Journal) daoj.find(new Long(1));
-        
-        
-        instance.setJournal(j);
-        try {
-            instance.call();
-        } catch (Exception ex) {
-            Logger.getLogger(TestAjoutFlux.class.getName()).log(Level.SEVERE, null, ex);
-        }
         
         try {
             /* TODO output your page here. You may use following sample code. */
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet TestAjoutFlux</title>");            
+            out.println("<title>Servlet TestTacheAllCalc</title>");            
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet TestAjoutFlux at " + request.getContextPath() + "</h1>");
+            out.println("<h1>Servlet TestTacheAllCalc at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
         } finally {            

@@ -9,6 +9,7 @@ import com.sun.syndication.io.SyndFeedInput;
 import com.sun.syndication.io.XmlReader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -41,7 +42,7 @@ import rssagregator.services.crud.ServiceCRUDFactory;
  */
 public class TacheDecouverteAjoutFlux extends TacheImpl<TacheDecouverteAjoutFlux> implements Incidable {
 
-    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheDecouverteAjoutFlux.class);
+//    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheDecouverteAjoutFlux.class);
     /**
      * *
      * Le journal que la tâche doit parcourir
@@ -143,6 +144,7 @@ public class TacheDecouverteAjoutFlux extends TacheImpl<TacheDecouverteAjoutFlux
                         f.setJournalLie(journal);
                         f.setUrl(sousTache.link);
                         f.setMediatorFlux(journal.getComportementParDefaultDesFlux());
+                        f.setCreated(new Date());
 
                         if (activerLesFLux) { // On active les flux si c'est demandé
                             f.setActive(true);
@@ -160,6 +162,7 @@ public class TacheDecouverteAjoutFlux extends TacheImpl<TacheDecouverteAjoutFlux
                             serviceCRUD.ajouter(f);
                             notificationAjoutFlux.getFluxAjoute().add(f);
                             notificationAjoutFlux.setJournal(journal);
+                            notificationAjoutFlux.setDateFin(new Date());
                         }
                     }
                 } catch (Exception e) {
@@ -290,7 +293,7 @@ public class TacheDecouverteAjoutFlux extends TacheImpl<TacheDecouverteAjoutFlux
 
     @Override
     public void fermetureIncident() throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     /**

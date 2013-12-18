@@ -14,8 +14,11 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Version;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import org.apache.poi.util.Beta;
 import rssagregator.beans.traitement.MediatorCollecteAction;
+import rssagregator.dao.DAOFactory;
 import rssagregator.services.tache.TacheDecouverteAjoutFlux;
 
 /**
@@ -25,10 +28,11 @@ import rssagregator.services.tache.TacheDecouverteAjoutFlux;
 @Entity
 //@Customizer(JournalEntityLisner.class) 
 //@Cacheable(value = false)
-public class Journal implements Serializable, BeanSynchronise {
+@XmlRootElement
+public class Journal extends Bean implements Serializable, BeanSynchronise {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.TABLE)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long ID;
 //    @Version
 //    private Integer version;
@@ -63,7 +67,7 @@ public class Journal implements Serializable, BeanSynchronise {
     /**
      * Un journal possède plusieurs flux. La suppression du journal entraine la suppression des flux par cascade.
      */
-    @OneToMany(mappedBy = "journalLie", fetch = FetchType.EAGER, cascade = {CascadeType.DETACH})
+    @OneToMany(mappedBy = "journalLie", fetch = FetchType.LAZY, cascade = {CascadeType.DETACH})
     private List<Flux> fluxLie = new ArrayList<Flux>();
     /**
      * La page d'accueil du journal. Cette variable est informative. Exemple http://www.lemonde.fr
@@ -241,6 +245,7 @@ public class Journal implements Serializable, BeanSynchronise {
      * @see #fluxLie
      * @return
      */
+    @XmlTransient
     public List<Flux> getFluxLie() {
         return fluxLie;
     }
@@ -356,5 +361,24 @@ public class Journal implements Serializable, BeanSynchronise {
         } else {
             return "journal sans nom";
         }
+    }
+
+    @Override
+    public String getReadURL() {
+        
+                Conf c = DAOFactory.getInstance().getDAOConf().getConfCourante();
+        String url = c.getServurl();
+                if (url != null && url.length() > 1) {
+            Character ch = url.charAt(url.length() - 1);
+            if (!ch.equals(new Character('/'))) {
+                url += "/";
+            }
+        }
+                
+                String retour = url + "journaux/read?id=" + ID.toString();
+                return retour;
+                
+        
+        
     }
 }

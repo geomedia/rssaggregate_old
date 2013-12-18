@@ -19,10 +19,13 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.Version;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import org.apache.poi.util.Beta;
 import org.eclipse.persistence.annotations.Index;
 import rssagregator.beans.exception.IncompleteBeanExeption;
 import rssagregator.services.ServiceSynchro;
+import rssagregator.utils.ExceptionTool;
 
 /**
  * *
@@ -38,10 +41,11 @@ import rssagregator.services.ServiceSynchro;
 @Table(name = "item")
 //@Cacheable(value = true)
 //@Cache(type = CacheType.CACHE, coordinationType = CacheCoordinationType.SEND_NEW_OBJECTS_WITH_CHANGES, isolation = CacheIsolationType.SHARED, shared = true)
+@XmlRootElement
 public class Item implements Serializable, Comparable<Item>, ContentRSS {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.TABLE)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long ID;
     /**
      * *
@@ -126,9 +130,13 @@ public class Item implements Serializable, Comparable<Item>, ContentRSS {
      */
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.REFRESH, CascadeType.MERGE}, targetEntity = Flux.class)
     private List<Flux> listFlux = new LinkedList<Flux>();
-    @OneToMany(cascade = CascadeType.ALL)
+    
+    
+//    @OneToMany(cascade = CascadeType.ALL, mappedBy = "")
+    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL)
     private List<DonneeBrute> donneeBrutes = new ArrayList<DonneeBrute>();
 
+    @XmlTransient
     public List<DonneeBrute> getDonneeBrutes() {
         return donneeBrutes;
     }
@@ -304,6 +312,7 @@ public class Item implements Serializable, Comparable<Item>, ContentRSS {
      * @see #listFlux
      * @return
      */
+    @XmlTransient
     public List<Flux> getListFlux() {
         return listFlux;
     }
@@ -456,6 +465,7 @@ public class Item implements Serializable, Comparable<Item>, ContentRSS {
             newDonneeBrute.setHashContenu(hashContenu);
             newDonneeBrute.setCategorie(categorie);
             newDonneeBrute.setContenu(contenu);
+            newDonneeBrute.setItem(this);
 
 //            newDonneeBrute.setItem(this);
             this.donneeBrutes.add(newDonneeBrute);
@@ -474,29 +484,48 @@ public class Item implements Serializable, Comparable<Item>, ContentRSS {
 
         boolean versement = false;
         List<DonneeBrute> listDonneebruteAutreItem = i.donneeBrutes;
+        
+        
+        
+      versement =  this.donneeBrutes.addAll(i.donneeBrutes);
+      
         for (int j = 0; j < listDonneebruteAutreItem.size(); j++) {
-            DonneeBrute donneeBruteAutre = listDonneebruteAutreItem.get(j);
-            List<DonneeBrute> listdonneBrutThis = this.donneeBrutes;
-            boolean trouve = false;
-            for (int k = 0; k < listdonneBrutThis.size(); k++) {
-                DonneeBrute donneeBruteThis = listdonneBrutThis.get(k);
-                if (donneeBruteAutre.getFlux().getID().equals(donneeBruteThis.getFlux().getID())) {
-                    trouve = true;
-                }
-            }
-            if (!trouve) {
-                this.donneeBrutes.add(donneeBruteAutre);
-                versement = true;
-//                System.out.println("===========VERSEMENT==============");
-//                System.out.println("NOMBRE DONNEE BRUT POUR ITEM : " + this.donneeBrutes.size());
-//                for (int k = 0; k < this.donneeBrutes.size(); k++) {
-//                    DonneeBrute donneeBrute = this.donneeBrutes.get(k);
-////                    System.out.println("DESC : " + donneeBrute.getDescription());
-//                    
-//                }
-
-            }
+            DonneeBrute donneeBrute = listDonneebruteAutreItem.get(j);
+            donneeBrute.setItem(this);
+            
         }
+      
+
+//        for (int j = 0; j < listDonneebruteAutreItem.size(); j++) {
+//            DonneeBrute donneeBrute = listDonneebruteAutreItem.get(j);
+//        }
+      
+      
+        
+//        for (int j = 0; j < listDonneebruteAutreItem.size(); j++) {
+//            DonneeBrute donneeBruteAutre = listDonneebruteAutreItem.get(j);
+//            List<DonneeBrute> listdonneBrutThis = this.donneeBrutes;
+//            boolean trouve = false;
+//            
+//            for (int k = 0; k < listdonneBrutThis.size(); k++) {
+//                DonneeBrute donneeBruteThis = listdonneBrutThis.get(k);
+//                if (donneeBruteAutre.getFlux().getID().equals(donneeBruteThis.getFlux().getID())) {
+//                    trouve = true;
+//                }
+//            }
+//            if (!trouve) {
+//                this.donneeBrutes.add(donneeBruteAutre);
+//                versement = true;
+////                System.out.println("===========VERSEMENT==============");
+////                System.out.println("NOMBRE DONNEE BRUT POUR ITEM : " + this.donneeBrutes.size());
+////                for (int k = 0; k < this.donneeBrutes.size(); k++) {
+////                    DonneeBrute donneeBrute = this.donneeBrutes.get(k);
+//////                    System.out.println("DESC : " + donneeBrute.getDescription());
+////                    
+////                }
+//
+//            }
+//        }
 
 
         if (versement) {
@@ -535,4 +564,25 @@ public class Item implements Serializable, Comparable<Item>, ContentRSS {
         }
 
     }
+    
+    /***
+     * Détermine si l'item appartien au flux envoyé en argument par comparaison des ID FLUX
+     * @param f
+     * @return 
+     */
+    public boolean appartientAuFlux(Flux f) throws NullPointerException, IllegalAccessException{
+        ExceptionTool.argumentNonNull(f);
+        ExceptionTool.checkNonNullField(f, "ID");
+        
+        for (int i = 0; i < listFlux.size(); i++) {
+            Flux flux = listFlux.get(i);
+            if(f.getID().equals(flux.getID())){
+                return true;
+            }
+            
+        }
+        return false;
+    }
+    
+    
 }

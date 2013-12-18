@@ -390,6 +390,7 @@ public class ServletTool {
 
         try {
             Object bean = dao.find(new Long(id));
+            System.out.println("beans " + bean);
 
             if (bean == null) {
                 throw new NoResultException();

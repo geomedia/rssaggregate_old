@@ -4,6 +4,7 @@
  */
 package rssagregator.services.crud;
 
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
 
@@ -58,4 +59,8 @@ public abstract class AbstrServiceCRUD {
     public abstract void supprimer(Object obj) throws Exception;
 
     public abstract void supprimer(Object obj, EntityManager em) throws Exception;
+    
+    public abstract void supprimerList(List objs)throws Exception;
+    public abstract void supprimerList(List<Object> objs, EntityManager em)throws Exception;
+    
 }

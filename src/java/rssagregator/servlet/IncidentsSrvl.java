@@ -16,18 +16,15 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import rssagregator.beans.Flux;
-import rssagregator.beans.Journal;
 import rssagregator.beans.form.AbstrForm;
 import rssagregator.beans.form.FORMFactory;
-import rssagregator.beans.form.IncidentForm;
 import rssagregator.beans.incident.AbstrIncident;
-import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DAOIncident;
 import rssagregator.dao.DaoFlux;
+import rssagregator.services.crud.AbstrServiceCRUD;
 import rssagregator.services.crud.ServiceCRUDFactory;
 import rssagregator.services.crud.ServiceCrudIncident;
-import static rssagregator.servlet.JournauxSrvl.ATT_JOURNAL;
 import rssagregator.utils.ServletTool;
 import static rssagregator.utils.ServletTool.redir;
 
@@ -225,8 +222,8 @@ public class IncidentsSrvl extends HttpServlet {
 //            request.setAttribute(ATT_LIST, listAll);
 //            //--------------------------------------------ACTION : MOD-------------------------------------
 //        } 
-        
-        
+
+
         if (action.equals("list")) {
 
             try {
@@ -237,6 +234,7 @@ public class IncidentsSrvl extends HttpServlet {
                     c = Class.forName("rssagregator.beans.incident." + request.getParameter("type"));
                     System.out.println("CLASS : " + c);
                     dao = (DAOIncident) DAOFactory.getInstance().getDaoFromType(c);
+                    System.out.println("LE type : " + c);
                     if (!AbstrIncident.class.isAssignableFrom(c)) {
                         System.out.println("PAS ASSIGNABLE");
                         throw new Exception("non");
@@ -299,44 +297,72 @@ public class IncidentsSrvl extends HttpServlet {
                 logger.debug("EXX", ex);
                 redir(request, ATT_SERV_NAME + "/read?id=" + request.getParameter("id"), "L'entité demandée n'existe pas !", Boolean.TRUE);
             }
-        }
-        //------------------------------------------ACTION CLOSE-----------------------------------------
-        /***
+        } //------------------------------------------ACTION CLOSE-----------------------------------------
+        /**
+         * *
          * Permet de clore une liste d'incident
          */
-        else if(action.equals("close")){
+        else if (action.equals("close")) {
             //On récupère les incident
             List<AbstrIncident> listIncid = new ArrayList<AbstrIncident>();
             List<Long> listId = ServletTool.parseidFromRequest(request, null);
             System.out.println("ID : " + listId.size());
-        
+
             DAOIncident dao = DAOFactory.getInstance().getDAOIncident();
             dao.setClassAssocie(AbstrIncident.class);
             for (int i = 0; i < listId.size(); i++) {
                 Long long1 = listId.get(i);
-                    System.out.println("ID ds servlet " + long1);
+                System.out.println("ID ds servlet " + long1);
                 AbstrIncident incident = (AbstrIncident) dao.find(long1);
                 System.out.println("INCID " + incident);
-                if(incident != null){
+                if (incident != null) {
                     listIncid.add(incident);
                     System.out.println("INCID DS SERVLET : " + incident.getID());
                 }
-                
+
             }
-            
+
             ServiceCrudIncident service = (ServiceCrudIncident) ServiceCRUDFactory.getInstance().getServiceFor(AbstrIncident.class);
             try {
                 service.cloreIncidents(listIncid, dao.getEm(), true);
             } catch (Exception ex) {
                 Logger.getLogger(IncidentsSrvl.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
-            
+
+
+        } else if (action.equals("rem")) {
+
+            try {
+
+                List<AbstrIncident> listIncid = new ArrayList<AbstrIncident>();
+                List<Long> listId = ServletTool.parseidFromRequest(request, null);
+                DAOIncident dao = DAOFactory.getInstance().getDAOIncident();
+                dao.setClassAssocie(AbstrIncident.class);
+                for (int i = 0; i < listId.size(); i++) {
+                    Long long1 = listId.get(i);
+                    AbstrIncident incid = (AbstrIncident) dao.find(long1);
+                    if (incid != null) {
+                        listIncid.add(incid);
+                    }
+                }
+
+                AbstrServiceCRUD service = null;
+                service = ServiceCRUDFactory.getInstance().getServiceFor(AbstrIncident.class);
+                try {
+                    service.supprimerList(listIncid);
+                } catch (Exception ex) {
+                    Logger.getLogger(IncidentsSrvl.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                ServletTool.redir(request, "incidents", "suppression effetuée", false);
+
+            } catch (Exception e) {
+                ServletTool.redir(request, "incidents", "Errerur " + e, true);
+            }
         }
-        
-        
-        
-        
+
+
+
+
 // gestion de la vue et de l'envoie vers la JSP
         if (vue.equals("jsondesc")) {
             System.out.println("JsonDesc");

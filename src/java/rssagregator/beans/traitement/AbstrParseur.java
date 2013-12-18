@@ -18,6 +18,7 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.xml.bind.annotation.XmlRootElement;
 import rssagregator.beans.Item;
 
 /**
@@ -27,6 +28,7 @@ import rssagregator.beans.Item;
 @Entity
 @Table(name = "tr_parseur")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@XmlRootElement
 public class AbstrParseur implements Serializable, Cloneable,  Callable<List<Item>> {
 
     protected String forceEncoding;
@@ -37,6 +39,10 @@ public class AbstrParseur implements Serializable, Cloneable,  Callable<List<Ite
         @Transient
     InputStream inputStream;
 
+    public AbstrParseur() {
+    }
+
+        
 
 
     public void testParse() {

@@ -16,7 +16,11 @@ import rssagregator.services.ServiceMailNotifier;
 import rssagregator.services.mailtemplate.VelocityTemplateLoad;
 
 /**
- * Cette tâche est lancée toute les jours. Toutes les exception ouvertes sont vérifiées et un mail de relance est envoyé
+ * Cette tâche est lancée toute les jours. Elle doit envoyer un mail récapitulant tout les incidents pour lesquel l'administrateur doit intervenir. CAD : <ul>
+ * <li>Incident ne possédant pas de date de fin </li>
+ * <li></li>
+ * 
+ * </ul>
  * si besoin.
  *
  * @author clem

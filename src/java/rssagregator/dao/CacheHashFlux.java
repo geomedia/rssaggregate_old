@@ -7,13 +7,10 @@ package rssagregator.dao;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
-import rssagregator.beans.DonneeBrute;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.services.ServiceCollecteur;
@@ -212,15 +209,12 @@ public class CacheHashFlux {
      */
     public synchronized Boolean removeFlux(Flux flux) {
         if (flux != null && flux.getID() != null && flux.getID() >= 0) {
-            System.out.println("IF");
 
             for (Map.Entry<Flux, Set<String>> entry : cacheHash.entrySet()) {
-                System.out.println("FOR");
                 Flux flux1 = entry.getKey();
                 Set<String> set = entry.getValue();
                 if (flux1.getID().equals(flux.getID())) {
                     try {
-                        System.out.println("try");
                         cacheHash.remove(flux);
                         return true;
                     } catch (Exception e) {
@@ -231,7 +225,6 @@ public class CacheHashFlux {
 
             }
             if (cacheHash.containsKey(flux)) {
-                System.out.println("Contain");
 
             }
         }
@@ -242,8 +235,6 @@ public class CacheHashFlux {
     }
 
     public void addAllHashDeLItem(Item itemSemblableBDD, Flux flux) {
-        System.out.println("------");
-        System.out.println("ADD ALL");
         if (itemSemblableBDD == null) {
             throw new NullPointerException("item null");
         }
@@ -257,23 +248,15 @@ public class CacheHashFlux {
             Flux flux1 = entry.getKey();
             Set<String> set = entry.getValue();
             if (flux1.getID().equals(flux.getID())) {
-                System.out.println("TROUVE FALSE");
                 trouve = true;
                 if (itemSemblableBDD.getHashContenu() != null && !itemSemblableBDD.getHashContenu().isEmpty()) {
                     set.add(itemSemblableBDD.getHashContenu());
                 }
-                else{
-                    System.out.println("HASH BAD");
-                }
-
                 for (int i = 0; i < itemSemblableBDD.getDonneeBrutes().size(); i++) {
 //                    DonneeBrute donneeBrutes = itemSemblableBDD.getDonneeBrutes().get(i);
                     String str = itemSemblableBDD.getDonneeBrutes().get(i).getHashContenu();
                     if (str != null && !str.isEmpty()) {
                         set.add(str);
-                    }
-                    else{
-                        System.out.println("HASH MAUVAIS");
                     }
                 }
                 break;
@@ -281,7 +264,6 @@ public class CacheHashFlux {
         }
 
         if (!trouve) { // Si le flux n'est pas déjà présent
-            System.out.println("NE TROUVE");
             Set<String> newSet = new HashSet<String>();
             newSet.add(itemSemblableBDD.getHashContenu());
             for (int i = 0; i < itemSemblableBDD.getDonneeBrutes().size(); i++) {
@@ -293,7 +275,5 @@ public class CacheHashFlux {
             this.cacheHash.put(flux, newSet);
         }
 
-
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

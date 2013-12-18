@@ -35,13 +35,13 @@ public class ServiceXMLTool {
      * La méthode static doit parcourir le fichier servicedef.xml afin de générer chaque service. Pour chaque chmo vim
      * se service, elle crée les tache définit dans le même xml et les lance suivant les parametres donnée par le XML
      */
-    public static void instancierServiceEtTache() throws IOException, JDOMException, ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NamingException, RessourceIntrouvable {
+    public static void instancierServiceEtTache() throws IOException, JDOMException, ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NamingException, RessourceIntrouvable, Exception {
 
-        String propfile = PropertyLoader.loadProperti("serv.properties", "varpath");
+        String varPath = (String) PropertyLoader.returnConfPath()+"servicedef.xml";
 
         SAXBuilder sxb = new SAXBuilder();
         org.jdom.Document document;
-        document = sxb.build(new File(propfile + "/servicedef.xml"));
+        document = sxb.build(new File(varPath));
         Element racine = document.getRootElement();
 
 
@@ -113,6 +113,7 @@ public class ServiceXMLTool {
             Attribute attributclass = elementService.getAttribute("class");
 
             // on instancie la class
+            System.out.println("Attribute value " + attributclass.getValue());
             Class cService = Class.forName(attributclass.getValue());
             Method serviceGetInstance = cService.getMethod("getInstance");
             AbstrService service = (AbstrService) serviceGetInstance.invoke(null, new Object[0]);
@@ -171,6 +172,7 @@ public class ServiceXMLTool {
                     castTache.setJourSchedule(new Integer(attJour.getValue()));
                     castTache.setHeureSchedule(new Integer(attheure.getValue()));
                     castTache.setMinuteSchedule(new Integer(attminute.getValue()));
+                    castTache.setTimeSchedule(null);
                     //On ajoute la tache au service. 
 
                     service.schedule(castTache);
@@ -179,8 +181,14 @@ public class ServiceXMLTool {
 //                    Elementscheduleduree = tacheElement.getChild("scheduleduree");
                     Attribute attnbSec = Elementscheduleduree.getAttribute("nbSeconde");
                     castTache.setTimeSchedule(new Integer(attnbSec.getValue()));
+                    Byte type = 1;
+                    castTache.setSchedule(Boolean.TRUE);
+                    castTache.setTypeSchedule(type);
+                    castTache.completerNextExecution();
                     service.schedule(castTache);
+                    
                 } else if (Elementtouslesjoura != null) {
+                    System.out.println("");
                     Attribute attHeure = Elementtouslesjoura.getAttribute("heure");
                     Attribute attMinute = Elementtouslesjoura.getAttribute("minute");
                     castTache.setHeureSchedule(new Integer(attHeure.getValue()));
@@ -218,6 +226,8 @@ public class ServiceXMLTool {
         } catch (NamingException ex) {
             Logger.getLogger(ServiceXMLTool.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RessourceIntrouvable ex) {
+            Logger.getLogger(ServiceXMLTool.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
             Logger.getLogger(ServiceXMLTool.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

@@ -35,6 +35,7 @@ import rssagregator.beans.Item;
 import rssagregator.beans.Journal;
 import rssagregator.beans.exception.ArgumentIncorrect;
 import rssagregator.beans.exception.IncompleteBeanExeption;
+import rssagregator.utils.ExceptionTool;
 
 /**
  * La DAO permettabt d'échanger des items avec la base de données SQL.
@@ -321,11 +322,12 @@ public class DaoItem extends AbstrDao {
         return resuList;
     }
 
-    
-    /***
+    /**
+     * *
      * Retourne les items possédant des données brute avec un hash contenu dans la list
+     *
      * @param hash
-     * @return 
+     * @return
      */
     public List<Item> findItemsAvecHashDansDonneSource(String hash) {
 
@@ -338,11 +340,13 @@ public class DaoItem extends AbstrDao {
 
 
     }
-    
-        /***
+
+    /**
+     * *
      * Retourne les items possédant des données brute avec un hash contenu dans la list
+     *
      * @param hash
-     * @return 
+     * @return
      */
     public Item findItemAvecHashDansDonneSource(String hash) {
 
@@ -352,19 +356,15 @@ public class DaoItem extends AbstrDao {
 
         Item resu = null;
         try {
-        resu = (Item) query.getSingleResult();            
+            resu = (Item) query.getSingleResult();
         } catch (Exception e) {
-
         }
 
-        
+
         return resu;
 
 
     }
-    
-    
-    
 
     /**
      * *
@@ -612,30 +612,18 @@ public class DaoItem extends AbstrDao {
         return resu;
     }
 
-    public List<Item> itemCaptureParleFluxDurantlaDernierePeriodeCollecte(Flux flux) throws ArgumentIncorrect, IncompleteBeanExeption {
+    public List<Item> itemCaptureParleFluxDurantlaCollecte(Flux flux, FluxPeriodeCaptation periode) throws ArgumentIncorrect, IncompleteBeanExeption, NullPointerException, IllegalAccessException {
 
-        if (flux == null) {
-            throw new ArgumentIncorrect("Le flux envoyé en argument est null");
-        }
+        ExceptionTool.argumentNonNull(flux);
+        ExceptionTool.argumentNonNull(periode);
+        ExceptionTool.checkNonNullField(periode, "ID");
 
-
-        // Le flux doit être activé et posséder une période de collecte
 
         List resu = null;
-        FluxPeriodeCaptation last = flux.returnDerniereFluxPeriodeCaptation();
-        System.out.println("LAST : " + last);
-        if (last == null) {
-            throw new IncompleteBeanExeption("Impossible de retrouver la dernière période de captation du flux");
-        }
-
-        if (last != null) {
-
-            String req = "SELECT i FROM Item i JOIN i.listFlux f, f.periodeCaptations p WHERE p.ID=:idP";
-            Query query = em.createQuery(req);
-            query.setParameter("idP", last.getID());
-            resu = query.getResultList();
-
-        }
+        String req = "SELECT i FROM Item i JOIN i.listFlux f, f.periodeCaptations p WHERE p.ID=:idP";
+        Query query = em.createQuery(req);
+        query.setParameter("idP", periode.getID());
+        resu = query.getResultList();
 
         return resu;
     }
@@ -651,10 +639,10 @@ public class DaoItem extends AbstrDao {
      * @throws ArgumentIncorrect Si le tite envoyé est vide ou si le journal n'a pas d'id.
      * @return
      */
-    public List<Item> findItemPossedantTitreAppartenantAuJournal(String titre, String link,Journal journal) throws NullPointerException, ArgumentIncorrect {
-        if (journal == null) {
-            throw new NullPointerException("journal null");
-        }
+    public List<Item> findItemPossedantTitreAppartenantAuJournal(String titre, String link, Journal journal) throws NullPointerException, ArgumentIncorrect {
+//        if (journal == null) {
+//            throw new NullPointerException("journal null");
+//        }
 
         if (titre == null) {
             throw new NullPointerException("titre null");
@@ -664,15 +652,28 @@ public class DaoItem extends AbstrDao {
             throw new ArgumentIncorrect("Le titre envoyé est vide");
         }
 
-        if (journal.getID() == null) {
-            throw new ArgumentIncorrect("Le journal envoyé n'a pas d'ID");
+//        if (journal.getID() == null) {
+//            throw new ArgumentIncorrect("Le journal envoyé n'a pas d'ID");
+//        }
+
+        Query query = null;
+        if (journal == null) {
+            System.out.println("=======================");
+            System.out.println("JOURNAL LIE");
+            query = em.createQuery("SELECT i From Item i JOIN i.listFlux f WHERE f.journalLie IS NULL AND i.titre LIKE(:titre) OR i.link = :link ");
+           
+        } else {
+            query = em.createQuery("SELECT i From Item i JOIN  i.listFlux f, f.journalLie j WHERE j.ID=:idJ AND i.titre LIKE(:titre) OR i.link = :link");
+                 query.setParameter("idJ", journal.getID());
         }
 
-        Query query = em.createQuery("SELECT i From Item i JOIN  i.listFlux f, f.journalLie j WHERE j.ID=:idJ AND i.titre LIKE(:titre) OR i.link = :link");
-        query.setParameter("idJ", journal.getID());
+
+    
         query.setParameter("titre", titre);
         query.setParameter("link", link);
 
-        return query.getResultList();
+        List resultat = query.getResultList();
+        System.out.println("List Size " + resultat.size());
+        return resultat;
     }
 }

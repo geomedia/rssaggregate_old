@@ -4,17 +4,12 @@
  */
 package rssagregator.services;
 
-import rssagregator.services.tache.TacheVerifFluxNotificationMail;
-import rssagregator.services.tache.TacheAlerteMail;
 import rssagregator.services.tache.TacheFactory;
 import rssagregator.services.tache.TacheEnvoyerMail;
 import rssagregator.services.tache.AbstrTacheSchedule;
-import java.io.IOException;
 import java.util.List;
-import java.util.Observable;
 import java.util.Properties;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.mail.internet.AddressException;
@@ -36,7 +31,7 @@ import rssagregator.utils.PropertyLoader;
  *
  * @author clem
  */
-public class ServiceMailNotifier extends AbstrService {
+public class ServiceMailNotifier extends ServiceImpl {
 
     private static ServiceMailNotifier instance = new ServiceMailNotifier();
 //    private ScheduledExecutorService executorService;
@@ -55,9 +50,10 @@ public class ServiceMailNotifier extends AbstrService {
         try {
             //On doit charger le fichier de conf.
             //On commence par rechercher l'emplacement du fichier propertymail dans le fichier propertie du projet.
-            String fileConf = PropertyLoader.loadProperti("serv.properties", "mailconf");
-            propertiesMail = PropertyLoader.loadFromFile(fileConf);
-        } catch (IOException ex) {
+            
+            String varPath = (String) PropertyLoader.returnConfPath()+"mailconf.properties";
+            propertiesMail = PropertyLoader.loadFromFile(varPath);
+        } catch (Exception ex) {
             Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -84,103 +80,103 @@ public class ServiceMailNotifier extends AbstrService {
 
     }
 
-    @Override
-    public synchronized void update(Observable o, Object arg) {
-
-        //=============================================================================================
-        //                      GESTION DES TACHE SCHEDULE
-        //=============================================================================================
-
-        if (o instanceof AbstrTacheSchedule) {
-
-            //=====================>VERIFICATION QUOTIDIENNE<================================
-            /**
-             * Tous les jours, à 8h, cette tâche est lancée pour vérifier nofier ler erreurs en cours.
-             */
-            if (o.getClass().equals(TacheVerifFluxNotificationMail.class)) {
-                TacheVerifFluxNotificationMail tvfnm = (TacheVerifFluxNotificationMail) o;
-                if (tvfnm.getExeption() == null) {
-                    // C'est maintenant la tache elle me qui s'occupe de sa notification email
-//                    TacheEnvoyerMail envoyerMail = new TacheEnvoyerMail(this);
-//                    envoyerMail.setContent(tvfnm.getCorps());
-//                    envoyerMail.setPropertiesMail(propertiesMail);
-//                    try {
-//                        envoyerMail.setToMailAdresses(returnMailAdmin());
-//                        executorService.submit(envoyerMail);
-//                    } catch (AddressException ex) {
-//                        logger.error("Erreur lors de la récupération des mail a notifier", ex);
-//                        Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
-//                    }
-                }
-                if (tvfnm.getSchedule()) {
-                    schedule(tvfnm);
-                    // Les mail doivent partir à 8h, pour que les admins aient ca a leur arrivée au boulot. On calcul le temps
-//                    DateTime dtCurrent = new DateTime();
-//                    DateTime next = dtCurrent.plusDays(1).withHourOfDay(8);// withDayOfWeek(DateTimeConstants.SUNDAY);
-//                    Duration dur = new Duration(dtCurrent, next);
-//                    executorService.schedule(tvfnm, dur.getStandardSeconds(), TimeUnit.SECONDS);
-                }
-
-            } //=========================>ENVOYER UN MAIL<===================================
-            /**
-             * Gestion du retour de la tache permettant d'envoyer un mail. On tente par trois fois de le réenvoyer. Si
-             * c'est toujours un échec, on créer un incident dans la base de données
-             */
-            else if (o.getClass().equals(TacheEnvoyerMail.class)) {
-
-                TacheEnvoyerMail tacheSend = (TacheEnvoyerMail) o;
-                if (tacheSend.getExeption() == null) {
-                    logger.debug("Le mail est bien parti");
-                    
-                    this.schedule(tacheSend); // On reschedule la tache
-                    
-                } else { // Si le mail n'est pas parti. On tente de le réenvoyer au bout de trois tentatives, on crée un incident
-
-//                    if (tacheSend.getExeption().getClass().equals(AucunMailAdministateur.class)) {
-//                        IncidentFactory<ServerIncident> facto = new IncidentFactory<ServerIncident>();
-//                        ServerIncident serverIncident = facto.getIncident(ServerIncident.class, "pas de mail admin dans la conf", tacheSend.getExeption());
-//                        AbstrServiceCRUD serviceCRUD = ServiceCRUDFactory.getInstance().getServiceFor(serverIncident.getClass());
-//                        try {
-//                            serviceCRUD.ajouter(serverIncident);
-//                        } catch (Exception ex) {
-//                            Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
-//                        }
-//                    } else
-                        
-                        
-                        if (tacheSend.getNbrTentative() < 3) {
-                            
-                        executorService.schedule(tacheSend, 30, TimeUnit.SECONDS); // On réexecute la tache 30 seconde plus 
-                    } else {
-                        try {
-                            tacheSend.gererIncident();
-                        } catch (Exception ex) {
-                            Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    }
-                }
-            } //=======================>ALERT MAIL (30minutes)<==============================
-            /**
-             * Gestion du retour de la tache lancée toutes les 30 minutes afin d'envoyer un mail alertant les
-             * administrateurs des derniers incidents. En fonction de ce retour, on va envoyer un mail. A la fin on
-             * modifie la date de dernière notification des incidents.
-             */ 
-            else if (o.getClass().equals(TacheAlerteMail.class)) {
-                TacheAlerteMail cast = (TacheAlerteMail) o;
-                logger.debug("Tache Alertmail s'est notifié. Nombre d'incident : " + cast.getIncidents().size());
-                //Si la tache s'est déroulé sans exeption ET que de nouveau incident ont été revevé, on envoi un mail
-                if (cast.getExeption() == null && cast.getIncidents().size() > 0) {
-                    logger.debug("erreur de la tache " + cast.getExeption());
-                    // C'est maintenant la tache qui gère l'envoie de son mail rien pour l'instant dans ce bloc
-                }
-                if (cast.getSchedule()) {
-                    schedule(cast);
-//                    executorService.schedule(cast, 30, TimeUnit.SECONDS);
-                }
-            }
-//            gererIncident((AbstrTacheSchedule) o);
-        }
-    }
+//    @Override
+//    public synchronized void update(Observable o, Object arg) {
+//
+//        //=============================================================================================
+//        //                      GESTION DES TACHE SCHEDULE
+//        //=============================================================================================
+//
+//        if (o instanceof AbstrTacheSchedule) {
+//
+//            //=====================>VERIFICATION QUOTIDIENNE<================================
+//            /**
+//             * Tous les jours, à 8h, cette tâche est lancée pour vérifier nofier ler erreurs en cours.
+//             */
+//            if (o.getClass().equals(TacheVerifFluxNotificationMail.class)) {
+//                TacheVerifFluxNotificationMail tvfnm = (TacheVerifFluxNotificationMail) o;
+//                if (tvfnm.getExeption() == null) {
+//                    // C'est maintenant la tache elle me qui s'occupe de sa notification email
+////                    TacheEnvoyerMail envoyerMail = new TacheEnvoyerMail(this);
+////                    envoyerMail.setContent(tvfnm.getCorps());
+////                    envoyerMail.setPropertiesMail(propertiesMail);
+////                    try {
+////                        envoyerMail.setToMailAdresses(returnMailAdmin());
+////                        executorService.submit(envoyerMail);
+////                    } catch (AddressException ex) {
+////                        logger.error("Erreur lors de la récupération des mail a notifier", ex);
+////                        Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
+////                    }
+//                }
+//                if (tvfnm.getSchedule()) {
+//                    schedule(tvfnm);
+//                    // Les mail doivent partir à 8h, pour que les admins aient ca a leur arrivée au boulot. On calcul le temps
+////                    DateTime dtCurrent = new DateTime();
+////                    DateTime next = dtCurrent.plusDays(1).withHourOfDay(8);// withDayOfWeek(DateTimeConstants.SUNDAY);
+////                    Duration dur = new Duration(dtCurrent, next);
+////                    executorService.schedule(tvfnm, dur.getStandardSeconds(), TimeUnit.SECONDS);
+//                }
+//
+//            } //=========================>ENVOYER UN MAIL<===================================
+//            /**
+//             * Gestion du retour de la tache permettant d'envoyer un mail. On tente par trois fois de le réenvoyer. Si
+//             * c'est toujours un échec, on créer un incident dans la base de données
+//             */
+//            else if (o.getClass().equals(TacheEnvoyerMail.class)) {
+//
+//                TacheEnvoyerMail tacheSend = (TacheEnvoyerMail) o;
+//                if (tacheSend.getExeption() == null) {
+//                    logger.debug("Le mail est bien parti");
+//                    
+////                    this.schedule(tacheSend); // On reschedule la tache
+//                    
+//                } else { // Si le mail n'est pas parti. On tente de le réenvoyer au bout de trois tentatives, on crée un incident
+//
+////                    if (tacheSend.getExeption().getClass().equals(AucunMailAdministateur.class)) {
+////                        IncidentFactory<ServerIncident> facto = new IncidentFactory<ServerIncident>();
+////                        ServerIncident serverIncident = facto.getIncident(ServerIncident.class, "pas de mail admin dans la conf", tacheSend.getExeption());
+////                        AbstrServiceCRUD serviceCRUD = ServiceCRUDFactory.getInstance().getServiceFor(serverIncident.getClass());
+////                        try {
+////                            serviceCRUD.ajouter(serverIncident);
+////                        } catch (Exception ex) {
+////                            Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
+////                        }
+////                    } else
+//                        logger.error("Impossible d'envoyer le mail.");
+//                        
+////                        if (tacheSend.getNbrTentative() < 3) {
+////                            
+////                        executorService.schedule(tacheSend, 30, TimeUnit.SECONDS); // On réexecute la tache 30 seconde plus 
+////                    } else {
+////                        try {
+////                            tacheSend.gererIncident();
+////                        } catch (Exception ex) {
+////                            Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
+////                        }
+////                    }
+//                }
+//            } //=======================>ALERT MAIL (30minutes)<==============================
+//            /**
+//             * Gestion du retour de la tache lancée toutes les 30 minutes afin d'envoyer un mail alertant les
+//             * administrateurs des derniers incidents. En fonction de ce retour, on va envoyer un mail. A la fin on
+//             * modifie la date de dernière notification des incidents.
+//             */ 
+//            else if (o.getClass().equals(TacheAlerteMail.class)) {
+//                TacheAlerteMail cast = (TacheAlerteMail) o;
+//                logger.debug("Tache Alertmail s'est notifié. Nombre d'incident : " + cast.getIncidents().size());
+//                //Si la tache s'est déroulé sans exeption ET que de nouveau incident ont été revevé, on envoi un mail
+//                if (cast.getExeption() == null && cast.getIncidents().size() > 0) {
+//                    logger.debug("erreur de la tache " + cast.getExeption());
+//                    // C'est maintenant la tache qui gère l'envoie de son mail rien pour l'instant dans ce bloc
+//                }
+//                if (cast.getSchedule()) {
+//                    schedule(cast);
+////                    executorService.schedule(cast, 30, TimeUnit.SECONDS);
+//                }
+//            }
+////            gererIncident((AbstrTacheSchedule) o);
+//        }
+//    }
 
     /**
      * *

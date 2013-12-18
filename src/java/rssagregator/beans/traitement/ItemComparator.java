@@ -129,7 +129,7 @@ public class ItemComparator implements Comparator<ContentRSS> {
         } else {
             guid = 0;
         }
-
+        System.out.println("");
 
         boolean similaire; // Les contenu doivent provenir du mm article mais ne sont pas strictementEqual
         boolean strictementEqual = false;

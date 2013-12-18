@@ -85,7 +85,7 @@ public class Conf implements Serializable {
     /***
      * Il s'agit de la path contenant les fichiers de conf du serveur. Exemple /var/lib/RSSAgregate
      */
-    private String varpath;
+//    private String varpath;
 
     /***
      * Pour vérifier la cohérence de la configuration
@@ -179,13 +179,13 @@ public class Conf implements Serializable {
         this.servurl = servurl;
     }
 
-    public String getVarpath() {
-        return varpath;
-    }
-
-    public void setVarpath(String varpath) {
-        this.varpath = varpath;
-    }
+//    public String getVarpath() {
+//        return varpath;
+//    }
+//
+//    public void setVarpath(String varpath) {
+//        this.varpath = varpath;
+//    }
     
     
     /***

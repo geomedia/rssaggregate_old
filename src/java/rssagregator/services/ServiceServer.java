@@ -4,14 +4,7 @@
  */
 package rssagregator.services;
 
-import rssagregator.services.tache.TacheStillAlive;
 import rssagregator.services.tache.AbstrTacheSchedule;
-import java.util.Observable;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import rssagregator.beans.incident.AliveIncident;
-import rssagregator.services.tache.TacheDetectDeadLock;
 
 /**
  * Cette classe permet de gérer le lancement et le maintient des services de
@@ -20,7 +13,7 @@ import rssagregator.services.tache.TacheDetectDeadLock;
  *
  * @author clem
  */
-public class ServiceServer extends AbstrService {
+public class ServiceServer extends ServiceImpl {
 
     /**
      * *
@@ -41,7 +34,6 @@ public class ServiceServer extends AbstrService {
     /**
      * Durée d'attente dans la boucle du daemon en milisecodnes
      */
-    private Integer daemonTime;
 
 //    public ServiceServer(ScheduledExecutorService executorService1) {
 //        super(executorService1);
@@ -50,7 +42,6 @@ public class ServiceServer extends AbstrService {
         super();
 //        this(Executors.newSingleThreadScheduledExecutor());
         this.isStart = isStart;
-        this.daemonTime = daemonTime;
     }
 
     public static ServiceServer getInstance() {
@@ -212,40 +203,43 @@ public class ServiceServer extends AbstrService {
 //        executorService.submit(stillAlive);
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 //    }
-    @Override
-    /**
-     * *
-     * Les tâche gérée par le service centrales se notifient par cette methode.
-     * tache : <ul>
-     * <li>steel alive <li>
-     * </ul>
-     */
-    public void update(Observable o, Object arg) {
-        if (o instanceof AbstrTacheSchedule) {
-            if (o.getClass().equals(TacheStillAlive.class)) {
-                TacheStillAlive cast = (TacheStillAlive) o;
-                if (cast.getRupture()) {
-                    AliveIncident incident = new AliveIncident();
-                    DateTimeFormatter fmt = DateTimeFormat.forPattern("dd MMMM yyyy à hh'h'mm");
-                    incident.setMessageEreur("Il semble que l'application n'était pas ouverte entre : " + fmt.print(new DateTime(cast.getDebutRupture())) + " et : " + fmt.print(new DateTime(cast.getFinRupture())));
-
-                }
-                if (cast.getSchedule()) {
-                    schedule(cast);
-                }
-            }
-            else if(o.getClass().equals(TacheDetectDeadLock.class)){
-                TacheDetectDeadLock cast = (TacheDetectDeadLock)o;
-                schedule(cast);
-                
-                
-            }
-            
-//            gererIncident((AbstrTacheSchedule) o);
-        }
-
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    
+    
+    
+//    @Override
+//    /**
+//     * *
+//     * Les tâche gérée par le service centrales se notifient par cette methode.
+//     * tache : <ul>
+//     * <li>steel alive <li>
+//     * </ul>
+//     */
+//    public void update(Observable o, Object arg) {
+//        if (o instanceof AbstrTacheSchedule) {
+//            if (o.getClass().equals(TacheStillAlive.class)) {
+//                TacheStillAlive cast = (TacheStillAlive) o;
+//                if (cast.getRupture()) {
+//                    AliveIncident incident = new AliveIncident();
+//                    DateTimeFormatter fmt = DateTimeFormat.forPattern("dd MMMM yyyy à hh'h'mm");
+//                    incident.setMessageEreur("Il semble que l'application n'était pas ouverte entre : " + fmt.print(new DateTime(cast.getDebutRupture())) + " et : " + fmt.print(new DateTime(cast.getFinRupture())));
+//
+//                }
+//                if (cast.getSchedule()) {
+//                    schedule(cast);
+//                }
+//            }
+//            else if(o.getClass().equals(TacheDetectDeadLock.class)){
+//                TacheDetectDeadLock cast = (TacheDetectDeadLock)o;
+//                schedule(cast);
+//                
+//                
+//            }
+//            
+////            gererIncident((AbstrTacheSchedule) o);
+//        }
+//
+////        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//    }
 
     @Override
     @Deprecated

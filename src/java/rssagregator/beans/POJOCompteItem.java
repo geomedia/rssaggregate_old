@@ -388,7 +388,6 @@ public class POJOCompteItem {
         
         Integer[] nbrJour = new Integer[8];
         for (int i = 0; i < 7; i++) {
-            System.out.println("I : " + i);
             DescriptiveStatistics stat = new DescriptiveStatistics();
             mapStatJour.put(i+1, stat);
 //            Long long1 = sommeJour[i];
@@ -402,7 +401,6 @@ public class POJOCompteItem {
             Integer integer = entry.getValue();
             int dayOfWeek = dt.getDayOfWeek();
 //            System.out.println("IT" );
-            System.out.println("DAYokWEEK : " + dayOfWeek);
             mapStatJour.get(dayOfWeek).addValue(integer);
 
 //            sommeJour[dayOfWeek] += integer;
@@ -563,11 +561,8 @@ public class POJOCompteItem {
 
             Date date = entry.getKey();
             Integer integer = entry.getValue();
-            System.out.println("--> IT seuilmin  :  " + seuilMin + " | SEUIL MAX : " + seuilMax + " | value : " + integer);
             if (integer < seuilMin || moyenne > seuilMax) {
-
                 dateAnormal.put(date, integer);
-                System.out.println("ANNOMALIE SUR LA DATE : " + date);
             }
 
         }

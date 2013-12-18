@@ -31,12 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.Part;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import javax.xml.ws.http.HTTPException;
-import net.sf.json.util.PropertyFilter;
-import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import rssagregator.beans.Flux;
 import rssagregator.beans.FluxPeriodeCaptation;
 import rssagregator.beans.FluxType;
@@ -52,7 +47,7 @@ import rssagregator.services.crud.ServiceCRUDFactory;
 import rssagregator.services.ServiceCollecteur;
 import rssagregator.services.tache.TacheRecupCallable;
 import rssagregator.services.crud.ServiceCRUDFlux;
-import rssagregator.services.tache.TacheFactory;
+import rssagregator.utils.PropertyLoader;
 import rssagregator.utils.ServletTool;
 
 /**
@@ -96,9 +91,6 @@ public class FluxSrvl extends HttpServlet {
         Integer firstResult = null;
         Integer itPrPage = null;
         redirmap = null;
-
-        SecurityManager manager = System.getSecurityManager();
-        System.out.println("SECUMANAGER : " + manager);
 
 
         // Un simple attribut pour que le menu brille sur la navigation courante
@@ -145,8 +137,8 @@ public class FluxSrvl extends HttpServlet {
                 request.setAttribute("jSelect", jSelect);
                 System.out.println("On a selection le journa;l " + jSelect);
             } catch (Exception e) {
-                System.out.println("ERRRRR" + e);
-                logger.debug("err recup journal ", e);
+//                System.out.println("ERRRRR" + e);
+//                logger.debug("err recup journal ", e);
             }
 
             ServletTool.actionADD(request, ATT_OBJ, ATT_FORM, Flux.class, true);
@@ -193,9 +185,6 @@ public class FluxSrvl extends HttpServlet {
         } // Si l'action est liste, on récupère la liste des flux
         //-------------------------------------------------------- ACTION LIST --------------------------------------------------------
         else if (action.equals("list")) {
-            System.out.println("----------------");
-            System.out.println("ACTION LIST");
-            System.out.println("----------------");
             //            // Restriction en fonction du journal
             try {
                 Long idJournal = new Long(request.getParameter("journalid"));
@@ -208,7 +197,6 @@ public class FluxSrvl extends HttpServlet {
             }
 
             ServletTool.actionLIST(request, Flux.class, null, daoFlux);
-            System.out.println("-->--> LIST ACTION");
 //            // On restreint la liste des flux affiché
 //            List<Flux> list = null;
 //            // Restriction en fonction du journal
@@ -251,20 +239,12 @@ public class FluxSrvl extends HttpServlet {
 
 
         } else if (action.equals("rem")) {
-            logger.debug("Action remmm");
             // On tente de supprimer. Si une exeption est levée pendant la suppression. On redirige l'utilisateur différement
             try {
                 List<Flux> listFlux = ServletTool.getListFluxFromRequest(request, daoFlux);
                 ServiceCRUDFlux service = (ServiceCRUDFlux) ServiceCRUDFactory.getInstance().getServiceFor(Flux.class);
                 service.SupprimerListFlux(listFlux, true, null);
 
-//                for (int i = 0; i < listFlux.size(); i++) {
-//                    Flux flux1 = listFlux.get(i);
-////                    ServiceCollecteur.getInstance().removeFluxWithItem(flux1);
-//                    AbstrServiceCRUD service = ServiceCRUDFactory.getInstance().getServiceFor(flux1);
-//                    service.supprimer(flux1);
-//                }
-//                daoFlux.removeall(listFlux);
                 ServletTool.redir(request, "flux", "Suppression du flux effecué.", false);
             } catch (NoResultException e) {
                 ServletTool.redir(request, "flux", "Vous demandez a supprimer des flux qui n'existent pas.", true);
@@ -281,7 +261,8 @@ public class FluxSrvl extends HttpServlet {
             ServletTool.actionREAD(request, Flux.class, ATT_OBJ);
         } //-----------------------------------------------------ACTION IMPORT CSV
         else if (action.equals("importcsv")) {
-            String varPath = DAOFactory.getInstance().getDAOConf().getConfCourante().getVarpath();
+//            String varPath = DAOFactory.getInstance().getDAOConf().getConfCourante().getVarpath();
+            String varPath = (String) PropertyLoader.returnConfPath();
             //On récupère la phase
             String phase = request.getParameter("phase");
 
@@ -480,6 +461,7 @@ public class FluxSrvl extends HttpServlet {
             }
         }
     }
+    
 
 // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**

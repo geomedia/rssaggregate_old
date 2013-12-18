@@ -51,12 +51,10 @@ public class FilterBasicBeans implements Filter {
 
         //On récupère l'action.
         String action = request.getPathInfo();
-        System.out.println("ACT  :: " + action);
         if (action != null) {
             if (action.length() > 0) {
                 action = action.substring(1, action.length());
             }
-            System.out.println("ACT  :: " + action);
 
             Conf conf = DAOFactory.getInstance().getDAOConf().getConfCourante();
             HttpSession session = request.getSession();
@@ -72,7 +70,6 @@ public class FilterBasicBeans implements Filter {
                 Boolean statutJMS = ServiceSynchro.getInstance().getStatutConnection();
                 // Si le serveur est maitre, qu'il possede des esclaves et que la connection JMS n'est pas active
                 if (conf.getMaster() && conf.getServeurSlave().size() > 0 && !statutJMS) {
-                    System.out.println("Filtre");
                     request.setAttribute("accesmsg", "<strong>La connection JMS n'est pas active</strong>. Votre action demande que la connection JMS soit active afin de répercuter les éventuelles moficications sur les serveurs esclaves");
                     request.getRequestDispatcher("/erreurHTML.jsp").forward(request, response);
                 } // Si c'est un serveur esclaves, on refuse des modification par les servlet. Les entitées ne doivent être rajouté que par synchronisation JMS
