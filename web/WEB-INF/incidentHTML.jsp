@@ -164,7 +164,7 @@
 
                                     $(function() {
                                         $("#list").jqGrid({
-                                            loadonce: false,
+                                            loadonce: true,
                                             url: "${rootpath}incidents/list?vue=grid&type=CollecteIncident",
 //                                            url: "${rootpath}item/list?vue=grid",
                                             datatype: "json",

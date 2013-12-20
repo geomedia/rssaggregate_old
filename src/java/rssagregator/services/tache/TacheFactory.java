@@ -154,6 +154,13 @@ public class TacheFactory {
             maxExecuteTime = TacheCalculQualiteFluxLancementTous_maxExecuteTime;
             typeSchedule = TacheCalculQualiteFluxLancementTous_typeSchedule;
         }
+        
+        else if (c.equals(TacheRaffiner.class)){
+            newTache = new TacheRaffiner();
+            service = ServiceCollecteur.getInstance();
+            maxExecuteTime = 200;
+        }
+        
 
 
         if (newTache == null) {

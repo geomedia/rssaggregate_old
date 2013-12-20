@@ -354,6 +354,11 @@ public class Journal extends Bean implements Serializable, BeanSynchronise {
      */
     @Override
     public String toString() {
+        
+        if(this.nom != null && !this.nom.isEmpty() && this.pays != null && !this.pays.isEmpty()){
+            return this.nom+" ("+this.pays+")";
+        }
+        
         if (this.nom != null && !this.nom.isEmpty()) {
             return this.nom;
         } else if (this.ID != null) {

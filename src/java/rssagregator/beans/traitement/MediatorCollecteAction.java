@@ -125,8 +125,8 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
      * *
      * Il est possible de configurer un second dédoublonneur complétant le travail du premier
      */
-    @OneToOne(cascade = CascadeType.ALL)
-    protected AbstrDedoublonneur dedoublonneur2;
+//    @OneToOne(cascade = CascadeType.ALL)
+//    protected AbstrDedoublonneur dedoublonneur2;
     @Transient
     private Integer nbrItemCollecte;
     /**
@@ -233,12 +233,12 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
 
 
             // Ajout brut
-            RafineurHTML rafineur = new RafineurHTML();
-            for (int i = 0; i < listItem.size(); i++) {
-                Item item = listItem.get(i);
-                item.genererDonneesBrutes(flux);
-                rafineur.raffiner(item);
-            }
+//            RafineurHTML rafineur = new RafineurHTML();
+//            for (int i = 0; i < listItem.size(); i++) {
+//                Item item = listItem.get(i);
+////                item.genererDonneesBrutes(flux);
+////                rafineur.raffiner(item);
+//            }
 
 
 
@@ -265,29 +265,29 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
 //            DedoubloneurComparaisonTitre dedoub2 = new DedoubloneurComparaisonTitre();
 //            listItem = dedoub2.dedoublonne(listItem, flux);
 
-            if (dedoublonneur2 != null && dedoublonneur2.getEnable() != null && dedoublonneur2.getEnable()) {
-                dedoublonneur2.setMediatorAReferer(this);
-                listItem = dedoublonneur2.dedoublonne(listItem, flux);
-            }
+//            if (dedoublonneur2 != null && dedoublonneur2.getEnable() != null && dedoublonneur2.getEnable()) {
+//                dedoublonneur2.setMediatorAReferer(this);
+//                listItem = dedoublonneur2.dedoublonne(listItem, flux);
+//            }
 
 
 
-            DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
+//            DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
 
 
-            for (ListIterator<Item> it = listItem.listIterator(); it.hasNext();) {
-                Item item = it.next();
-                if (item.getID() == null) {
-                    Item itBDD = daoItem.findByHash(item.getHashContenu());
-                    if (itBDD != null) {
-
-//                        itBDD.addFlux(flux);
-                        itBDD.verserLesDonneeBruteAutreItem(item);
-                        it.set(itBDD);
-
-                    }
-                }
-            }
+//            for (ListIterator<Item> it = listItem.listIterator(); it.hasNext();) {
+//                Item item = it.next();
+//                if (item.getID() == null) {
+//                    Item itBDD = daoItem.findByHash(item.getHashContenu());
+//                    if (itBDD != null) {
+//
+////                        itBDD.addFlux(flux);
+//                        itBDD.verserLesDonneeBruteAutreItem(item);
+//                        it.set(itBDD);
+//
+//                    }
+//                }
+//            }
 
 
 
@@ -490,7 +490,7 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
         this.dedoubloneur = new Dedoubloneur();
         this.requesteur = new Requester();
         this.dedoubloneur = new Dedoubloneur();
-        this.dedoublonneur2 = new DedoubloneurComparaisonTitre();
+//        this.dedoublonneur2 = new DedoubloneurComparaisonTitre();
         this.parseur = new RomeParse();
     }
 
@@ -589,13 +589,13 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
         }
     }
 
-    public AbstrDedoublonneur getDedoublonneur2() {
-        return dedoublonneur2;
-    }
-
-    public void setDedoublonneur2(AbstrDedoublonneur dedoublonneur2) {
-        this.dedoublonneur2 = dedoublonneur2;
-    }
+//    public AbstrDedoublonneur getDedoublonneur2() {
+//        return dedoublonneur2;
+//    }
+//
+//    public void setDedoublonneur2(AbstrDedoublonneur dedoublonneur2) {
+//        this.dedoublonneur2 = dedoublonneur2;
+//    }
 
     @Override
     protected MediatorCollecteAction clone() throws CloneNotSupportedException {

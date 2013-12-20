@@ -4,10 +4,6 @@
  */
 package rssagregator.servlet;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ser.FilterProvider;
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -20,7 +16,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.simple.JSONArray;
-import rssagregator.beans.DonneeBrute;
+//import rssagregator.beans.DonneeBrute;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 //import rssagregator.beans.POJOCompteItem;
@@ -29,7 +25,6 @@ import rssagregator.beans.form.AbstrForm;
 import rssagregator.beans.form.FORMFactory;
 import rssagregator.beans.form.ItemForm;
 import rssagregator.dao.DAOFactory;
-import rssagregator.dao.DAOGenerique;
 import rssagregator.dao.DaoItem;
 import rssagregator.dao.SearchFilter;
 import rssagregator.utils.ServletTool;
@@ -263,7 +258,8 @@ public class ItemSrvl extends HttpServlet {
             request.setAttribute("listflux", DAOFactory.getInstance().getDAOFlux().findAllFlux(false));
 
             //List des journaux
-            request.setAttribute("listJournaux", DAOFactory.getInstance().getDaoJournal().findall());
+//            request.setAttribute("listJournaux", DAOFactory.getInstance().getDaoJournal().findall());
+            request.setAttribute("listJournaux", DAOFactory.getInstance().getDaoJournal().findallOrederByTitre());
         }
 
         /**
@@ -353,37 +349,37 @@ public class ItemSrvl extends HttpServlet {
             request.setAttribute("compte", compteurFluxItem.getListCompteItem());
 
         }
-        if(action.equals("donneesbrutes")){
-            
-            // récupération de l'id
-            List<Long> listID = ServletTool.parseidFromRequest(request, null);
-            for (int i = 0; i < listID.size(); i++) {
-                Long long1 = listID.get(i);
-                System.out.println("IDDD" + long1);
-            }
-
-            
-            
-            DAOGenerique dao = DAOFactory.getInstance().getDAOGenerique();
-            dao.setClassAssocie(DonneeBrute.class);
-            DonneeBrute brute =  (DonneeBrute) dao.find(listID.get(0));
-            
-               ObjectMapper mapper = new ObjectMapper();
-               
-                 FilterProvider filters = new SimpleFilterProvider().addFilter("serialisePourUtilisateur",
-                        SimpleBeanPropertyFilter.serializeAllExcept("flux, item"));
-                
-                String jsonn =  mapper.writer(filters).writeValueAsString(brute);
-                request.setAttribute("jsonstr", jsonn);
-                System.out.println(""+jsonn);
-                
-                vue = "jsonstr";
-                
-            
-            
-            
-            
-        }
+//        if(action.equals("donneesbrutes")){
+//            
+//            // récupération de l'id
+//            List<Long> listID = ServletTool.parseidFromRequest(request, null);
+//            for (int i = 0; i < listID.size(); i++) {
+//                Long long1 = listID.get(i);
+//                System.out.println("IDDD" + long1);
+//            }
+//
+//            
+//            
+//            DAOGenerique dao = DAOFactory.getInstance().getDAOGenerique();
+//            dao.setClassAssocie(DonneeBrute.class);
+//            DonneeBrute brute =  (DonneeBrute) dao.find(listID.get(0));
+//            
+//               ObjectMapper mapper = new ObjectMapper();
+//               
+//                 FilterProvider filters = new SimpleFilterProvider().addFilter("serialisePourUtilisateur",
+//                        SimpleBeanPropertyFilter.serializeAllExcept("flux, item"));
+//                
+//                String jsonn =  mapper.writer(filters).writeValueAsString(brute);
+//                request.setAttribute("jsonstr", jsonn);
+//                System.out.println(""+jsonn);
+//                
+//                vue = "jsonstr";
+//                
+//            
+//            
+//            
+//            
+//        }
 
 
 

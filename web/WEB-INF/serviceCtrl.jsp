@@ -71,8 +71,8 @@ td {
                         <td>${tache}</td>
                         <td>${tache.running}</td>
                         <td> <c:if test="${tache.running eq true}">${tache.returnExecutionDuration()}</c:if></td>
-                        <td><fmt:formatDate value="${tache.lasExecution}" pattern="dd/MM/yyyy hh:mm"/></td>
-                        <td><fmt:formatDate value="${tache.nextExecution}" pattern="dd/MM/yyyy hh:mm"/></td>
+                        <td><fmt:formatDate value="${tache.lasExecution}" pattern="dd/MM/yyyy HH:mm ss"/></td>
+                        <td><fmt:formatDate value="${tache.nextExecution}" pattern="dd/MM/yyyy HH:mm ss"/></td>
                         <td>${tache.exeption}</td>
 
                     </tr>

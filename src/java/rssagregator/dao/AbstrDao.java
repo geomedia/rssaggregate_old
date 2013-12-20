@@ -100,12 +100,12 @@ public abstract class AbstrDao<T> {
         System.out.println("");
         CriteriaBuilder cb = em.getCriteriaBuilder();
         List<Predicate> listWhere = new ArrayList<Predicate>();
-        
+
 
         CriteriaQuery cq = cb.createQuery(classAssocie);
         Root root = cq.from(classAssocie);
         if (criteriaSearchFilters != null && !criteriaSearchFilters.getFilters().isEmpty()) {
-           
+
             for (int i = 0; i < criteriaSearchFilters.getFilters().size(); i++) {
 
 
@@ -113,9 +113,9 @@ public abstract class AbstrDao<T> {
                 if (searchFilter.getData() == null || searchFilter.getField() == null || searchFilter.getOp() == null || searchFilter.getType() == null) {
                     continue;
                 }
-        
+
                 if (searchFilter.getOp().equals("eq")) {
-                    
+
                     if (searchFilter.getType() != null && searchFilter.getType().equals(String.class)) {
                         listWhere.add(cb.and(cb.equal(cb.lower(root.get(searchFilter.getField())), searchFilter.getData().toString().toLowerCase())));
                     } else if (searchFilter.getType() != null && searchFilter.getType().equals(Long.class)) {
@@ -170,14 +170,11 @@ public abstract class AbstrDao<T> {
                         Date d = (Date) searchFilter.getData();
                         listWhere.add(cb.and(cb.lessThan(root.get(searchFilter.getField()), d)));
                     }
-                }
-                else if(searchFilter.getOp().equals("inn")){
+                } else if (searchFilter.getOp().equals("inn")) {
                     listWhere.add(cb.and(root.get(searchFilter.getField()).isNotNull()));
-                }
-                else if(searchFilter.getOp().equals("isn")){
+                } else if (searchFilter.getOp().equals("isn")) {
                     listWhere.add(cb.and(root.get(searchFilter.getField()).isNull()));
-                }
-                else {
+                } else {
                 }
             }
         }
@@ -245,7 +242,7 @@ public abstract class AbstrDao<T> {
     public List<T> findCriteria() {
         TypedQuery<T> tq = gestionCriteria(false);
 
-        if (criteriaSearchFilters.criteriaStartRow != null &&  criteriaSearchFilters.criteriaRow != null) {
+        if (criteriaSearchFilters.criteriaStartRow != null && criteriaSearchFilters.criteriaRow != null) {
             tq.setMaxResults(criteriaSearchFilters.criteriaRow);
             tq.setFirstResult(criteriaSearchFilters.criteriaStartRow);
         } else {
@@ -336,7 +333,7 @@ public abstract class AbstrDao<T> {
 //        tr.begin();
 
         em.remove(em.merge(obj));
-       
+
 
 //        try {
 //            if (BeanSynchronise.class.isAssignableFrom(obj.getClass())) {
@@ -373,6 +370,8 @@ public abstract class AbstrDao<T> {
         }
         return null;
     }
+
+
 
     public AbstrDao() {
     }
@@ -447,7 +446,6 @@ public abstract class AbstrDao<T> {
 //    public void setCriteriaRow(Integer criteriaRow) {
 //        this.criteriaRow = criteriaRow;
 //    }
-
     public SearchFiltersList getCriteriaSearchFilters() {
         return criteriaSearchFilters;
     }
@@ -481,7 +479,6 @@ public abstract class AbstrDao<T> {
             em.getTransaction().rollback();
         }
     }
-
 //    public EntityTransaction getTr() {
 //        return tr;
 //    }
@@ -489,6 +486,4 @@ public abstract class AbstrDao<T> {
 //    public void setTr(EntityTransaction tr) {
 //        this.tr = tr;
 //    }
-    
-    
 }

@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import javax.persistence.EntityManager;
 import org.apache.log4j.Logger;
@@ -249,8 +250,8 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
 
     /**
      * *
-     * Initialise les variables de la tâche en début de traitement. - annuler = false exeption = null running = true
-     * last
+     * Initialise les variables de la tâche en début de traitement (block du try du call). - annuler = false exeption =
+     * null running = true last
      */
     public void initLancementTache() {
         annuler = false;
@@ -259,28 +260,50 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
         lasExecution = new Date();
         nbrTentative = 0;
         listRessourcesLocke = new ArrayList<Object>();
-
     }
 
+    /**
+     * *
+     * Méthode nécessairement déclanché à la fin du call de la tâche (block finaly du call. Complete la next execution,
+     * variable running etc...; Ferme l'em; libère la semaphore
+     */
     public void finTache() {
         running = false;
+
+        //--->roolback de la transaction si elle est encore ouverte
+        try {
+            commitTransaction(false);
+        } catch (Exception e) {
+            logger.error("Erreur lors d'un roolback de " + this, e);
+        }
+
+        //---> Fermeture de l'em
+        closeEM();
+
+
+        //----> Complétion de la prochaine execution des tache schedule
         if (this.schedule) {
             try {
-
                 completerNextExecution();
-
             } catch (NullPointerException ex) {
-                logger.error("Fin tache");
-                java.util.logging.Logger.getLogger(AbstrTacheSchedule.class.getName()).log(Level.SEVERE, null, ex);
+                logger.error("Erreur Fin tache " + this, ex);
             } catch (ObjectIncompatible ex) {
-                java.util.logging.Logger.getLogger(AbstrTacheSchedule.class.getName()).log(Level.SEVERE, null, ex);
+                logger.error("Erreur Fin tache " + this, ex);
             } catch (ActionNonEffectuee ex) {
-                java.util.logging.Logger.getLogger(AbstrTacheSchedule.class.getName()).log(Level.SEVERE, null, ex);
+                logger.error("Erreur Fin tache " + this, ex);
             }
         }
-        
-        closeEM();
-        
+
+        //---> Liberation de la sémaphore ce qui permet a d'autre tâche de se lancer pour par exemple collecter de la donnée sur le journal occupé
+        if (sema != null) { //Libération de la semaphore si elle existe
+            sema.release();
+        }
+
+        //--> notification auprès des observer (le Service lié a la tâche)
+        this.setChanged();   //On se notifi au service qui va rescheduler
+        this.notifyObservers();
+
+//        closeEM();
     }
 
     public static void main(String[] args) {
@@ -468,6 +491,11 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
     public void setNextExecution(Date nextExecution) {
         this.nextExecution = nextExecution;
     }
+    /**
+     * *
+     * La semathore provenant de {@link SemaphoreLancementTache] pouvant être utilisé par les tâche pour locker une ressource sans passer par JPA
+     */
+    Semaphore sema = null;
 
     /**
      * *
@@ -493,15 +521,25 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
      */
     public long returnNextDuration() throws NullPointerException {
 
+//        ExceptionTool.argumentNonNull(this.nextExecution);
+
+        if (this.nextExecution == null) {
+            try {
+                completerNextExecution();
+            } catch (ObjectIncompatible ex) {
+                java.util.logging.Logger.getLogger(AbstrTacheSchedule.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ActionNonEffectuee ex) {
+                java.util.logging.Logger.getLogger(AbstrTacheSchedule.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
         ExceptionTool.argumentNonNull(this.nextExecution);
 
+
         DateTime now = new DateTime();
-        System.out.println("NOW : " + now);
         DateTime next = new DateTime(this.nextExecution);
-        System.out.println("NEXT : " + next);
 
         Duration dur = new Duration(now, next);
-        System.out.println("Duration de sched : " + dur.getStandardSeconds());
 
         return dur.getStandardSeconds();
     }
@@ -520,6 +558,14 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
 
     public void setLogger(Logger logger) {
         this.logger = logger;
+    }
+
+    public Semaphore getSema() {
+        return sema;
+    }
+
+    public void setSema(Semaphore sema) {
+        this.sema = sema;
     }
 
     /**
@@ -551,5 +597,34 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
      */
     public void setTypeSchedule(Byte typeSchedule) {
         this.typeSchedule = typeSchedule;
+    }
+
+    /**
+     * Commit ou roolback la transaction de l'em
+     */
+    public void commitTransaction(Boolean commit) throws Exception {
+
+        if (em != null) {
+            if (em.isJoinedToTransaction()) {
+
+
+                if (commit) {
+                    try {
+                        em.getTransaction().commit();
+                    } catch (Exception e) {
+                        logger.error("erreur lors du commit ", e);
+                        throw e;
+                    }
+
+                } else {
+                    try {
+                        em.getTransaction().rollback();
+                    } catch (Exception e) {
+                        logger.error("Erreur lors du roolback", e);
+                        throw e;
+                    }
+                }
+            }
+        }
     }
 }

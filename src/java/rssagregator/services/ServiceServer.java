@@ -343,4 +343,16 @@ public class ServiceServer extends ServiceImpl {
         super.stopService();
 
     }
+
+    @Override
+    public void lancerService() {
+        super.lancerService(); //To change body of generated methods, choose Tools | Templates.
+        SemaphoreLancementTache lancementTache = SemaphoreLancementTache.getinstance();
+        this.executorServiceAdministratif.submit(lancementTache);
+        
+        
+    }
+    
+    
+    
 }

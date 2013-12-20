@@ -111,7 +111,7 @@ public class FluxSrvl extends HttpServlet {
         DaoJournal daoJournal = DAOFactory.getInstance().getDaoJournal();
         DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
 
-        List<Object> journals = daoJournal.findall(); // On a besoin de la liste des journaux dans les pages html pour les menus déroulant. Il faut donc un attribut list journaux
+        List<Journal> journals = daoJournal.findallOrederByTitre(); // On a besoin de la liste des journaux dans les pages html pour les menus déroulant. Il faut donc un attribut list journaux
         request.setAttribute("listjournaux", journals);
 
         //Il s'agit de la liste des flux à faire devant être affichées par la vue. (en cas de mod del list)

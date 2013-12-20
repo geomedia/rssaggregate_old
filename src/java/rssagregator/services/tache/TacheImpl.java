@@ -135,9 +135,10 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
 
     /**
      * *
-     * Le bloc exécuté a la fin de l'appel de la tache. Il faut notifier le service. Libérer les ressources, Retourner
-     * la tache elle meme. Commit la transaction. En cas d'annulation la transaction est roolbacké Il peut être
-     * redéclarée.
+     * Le bloc exécuté a la fin de l'appel du traitement de la tache ({@link TacheImpl#executeProcessus()} qui déclanche
+     * successivement {@link TacheImpl#callCorps() },  {@link TacheImpl#callCatchException(java.lang.Exception) }, {@link TacheImpl#callFinalyse()
+     * }. Il faut notifier le service. Libérer les ressources, Retourner la tache elle meme. Commit la transaction. En
+     * cas d'annulation la transaction est roolbacké Il peut être redéclarée.
      *
      * @return
      */
@@ -159,9 +160,6 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
             }
         }
 
-//        this.setChanged();
-//        this.notifyObservers();
-//        running = false;
         return (T) this;
     }
 
@@ -181,7 +179,6 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
             this.annuler = true;
         }
 
-
 //        if (!DAOFactory.getInstance().getDAOConf().getConfCourante().getProd()) {
 //            logger.debug("Debug exeption Tache : " + this.getClass().getSimpleName() + "\n " + this, e);
 //        }
@@ -189,44 +186,16 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
 
         // En fonction du niveau de log on affiche ou non la trace. Certaine erreur sont récurante (Level info) , on n'affiche alors pas la trace. Si le debug est en error (envoie de mail par log 4j) on affiche la trace
 
-//        LevelRangeFilter filter = new LevelRangeFilter();
-//        filter.setLevelMin(org.apache.log4j.Level.ERROR);
-//        filter.setLevelMax(org.apache.log4j.Level.FATAL);
-
-
         if (org.apache.log4j.Level.toLevel(logErrorLevel).isGreaterOrEqual(Priority.ERROR)) {
             logger.log(Priority.toPriority(logErrorLevel), "erreur sur la tache " + this + e, e);
         } else {
             logger.log(Priority.toPriority(logErrorLevel), "erreur sur la tache " + this + e);
         }
 
-//        if (logger.getLevel().isGreaterOrEqual(Priority.ERROR)) {
-// 
-//        }
-//        else{
-//   
-//        }
         try {
-            //        if(logErrorLevel == org.apache.log4j.Level.INFO_INT){
-            ////            logger.setLevel();
-            //        }
-
-
             commitTransaction(false);
-
-
-            //        if (em != null && em.isOpen()) {
-            //            if (em.isJoinedToTransaction()) {
-            //                try {
-            //                    em.getTransaction().rollback();
-            //                } catch (Exception ex) {
-            //                    logger.error("Erreur lors du RollBack", ex);
-            //                }
-            //            }
-            //        }
         } catch (Exception ex) {
             logger.error("RoolbackException", exeption);
-//            Logger.getLogger(TacheImpl.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -241,6 +210,8 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
     @Override
     public T executeProcessus() throws InterruptedException {
         nbrTentative++;
+        this.exeption = null;// A l'execution on nullify l'exeption
+
         try {
             if (!DAOFactory.getInstance().getDAOConf().getConfCourante().getProd()) { // Si ce n'est pas en prod on affiche un débug pour toutes les exécution
                 logger.debug("Execute " + this);
@@ -248,16 +219,19 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
 
             if (!annuler) {
                 callCorps();
+            } else {
+                throw new InterruptedException(); // Si la tache est annulé on emmet une interrupt exeption
             }
 
         } catch (InterruptedException e) { // Pour une interruption on ne déclanche pas le traitement classique de l'erreur
-            logger.debug("Interruption");
+            logger.debug("Interruption de " + this);
             this.setAnnuler(true);
             throw e;
         } catch (Exception e) { // Si c'est une autre exception on lance la fonction de capture
             callCatchException(e);
 
         } finally {
+
             return callFinalyse(); // > Appel de callFinalyse qui effectue les commit libère les ressources etc.
         }
     }
@@ -271,10 +245,7 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
 //        this.annuler = false; //
 //        listRessourcesLocke = new ArrayList<Object>();
 
-
         initLancementTache();
-
-
 
         try {
 
@@ -305,13 +276,10 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
                     incidableTask.gererIncident();
                 }
             }
-
             ThreadUtils.interruptCheck(); // 
-
             logger.debug("Notification");
-            this.setChanged();   //On se notifi au service qui va rescheduler
-            this.notifyObservers();
-            return resu;
+
+
         } catch (InterruptedException e) {
             logger.debug("Interruption");
             annuler = true;
@@ -320,45 +288,10 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
             logger.error("Exception annormale tache " + this, e);
             throw e;
         } finally {
-
             // On rollback la transaction si une transaction est encore ouverte
-            try {
-                commitTransaction(false); 
-            } catch (Exception e) {
-                logger.error("Erreur lors d'un roolback de " + this, e);
-            }
-
-            finTache(); // Running = false et completion de la date de prochaine execution ; fermeture de l'em
+            finTache(); // Running = false et completion de la date de prochaine execution ; fermeture de l'em; libération de la semaphore; notification des observer
             logger.debug("END " + this);
-        }
-    }
-
-    /**
-     * Commit ou roolback la transaction de l'em
-     */
-    public void commitTransaction(Boolean commit) throws Exception {
-
-        if (em != null) {
-            if (em.isJoinedToTransaction()) {
-
-
-                if (commit) {
-                    try {
-                        em.getTransaction().commit();
-                    } catch (Exception e) {
-                        logger.error("erreur lors du commit ", e);
-                        throw e;
-                    }
-
-                } else {
-                    try {
-                        em.getTransaction().rollback();
-                    } catch (Exception e) {
-                        logger.error("Erreur lors du roolback", e);
-                        throw e;
-                    }
-                }
-            }
+            return (T) this;
         }
     }
 

@@ -126,7 +126,7 @@ public class TacheCalculQualiteFlux extends TacheImpl<TacheCalculQualiteFlux> im
         compteItem.setItems(items);
         compteItem.setDate1(date1);
         compteItem.setDate2(date2);
-        
+
         compteItem.compte();
         compteItem.calculterBoxPloat();
 
@@ -184,17 +184,19 @@ public class TacheCalculQualiteFlux extends TacheImpl<TacheCalculQualiteFlux> im
         List<AnomalieCollecte> AnomalieDsBSS = daoIncident.findOpenCollecteIncident(flux, AnomalieCollecte.class, null);
 
 
-        for (Map.Entry<Date, Integer> entry : anomalies.entrySet()) {
-            Date date = entry.getKey();
-            Integer nbtConstate = entry.getValue();
-            AnomalieCollecte anomalieIncident = factory.getIncident(AnomalieCollecte.class, "Le nombre d'item capturé pour ce jour est anormalement haut ou bas", null);
-            anomalieIncident.setDateDebut(date);
-            anomalieIncident.setNombreCaptureConstate(nbtConstate);
-            anomalieIncident.setFluxLie(flux);
-            anomalieIncident.setMoyenneDesCapture(compteItem.getMoyenne());
-            anomalieIncident.setSeuil(33);
-            ThreadUtils.interruptCheck();
-            serviceCrud.ajouterIncidentdeCollecte(anomalieIncident, flux, em, false);
+        if (false) { // Désactivé pour le moment
+            for (Map.Entry<Date, Integer> entry : anomalies.entrySet()) {
+                Date date = entry.getKey();
+                Integer nbtConstate = entry.getValue();
+                AnomalieCollecte anomalieIncident = factory.getIncident(AnomalieCollecte.class, "Le nombre d'item capturé pour ce jour est anormalement haut ou bas", null);
+                anomalieIncident.setDateDebut(date);
+                anomalieIncident.setNombreCaptureConstate(nbtConstate);
+                anomalieIncident.setFluxLie(flux);
+                anomalieIncident.setMoyenneDesCapture(compteItem.getMoyenne());
+                anomalieIncident.setSeuil(33);
+                ThreadUtils.interruptCheck();
+                serviceCrud.ajouterIncidentdeCollecte(anomalieIncident, flux, em, false);
+            }
         }
 
         //------------Enregistrement

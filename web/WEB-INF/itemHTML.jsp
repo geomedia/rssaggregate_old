@@ -36,8 +36,8 @@
 
                 </ul>
                 </p>
-                <p>Date pub : <fmt:formatDate value="${item.datePub}" pattern="dd/MM/yyyy hh:mm:ss"/></p>
-                <p>Date récup <fmt:formatDate value="${item.dateRecup}" pattern="dd/MM/yyyy hh:mm:ss"/></p>
+                <p>Date pub : <fmt:formatDate value="${item.datePub}" pattern="dd/MM/yyyy HH:mm:ss"/></p>
+                <p>Date récup <fmt:formatDate value="${item.dateRecup}" pattern="dd/MM/yyyy HH:mm:ss"/></p>
                 <p>Guid : ${item.guid}</p>
                 <p>contenu : ${item.contenu}</p>
 
@@ -46,13 +46,7 @@
                 <p></p>
 
                 <hr />
-                <h2>Données brutes</h2>
-                <select name="donneeBrutes" id="donneeBrutes">
-                    <option value="Selection">Données brutes </option>
-                    <c:forEach items="${item.donneeBrutes}" var="brute">
-                        <option value="${brute.ID}">${brute}</option>
-                    </c:forEach>
-                </select>
+
 
 
 
@@ -107,7 +101,7 @@
                                             <option value="null">Journal : </option>
                                             <option id="tous">tous</option>
                                             <c:forEach items="${listJournaux}" var="j">
-                                                <option value="${j.ID}">${j.nom}</option>
+                                                <option value="${j.ID}">${j}</option>
                                             </c:forEach>
                                         </select>
                                     </td>

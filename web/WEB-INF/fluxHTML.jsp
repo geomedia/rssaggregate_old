@@ -454,7 +454,7 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
                                 <select name="journalLie" id="journalLie">
                                     <option value="-1">Aucun</option>
                                     <c:forEach items="${listjournaux}" var="journal">
-                                        <option<c:if test="${journal.ID==bean.journalLie.ID}"> selected="selected"</c:if><c:if test="${journal.ID==jSelect.ID}"> selected="selected"</c:if> value="${journal.ID}">${journal.nom}</option>
+                                        <option<c:if test="${journal.ID==bean.journalLie.ID}"> selected="selected"</c:if><c:if test="${journal.ID==jSelect.ID}"> selected="selected"</c:if> value="${journal.ID}">${journal}</option>
                                     </c:forEach>
                                 </select>
 

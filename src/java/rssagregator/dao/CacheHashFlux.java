@@ -252,13 +252,13 @@ public class CacheHashFlux {
                 if (itemSemblableBDD.getHashContenu() != null && !itemSemblableBDD.getHashContenu().isEmpty()) {
                     set.add(itemSemblableBDD.getHashContenu());
                 }
-                for (int i = 0; i < itemSemblableBDD.getDonneeBrutes().size(); i++) {
-//                    DonneeBrute donneeBrutes = itemSemblableBDD.getDonneeBrutes().get(i);
-                    String str = itemSemblableBDD.getDonneeBrutes().get(i).getHashContenu();
-                    if (str != null && !str.isEmpty()) {
-                        set.add(str);
-                    }
-                }
+//                for (int i = 0; i < itemSemblableBDD.getDonneeBrutes().size(); i++) {
+////                    DonneeBrute donneeBrutes = itemSemblableBDD.getDonneeBrutes().get(i);
+//                    String str = itemSemblableBDD.getDonneeBrutes().get(i).getHashContenu();
+//                    if (str != null && !str.isEmpty()) {
+//                        set.add(str);
+//                    }
+//                }
                 break;
             }
         }
@@ -266,12 +266,12 @@ public class CacheHashFlux {
         if (!trouve) { // Si le flux n'est pas déjà présent
             Set<String> newSet = new HashSet<String>();
             newSet.add(itemSemblableBDD.getHashContenu());
-            for (int i = 0; i < itemSemblableBDD.getDonneeBrutes().size(); i++) {
-                String str = itemSemblableBDD.getDonneeBrutes().get(i).getHashContenu();
-                if (str != null && !str.isEmpty()) {
-                    newSet.add(str);
-                }
-            }
+//            for (int i = 0; i < itemSemblableBDD.getDonneeBrutes().size(); i++) {
+//                String str = itemSemblableBDD.getDonneeBrutes().get(i).getHashContenu();
+//                if (str != null && !str.isEmpty()) {
+//                    newSet.add(str);
+//                }
+//            }
             this.cacheHash.put(flux, newSet);
         }
 

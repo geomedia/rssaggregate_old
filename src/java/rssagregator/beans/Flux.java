@@ -70,8 +70,8 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long ID;
 
-    @OneToMany(mappedBy = "flux", cascade = CascadeType.ALL)
-    private List<DonneeBrute> donneeBrutes;
+//    @OneToMany(mappedBy = "flux", cascade = CascadeType.ALL)
+//    private List<DonneeBrute> donneeBrutes;
 
     public Flux() {
         propertyChangeSupport = new PropertyChangeSupport(this);
@@ -468,13 +468,13 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
         this.estStable = estStable;
     }
 
-    public List<DonneeBrute> getDonneeBrutes() {
-        return donneeBrutes;
-    }
-
-    public void setDonneeBrutes(List<DonneeBrute> donneeBrutes) {
-        this.donneeBrutes = donneeBrutes;
-    }
+//    public List<DonneeBrute> getDonneeBrutes() {
+//        return donneeBrutes;
+//    }
+//
+//    public void setDonneeBrutes(List<DonneeBrute> donneeBrutes) {
+//        this.donneeBrutes = donneeBrutes;
+//    }
 
     /**
      * *

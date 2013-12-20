@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
 import javax.persistence.Entity;
-import rssagregator.beans.DonneeBrute;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.dao.DAOFactory;
@@ -114,37 +113,41 @@ public class Dedoubloneur extends AbstrDedoublonneur {
 
 
                 Item ItemBDD = dao.findItemAvecHashDansDonneSource(itemCapture.getHashContenu());
+           
 
                 //Si on a trouvé une item
                 if (ItemBDD != null) {
+                         System.out.println("ITEM BDD : ");
                     //Si l'item BDD posséde déjà le flux observé
                     boolean present = fluxPresentDansList(ItemBDD.getListFlux(), flux);
                     if (present) {
                         // On parcours tout les donnes brutes de l'item BDD
+                        
+                        
+                        it.remove();
 
-                        boolean trouve = false;
-                        for (int i = 0; i < ItemBDD.getDonneeBrutes().size(); i++) {
-                            DonneeBrute donneBruteBDD = ItemBDD.getDonneeBrutes().get(i);
-
-                            if (donneBruteBDD.getHashContenu().equals(itemCapture.getHashContenu()) && donneBruteBDD.getFlux().getID().equals(flux.getID())) {
-                                trouve = true;
-                            }
-
-                        }
-                        if (trouve) {
-                            it.remove();
-                            mediatorAReferer.nbDedoubBdd++;
-//                            ServiceCollecteur.getInstance().getCacheHashFlux().addHash(flux, ItemBDD.getHashContenu());
-                            ServiceCollecteur.getInstance().getCacheHashFlux().addAllHashDeLItem(itemCapture, flux); //addHash(flux, ItemBDD.getHashContenu());
-                        } else {
-                            
-                            ItemBDD.verserLesDonneeBruteAutreItem(itemCapture);
-                            it.set(ItemBDD);
-                        }
+//                        boolean trouve = false;
+//                        for (int i = 0; i < ItemBDD.getDonneeBrutes().size(); i++) {
+//                            DonneeBrute donneBruteBDD = ItemBDD.getDonneeBrutes().get(i);
+//                            if (donneBruteBDD.getHashContenu().equals(itemCapture.getHashContenu()) && donneBruteBDD.getFlux().getID().equals(flux.getID())) {
+//                                trouve = true;
+//                            }
+//                        }
+//                        if (trouve) {
+//                            it.remove();
+//                            mediatorAReferer.nbDedoubBdd++;
+////                            ServiceCollecteur.getInstance().getCacheHashFlux().addHash(flux, ItemBDD.getHashContenu());
+//                            ServiceCollecteur.getInstance().getCacheHashFlux().addAllHashDeLItem(itemCapture, flux); //addHash(flux, ItemBDD.getHashContenu());
+//                        } else {
+//                            
+//                            ItemBDD.verserLesDonneeBruteAutreItem(itemCapture);
+//                            it.set(ItemBDD);
+//                        }
 
                     } else {
-                        ItemBDD.verserLesDonneeBruteAutreItem(itemCapture);
+//                        ItemBDD.verserLesDonneeBruteAutreItem(itemCapture);
                         it.set(ItemBDD);
+                        System.out.println("---> Inversion");
                     }
                 }
             }

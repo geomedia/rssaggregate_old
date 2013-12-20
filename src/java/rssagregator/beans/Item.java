@@ -2,12 +2,10 @@ package rssagregator.beans;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -15,7 +13,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.Version;
@@ -32,7 +30,7 @@ import rssagregator.utils.ExceptionTool;
  * <p>Entitée primordiale pour le projet GEOMEDIA. Une item corresponds à la synthèse d'un article disponible dans un
  * flux RSS. Un {@link Flux} peut posséder plusieurs items. Une même item peut de même posséder plusieurs Flux. En
  * effet, il est courrant qu'un flux "A la Une" diffuse des items similaire au flux "internationale", une même
- * information peut ainsi être trouvé dans des flux différent d'où cette relation de N à N<p>
+ * information peut ainsi être trouvé dans des flux différent d'où cette relation de N à N</p>
  *
  * @author clem
  * @version 0.1
@@ -128,22 +126,24 @@ public class Item implements Serializable, Comparable<Item>, ContentRSS {
      * *
      * Les flux auxquelles appartiennent l'item.
      */
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.REFRESH, CascadeType.MERGE}, targetEntity = Flux.class)
+    @ManyToMany(fetch = FetchType.EAGER, targetEntity = Flux.class)
     private List<Flux> listFlux = new LinkedList<Flux>();
+    @ManyToOne
+    private ItemRaffinee itemRaffinee;
     
     
 //    @OneToMany(cascade = CascadeType.ALL, mappedBy = "")
-    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL)
-    private List<DonneeBrute> donneeBrutes = new ArrayList<DonneeBrute>();
-
-    @XmlTransient
-    public List<DonneeBrute> getDonneeBrutes() {
-        return donneeBrutes;
-    }
-
-    public void setDonneeBrutes(List<DonneeBrute> donneeBrutes) {
-        this.donneeBrutes = donneeBrutes;
-    }
+//    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL)
+//    private List<DonneeBrute> donneeBrutes = new ArrayList<DonneeBrute>();
+//
+//    @XmlTransient
+//    public List<DonneeBrute> getDonneeBrutes() {
+//        return donneeBrutes;
+//    }
+//
+//    public void setDonneeBrutes(List<DonneeBrute> donneeBrutes) {
+//        this.donneeBrutes = donneeBrutes;
+//    }
 
     /**
      * *
@@ -430,47 +430,47 @@ public class Item implements Serializable, Comparable<Item>, ContentRSS {
      * @param f
      * @throws IncompleteBeanExeption 
      */
-    public void genererDonneesBrutes(Flux f) throws IncompleteBeanExeption {
-
-        if (f == null) {
-            throw new NullPointerException("impossible de verser avec un flux null");
-        }
-
-        if (f.getID() == null) {
-            throw new IncompleteBeanExeption("Le flux envoyé n'a pas d'id");
-        }
-
-
-        List<DonneeBrute> donneesbrutes = this.donneeBrutes;
-        boolean absente = true;
-        for (int i = 0; i < donneesbrutes.size(); i++) {
-            DonneeBrute donneeBrute = donneesbrutes.get(i);
-
-            if (donneeBrute.getFlux().getID().equals(f.getID()) && donneeBrute.getHashContenu().equals(this.hashContenu)) {
-                absente = false;
-            }
-
-        }
-
-        if (absente) {
-            DonneeBrute newDonneeBrute = new DonneeBrute();
-            newDonneeBrute.setDescription(description);
-            newDonneeBrute.setLink(link);
-            newDonneeBrute.setGuid(guid);
-            newDonneeBrute.setFlux(f);
-            newDonneeBrute.setHashContenu(hashContenu);
-            newDonneeBrute.setTitre(titre);
-            newDonneeBrute.setDatePub(datePub);
-            newDonneeBrute.setDateRecup(dateRecup);
-            newDonneeBrute.setHashContenu(hashContenu);
-            newDonneeBrute.setCategorie(categorie);
-            newDonneeBrute.setContenu(contenu);
-            newDonneeBrute.setItem(this);
-
+//    public void genererDonneesBrutes(Flux f) throws IncompleteBeanExeption {
+//
+//        if (f == null) {
+//            throw new NullPointerException("impossible de verser avec un flux null");
+//        }
+//
+//        if (f.getID() == null) {
+//            throw new IncompleteBeanExeption("Le flux envoyé n'a pas d'id");
+//        }
+//
+//
+//        List<DonneeBrute> donneesbrutes = this.donneeBrutes;
+//        boolean absente = true;
+//        for (int i = 0; i < donneesbrutes.size(); i++) {
+//            DonneeBrute donneeBrute = donneesbrutes.get(i);
+//
+//            if (donneeBrute.getFlux().getID().equals(f.getID()) && donneeBrute.getHashContenu().equals(this.hashContenu)) {
+//                absente = false;
+//            }
+//
+//        }
+//
+//        if (absente) {
+//            DonneeBrute newDonneeBrute = new DonneeBrute();
+//            newDonneeBrute.setDescription(description);
+//            newDonneeBrute.setLink(link);
+//            newDonneeBrute.setGuid(guid);
+//            newDonneeBrute.setFlux(f);
+//            newDonneeBrute.setHashContenu(hashContenu);
+//            newDonneeBrute.setTitre(titre);
+//            newDonneeBrute.setDatePub(datePub);
+//            newDonneeBrute.setDateRecup(dateRecup);
+//            newDonneeBrute.setHashContenu(hashContenu);
+//            newDonneeBrute.setCategorie(categorie);
+//            newDonneeBrute.setContenu(contenu);
 //            newDonneeBrute.setItem(this);
-            this.donneeBrutes.add(newDonneeBrute);
-        }
-    }
+//
+////            newDonneeBrute.setItem(this);
+//            this.donneeBrutes.add(newDonneeBrute);
+//        }
+//    }
 
     /**
      * *
@@ -479,62 +479,62 @@ public class Item implements Serializable, Comparable<Item>, ContentRSS {
      * @param i l'item pour laquelle on doit récupérer les données brutes
      * @return true si un versement qqchose a pu être versé. sinon false.
      */
-    public Boolean verserLesDonneeBruteAutreItem(Item i) {
-
-
-        boolean versement = false;
-        List<DonneeBrute> listDonneebruteAutreItem = i.donneeBrutes;
-        
-        
-        
-      versement =  this.donneeBrutes.addAll(i.donneeBrutes);
-      
-        for (int j = 0; j < listDonneebruteAutreItem.size(); j++) {
-            DonneeBrute donneeBrute = listDonneebruteAutreItem.get(j);
-            donneeBrute.setItem(this);
-            
-        }
-      
-
+//    public Boolean verserLesDonneeBruteAutreItem(Item i) {
+//
+//
+//        boolean versement = false;
+//        List<DonneeBrute> listDonneebruteAutreItem = i.donneeBrutes;
+//        
+//        
+//        
+//      versement =  this.donneeBrutes.addAll(i.donneeBrutes);
+//      
 //        for (int j = 0; j < listDonneebruteAutreItem.size(); j++) {
 //            DonneeBrute donneeBrute = listDonneebruteAutreItem.get(j);
-//        }
-      
-      
-        
-//        for (int j = 0; j < listDonneebruteAutreItem.size(); j++) {
-//            DonneeBrute donneeBruteAutre = listDonneebruteAutreItem.get(j);
-//            List<DonneeBrute> listdonneBrutThis = this.donneeBrutes;
-//            boolean trouve = false;
+//            donneeBrute.setItem(this);
 //            
-//            for (int k = 0; k < listdonneBrutThis.size(); k++) {
-//                DonneeBrute donneeBruteThis = listdonneBrutThis.get(k);
-//                if (donneeBruteAutre.getFlux().getID().equals(donneeBruteThis.getFlux().getID())) {
-//                    trouve = true;
-//                }
-//            }
-//            if (!trouve) {
-//                this.donneeBrutes.add(donneeBruteAutre);
-//                versement = true;
-////                System.out.println("===========VERSEMENT==============");
-////                System.out.println("NOMBRE DONNEE BRUT POUR ITEM : " + this.donneeBrutes.size());
-////                for (int k = 0; k < this.donneeBrutes.size(); k++) {
-////                    DonneeBrute donneeBrute = this.donneeBrutes.get(k);
-//////                    System.out.println("DESC : " + donneeBrute.getDescription());
-////                    
-////                }
-//
-//            }
 //        }
-
-
-        if (versement) {
-            return true; // Si des données brutes on été versées
-        } else {
-            return false; // si rien n'a été versé.
-        }
-
-    }
+//      
+//
+////        for (int j = 0; j < listDonneebruteAutreItem.size(); j++) {
+////            DonneeBrute donneeBrute = listDonneebruteAutreItem.get(j);
+////        }
+//      
+//      
+//        
+////        for (int j = 0; j < listDonneebruteAutreItem.size(); j++) {
+////            DonneeBrute donneeBruteAutre = listDonneebruteAutreItem.get(j);
+////            List<DonneeBrute> listdonneBrutThis = this.donneeBrutes;
+////            boolean trouve = false;
+////            
+////            for (int k = 0; k < listdonneBrutThis.size(); k++) {
+////                DonneeBrute donneeBruteThis = listdonneBrutThis.get(k);
+////                if (donneeBruteAutre.getFlux().getID().equals(donneeBruteThis.getFlux().getID())) {
+////                    trouve = true;
+////                }
+////            }
+////            if (!trouve) {
+////                this.donneeBrutes.add(donneeBruteAutre);
+////                versement = true;
+//////                System.out.println("===========VERSEMENT==============");
+//////                System.out.println("NOMBRE DONNEE BRUT POUR ITEM : " + this.donneeBrutes.size());
+//////                for (int k = 0; k < this.donneeBrutes.size(); k++) {
+//////                    DonneeBrute donneeBrute = this.donneeBrutes.get(k);
+////////                    System.out.println("DESC : " + donneeBrute.getDescription());
+//////                    
+//////                }
+////
+////            }
+////        }
+//
+//
+//        if (versement) {
+//            return true; // Si des données brutes on été versées
+//        } else {
+//            return false; // si rien n'a été versé.
+//        }
+//
+//    }
 
     /**
      * *
@@ -583,6 +583,16 @@ public class Item implements Serializable, Comparable<Item>, ContentRSS {
         }
         return false;
     }
+
+    public ItemRaffinee getItemRaffinee() {
+        return itemRaffinee;
+    }
+
+    public void setItemRaffinee(ItemRaffinee itemRaffinee) {
+        this.itemRaffinee = itemRaffinee;
+    }
+    
+    
     
     
 }

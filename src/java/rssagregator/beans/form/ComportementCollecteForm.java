@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import rssagregator.beans.traitement.Dedoubloneur;
-import rssagregator.beans.traitement.DedoubloneurComparaisonTitre;
+//import rssagregator.beans.traitement.DedoubloneurComparaisonTitre;
 import rssagregator.beans.traitement.MediatorCollecteAction;
 import rssagregator.beans.traitement.Requester;
 import rssagregator.beans.traitement.RomeParse;
@@ -34,7 +34,7 @@ public class ComportementCollecteForm extends AbstrForm {
     private String comportement_nom;
     private String comportement_desc;
     private Boolean defaut;
-    private Boolean secondDedoub;
+//    private Boolean secondDedoub;
 
     protected ComportementCollecteForm() {
     }
@@ -73,7 +73,7 @@ public class ComportementCollecteForm extends AbstrForm {
             collecte.getDedoubloneur().setDedoubCategory(dedoubCategory);
 
 
-            collecte.getDedoublonneur2().setEnable(secondDedoub);
+//            collecte.getDedoublonneur2().setEnable(secondDedoub);
 
 
 
@@ -211,12 +211,12 @@ public class ComportementCollecteForm extends AbstrForm {
         }
 
 
-        s = request.getParameter("secondDedoub");
-        if (s == null || s.isEmpty()) {
-            secondDedoub = false;
-        } else {
-            secondDedoub = true;
-        }
+//        s = request.getParameter("secondDedoub");
+//        if (s == null || s.isEmpty()) {
+//            secondDedoub = false;
+//        } else {
+//            secondDedoub = true;
+//        }
 
 
 

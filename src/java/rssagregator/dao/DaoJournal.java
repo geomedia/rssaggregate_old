@@ -4,6 +4,7 @@
  */
 package rssagregator.dao;
 
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.NoResultException;
@@ -59,6 +60,20 @@ public class DaoJournal extends AbstrDao {
         this.classAssocie = Journal.class;
         em = daof.getEntityManager();
     }
+    
+    
+        /***
+     * Retourne la liste des journaux ordonné par titre
+     * @return 
+     */
+    public List<Journal> findallOrederByTitre() {
+
+        Query req = em.createQuery("SELECT j FROM Journal j ORDER BY j.nom");
+        List<Journal> resu = req.getResultList();
+        return resu;
+    }
+    
+    
 
     //    public void modifier(Journal journal) {
     //        if (journal.getID() != null && journal.getID() >= 0) {

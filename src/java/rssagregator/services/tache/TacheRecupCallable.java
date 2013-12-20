@@ -6,9 +6,8 @@ package rssagregator.services.tache;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Observer;
 import javax.persistence.LockModeType;
-import rssagregator.beans.DonneeBrute;
+//import rssagregator.beans.DonneeBrute;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.beans.exception.CollecteUnactiveFlux;
@@ -20,6 +19,7 @@ import rssagregator.beans.incident.IncidentFactory;
 import rssagregator.beans.traitement.MediatorCollecteAction;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DAOIncident;
+import rssagregator.services.SemaphoreLancementTache;
 import rssagregator.services.ServiceCollecteur;
 import rssagregator.services.crud.AbstrServiceCRUD;
 import rssagregator.services.crud.ServiceCRUDFactory;
@@ -33,12 +33,6 @@ import rssagregator.utils.ThreadUtils;
  */
 public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements Incidable, TacheActionableSurUnBean {
 
-
-
-
-    
-    
-    
 //    org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheRecupCallable.class);
     /**
      * *
@@ -75,6 +69,9 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
      * Un pointeur permettant de retrouver le comportement utilisé (un clone de celui servant de modèle dans le flux)
      */
     MediatorCollecteAction comportementDuFlux;
+    
+    
+
 
     /**
      * *
@@ -174,7 +171,6 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
         }
     }
 
-
     @Override
     public Class getTypeIncident() {
         return CollecteIncident.class;
@@ -191,11 +187,7 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
     @Override
     protected synchronized TacheRecupCallable callFinalyse() {
         try {
-
-            // Il faut aussi supprimer des hash si ils sont trop nombreux
-
-     
-            if (this.getExeption() == null) {
+            if (this.exeption == null) {
                 commitTransaction(true);
                 // Si le comit passe alors on peut ajouter tous les hash au cache
                 ServiceCollecteur collecteur = ServiceCollecteur.getInstance();
@@ -203,11 +195,6 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
                     for (int i = 0; i < nouvellesItems.size(); i++) {
                         Item item = nouvellesItems.get(i);
                         collecteur.getCacheHashFlux().addHash(flux, item.getHashContenu());
-                        for (int j = 0; j < item.getDonneeBrutes().size(); j++) {
-                            DonneeBrute donneesBrutes = item.getDonneeBrutes().get(j);
-                            collecteur.getCacheHashFlux().addHash(flux, donneesBrutes.getHashContenu());
-
-                        }
                     }
                 }
 
@@ -226,62 +213,53 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
                 } catch (Exception e) {
                     logger.debug("err", e);
                 }
-            }
-            else{
-                System.out.println("ROOL BACK");
+            } else {
                 commitTransaction(false); // Si il y a eu des erreur on roolback
             }
 
         } catch (Exception e) {
             logger.error("Erreur sur le flux " + flux, e); // Cette erreur ne devrait pas survenir. On recevra un mail si c'est le cas grace a l'appender de Log4J
+        } finally {
+           
         }
         return (TacheRecupCallable) super.callFinalyse();
-
-//            setChanged(); // Notification du service (ServiceCollecteur)
-//            notifyObservers();
-//            return this; // La tache se retourne a l'appelant
     }
 
     @Override
-    protected void callCorps() throws InterruptedException, Exception {    
-        
+    protected void callCorps() throws InterruptedException, Exception {
+
         if (!flux.getActive()) {
             throw new CollecteUnactiveFlux("Ce flux doit être activé pour être récolté");
         }
 
         initialiserTransaction();
-        
-  
-        
-//        Thread.sleep(300000);
-        
+
 
         this.verrouillerObjectDansLEM(flux, LockModeType.PESSIMISTIC_WRITE);
 
-
         // Si le flux appartient a un journal, il faut verrouiller le journal afin d'éviter que plusieurs tache collecte les donnes d'un même journal en meme temps
         if (flux.getJournalLie() != null && flux.getJournalLie().getID() != null) {
-            verrouillerObjectDansLEM(flux.getJournalLie(), LockModeType.PESSIMISTIC_READ);
+//            verrouillerObjectDansLEM(flux.getJournalLie(), LockModeType.PESSIMISTIC_READ);
+            sema = SemaphoreLancementTache.getinstance().returnSemaphoreForRessource(flux.getJournalLie());
+            sema.acquire();
         }
-                   
+
+//        Thread.sleep(3000);
+
 
         MediatorCollecteAction cloneComportement = this.flux.getMediatorFlux().genererClone(); //On crée une copie du mediator devant être employé. Cela permet de faire travailler plusieurs flux avec le même modèle de Comportement
         this.comportementDuFlux = cloneComportement;
-        
-        ThreadUtils.interruptCheck(); // On lance l'execution si la thread n'est pas déjà interrompu
 
+        ThreadUtils.interruptCheck(); // On lance l'execution si la thread n'est pas déjà interrompu
         nouvellesItems = cloneComportement.executeActions(this.flux); // On exécute la collecte en utilisant le Comportement de Collecte cloné
 
-        
-        ThreadUtils.interruptCheck(); 
-        
+        ThreadUtils.interruptCheck();
+
         //On enregistre chaque item trouvé
         ServiceCollecteur collecteur = ServiceCollecteur.getInstance();
         for (int i = 0; i < nouvellesItems.size(); i++) {
             Item item = nouvellesItems.get(i);
             collecteur.ajouterItemAuFlux(flux, item, em, false, cloneComportement); // Il faut préciser au collecteur l'em qu'il doit utiliser, on lui donne celui qui block actuellement le flux. Les enregistrements ne sont alors pas encore commités
-            System.out.println("Et dans la tache l'item a " + item.getDonneeBrutes().size());
-        
         }
 
         logger.debug("Recup du Flux " + flux.getID() + " " + flux + "\n Découverte : " + cloneComportement.getNbrItemCollecte() + "; Mem Dedoub :" + cloneComportement.getNbDedoubMemoire() + "; dedoubBDD" + cloneComportement.getNbDedoubBdd() + "; interneFlux : " + cloneComportement.getNbDoublonInterneAuflux() + "; Liaison : " + cloneComportement.getNbLiaisonCree() + "; it crée : " + cloneComportement.getNbNouvelle());
@@ -319,8 +297,6 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
         this.incident = incident;
     }
 
-
-
     @Override
     protected void finalize() throws Throwable {
         super.finalize(); //To change body of generated methods, choose Tools | Templates.
@@ -335,10 +311,4 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
     public String toString() {
         return "TacheRecupCallable{" + "flux=" + flux + ", DateDerniereRecup=" + DateDerniereRecup + ", incident=" + incident + '}';
     }
-    
-    
-    
-    
-    
-    
 }

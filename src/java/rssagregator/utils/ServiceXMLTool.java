@@ -174,8 +174,7 @@ public class ServiceXMLTool {
                     castTache.setMinuteSchedule(new Integer(attminute.getValue()));
                     castTache.setTimeSchedule(null);
                     //On ajoute la tache au service. 
-
-                    service.schedule(castTache);
+                    service.getTacheProducteur().produire(castTache);
 
                 } else if (Elementscheduleduree != null) {
 //                    Elementscheduleduree = tacheElement.getChild("scheduleduree");
@@ -185,8 +184,7 @@ public class ServiceXMLTool {
                     castTache.setSchedule(Boolean.TRUE);
                     castTache.setTypeSchedule(type);
                     castTache.completerNextExecution();
-                    service.schedule(castTache);
-                    
+                    service.getTacheProducteur().produire(castTache);
                 } else if (Elementtouslesjoura != null) {
                     System.out.println("");
                     Attribute attHeure = Elementtouslesjoura.getAttribute("heure");
@@ -195,9 +193,8 @@ public class ServiceXMLTool {
                     castTache.setMinuteSchedule(new Integer(attMinute.getValue()));
                     castTache.setJourSchedule(null);
                     castTache.setTimeSchedule(null);
-                    service.schedule(castTache);
+                    service.getTacheProducteur().produire(castTache);
                 }
-
             }
             // On récupère la class
         }

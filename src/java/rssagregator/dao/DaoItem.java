@@ -15,6 +15,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityTransaction;
+import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
 import javax.persistence.Query;
 import javax.persistence.RollbackException;
 import javax.persistence.TypedQuery;
@@ -350,14 +352,28 @@ public class DaoItem extends AbstrDao {
      */
     public Item findItemAvecHashDansDonneSource(String hash) {
 
-        Query query = em.createQuery("SELECT item FROM Item item JOIN item.listFlux f, item.donneeBrutes b WHERE  b.hashContenu = :hash");
+//        Query query = em.createQuery("SELECT item FROM Item item JOIN item.listFlux f, item.donneeBrutes b WHERE  b.hashContenu = :hash");
+        Query query = em.createQuery("SELECT DISTINCT i FROM Item i  LEFT OUTER JOIN FETCH i.listFlux WHERE i.hashContenu = :hash");
+        // On ote ici l'emploi du distinct. Théoriquement il ne devrait pas être necessaire avec le join fetch, mais si on ne le fait pas, retour de plusieur résultat, l'orm oubli de fetcher et fait renvoie plusieurs même item pour chaque jointure
+        //cf https://www.java.net//node/663109
+        //http://www.coderanch.com/t/163772/OCEJPA/certification/JPA-getSingleResult-Error
+        
         query.setParameter("hash", hash);
 
 
         Item resu = null;
         try {
             resu = (Item) query.getSingleResult();
-        } catch (Exception e) {
+        }
+        catch (NoResultException e){
+//            logger.debug("Noresult en soit pas une erreur" , e);
+        }
+        catch (NonUniqueResultException e){
+            
+            logger.debug("Non unique pourtant le requete porte sur un hash unique ??!! :  "+ hash, e);
+        }
+        catch (Exception e) {
+            logger.error("Erreur", e);
         }
 
 

@@ -22,11 +22,13 @@ public class ServiceImpl extends AbstrService {
     public void update(Observable o, Object arg) {
         if (o instanceof AbstrTacheSchedule) {
 
+            AbstrTacheSchedule castTache = (AbstrTacheSchedule) o;
+
             logger.debug("Notification de la tache");
-            // Si c'est une tâche schedule on la reschedule
-            AbstrTacheSchedule tacheSchedule = (AbstrTacheSchedule) o;
-            if (tacheSchedule.getSchedule()) {
-                schedule(tacheSchedule);
+
+            // Si c'est une tache schedulé et pas annuler un demande la gestion du producteur de tache
+            if (castTache.getSchedule() && !castTache.getAnnuler()) {
+                this.tacheProducteur.produire(castTache);
             }
         }
     }

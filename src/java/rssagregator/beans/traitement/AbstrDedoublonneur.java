@@ -368,8 +368,8 @@ public abstract class AbstrDedoublonneur implements Serializable, Cloneable {
                             if (item1.getID() != null) {
                                 if (item1.getID().equals(item.getID())) {
                                     cpt++;
-                                    item1.verserLesDonneeBruteAutreItem(item);
-                                    item.verserLesDonneeBruteAutreItem(item1);
+//                                    item1.verserLesDonneeBruteAutreItem(item);
+//                                    item.verserLesDonneeBruteAutreItem(item1);
                                 }
                             }
                         }
