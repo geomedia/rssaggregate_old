@@ -139,24 +139,24 @@ public class ConfigSrvl extends HttpServlet {
          * *=====================================================================================
          * . ....................................ACTION : IMPORT ITEM
          *///=====================================================================================
-        if (action.equals("importitem") && confcourante.getMaster()) {
-            // On lance manuellement la tâche de Synchro
-//            ScheduledExecutorService es = Executors.newSingleThreadScheduledExecutor();
-            
-            TacheSynchroHebdomadaire recupItem = new TacheSynchroHebdomadaire(ServiceSynchro.getInstance());
-            List<Item> list = null;
-            try {
-                TacheSynchroHebdomadaire fut = recupItem.call();
-                request.setAttribute("tacheGenerale", fut);
-                
-                
-//                list = fut.getItemTrouvees(); // TODO il faudra mettre un delai limite lors qu'on aura fait des test grandeur nature.
-//                list = recupItem.call();
-                request.setAttribute("listitemtrouve", list);
-            } catch (Exception ex) {
-                Logger.getLogger(ConfigSrvl.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
+//        if (action.equals("importitem") && confcourante.getMaster()) {
+//            // On lance manuellement la tâche de Synchro
+////            ScheduledExecutorService es = Executors.newSingleThreadScheduledExecutor();
+//            
+//            TacheSynchroHebdomadaire recupItem = new TacheSynchroHebdomadaire(ServiceSynchro.getInstance());
+//            List<Item> list = null;
+//            try {
+//                TacheSynchroHebdomadaire fut = recupItem.call();
+//                request.setAttribute("tacheGenerale", fut);
+//                
+//                
+////                list = fut.getItemTrouvees(); // TODO il faudra mettre un delai limite lors qu'on aura fait des test grandeur nature.
+////                list = recupItem.call();
+//                request.setAttribute("listitemtrouve", list);
+//            } catch (Exception ex) {
+//                Logger.getLogger(ConfigSrvl.class.getName()).log(Level.SEVERE, null, ex);
+//            }
+//        }
 
         /**
          * =====================================================================================

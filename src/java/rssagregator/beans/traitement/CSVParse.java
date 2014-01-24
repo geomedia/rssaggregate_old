@@ -6,10 +6,12 @@ package rssagregator.beans.traitement;
 
 import au.com.bytecode.opencsv.CSVReader;
 import com.sun.syndication.io.FeedException;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -52,15 +54,19 @@ public class CSVParse extends AbstrParseur {
     private int cDateRecup;
     private int cCat;
     private int cContenu;
+    
+    
+    private String datePattern;
 
     @Override
-    public List<Item> execute(InputStream xml) throws IOException, IllegalArgumentException, FeedException {
+    public List<Item> execute(byte[] xml) throws IOException, IllegalArgumentException, FeedException {
 
         List<Item> listItem = new ArrayList<Item>();
+            org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
 
-        
-        
-        
+
+
+
 //        FileInputStream fileInputStream = new FileInputStream(csvFile);
 
 //        CSVReader cSVReader = new CSVReader(new InputStreamReader(xml));
@@ -68,13 +74,37 @@ public class CSVParse extends AbstrParseur {
 
         //Parcours du fichier ligne à ligne
 //        CSVReader reader = new CSVReader(new FileReader(csvFile));
-        CSVReader reader = new CSVReader(new InputStreamReader(xml), separator, quotechar, escape, line, strictQuotes, ignoreLeadingWhiteSpace);
+        System.out.println("LINE : " + line);
 
+        CSVReader reader = null;
+        if (forceEncoding != null && !forceEncoding.isEmpty()) {
+            try {
+                Charset charset = Charset.forName(forceEncoding);
+                ByteArrayInputStream bais = new ByteArrayInputStream(xml);
+                InputStreamReader inputStreamReader1 = new InputStreamReader(bais, charset);
+                
+                reader = new CSVReader(inputStreamReader1, separator, quotechar, escape, line, strictQuotes, ignoreLeadingWhiteSpace);
+
+            } catch (Exception e) {
+                logger.debug("Impossible de trouver le charset ? " , e);
+            }
+        }
+
+
+        if (reader == null) {
+              ByteArrayInputStream bais = new ByteArrayInputStream(xml);
+            reader = new CSVReader(new InputStreamReader(bais), separator, quotechar, escape, line, strictQuotes, ignoreLeadingWhiteSpace);
+        }
+
+        System.out.println("Separateur " + separator);
 
         String[] nextLine;
-        DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+//        DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter fmt = DateTimeFormat.forPattern(datePattern);
+        
 
         while ((nextLine = reader.readNext()) != null) {
+            System.out.println("ITERATION");
             String titre = nextLine[cTitre];
             String description = nextLine[cDescription];
             String link = nextLine[cLink];
@@ -83,10 +113,7 @@ public class CSVParse extends AbstrParseur {
             String dateRecup = nextLine[cDateRecup];
             String cat = nextLine[cCat];
             String contenu = nextLine[cContenu];
-            
-            System.out.println("datepub : " + datePub);
-            System.out.println("date recup : " + dateRecup);
-            System.out.println("Coll date recup : " + cDateRecup);
+
 
             Item item = new Item();
             item.setTitre(titre);
@@ -95,7 +122,6 @@ public class CSVParse extends AbstrParseur {
             item.setGuid(guid);
             item.setCategorie(cat);
             item.setContenu(contenu);
-//            item.setDatePub(new Date(datePub));
 
             // TODO : on a peut être une perte de performance avec cette librairie. Optimisation ?
             item.setDatePub(fmt.parseDateTime(datePub).toDate());
@@ -104,20 +130,8 @@ public class CSVParse extends AbstrParseur {
 
         }
 
-//        for (int i = 0; i < listItem.size(); i++) {
-//            Item item = listItem.get(i);
-//            System.out.println("Titre : " + item.getTitre());
-//            System.out.println("Desc : " + item.getDescription());
-//            System.out.println("Date Pub " + item.getDatePub());
-//            System.out.println("Date Recup : "+ item.getDateRecup());
-//        }
-//        
+        System.out.println("NOMBRE D'item " + listItem.size());
         return listItem;
-
-
-
-
-//        return super.execute(xml); //To change body of generated methods, choose Tools | Templates.
     }
 
     public CSVParse() {
@@ -241,6 +255,15 @@ public class CSVParse extends AbstrParseur {
     public void setcTitre(int cTitre) {
         this.cTitre = cTitre;
     }
+
+    public String getDatePattern() {
+        return datePattern;
+    }
+
+    public void setDatePattern(String datePattern) {
+        this.datePattern = datePattern;
+    }
+    
     
     
 

@@ -8,13 +8,10 @@ import java.net.MalformedURLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -157,18 +154,18 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
     
     
     
-    @Transient
-    protected transient short nbItTrouve= 0;
-    @Transient
-    protected transient short nbDedoubMemoire = 0;
-    @Transient
-    protected transient short nbDedoubBdd = 0;
-    @Transient
-    protected transient short nbLiaisonCree = 0;
-    @Transient
-    protected transient short nbNouvelle = 0;
-    @Transient
-    protected transient short nbDoublonInterneAuflux =0;
+//    @Transient
+//    protected transient short nbItTrouve= 0;
+//    @Transient
+//    protected transient short nbDedoubMemoire = 0;
+//    @Transient
+//    protected transient short nbDedoubBdd = 0;
+//    @Transient
+//    protected transient short nbLiaisonCree = 0;
+//    @Transient
+//    protected transient short nbNouvelle = 0;
+//    @Transient
+//    protected transient short nbDoublonInterneAuflux =0;
             
     
 
@@ -181,8 +178,9 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
     }
 
     /**
-     * Le médiator récolte les item les parse et les dédoublonne.
+     * Le médiator récolte les item les parse et les dédoublonne. DEPRECATED . IL FAUT UTILISER LES VISITOR POUR EFEFCTUER l'ACTION DE COLLECTER
      */
+    @Deprecated
     public List<Item> executeActions(Flux flux) throws MalformedURLException, IOException, HTTPException, FeedException, HTTPException, Exception {
 // On vérifie si le collecteur est actif. Pour lancer la collecte
         // On commence par récupérer le flux
@@ -198,12 +196,12 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
                     requesteur.timeOut = 15;
                 }
                 this.requesteur.requete(flux.getUrl());
-                retourInputStream = this.requesteur.getHttpInputStream();
+//                retourInputStream = this.requesteur.getHttpInputStream();
                 
 //                System.out.println("retour : " + retourInputStream.toString());
                 
                 if (parseur != null) {
-                    parseur.setInputStream(retourInputStream);
+//                    parseur.setInputStream(retourInputStream);
                 }
             }
             //-----------------------------
@@ -216,13 +214,19 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
 
             futurs = executor.submit(parseur);
             if (requesteur == null) {
-                listItem = futurs.get(12, TimeUnit.SECONDS);
+                try {
+                listItem = futurs.get(12, TimeUnit.SECONDS);                    
+                } catch (Exception e) {
+                logger.debug("ERR", e);
+                }
+
             } else {
                 listItem = futurs.get(requesteur.getTimeOut(), TimeUnit.SECONDS);
             }
 
             this.nbrItemCollecte = listItem.size();
-            this.nbItTrouve = (short) listItem.size();
+            
+//            this.nbItTrouve = (short) listItem.size();
 
 
 
@@ -242,10 +246,6 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
 
 
 
-            //rafi
-
-
-
 
 
 
@@ -257,7 +257,7 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
             if (dedoubloneur != null && dedoubloneur.enable != null && dedoubloneur.enable) {
 //                this.dedoubloneur.calculHash(listItem);
                 // On lance le premier dédoublonneur. Il est chargé de dédoublonner par rapport aux hash.
-                this.dedoubloneur.setMediatorAReferer(this);
+//                this.dedoubloneur.setMediatorAReferer(this);
                 listItem = this.dedoubloneur.dedoublonne(listItem, flux);
             }
 
@@ -297,7 +297,7 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
         } finally {
             // Quoi qu'il arrive, il faut fermer la connection. et détruire le pool du parseur. 
             if (requesteur != null) {
-                this.requesteur.disconnect();
+                this.requesteur.clore();
             }
             if (executor != null) {
                 executor.shutdownNow();
@@ -624,21 +624,6 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
         return this.clone();
     }
 
-    public static void main(String[] args) {
-        try {
-            MediatorCollecteAction mca = MediatorCollecteAction.getDefaultCollectAction();
-            System.out.println("time out 1 : " + mca.getRequesteur().getTimeOut());
-            MediatorCollecteAction mca2 = (MediatorCollecteAction) mca.clone();
-
-
-            System.out.println("time out 1 : " + mca.getRequesteur().getTimeOut());
-            System.out.println("time out 1 : " + mca2.getRequesteur().getTimeOut());
-
-
-        } catch (CloneNotSupportedException ex) {
-            Logger.getLogger(MediatorCollecteAction.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
 
 //    @Override
 //    /***
@@ -674,55 +659,55 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
         return true;
     }
 
-    public short getNbItTrouve() {
-        return nbItTrouve;
-    }
-
-    public void setNbItTrouve(short nbItTrouve) {
-        this.nbItTrouve = nbItTrouve;
-    }
-
-    public short getNbDedoubMemoire() {
-        return nbDedoubMemoire;
-    }
-
-    public void setNbDedoubMemoire(short nbDedoubMemoire) {
-        this.nbDedoubMemoire = nbDedoubMemoire;
-    }
-
-    public short getNbDedoubBdd() {
-        return nbDedoubBdd;
-    }
-
-    public void setNbDedoubBdd(short nbDedoubBdd) {
-        this.nbDedoubBdd = nbDedoubBdd;
-    }
-
-    public short getNbLiaisonCree() {
-        return nbLiaisonCree;
-    }
-
-    public void setNbLiaisonCree(short nbLiaisonCree) {
-        this.nbLiaisonCree = nbLiaisonCree;
-    }
-
-    public short getNbNouvelle() {
-        return nbNouvelle;
-    }
-
-    public void setNbNouvelle(short nbNouvelle) {
-        this.nbNouvelle = nbNouvelle;
-    }
-
-    public short getNbDoublonInterneAuflux() {
-        return nbDoublonInterneAuflux;
-    }
-
-    public void setNbDoublonInterneAuflux(short nbDoublonInterneAuflux) {
-        this.nbDoublonInterneAuflux = nbDoublonInterneAuflux;
-    }
+//    public short getNbItTrouve() {
+//        return nbItTrouve;
+//    }
+//
+//    public void setNbItTrouve(short nbItTrouve) {
+//        this.nbItTrouve = nbItTrouve;
+//    }
+//
+//    public short getNbDedoubMemoire() {
+//        return nbDedoubMemoire;
+//    }
+//
+//    public void setNbDedoubMemoire(short nbDedoubMemoire) {
+//        this.nbDedoubMemoire = nbDedoubMemoire;
+//    }
+//
+//    public short getNbDedoubBdd() {
+//        return nbDedoubBdd;
+//    }
+//
+//    public void setNbDedoubBdd(short nbDedoubBdd) {
+//        this.nbDedoubBdd = nbDedoubBdd;
+//    }
+//
+//    public short getNbLiaisonCree() {
+//        return nbLiaisonCree;
+//    }
+//
+//    public void setNbLiaisonCree(short nbLiaisonCree) {
+//        this.nbLiaisonCree = nbLiaisonCree;
+//    }
+//
+//    public short getNbNouvelle() {
+//        return nbNouvelle;
+//    }
+//
+//    public void setNbNouvelle(short nbNouvelle) {
+//        this.nbNouvelle = nbNouvelle;
+//    }
+//
+//    public short getNbDoublonInterneAuflux() {
+//        return nbDoublonInterneAuflux;
+//    }
+//
+//    public void setNbDoublonInterneAuflux(short nbDoublonInterneAuflux) {
+//        this.nbDoublonInterneAuflux = nbDoublonInterneAuflux;
+//    }
     
-    
-    
+
+
     
 }

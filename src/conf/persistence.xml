@@ -16,16 +16,16 @@
         <!--<non-jta-data-source>postconf</non-jta-data-source>-->
         <!--<non-jta-data-source/>-->
         <class>rssagregator.beans.Journal</class>
-<class>rssagregator.beans.incident.CollecteIncident</class>
-<class>rssagregator.beans.traitement.MediatorCollecteAction</class>
-<class>rssagregator.beans.traitement.AbstrParseur</class>
-<class>rssagregator.beans.Flux</class>
-<class>rssagregator.beans.Item</class>
-<class>rssagregator.beans.FluxType</class>
-<class>rssagregator.beans.traitement.AbstrRequesteur</class>
-<class>rssagregator.beans.traitement.AbstrDedoublonneur</class>
-<class>rssagregator.beans.FluxPeriodeCaptation</class>
-<exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <class>rssagregator.beans.incident.CollecteIncident</class>
+        <class>rssagregator.beans.traitement.MediatorCollecteAction</class>
+        <class>rssagregator.beans.traitement.AbstrParseur</class>
+        <class>rssagregator.beans.Flux</class>
+        <class>rssagregator.beans.Item</class>
+        <class>rssagregator.beans.FluxType</class>
+        <class>rssagregator.beans.traitement.AbstrRequesteur</class>
+        <class>rssagregator.beans.traitement.AbstrDedoublonneur</class>
+        <class>rssagregator.beans.FluxPeriodeCaptation</class>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
         <shared-cache-mode>ALL</shared-cache-mode>
         <!--=============================================================================================================-->
         <!--.................................PARAMETRES DE CONNECTION A POSTGRES SQL.....................................-->
@@ -38,34 +38,34 @@
         <properties>
             <property name="eclipselink.weaving" value="false"/>
             
-                <property name="eclipselink.ddl-generation" value="create-tables"/>
-                <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
-                <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/rss"/>
-                <property name="javax.persistence.jdbc.user" value="clem"/>
-                <property name="javax.persistence.jdbc.password" value="LGSw700S"/>
-                <!--<property name="eclipselink.cache.shared.default" value="true"/>-->
-                <!--<property name="eclipselink.cache.shared.Flux" value="true"/>-->
-                <!--=============================================================================================================-->
-                <!--...........................................CONFIG DU POOL DE CONNECTION......................................-->
-                <!--=============================================================================================================-->
-                <!--On utilise un pool interne-->
-                <property name="eclipselink.connection-pool.default.initial" value="1"/>
-                <property name="eclipselink.connection-pool.default.min" value="30"/>
-                <property name="eclipselink.connection-pool.default.max" value="40"/>
+            <property name="eclipselink.ddl-generation" value="create-tables"/>
+            <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/TGBase"/>
+            <property name="javax.persistence.jdbc.user" value="clem"/>
+            <property name="javax.persistence.jdbc.password" value="LGSw700S"/>
+            <!--<property name="eclipselink.cache.shared.default" value="true"/>-->
+            <!--<property name="eclipselink.cache.shared.Flux" value="true"/>-->
+            <!--=============================================================================================================-->
+            <!--...........................................CONFIG DU POOL DE CONNECTION......................................-->
+            <!--=============================================================================================================-->
+            <!--On utilise un pool interne-->
+            <property name="eclipselink.connection-pool.default.initial" value="1"/>
+            <property name="eclipselink.connection-pool.default.min" value="30"/>
+            <property name="eclipselink.connection-pool.default.max" value="40"/>
             
             
             
             
-                <!--=============================================================================================================-->
-                <!--.....Configuration des logs de Eclipse Link. Comme pour le reste de l'application, on va utiliser log4j.....-->
-                <!--=============================================================================================================-->
+            <!--=============================================================================================================-->
+            <!--.....Configuration des logs de Eclipse Link. Comme pour le reste de l'application, on va utiliser log4j.....-->
+            <!--=============================================================================================================-->
        
-                <property name="eclipselink.logging.logger" value="org.eclipse.persistence.logging.CommonsLoggingSessionLog"/>
-                <property name="eclipselink.logging.level" value="WARNING"/>
+            <property name="eclipselink.logging.logger" value="org.eclipse.persistence.logging.CommonsLoggingSessionLog"/>
+            <property name="eclipselink.logging.level" value="WARNING"/>
             
-                <!--==============================================================================================================-->
-                <!--Configuration du cache coordination-->
-                <!--==============================================================================================================-->
+            <!--==============================================================================================================-->
+            <!--Configuration du cache coordination-->
+            <!--==============================================================================================================-->
 
    
             
@@ -87,4 +87,77 @@
             <property name="eclipselink.ddl-generation" value="create-tables"/>
         </properties>
     </persistence-unit>-->
+    
+    
+    
+    <!--Cette seconde Persistance Unite est dédié au test-->
+    
+    
+<!--    <persistence-unit name="RSSAgregatePUTest" transaction-type="RESOURCE_LOCAL">
+        <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+        <non-jta-data-source>postconf</non-jta-data-source>
+        <non-jta-data-source/>
+        <class>rssagregator.beans.Journal</class>
+        <class>rssagregator.beans.incident.CollecteIncident</class>
+        <class>rssagregator.beans.traitement.MediatorCollecteAction</class>
+        <class>rssagregator.beans.traitement.AbstrParseur</class>
+        <class>rssagregator.beans.Flux</class>
+        <class>rssagregator.beans.Item</class>
+        <class>rssagregator.beans.FluxType</class>
+        <class>rssagregator.beans.traitement.AbstrRequesteur</class>
+        <class>rssagregator.beans.traitement.AbstrDedoublonneur</class>
+        <class>rssagregator.beans.FluxPeriodeCaptation</class>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <shared-cache-mode>ALL</shared-cache-mode>
+        =============================================================================================================
+        .................................PARAMETRES DE CONNECTION A POSTGRES SQL.....................................
+        =============================================================================================================
+                <class>rssagregator.Truc</class>
+        <class>rssagregator.services.ServiceSynchro</class>
+        <class>rssagregator.beans.Flurssagregator.beans.Flux</class>
+        <class>rssagregator.beans.Flurssagregator.beans.Item</class>
+    
+        <properties>
+            <property name="eclipselink.weaving" value="false"/>
+            
+            <property name="eclipselink.ddl-generation" value="create-tables"/>
+            <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/Test"/>
+            <property name="javax.persistence.jdbc.user" value="clem"/>
+            <property name="javax.persistence.jdbc.password" value="LGSw700S"/>
+            <property name="eclipselink.cache.shared.default" value="true"/>
+            <property name="eclipselink.cache.shared.Flux" value="true"/>
+            =============================================================================================================
+            ...........................................CONFIG DU POOL DE CONNECTION......................................
+            =============================================================================================================
+            On utilise un pool interne
+            <property name="eclipselink.connection-pool.default.initial" value="1"/>
+            <property name="eclipselink.connection-pool.default.min" value="30"/>
+            <property name="eclipselink.connection-pool.default.max" value="40"/>
+            
+            
+            
+            
+            =============================================================================================================
+            .....Configuration des logs de Eclipse Link. Comme pour le reste de l'application, on va utiliser log4j.....
+            =============================================================================================================
+       
+            <property name="eclipselink.logging.logger" value="org.eclipse.persistence.logging.CommonsLoggingSessionLog"/>
+            <property name="eclipselink.logging.level" value="WARNING"/>
+            
+            ==============================================================================================================
+            Configuration du cache coordination
+            ==============================================================================================================
+
+   
+            
+        </properties>
+        
+ 
+
+
+    </persistence-unit>-->
+    
+    
+    
 </persistence>

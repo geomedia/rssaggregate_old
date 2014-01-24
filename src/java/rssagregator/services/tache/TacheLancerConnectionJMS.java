@@ -29,15 +29,15 @@ public class TacheLancerConnectionJMS extends TacheImpl<TacheLancerConnectionJMS
 
 //    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheLancerConnectionJMS.class);
 
-    /**
-     * *
-     * Constructeur de la tâche
-     *
-     * @param s le service devant gérer le retour de la tâche
-     */
-    public TacheLancerConnectionJMS(Observer s) {
-        super(s);
-    }
+//    /**
+//     * *
+//     * Constructeur de la tâche
+//     *
+//     * @param s le service devant gérer le retour de la tâche
+//     */
+//    public TacheLancerConnectionJMS(Observer s) {
+//        super(s);
+//    }
 
     public TacheLancerConnectionJMS() {
         super();

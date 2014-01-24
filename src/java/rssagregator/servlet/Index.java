@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author clem
  */
-@WebServlet(name = "Index", urlPatterns = {"/index"})
+@WebServlet(name = "Index", urlPatterns = {"/index3"})
 public class Index extends HttpServlet {
     public static final String VUE = "/WEB-INF/index.jsp";
     

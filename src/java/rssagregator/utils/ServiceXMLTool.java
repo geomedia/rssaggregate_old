@@ -134,6 +134,7 @@ public class ServiceXMLTool {
             // On instancie chaque tache
             List listTache = elementService.getChildren("tache");
             for (int j = 0; j < listTache.size(); j++) {
+             
                 Element tacheElement = (Element) listTache.get(j);
                 // Récupération de la class
                 Attribute attClassTache = tacheElement.getAttribute("class");

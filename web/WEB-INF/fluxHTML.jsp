@@ -1,3 +1,5 @@
+<%@page import="java.util.Map"%>
+<%@page import="java.nio.charset.Charset"%>
 <%@taglib prefix="sql" uri="http://java.sun.com/jsp/jstl/sql"%>
 <%-- 
     Document   : index
@@ -17,7 +19,7 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
 <!--Inclusion du menu haut-->
 <c:import url="/WEB-INF/headerjsp.jsp" />
 
-
+<script src="${rootpath}AjaxFluxDyn.js"></script>
 
 
 <div id="header-wrapper">
@@ -116,133 +118,133 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
                         <script src="${rootpath}AjaxFluxDyn.js"></script>
 
 
-                        
-                        
+
+
 
 
                         <table id="list" width="600"><tr><td></td></tr></table> 
                         <div id="pager"></div> 
                         <script type="text/javascript">
-                            /***
-                             *  Utilisé par JQgrid pour formater le champ journal en un lien
-                             * @param {type} cellvalue
-                             * @param {type} options
-                             * @param {type} rowObjcet
-                             * @param {type} l4
-                             * @param {type} l5
-                             * @returns {String}
-                             */
-                            function myLinkFormatter(cellvalue, options, rowObjcet, l4, l5) {
-                                // Lors du classement après recherche sur le client side, le rowObjet ne peut être lu de la même manière. La ligne suivant permet de pallier à ce problème
-                                id = rowObjcet[0];
-                                texteLien = rowObjcet[1];
-                                if (rowObjcet[0] === undefined) {
-                                    id = rowObjcet['ID'];
-                                    texteLien = rowObjcet['nom'];
-                                }
-                                return '<a href = "/RSSAgregate/flux/read?id=' + id + '">' + texteLien + '</a>';
-                            }
+                                    /***
+                                     *  Utilisé par JQgrid pour formater le champ journal en un lien
+                                     * @param {type} cellvalue
+                                     * @param {type} options
+                                     * @param {type} rowObjcet
+                                     * @param {type} l4
+                                     * @param {type} l5
+                                     * @returns {String}
+                                     */
+                                            function myLinkFormatter(cellvalue, options, rowObjcet, l4, l5) {
+                                            // Lors du classement après recherche sur le client side, le rowObjet ne peut être lu de la même manière. La ligne suivant permet de pallier à ce problème
+                                            id = rowObjcet[0];
+                                                    texteLien = rowObjcet[1];
+                                                    if (rowObjcet[0] === undefined) {
+                                            id = rowObjcet['ID'];
+                                                    texteLien = rowObjcet['nom'];
+                                            }
+                                            return '<a href = "/RSSAgregate/flux/read?id=' + id + '">' + texteLien + '</a>';
+                                            }
 
-                            $(function() {
-                                $("#list").jqGrid({
+                                    $(function() {
+                                    $("#list").jqGrid({
                                     url: "${rootpath}flux/list?vue=grid",
-                                    loadonce: true,
-                                    datatype: "json",
-                                    mtype: "GET",
-                                    colNames: ["ID", 'nom', "Journal", "Type", "active", "created"],
-                                    colModel: [
-                                        {name: "ID", key: true, width: 55, hidden: true},
-                                        {name: "nom", width: 55, search: true, formatter: myLinkFormatter, searchoptions: {sopt: ['cn', 'eq']}},
-                                        {name: "journalLie", width: 90, searchoptions: {sopt: ['cn', 'eq']}},
-                                        {name: "typeFlux", title: 'Type', search: true, width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
-                                        {name: "active", width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
-                                        {name: "created", width: 80, align: "right", stype: 'select', editoptions: {value: {'': 'tous', 'autre': 'autre', 'quotidien': 'quotidien'}}},
+                                            loadonce: true,
+                                            datatype: "json",
+                                            mtype: "GET",
+                                            colNames: ["ID", 'nom', "Journal", "Type", "active", "created"],
+                                            colModel: [
+                                    {name: "ID", key: true, width: 55, hidden: true},
+                                    {name: "nom", width: 55, search: true, formatter: myLinkFormatter, searchoptions: {sopt: ['cn', 'eq']}},
+                                    {name: "journalLie", width: 90, searchoptions: {sopt: ['cn', 'eq']}},
+                                    {name: "typeFlux", title: 'Type', search: true, width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
+                                    {name: "active", width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
+                                    {name: "created", width: 80, align: "right", stype: 'select', editoptions: {value: {'': 'tous', 'autre': 'autre', 'quotidien': 'quotidien'}}},
                                     ],
-                                    pager: "#pager",
-                                    rowNum: 10,
-                                    rowList: [30, 50, 100, 150, 300, 500],
-                                    sortname: "invid",
-                                    sortorder: "desc",
-                                    viewrecords: true,
-                                    gridview: true,
-                                    autoencode: true,
-                                    caption: "Recherche parmis les flux",
-                                    sortable: true,
-                                    sorttype: 'text',
-                                    autowidth: true,
-                                    exptype: "csvstring",
-                                    root: "grid",
-                                    multiselect: true,
-//                                            scrollrows : true,
-                                    ident: "\t"
-//                                    filterToolbar: {searchOperators: true},
-//                                    search: {
-//                                        caption: "Search...",
-//                                        Find: "Find",
-//                                        Reset: "Reset",
-//                                        odata: ['equal', 'not equal', 'less', 'less or equal', 'greater', 'greater or equal', 'begins with', 'does not begin with', 'is in', 'is not in', 'ends with', 'does not end with', 'contains', 'does not contain'],
-//                                        groupOps: [{op: "AND", text: "all"}, {op: "OR", text: "any"}],
-//                                        matchText: " match",
-//                                        rulesText: " rules"
-//                                    }
-                                }
-                                );
-                                optionsearch = {searchOperators: true, stringResult: true};
-//                                jQuery("#list").jqGrid('filterToolbar', {searchOperators: true});
-                                jQuery("#list").filterToolbar(optionsearch);
-                                jQuery("#list").navGrid('#pager', {edit: false, add: false, del: false, search: false})
-                                        .navButtonAdd('#pager', {
+                                            pager: "#pager",
+                                            rowNum: 10,
+                                            rowList: [30, 50, 100, 150, 300, 500],
+                                            sortname: "invid",
+                                            sortorder: "desc",
+                                            viewrecords: true,
+                                            gridview: true,
+                                            autoencode: true,
+                                            caption: "Recherche parmis les flux",
+                                            sortable: true,
+                                            sorttype: 'text',
+                                            autowidth: true,
+                                            exptype: "csvstring",
+                                            root: "grid",
+                                            multiselect: true,
+                                            //                                            scrollrows : true,
+                                            ident: "\t"
+                                            //                                    filterToolbar: {searchOperators: true},
+                                            //                                    search: {
+                                            //                                        caption: "Search...",
+                                            //                                        Find: "Find",
+                                            //                                        Reset: "Reset",
+                                            //                                        odata: ['equal', 'not equal', 'less', 'less or equal', 'greater', 'greater or equal', 'begins with', 'does not begin with', 'is in', 'is not in', 'ends with', 'does not end with', 'contains', 'does not contain'],
+                                            //                                        groupOps: [{op: "AND", text: "all"}, {op: "OR", text: "any"}],
+                                            //                                        matchText: " match",
+                                            //                                        rulesText: " rules"
+                                            //                                    }
+                                    }
+                                    );
+                                            optionsearch = {searchOperators: true, stringResult: true};
+                                            //                                jQuery("#list").jqGrid('filterToolbar', {searchOperators: true});
+                                            jQuery("#list").filterToolbar(optionsearch);
+                                            jQuery("#list").navGrid('#pager', {edit: false, add: false, del: false, search: false})
+                                            .navButtonAdd('#pager', {
                                     caption: "'Export To CSV",
-                                    buttonicon: "ui-icon-add",
-                                    onClickButton: function() {
-                                        opt = {exptype: "jsonstring"};
-                                        $("#list").jqGrid('excelExport', {tag: 'csv', url: '${rootpath}flux/list?vue=csv'});
-                                    },
-                                    position: "last"
-                                })
-                                        .navButtonAdd('#pager',
-                                        {
-                                            caption: "Supprimer",
                                             buttonicon: "ui-icon-add",
                                             onClickButton: function() {
-                                                reponse = confirm('Vous vous apprétez à supprimer un flux. Toutes les items associées seront supprimée. Cette manipulation est irréverssible. Confirmez vous votre choix ?');
-                                                if (reponse) {
-                                                    selRowId = $('#list').jqGrid('getGridParam', 'selarrrow');
-                                                    //chaine = "";
-                                                    //for (i = 0; i < selRowId.length; i++) {
-                                                    //    chaine += 'id=' + selRowId[i] + ',';
-                                                    //}
-                                                    //if (chaine.length > 2) {
-                                                    //    chaine = chaine.substr(0, chaine.length - 1);
-                                                    //}
-                                                    //url = ${rootpath} + 'flux/rem?' + chaine;
-                                                    url = ${rootpath} + 'flux/rem?id=' + selRowId;
-                                                    location.href = url;
-                                                }
-
-                                            },
-                                        })
-                                        .navButtonAdd('#pager', {
-                                    caption: "Mise a jour",
-                                    buttonicon: "ui-icon-add",
-                                    onClickButton: function() {
-                                        alert('maj' + formatIdParamFromSelectedRow());
-                                        location.href = ${rootpath} + 'flux/maj?' + formatIdParamFromSelectedRow();
+                                    opt = {exptype: "jsonstring"};
+                                            $("#list").jqGrid('excelExport', {tag: 'csv', url: '${rootpath}flux/list?vue=csv'});
+                                    },
+                                            position: "last"
+                                    })
+                                            .navButtonAdd('#pager',
+                                    {
+                                    caption: "Supprimer",
+                                            buttonicon: "ui-icon-add",
+                                            onClickButton: function() {
+                                    reponse = confirm('Vous vous apprétez à supprimer un flux. Toutes les items associées seront supprimée. Cette manipulation est irréverssible. Confirmez vous votre choix ?');
+                                            if (reponse) {
+                                    selRowId = $('#list').jqGrid('getGridParam', 'selarrrow');
+                                            //chaine = "";
+                                            //for (i = 0; i < selRowId.length; i++) {
+                                            //    chaine += 'id=' + selRowId[i] + ',';
+                                            //}
+                                            //if (chaine.length > 2) {
+                                            //    chaine = chaine.substr(0, chaine.length - 1);
+                                            //}
+                                            //url = ${rootpath} + 'flux/rem?' + chaine;
+                                            url = ${rootpath} + 'flux/rem?id=' + selRowId;
+                                            location.href = url;
                                     }
-                                });
-                            });
-                            /***
-                             * Parcours les items sélectionné par dans la grid et renvoi une chaine de caractère sous la forme id=nul,id=num2. Permet de formater les paramettres dans une url
-                             * @returns {unresolved} */
-                            function formatIdParamFromSelectedRow() {
-                                selRowId = $('#list').jqGrid('getGridParam', 'selarrrow');
-                                ch = "";
-                                for (i = 0; i < selRowId.length; i++) {
-                                    ch += 'id=' + selRowId[i] + ',aa';
-                                }
-                                if (ch.length > 2) {
-                                    ch = ch.substr(0, ch.length - 1);
-                                }
+
+                                    },
+                                    })
+                                            .navButtonAdd('#pager', {
+                                    caption: "Mise a jour",
+                                            buttonicon: "ui-icon-add",
+                                            onClickButton: function() {
+                                    alert('maj' + formatIdParamFromSelectedRow());
+                                            location.href = ${rootpath} + 'flux/maj?' + formatIdParamFromSelectedRow();
+                                    }
+                                    });
+                                    });
+                                            /***
+                                    * Parcours les items sélectionné par dans la grid et renvoi une chaine de caractère sous la forme id=nul,id=num2. Permet de formater les paramettres dans une url
+                                             * @returns {unresolved} */
+                                                    function formatIdParamFromSelectedRow() {
+                                                    selRowId = $('#list').jqGrid('getGridParam', 'selarrrow');
+                                                            ch = "";
+                                                            for (i = 0; i < selRowId.length; i++) {
+                                                    ch += 'id=' + selRowId[i] + ',aa';
+                                                    }
+                                                    if (ch.length > 2) {
+                                                    ch = ch.substr(0, ch.length - 1);
+                                                    }
 <!--alert(selRowId);-->
                                 return 'id=' + selRowId;
                                 return ch;
@@ -280,21 +282,21 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
                                                     <button type="button" onclick="actionsub();"> OK</button>
                                                 </form>-->
                         <script>
-                            //Petite fonction pour la soumission du formulaire permettant la mise à jour et la suppression en nombre
-                            function actionsub() {
-                                action = $('#act').val();
-                                if (action === 'rem') {
-                                    reponse = confirm('Vous vous apprétez à supprimer un flux. Toutes les items associées seront supprimée. Cette manipulation est irréverssible. Confirmez vous votre choix ?');
-                                    if (reponse) {
-                                        $('#formaction2').attr('action', '${rootpath}flux/' + action);
-                                        $('#formaction2').submit();
-                                    }
-                                }
-                                else if (action === 'maj') {
-                                    $('#formaction2').attr('action', '${rootpath}flux/' + action);
-                                    $('#formaction2').submit();
-                                }
-                            }
+                                    //Petite fonction pour la soumission du formulaire permettant la mise à jour et la suppression en nombre
+                                            function actionsub() {
+                                            action = $('#act').val();
+                                                    if (action === 'rem') {
+                                            reponse = confirm('Vous vous apprétez à supprimer un flux. Toutes les items associées seront supprimée. Cette manipulation est irréverssible. Confirmez vous votre choix ?');
+                                                    if (reponse) {
+                                            $('#formaction2').attr('action', '${rootpath}flux/' + action);
+                                                    $('#formaction2').submit();
+                                            }
+                                            }
+                                            else if (action === 'maj') {
+                                            $('#formaction2').attr('action', '${rootpath}flux/' + action);
+                                                    $('#formaction2').submit();
+                                            }
+                                            }
 
                         </script>
                     </c:when>
@@ -308,18 +310,18 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
                             <li><a href="${rootpath}incidents/recherche?fluxSelection2=${bean.ID}&type=CollecteIncident">Parcourir les incidents</a></li>
                             <li><a href="${rootpath}flux/importcsv?id=${bean.ID}">Importer des items</a></li>
                             <script>
-                                $(document).ready(function() {
-                                    $('#suppLink').on('click', function truc2(e) {
+                                        $(document).ready(function() {
+                                        $('#suppLink').on('click', function truc2(e) {
 
                                         reponse = confirm('Vous vous apprétez à supprimer un flux. Toutes les items associées seront supprimée. Cette manipulation est irréverssible. Confirmez vous votre choix ?');
-                                        if (reponse) {
-                                            return true;
+                                                if (reponse) {
+                                        return true;
                                         } else {
-                                            e.preventDefault();
-                                            return false;
+                                        e.preventDefault();
+                                                return false;
                                         }
-                                    });
-                                });</script>
+                                        });
+                                        });</script>
 
 
                         </ul>
@@ -327,12 +329,12 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
 
                     <c:when test="${action=='highchart'}">
 
-    
+
 
                         <script>
-                                $(function() {
+                                            $(function() {
                                     $(".datepicker").datepicker({dateFormat: "yy-mm-dd"});
-                                });</script>
+                                    });</script>
 
 
 
@@ -353,7 +355,7 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
                                         <select id="journalSelection">
                                             <option value="null">Journal : </option>
                                             <option id="tous">tous</option>
-                                            <c:forEach items="${listJournaux}" var="j">
+                                            <c:forEach items="${listjournaux}" var="j">
                                                 <option value="${j.ID}">${j.nom}</option>
                                             </c:forEach>
 
@@ -361,7 +363,7 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
                                     </td>
 
                                     <td>
-                     
+
                                         <ul id="fluxSelection" name="oldid-flux" style="min-width: 300px; width: 400px" class="connectedSortable">
                                             <c:forEach items="${listflux}" var="fl">
                                                 <li value="${fl.ID}">${fl}</li>                                
@@ -460,13 +462,13 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
 
 
                                 <br />
-                                <label title="La rubrique du journal concernée : international, A la Une ... Pour ajouter des types de flux allez dans la configuration générale">Type de flux</label>
+                                <label title="La rubrique du journal concernée : international, A la Une ... Pour ajouter des types de flux allez dans la configuration générale">Type de flux<span class="requis">*</span></label>
                                 <select name="typeFlux">
-                                    <option value="-1">Aucun</option>
+                                    <option value=""></option>
                                     <c:forEach items="${listtypeflux}" var="typeflux">
                                         <option<c:if test="${bean.typeFlux.denomination==typeflux.denomination}"> selected="true" </c:if> value="${typeflux.ID}">${typeflux.denomination}</option>
                                     </c:forEach>
-                                </select>
+                                </select><span class="erreur" id="errtypeFlux"></span>
                                 <br />
 
                                 <label for="nom" title="Paramettre facultatif : Par défaut le flux sera nommé en fonction du journal et du type de flux sélectionné. Ce paramettre permet de forcer un nom">Nom du flux : </label>
@@ -526,30 +528,22 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
                             </tr>
 
 
-                            * 1=nombre item trouvé ; 2 dedoub memoire; 3 BDD item lié ;4 BDD item déjà présente mais lien ajouté ;  5 item nouvelles
 
-                            <c:forEach items="${listTache}" var="tache">
-                                IT
 
-                            </c:forEach>
 
                             <c:forEach items="${listTache}" var="tache">
                                 <tr>
                                     <td> ${tache.flux}</td>
-<!--                                    <td>${tache.comportementDuFlux.dedoubloneur.compteCapture[0]}</td>
-                                    <td>${tache.comportementDuFlux.dedoubloneur.compteCapture[1]}</td>
-                                    <td>${tache.comportementDuFlux.dedoubloneur.compteCapture[2]}</td>
-                                    <td>${tache.comportementDuFlux.dedoubloneur.compteCapture[3]}</td>
-                                    <td>${tache.comportementDuFlux.dedoubloneur.compteCapture[4]}</td>-->
-                                    <td>${tache.comportementDuFlux.nbItTrouve}</td>
-                                    <td>${tache.comportementDuFlux.nbDoublonInterneAuflux}</td>
-                                    <td>${tache.comportementDuFlux.nbDedoubMemoire}</td>
-                                    <td>${tache.comportementDuFlux.nbDedoubBdd}</td>
-                                    <td>${tache.comportementDuFlux.nbLiaisonCree}</td>
-                                    <td>${tache.comportementDuFlux.nbNouvelle}</td>
+
+                                    <td>${tache.visitorHTTP.nbItTrouve}</td>
+                                    <td>${tache.visitorHTTP.nbDoublonInterneAuflux}</td>
+                                    <td>${tache.visitorHTTP.nbDedoubMemoire}</td>
+                                    <td>${tache.visitorHTTP.nbDedoubBdd}</td>
+                                    <td>${tache.visitorHTTP.nbLiaisonCree}</td>
+                                    <td>${tache.visitorHTTP.nbNouvelle}</td>
                                     <td>
                                         <c:set var="erreur" value="0"></c:set>
-                                      
+
                                         <c:if test="${not empty tache.exeption}">
                                             <c:set var="erreur" value="1"></c:set>
                                             ${tache.exeption} 
@@ -585,11 +579,42 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
 
                         </p>
                         <hr />
+                        <h2>Principaux incidents de collecte</h2>
+                        <p>Ci dessous sont affichés les incidents ayant perturbé la collecte pendant plus de 4 heures.</p>
+
+
+
+                        <table border="1">
+                            <tr>
+                                <th>Intitulé</th>
+                                <th>Description</th>
+                                <th>dateDébut</th>
+                                <th>dateFin</th>
+                            </tr>
+
+
+                            <c:forEach items="${indids}" var="inci">
+                                <tr>
+                                    <td><a href="${inci.urlAdmin}">${inci}</a></td>
+                                    <td>${inci.messageEreur}</td>
+                                    <td><fmt:formatDate value="${inci.dateDebut}" pattern="dd/MM/yyyy hh:mm"/></td>
+                                    <td><c:if test="${not empty inci.dateFin}"><fmt:formatDate value="${inci.dateFin}" pattern="dd/MM/yyyy hh:mm"/></c:if>
+                                        <c:if test="${empty inci.dateFin}">Non clos</c:if>
+                                        </td></tr>
+                                </c:forEach>
+
+                        </table>
+                        <p><a href="#">Voir tous les incidents du flux</a></p>
+
+
+
+                        <hr />
+
 
                         <h2>Indice de captation</h2>
 
-                        
-                         <script src="${rootpath}AjaxFluxDyn.js"></script>
+
+
                         <label>Periode de captation : </label> 
                         <select id="selectionPeriod">
                             <option>Selection</option>
@@ -602,15 +627,27 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
 
                         <div id="container" style="height: 400px; margin: auto; min-width: 310px; max-width: 600px"></div>
 
-                
+
 
                     </c:when>
 
 
                     <c:when test="${action == 'importcsv'}">
-                        CSV
-                        <form method="POST"  enctype="multipart/form-data">
+
+                        <p>
+                            Vous vous apprétez à importer des items. Avant de commencer la procédure, veillez à ce que les fichier csv soient correct ! Les points suivant sont à observer : 
+                        <ul>
+                            <li>Encodage de caractère. Il est nécessaire de connaitre l'encodage de caractère de votre fichier (UTF-8, ISO-8859-1, ISO-8859-15...)</li>
+                            <li>les date doivent être au format : yyyy-MM-dd HH:mm:ss</li>
+                            <li>il est préférable d'utiliser la tabulation comme séparateur de champs</li>
+                            <li>N'insérer pas de données avec des problèmes d'encodage de caractères</li>
+                        </ul>
+                        L'import se déroule en trois phase : l'envoie du fichier csv, le parsing du fichier, la vérification des données parsée et enfin l'enregistrement. Une fois les données enregistrées, il vous sera impossible de les supprimer simplement. Il ne sera en effet pas possible de séparer les items importé des anciennes items. Ne faites ainsi pas cette opération à la légère. Peut être devriez-vous dans un premier temps vérifier le bon déroullement des opérations en effectant l'ajout sur le serveur de test.
+                        </p>
+
+                        <form method="POST"  enctype="multipart/form-data" id="formUpload">
                             <input type="hidden" name="phase" value="upload" />
+                            <input type="hidden" name="init" value="false"/>
                             <label>Votre fichier CSV : </label>
                             <input type="file" name="csvfile" />
                             <!--                            <fieldset>
@@ -622,20 +659,52 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
                                                                 <label title="sets if characters outside the quotes are ignored">StrictQuotes : </label><input name="strictQuotes" type="checkbox"/><br/>
                                                                 <label title="it true, parser should ignore white space before a quote in a field">IgnoreLeadingWhiteSpace : </label><input name="ignoreLeadingWhiteSpace" type="checkbox"/><br />
                                                             </fieldset>-->
+
+
                                 <input type="submit" value="Upload">
+                            </form>
+                            <form method="POST">
+                                <input type="hidden" name="init" value="true"/>
+                                <input value="réinitialiser" type="submit" />
                             </form>
 
 
-                        <c:if test="${phase=='parse'}">
-                            PARSE
-                            <form method="POST">
+
+
+                        <c:if test="${phase=='parse' or phase=='presave'}">
+                            <form method="POST" id="formParse">
                                 <input type="hidden" name="phase" value="parse" />
+                                <input type="hidden" name="init" value="false"/>
                                 <fieldset>
                                     <legend>Paramettre de Parsing</legend>
+
+                                    <label title="Encodage de caractère utilisé par votre fichier.">Charset : </label>
+                                    <select name="forceEncoding" id="forceEncoding">
+                                        <%
+                                            Map<String, Charset> map = Charset.availableCharsets();
+                                            for (Map.Entry<String, Charset> entry : map.entrySet()) {
+                                                String string = entry.getKey();
+                                                Charset charset = entry.getValue();
+
+                                                if (charset.toString().equals("UTF-8")) {
+                                                    out.print("<option value=\"" + charset + "\" selected=\"true\">" + string + "</option>");
+                                                } else {
+                                                    out.print("<option value=\"" + charset + "\">" + string + "</option>");
+                                                }
+                                            }
+                                        %>
+                                    </select>
+
+
+                                    <br />
+
+
+
+                                    <label>Date Pattern :</label><input type="text" name="datePattern" value="yyyy-MM-dd HH:mm:ss"/><br />
                                     <label title="the delimiter to use for separating entries quotechar">Separator : </label><input name="separator" type="text" value="<c:out value="\t"></c:out>" /><br />
                                     <label title="the character to use for quoted elements escape">Quotechar :</label><input name="quotechar" type="text"  value="<c:out value="\""></c:out>" /><br />
                                     <label title="the character to use for escaping a separator or quote line">Escape  :</label><input name="escape" type="text" value="<c:out value="\\"></c:out>" /><br />
-                                        <label title="the line number to skip for start reading strictQuotes">Line : </label><input name="line" type="text" value="0" /><br />
+                                        <label title="the line number to skip for start reading strictQuotes">First Line : </label><input name="line" type="text" value="0" /><br />
                                         <label title="sets if characters outside the quotes are ignored">StrictQuotes : </label><input name="strictQuotes" type="checkbox"/><br/>
                                         <label title="it true, parser should ignore white space before a quote in a field">IgnoreLeadingWhiteSpace : </label><input name="ignoreLeadingWhiteSpace" type="checkbox"/><br />
 
@@ -663,94 +732,118 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
                                                         <option value="5">Col 6</option>
                                                         <option value="6">Col 7</option>
                                                         <option value="7">Col 8</option>
+                                                        <option value="8">Col9</option>
+                                                        <option value="9">Col 10</option>
+                                                        <option value="10">Col 11</option>
                                                     </select>
                                                 </td>
                                                 <td>
                                                     <select name="cDescription">
-                                                        <option value="0">Col 1</option>
-                                                        <option value="1" selected="selected">Col 2</option>
+                                                        <option value="0" selected="selected">Col 1</option>
+                                                        <option value="1"selected="true">Col 2</option>
                                                         <option value="2">Col 3</option>
                                                         <option value="3">Col 4</option>
                                                         <option value="4">Col 5</option>
                                                         <option value="5">Col 6</option>
                                                         <option value="6">Col 7</option>
                                                         <option value="7">Col 8</option>
+                                                        <option value="8">Col9</option>
+                                                        <option value="9">Col 10</option>
+                                                        <option value="10">Col 11</option>
                                                     </select>
                                                 </td>
                                                 <td>
                                                     <select name="cLink">
-                                                        <option value="0">Col 1</option>
+                                                        <option value="0" selected="selected">Col 1</option>
                                                         <option value="1">Col 2</option>
-                                                        <option value="2" selected="selected">Col 3</option>
+                                                        <option value="2" selected="true">Col 3</option>
                                                         <option value="3">Col 4</option>
                                                         <option value="4">Col 5</option>
                                                         <option value="5">Col 6</option>
                                                         <option value="6">Col 7</option>
                                                         <option value="7">Col 8</option>
+                                                        <option value="8">Col9</option>
+                                                        <option value="9">Col 10</option>
+                                                        <option value="10">Col 11</option>
                                                     </select>
                                                 </td>
 
 
                                                 <td>
                                                     <select name="cGuid">
-                                                        <option value="0">Col 1</option>
+                                                        <option value="0" selected="selected">Col 1</option>
                                                         <option value="1">Col 2</option>
                                                         <option value="2">Col 3</option>
-                                                        <option value="3" selected="selected">Col 4</option>
+                                                        <option value="3" selected="true">Col 4</option>
                                                         <option value="4">Col 5</option>
                                                         <option value="5">Col 6</option>
                                                         <option value="6">Col 7</option>
                                                         <option value="7">Col 8</option>
+                                                        <option value="8">Col9</option>
+                                                        <option value="9">Col 10</option>
+                                                        <option value="10">Col 11</option>
                                                     </select>
                                                 </td>
                                                 <td>
                                                     <select name="cDatePub">
-                                                        <option value="0">Col 1</option>
+                                                        <option value="0" selected="selected">Col 1</option>
                                                         <option value="1">Col 2</option>
                                                         <option value="2">Col 3</option>
                                                         <option value="3">Col 4</option>
-                                                        <option value="4" selected="selected">Col 5</option>
+                                                        <option value="4" selected="true">Col 5</option>
                                                         <option value="5">Col 6</option>
                                                         <option value="6">Col 7</option>
                                                         <option value="7">Col 8</option>
+                                                        <option value="8">Col9</option>
+                                                        <option value="9">Col 10</option>
+                                                        <option value="10">Col 11</option>
                                                     </select>
                                                 </td>
 
                                                 <td>
                                                     <select name="cDateRecup">
-                                                        <option value="0">Col 1</option>
+                                                        <option value="0" selected="selected">Col 1</option>
                                                         <option value="1">Col 2</option>
                                                         <option value="2">Col 3</option>
                                                         <option value="3">Col 4</option>
                                                         <option value="4">Col 5</option>
-                                                        <option value="5" selected="selected">Col 6</option>
+                                                        <option value="5" selected="true">Col 6</option>
                                                         <option value="6">Col 7</option>
                                                         <option value="7">Col 8</option>
+                                                        <option value="8">Col9</option>
+                                                        <option value="9">Col 10</option>
+                                                        <option value="10">Col 11</option>
                                                     </select>
                                                 </td>
 
                                                 <td>
                                                     <select name="cCat">
-                                                        <option value="0">Col 1</option>
+                                                        <option value="0" selected="selected">Col 1</option>
                                                         <option value="1">Col 2</option>
                                                         <option value="2">Col 3</option>
                                                         <option value="3">Col 4</option>
                                                         <option value="4">Col 5</option>
                                                         <option value="5">Col 6</option>
-                                                        <option value="6" selected="selected">Col 7</option>
+                                                        <option value="6" selected="true">Col 7</option>
                                                         <option value="7">Col 8</option>
+                                                        <option value="8">Col9</option>
+                                                        <option value="9">Col 10</option>
+                                                        <option value="10">Col 11</option>
                                                     </select>
                                                 </td>
                                                 <td>
                                                     <select name="cContenu">
-                                                        <option value="0">Col 1</option>
+                                                        <option value="0" selected="selected">Col 1</option>
                                                         <option value="1">Col 2</option>
                                                         <option value="2">Col 3</option>
                                                         <option value="3">Col 4</option>
                                                         <option value="4">Col 5</option>
                                                         <option value="5">Col 6</option>
                                                         <option value="6">Col 7</option>
-                                                        <option value="7" selected="selected">Col 8</option>
+                                                        <option value="7" selected="true">Col 8</option>
+                                                        <option value="8">Col9</option>
+                                                        <option value="9">Col 10</option>
+                                                        <option value="10">Col 11</option>
                                                     </select>
                                                 </td>
 
@@ -767,57 +860,18 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
                         </c:if>
 
 
+                        <table id="list" width="600"><tr><td></td></tr></table> 
+                        <div id="pager"></div> 
+
+                        <div id="preSave"></div>
+
+
+
+
+                        <div id="infoResultats"></div>
 
                         <c:if test="${!empty sessionScope.imporComportement}">
-                            <h2>Appercut des items parsées</h2>
-                            <p><strong>Nombre d'item :</strong> ${fn:length(sessionScope.imporComportement.listItem)}
-                            </p>
 
-
-
-                            <ul>
-                                <c:forEach begin="0" end="5" items="${sessionScope.imporComportement.listItem}" var="itDebut" varStatus="st">
-                                    <li>
-                                        <p>Item n°${st.index}</p>
-                                        <p>Titre ${itDebut.titre}</p>
-                                        <p>Description : ${itDebut.description}</p>
-                                        <p>Lien : ${itDebut.link}</p>
-                                        <p>GUID : ${itDebut.guid}</p>
-                                        <p>Date publication : <fmt:formatDate value="${itDebut.datePub}" pattern="dd/MM/yyyy hh:mm"/></p>
-                                        <p>Date Reception : <fmt:formatDate value="${itDebut.dateRecup}" pattern="dd/MM/yyyy hh:mm"/></p>
-                                        <p>Categorie : ${itDebut.categorie}</p>
-                                        <p>Contenu : ${itDebut.contenu}</p>
-                                    </li>
-                                </c:forEach>
-                            </ul>
-
-
-                            <c:if test="${fn:length(sessionScope.imporComportement.listItem)-5 > 0}">
-
-                                <p>[ ... ]</p>
-
-
-                                <ul>
-                                    <c:forEach begin="${fn:length(sessionScope.imporComportement.listItem)-5}" end="${fn:length(sessionScope.imporComportement.listItem)}" items="${sessionScope.imporComportement.listItem}" var="itDebut" varStatus="st">
-                                        <li>
-                                            <p>Item n°${st.index}</p>
-                                            <p>Titre ${itDebut.titre}</p>
-                                            <p>Description : ${itDebut.description}</p>
-                                            <p>Lien : ${itDebut.link}</p>
-                                            <p>GUID : ${itDebut.guid}</p>
-                                            <p>Date publication : <fmt:formatDate value="${itDebut.datePub}" pattern="dd/MM/yyyy hh:mm"/></p>
-                                            <p>Date Reception : <fmt:formatDate value="${itDebut.dateRecup}" pattern="dd/MM/yyyy hh:mm"/></p>
-                                            <p>Categorie : ${itDebut.categorie}</p>
-                                            <p>Contenu : ${itDebut.contenu}</p>
-                                        </li>
-                                    </c:forEach>
-                                </ul>
-                            </c:if>
-
-                            <form method="POST">
-                                <input type="hidden" name="phase" value="saveItem" />
-                                <input type="submit" value="Enregistrer les items dans la base de donneés"/>
-                            </form>
 
                         </c:if>
 

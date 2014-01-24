@@ -1,0 +1,57 @@
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">
+    <channel>
+        <title>Klemm Zeitung</title>
+        <link>http://KlemmZeitung.comg/</link>
+        <description>Flux à la une du pseudo journal</description>
+        
+        <item>
+            <title>Inter1</title>
+            <link>http://KlemmZeitung.comg/inter2</link>
+            <description>transition énergétique sont soit « trop limités » soit « balbutiants ». Ils ne permettent pas de « faire complètement le tour du circuit économique et ainsi d’évaluer les besoins d’investissement, leur possible financement par la baisse de la facture énergétique, ni même leurs conséquences sur l’emploi ».</description>
+            <pubDate>Fri, 13 Dec 2013 13:20:30 GMT</pubDate>
+            <guid>Inter2</guid>
+            <dc:date>2013-12-13T13:20:30Z</dc:date>
+        </item>
+        
+        
+        <item>
+            <title>Inter3</title>
+            <link>http://KlemmZeitung.comg/inter1</link>
+            <description>Inter3</description>
+            <pubDate>Fri, 13 Dec 2013 13:20:30 GMT</pubDate>
+            <guid>Inter3</guid>
+            <dc:date>2013-12-13T13:20:30Z</dc:date>
+        </item>
+        
+        
+        <item>
+            <title>Autre1</title>
+            <link>http://KlemmZeitung.comg/autre1</link>
+            <description>autre1</description>
+            <pubDate>Fri, 13 Dec 2013 13:20:30 GMT</pubDate>
+            <guid>autre1</guid>
+            <dc:date>2013-12-13T13:20:30Z</dc:date>
+        </item>
+        
+        
+        <item>
+            <title>Autre2</title>
+            <link>http://KlemmZeitung.comg/autre1</link>
+            <description>autre2</description>
+            <pubDate>Fri, 13 Dec 2013 13:20:30 GMT</pubDate>
+            <guid>autre2</guid>
+            <dc:date>2013-12-13T13:20:30Z</dc:date>
+        </item>
+        
+        <item>
+            <title>Qui veut manger une pomme OGM</title>
+            <link>http://KlemmZeitung.comg/autre1</link>
+            <description>Les résultats, parus dans la revue Neurology, suggèrent qu'une forte consommation d'alcool en milieu de vie (40 à 60 ans) pourrait entraîner un déclin cognitif plus rapide au cours de la vieillesse</description>
+            <pubDate>Fri, 13 Dec 2013 13:20:30 GMT</pubDate>
+            <guid>osudiouoia</guid>
+            <dc:date>2013-12-13T13:20:30Z</dc:date>
+        </item>
+
+    </channel>
+  
+</rss>

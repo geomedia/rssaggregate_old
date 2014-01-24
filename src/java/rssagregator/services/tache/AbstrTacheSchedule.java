@@ -6,14 +6,19 @@ package rssagregator.services.tache;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import javax.persistence.EntityManager;
 import org.apache.log4j.Logger;
+import org.apache.poi.util.Beta;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.Duration;
@@ -21,18 +26,18 @@ import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 import rssagregator.beans.exception.ActionNonEffectuee;
 import rssagregator.beans.incident.ObjectIncompatible;
+import rssagregator.dao.DAOFactory;
 import rssagregator.services.AbstrService;
+import rssagregator.services.SemaphoreCentre;
 import rssagregator.utils.ExceptionTool;
 
 /**
- * Toutes les tâche schedule de l'application doivent hériter de cette classe abstraite
+ * Toutes les tâches schedulées de l'application doivent hériter de cette classe abstraite
  *
  * @author clem
  */
 public abstract class AbstrTacheSchedule<T> extends Observable implements Callable<T> {
 
-//    ScheduledExecutorService executorService;
-//    AbstrService service;
     /**
      * *
      * Détermine si l'instance de la tache doit avoir ou non un comportment périodique
@@ -71,7 +76,9 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
     Throwable exeption = null;
     /**
      * *
-     * Boollean permettant d'annuler la tache
+     * Boollean permettant d'annuler la tache. Lorsqu'une tache est annulé elle n'est plus reschedulé. Ne pas confondre
+     * avec le fait d'interrompre la tache. L'interruption stoppe la tache mais la laisse se reschedulé si elle n'est
+     * pas annulée.
      */
     Boolean annuler = false;
     /**
@@ -135,6 +142,11 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
      * Liste contenant les références aux objets locké par la tache
      */
     List<Object> listRessourcesLocke = new ArrayList<Object>();
+    /**
+     * *
+     * Le future de la tache lorsqu'elle est lancée
+     */
+    Future future;
 
     protected AbstrTacheSchedule() {
         this.schedule = false;
@@ -142,19 +154,18 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
         nbrTentative = 0;
     }
 
-    /**
-     * *
-     * Par default le bollean schedule est à false;
-     *
-     * @param executorService
-     */
-    protected AbstrTacheSchedule(Observer s) {
-        this.addObserver(s);
-        this.schedule = false;
-        exeption = null;
-        nbrTentative = 0;
-    }
-
+//    /**
+//     * *
+//     * Par default le bollean schedule est à false;
+//     *
+//     * @param executorService
+//     */
+//    protected AbstrTacheSchedule(Observer s) {
+//        this.addObserver(s);
+//        this.schedule = false;
+//        exeption = null;
+//        nbrTentative = 0;
+//    }
     /**
      * *
      * Détermine si l'instance de la tache doit avoir ou non un comportment périodique
@@ -267,7 +278,7 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
      * Méthode nécessairement déclanché à la fin du call de la tâche (block finaly du call. Complete la next execution,
      * variable running etc...; Ferme l'em; libère la semaphore
      */
-    public void finTache() {
+    protected void finTache() {
         running = false;
 
         //--->roolback de la transaction si elle est encore ouverte
@@ -279,7 +290,6 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
 
         //---> Fermeture de l'em
         closeEM();
-
 
         //----> Complétion de la prochaine execution des tache schedule
         if (this.schedule) {
@@ -294,27 +304,9 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
             }
         }
 
-        //---> Liberation de la sémaphore ce qui permet a d'autre tâche de se lancer pour par exemple collecter de la donnée sur le journal occupé
-        if (sema != null) { //Libération de la semaphore si elle existe
-            sema.release();
-        }
-
         //--> notification auprès des observer (le Service lié a la tâche)
         this.setChanged();   //On se notifi au service qui va rescheduler
         this.notifyObservers();
-
-//        closeEM();
-    }
-
-    public static void main(String[] args) {
-        Byte b;
-        b = 10;
-        if (b == 110) {
-            System.out.println("TRUE");
-        } else {
-            System.out.println("FALSE");
-        }
-
     }
 
     /**
@@ -492,24 +484,84 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
         this.nextExecution = nextExecution;
     }
     /**
-     * *
-     * La semathore provenant de {@link SemaphoreLancementTache] pouvant être utilisé par les tâche pour locker une ressource sans passer par JPA
+     * Un set de semathore provenant de {@link SemaphoreCentre] pouvant être utilisé par les tâche pour locker une ressource sans passer par JPA.
+     * Elle sont utilisées par les consommateurs afin de monopoliser les ressources nécessaire avant le lancement de la tache
      */
-    Semaphore sema = null;
+    Set<Semaphore> sem = new LinkedHashSet<Semaphore>();
 
     /**
-     * *
+     * acquisition de toutes les semaphore du set {@link #sem}
+     */
+    public void acquireSem() throws InterruptedException {
+
+        synchronized (SemaphoreCentre.getinstance()) {  // On monopolise le semset afin notamment qu'il soit impossible d'y passer le menage en même temps
+            sem = returnSemSet(); // On obtient la dernière version du sem set.
+            for (Iterator<Semaphore> it = sem.iterator(); it.hasNext();) {
+                Semaphore sema = it.next();
+                sema.acquire();
+
+            }
+        }
+    }
+
+    /***
+     * Tente d'acquerir toutes les sémaphore sans attendre. Si l'une n'est pas dispo libère ce qui est déjà acquis et retourne false;
+     * @return 
+     */
+    public boolean tryAcquireSem() {
+
+        synchronized (SemaphoreCentre.getinstance()) {  // On monopolise le semset afin notamment qu'il soit impossible d'y passer le menage en même temps
+            sem = returnSemSet(); // On obtient la dernière version du sem set.
+
+            boolean allAquire = true;
+            List<Semaphore> acuireed = new ArrayList<Semaphore>();
+            
+            for (Iterator<Semaphore> it = sem.iterator(); it.hasNext();) {
+                  Semaphore sema = it.next();
+                 boolean aq = sema.tryAcquire();
+                 
+                 // Si on a pu acquerir la semaphore
+                 if(aq){
+                    acuireed.add(sema);
+                 }
+                 else{
+                      allAquire = false;
+                      for (int i = 0; i < acuireed.size(); i++) {
+                          //On libère les semaphore déjà acquises
+                         Semaphore semaphore = acuireed.get(i);
+                         semaphore.release();
+                         return false;
+                     }
+                 }
+            }
+            return false;
+        }
+    }
+
+    public Set<Semaphore> returnSemSet() {
+        return sem;
+    }
+
+    /**
+     * Libère toute les sem de la tâche
+     */
+    public void releaseSem() {
+        for (Iterator<Semaphore> it = sem.iterator(); it.hasNext();) {
+            Semaphore sema = it.next();
+            sema.release();
+        }
+    }
+
+    /**
      * Donne le nombre de seconde depuis la dernière execution
      *
      * @return
      */
     public long returnExecutionDuration() {
-
         DateTime now = new DateTime();
         DateTime lastExe = new DateTime(this.lasExecution);
         Duration dur = new Duration(lastExe, now);
         return dur.getStandardSeconds();
-
     }
 
     /**
@@ -527,9 +579,9 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
             try {
                 completerNextExecution();
             } catch (ObjectIncompatible ex) {
-                java.util.logging.Logger.getLogger(AbstrTacheSchedule.class.getName()).log(Level.SEVERE, null, ex);
+                logger.error("Erreur lors de la completion de la prochaine execution de la tache ", ex);
             } catch (ActionNonEffectuee ex) {
-                java.util.logging.Logger.getLogger(AbstrTacheSchedule.class.getName()).log(Level.SEVERE, null, ex);
+                logger.error("Erreur lors de la completion de la prochaine execution de la tache ", ex);
             }
         }
 
@@ -558,14 +610,6 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
 
     public void setLogger(Logger logger) {
         this.logger = logger;
-    }
-
-    public Semaphore getSema() {
-        return sema;
-    }
-
-    public void setSema(Semaphore sema) {
-        this.sema = sema;
     }
 
     /**
@@ -626,5 +670,25 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
                 }
             }
         }
+    }
+
+    /**
+     * *
+     * Initialise l'em de la tache et lock les ressources qui vont être utilisés par la tache. Le déclanchement de cette
+     * méthode peut provoquer l'attente si la ressource n'est pas disponible. /!\ Ce n'est plus ce procédé qui est
+     * utilisé mais les sémaphores avec {@link SemaphoreCentre}
+     *
+     * @throws Exception
+     */
+    @Beta
+    public void initEmAndLockRessources() throws Exception {
+    }
+
+    public Future getFuture() {
+        return future;
+    }
+
+    public void setFuture(Future future) {
+        this.future = future;
     }
 }

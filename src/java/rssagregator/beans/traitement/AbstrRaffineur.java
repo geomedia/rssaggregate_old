@@ -4,6 +4,7 @@
  */
 package rssagregator.beans.traitement;
 
+import rssagregator.beans.ContentRSS;
 import rssagregator.beans.Item;
 
 /**
@@ -17,5 +18,5 @@ public abstract class AbstrRaffineur {
     
     
     
-    public abstract void raffiner(Item i);
+    public abstract void raffinerContenu(ContentRSS i);
 }

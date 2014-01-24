@@ -25,7 +25,11 @@
 
 <%
     StringWriter sw = new StringWriter();
-    CSVWriter cSVWriter = new CSVWriter(sw);
+
+//    CSVWriter cSVWriter = new CSVWriter(sw);
+    CSVWriter cSVWriter = new CSVWriter(sw, '\t');
+
+
     List<String[]> data = new ArrayList<String[]>();
     List<Item> listItem = (List<Item>) request.getAttribute("items");
 
@@ -36,22 +40,22 @@
     for (int i = 0; i < listFiltre.size(); i++) {
         SearchFilter fi = listFiltre.get(i);
         if (fi.getField().equals("listFlux")) {
-            System.out.println("DATA :   " + fi.getData().getClass());
             fluxSelectionne = (List) fi.getData();
         }
     }
 
 
     // Gestion des enetes
-    data.add(new String[]{"ID Item", "Titre", "Description", "Date Récup", "Date relative calculé par rapport aux Fuseaux", "ID flux", "typeFlux", "Journal"});
+    data.add(new String[]{"ID Item", "Titre", "Description", "Contenu", "Catégorie", "Lien", "Date Récup", "Date publication", "ID flux", "typeFlux", "Journal"});
 
 
-    DateTimeFormatter fmt = ISODateTimeFormat.dateHourMinute();
+//    DateTimeFormatter fmt = ISODateTimeFormat.dateHourMinute();
+    DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
     int i;
     for (i = 0; i < listItem.size(); i++) {
         Item it = listItem.get(i);
 
-        List<Flux> listFl = it.getListFlux();
+
 
 
         String id = "";
@@ -76,10 +80,39 @@
         }
 
         String dateCalcule = "??";
+        String datePub = "";
+        if (it.getDatePub() != null) {
+            DateTime dtPub = new DateTime(it.getDatePub());
+            datePub = fmt.print(dtPub);
+        }
 
-        int j;
-        for (j = 0; j < listFl.size(); j++) {
+        String cat = "";
+        if (it.getCategorie() != null) {
+            cat = it.getCategorie();
+        }
 
+        String contenu = "";
+        if (it.getContenu() != null) {
+            contenu = it.getContenu();
+        }
+
+        String lien = "";
+        if (it.getLink() != null) {
+            lien = it.getLink();
+        }
+
+        
+        
+        List<Flux> listFl = it.getListFlux(); // Pour chaque flux de l'item
+        
+        for (int j = 0; j < listFl.size(); j++) {
+
+            Flux fluxObserve = listFl.get(j);
+//            if(fluxSelectionne.contains(fluxObserve)){
+                
+//            }
+//            
+//            
             Boolean trouve = false;
             for (int idx = 0; idx < fluxSelectionne.size(); idx++) {
                 Flux elem = fluxSelectionne.get(idx);
@@ -87,8 +120,7 @@
                     trouve = true;
                 }
             }
-
-            
+//
             if (trouve) {
                 String idFlux = "";
                 if (listFl.get(j).getID() != null) {
@@ -105,7 +137,7 @@
                     journal = listFl.get(j).getJournalLie().getNom();
                 }
 
-                data.add(new String[]{id, titre, desc, dateRecup, dateCalcule, idFlux, typeFl, journal});
+                data.add(new String[]{id, titre, desc, contenu, cat, lien, dateRecup, datePub, idFlux, typeFl, journal});
             }
 
         }
@@ -115,6 +147,7 @@
 //    Comparator<String[]> compa = new CsvComparator1();
 //
 //// On trie la liste
+
 
     cSVWriter.writeAll(data);
     cSVWriter.close();

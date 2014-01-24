@@ -54,10 +54,10 @@ public class TacheSynchroRecupItem extends TacheImpl<TacheSynchroRecupItem> impl
     //    public TacheSynchroRecupItem(ScheduledExecutorService executorService) {
     //        this.executorService = executorService;
     //    }
-    public TacheSynchroRecupItem(AbstrService executorService) {
-        super(executorService);
-        this.itemTrouvees = new ArrayList<Item>();
-    }
+//    public TacheSynchroRecupItem(AbstrService executorService) {
+//        super(executorService);
+//        this.itemTrouvees = new ArrayList<Item>();
+//    }
 
     @Override
     protected void callCorps() throws Exception {

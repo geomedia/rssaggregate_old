@@ -36,8 +36,11 @@ public class AbstrParseur implements Serializable, Cloneable,  Callable<List<Ite
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long ID;
     
+//        @Transient
+//    InputStream inputStream;
+        
         @Transient
-    InputStream inputStream;
+        byte[] contenuAParser;
 
     public AbstrParseur() {
     }
@@ -50,7 +53,7 @@ public class AbstrParseur implements Serializable, Cloneable,  Callable<List<Ite
     }
 
    
-    public List<Item> execute(InputStream xml) throws IOException, IllegalArgumentException, FeedException {
+    public List<Item> execute(byte[] xml) throws IOException, IllegalArgumentException, FeedException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -62,13 +65,13 @@ public class AbstrParseur implements Serializable, Cloneable,  Callable<List<Ite
         this.ID = ID;
     }
 
-    public InputStream getInputStream() {
-        return inputStream;
-    }
-
-    public void setInputStream(InputStream inputStream) {
-        this.inputStream = inputStream;
-    }
+//    public InputStream getInputStream() {
+//        return inputStream;
+//    }
+//
+//    public void setInputStream(InputStream inputStream) {
+//        this.inputStream = inputStream;
+//    }
 
 
     
@@ -81,7 +84,7 @@ public class AbstrParseur implements Serializable, Cloneable,  Callable<List<Ite
 
     @Override
     public List<Item> call() throws Exception {
-       return execute(inputStream);
+       return execute(contenuAParser);
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -106,7 +109,22 @@ public class AbstrParseur implements Serializable, Cloneable,  Callable<List<Ite
         }
         return true;
     }
-    
+
+    public String getForceEncoding() {
+        return forceEncoding;
+    }
+
+    public void setForceEncoding(String forceEncoding) {
+        this.forceEncoding = forceEncoding;
+    }
+
+    public byte[] getContenuAParser() {
+        return contenuAParser;
+    }
+
+    public void setContenuAParser(byte[] contenuAParser) {
+        this.contenuAParser = contenuAParser;
+    }
     
     
     

@@ -25,6 +25,8 @@ public class CacheHashFlux {
     static CacheHashFlux instance = new CacheHashFlux();
     Map<Flux, Set<String>> cacheHash = new HashMap<Flux, Set<String>>(); // Le type Lincked hash map permet de concerver l'ordre d'ajout. Utile quand on veut supprimer les x premier (mais peut être mauvais en terme de capacité
 
+     org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
+    
     protected CacheHashFlux() {
     }
 
@@ -40,7 +42,8 @@ public class CacheHashFlux {
      * Cette méthode doit être lancée au démarrage du {@link ServiceCollecteur}. Elle permet d'initialiser le cache des
      * flux avec les données récupérée dans la base de données
      */
-    public void ChargerLesHashdesFluxdepuisBDD() {
+    public synchronized void ChargerLesHashdesFluxdepuisBDD() {
+        logger.debug("Chargement");
 
         DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
 //        List<Flux> listflux = daoFlux.findAllFlux(Boolean.TRUE);
@@ -49,10 +52,11 @@ public class CacheHashFlux {
         DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
         for (int i = 0; i < listflux.size(); i++) {
             Flux flux = listflux.get(i);
-            Set<String> listHash = daoItem.findLastHash(flux, 500, false);
+            Set<String> listHash = daoItem.findLastHash(flux, 500);
             addAll(flux, listHash);
-        }
+        } 
 
+        logger.debug("fin de chargement");
     }
 
     /**

@@ -9,7 +9,8 @@
 </div>
 
 <div id="footer">
-    <p>Pied de page</p>
+    <p><strong> ©ANR Geomedia</strong></p>
+    <p class="small">En cas de problèmes techniques <a href="maito:bobi@gmail.com">contacter l'administrateur</a></p>
 </div>
 
 </body>

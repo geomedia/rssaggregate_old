@@ -153,10 +153,16 @@ public class JournalForm extends AbstrForm {
         if (s != null && !s.isEmpty()) {
             langue = s;
         }
+        else{
+             erreurs.put("langue", new String[]{ERR_NE_PEUT_ETRE_NULL, ERR_NE_PEUT_ETRE_NULL});
+        }
 
         s = request.getParameter("pays");
         if (s != null && !s.isEmpty()) {
             pays = s;
+        }
+        else{
+             erreurs.put("pays", new String[]{ERR_NE_PEUT_ETRE_NULL, ERR_NE_PEUT_ETRE_NULL});
         }
 
         s = request.getParameter("fuseauHorraire");

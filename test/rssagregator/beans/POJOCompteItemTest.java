@@ -222,12 +222,12 @@ public class POJOCompteItemTest {
     public void testCalculterBoxPloat() throws Exception {
         System.out.println("calculterBoxPloat");
         POJOCompteItem instance = genererInstanceTest();
-        
+
         instance.compte();
-        
+
         instance.calculterBoxPloat();
-        
-        
+
+
         instance = new POJOCompteItem();
         List<Item> listItem = new ArrayList<Item>();
         Item it1 = new Item();
@@ -236,15 +236,16 @@ public class POJOCompteItemTest {
         instance.setItems(listItem);
         instance.setDate1(new DateTime(2013, 1, 1, 0, 0).toDate());
         instance.setDate2(new DateTime(2013, 1, 2, 0, 0).toDate());
-        
+
         instance.compte();
         instance.calculterBoxPloat();
-        
-        
+
+
         // TODO review the generated test code and remove the default call to fail.
 //        fail("The test case is a prototype.");
     }
 //
+
     /**
      * Test of calculerMoyenne method, of class POJOCompteItem.
      */
@@ -295,18 +296,18 @@ public class POJOCompteItemTest {
         }
 
 //        List expResult = null;
-        Map<Date,Integer> result = instance.detecterAnomalieParrapportAuSeuil(seuil);
+        Map<Date, Integer> result = instance.detecterAnomalieParrapportAuSeuil(seuil);
 
         if (result.size() != 3) {
             fail("on attend 3 résultats");
         }
-        
-        
+
+
         try { // On tente de faire le calcul avec une valeur null doit lever une NullPointerException
             instance.detecterAnomalieParrapportAuSeuil(null);
             fail("devait lancer une exception");
         } catch (Exception e) {
-            if(!e.getClass().equals(NullPointerException.class)){
+            if (!e.getClass().equals(NullPointerException.class)) {
                 fail("devait lever une NullPointerException");
             }
         }
@@ -388,5 +389,65 @@ public class POJOCompteItemTest {
         instance.setDate1(new DateTime(2013, 1, 1, 0, 0).toDate());
         instance.setDate2(new DateTime(2013, 1, 6, 0, 0).toDate());
         return instance;
+    }
+
+    /**
+     * Test of detecterAnomalieNbrMinimalItem method, of class POJOCompteItem.
+     */
+    @Test
+    public void testDetecterAnomalieNbrMinimalItem() {
+
+        List<Item> listItem = new ArrayList<Item>();
+        Item it1 = new Item();
+        it1.setDateRecup(new DateTime(2013, 1, 1, 0, 1).toDate());
+
+        Item it11 = new Item();
+        it11.setDateRecup(new DateTime(2013, 1, 1, 0, 1).toDate());
+
+        Item it2 = new Item();
+        it2.setDateRecup(new DateTime(2013, 1, 6, 0, 1).toDate());
+        listItem.add(it1);
+        listItem.add(it2);
+        listItem.add(it11);
+        POJOCompteItem instance = genererInstanceTest();
+        instance.setItems(listItem);
+        instance.setDate1(new DateTime(2013, 1, 1, 0, 1).toDate());
+        instance.setDate2(new DateTime(2013, 1, 6, 0, 1).toDate());
+
+        System.out.println("detecterAnomalieNbrMinimalItem-----");
+        Integer nbrItem = 0;
+        Integer jour = 50;
+
+        try {
+            instance.compte();
+        } catch (Exception ex) {
+            Logger.getLogger(POJOCompteItemTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        Map<Date, Integer> result = instance.detecterAnomalieNbrMinimalItem(0, 50);
+        if(!result.isEmpty()){
+            fail("On ne devait pas avoir de résultats");
+        }
+        result = instance.detecterAnomalieNbrMinimalItem(3, 2);
+        if(!result.isEmpty()){
+            fail("On ne devait pas avoir de résultat il y en a "+ result.size());
+        }
+        
+        result = instance.detecterAnomalieNbrMinimalItem(0, 3);
+        if(result.isEmpty()){
+            fail("il devait y avoir des résultats");
+        }
+        
+        
+        
+
+        System.out.println("NBR de jour en exeption " + result.size());
+
+        for (Map.Entry<Date, Integer> entry : result.entrySet()) {
+            Date date = entry.getKey();
+            Integer integer = entry.getValue();
+            System.out.println("Date : " + date + "avec " + integer);
+        }
+
     }
 }

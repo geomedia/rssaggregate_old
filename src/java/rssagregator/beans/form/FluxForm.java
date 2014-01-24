@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import rssagregator.beans.Flux;
 import rssagregator.beans.FluxType;
 import rssagregator.beans.Journal;
+import static rssagregator.beans.form.AbstrForm.ERR_NE_PEUT_ETRE_NULL;
 import rssagregator.beans.traitement.MediatorCollecteAction;
 import rssagregator.dao.DAOComportementCollecte;
 import rssagregator.dao.DAOFactory;
@@ -212,6 +213,10 @@ public class FluxForm extends AbstrForm {
                 erreurs.put("typeFlux", new String[]{"Incorrect", "Incorrect"});
             }
         }
+        else{
+            erreurs.put("typeFlux", new String[]{ERR_NE_PEUT_ETRE_NULL, ERR_NE_PEUT_ETRE_NULL});
+        }
+        
 
         //----------> NOM DU FLUX
         s = request.getParameter("nom");

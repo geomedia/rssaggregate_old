@@ -17,7 +17,7 @@ import rssagregator.utils.PropertyLoader;
 /**
  * Cette tache écrit dans un fichier de log propre /var/lib/RSSAgregate/log/stillalive. Ce fichier permet de vérifier
  * qu'il n'y a pas de coupure sur le service. La tâche est gérée par le service {@link ServiceServer}. Elle génère des
- * incident de type {@link AliveIncident}
+ * incident de type {@link AliveIncident} 
  *
  * @author clem
  */
@@ -34,12 +34,19 @@ public class TacheStillAlive extends TacheImpl<TacheStillAlive> {
      * est a true
      */
     Boolean rupture = false;
+    
+    /***
+     * date de début de la dernière rupture de continuité
+     */
     Date debutRupture;
+    
+    /***
+     * Date de fin de la dernière rupture de continuité
+     */
     Date finRupture;
     
     @Override
     protected void callCorps() throws Exception {
-
 
 
         initialiserTransaction();
@@ -74,7 +81,19 @@ public class TacheStillAlive extends TacheImpl<TacheStillAlive> {
             //----> Enregistrement de l'incident
             AbstrServiceCRUD serviceCrud = ServiceCRUDFactory.getInstance().getServiceFor(AliveIncident.class);
             IncidentFactory<AliveIncident> facto = new IncidentFactory<AliveIncident>();
-            AliveIncident inci = facto.getIncident(AliveIncident.class, "Il semble que le serveur ait arrété de fonctionner durant un laps de temps", null);
+            
+            
+            String text = "<p>Il semble que le serveur ait arrété de fonctionner durant un laps de temps. </p>";
+            if(alivePOJO.getDebutRupture() != null && alivePOJO.getFinRupture() != null){
+                text += "<p>Le fichier de controle n'a pas été modifié entre les dates : <ul>"
+                        +"<ul>"
+                        +"<li>"+alivePOJO.getDebutRupture()+"</li>"
+                        +"<li>"+alivePOJO.getFinRupture()+"</li>"
+                        + "</ul></p>";
+            }
+            
+            
+            AliveIncident inci = facto.getIncident(AliveIncident.class, text, null);
             inci.setDateDebut(debutRupture);
             inci.setDateFin(debutRupture);
 

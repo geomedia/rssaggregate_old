@@ -4,26 +4,23 @@
  */
 package rssagregator.services.tache;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Observer;
-import java.util.concurrent.Future;
-import rssagregator.beans.ServeurSlave;
-import rssagregator.dao.DAOFactory;
-import rssagregator.services.ServiceSynchro;
 
 /**
+ * 
+ * /!\ N'est pas fonctionnel. On a retirer la synchronisation du projet
  * Cette tache est lancée toutes les semaines afin de récupérérer sur les serveurs esclaves les items collectées qui
  * manqueraient sur le serveur maitre
  *
  * @author clem
  */
+@Deprecated
 public class TacheSynchroHebdomadaire extends TacheImpl<TacheSynchroHebdomadaire> {
 
-    public TacheSynchroHebdomadaire(Observer s) {
-        super(s);
-        erreur = false;
-    }
+//    public TacheSynchroHebdomadaire(Observer s) {
+//        super(s);
+//        erreur = false;
+//    }
 
     public TacheSynchroHebdomadaire() {
         super();
@@ -37,21 +34,21 @@ public class TacheSynchroHebdomadaire extends TacheImpl<TacheSynchroHebdomadaire
 
     @Override
     protected void callCorps() throws Exception {
-        synchroSlave = new ArrayList<TacheSynchroRecupItem>();
-        // Pour chaque serveur slave
-        List<ServeurSlave> listSlave = DAOFactory.getInstance().getDAOConf().getConfCourante().getServeurSlave(); // Pour chaque serveur esclave
-        for (int i = 0; i < listSlave.size(); i++) {
-            ServeurSlave serveurSlave = listSlave.get(i);
-            TacheSynchroRecupItem t = new TacheSynchroRecupItem(ServiceSynchro.getInstance());
-            t.setServeurSlave(serveurSlave);
-            synchroSlave.add(t);
-            Future<TacheSynchroRecupItem> futur = ServiceSynchro.getInstance().getExecutorService().submit(t);
-            TacheSynchroRecupItem recupItem = futur.get();
-
-            if (recupItem.getExeption() != null) {
-                erreur = true;
-            }
-        }
+//        synchroSlave = new ArrayList<TacheSynchroRecupItem>();
+//        // Pour chaque serveur slave
+//        List<ServeurSlave> listSlave = DAOFactory.getInstance().getDAOConf().getConfCourante().getServeurSlave(); // Pour chaque serveur esclave
+//        for (int i = 0; i < listSlave.size(); i++) {
+//            ServeurSlave serveurSlave = listSlave.get(i);
+//            TacheSynchroRecupItem t = new TacheSynchroRecupItem(ServiceSynchro.getInstance());
+//            t.setServeurSlave(serveurSlave);
+//            synchroSlave.add(t);
+//            Future<TacheSynchroRecupItem> futur = ServiceSynchro.getInstance().getExecutorService().submit(t);
+//            TacheSynchroRecupItem recupItem = futur.get();
+//
+//            if (recupItem.getExeption() != null) {
+//                erreur = true;
+//            }
+//        }
     }
 
 //    @Override

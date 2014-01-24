@@ -69,7 +69,8 @@ public abstract class AbstrDedoublonneur implements Serializable, Cloneable {
     protected Boolean enable = true;
     
     @Transient
-    MediatorCollecteAction mediatorAReferer;
+    VisitorCollecteFlux visitor;
+    
 
     public Boolean getEnable() {
         return enable;
@@ -329,7 +330,8 @@ public abstract class AbstrDedoublonneur implements Serializable, Cloneable {
                     }
                     if (cpt > 1) {
                         it.remove();
-                        mediatorAReferer.nbDoublonInterneAuflux++;
+                        visitor.nbDoublonInterneAuflux++;
+//                        mediatorAReferer.nbDoublonInterneAuflux++;
                     }
                 }
             }
@@ -351,7 +353,8 @@ public abstract class AbstrDedoublonneur implements Serializable, Cloneable {
                     }
                     if (cpt > 1) {
                         it.remove();
-                        mediatorAReferer.nbDoublonInterneAuflux++;
+                        visitor.nbDoublonInterneAuflux++;
+//                        mediatorAReferer.nbDoublonInterneAuflux++;
                     }
 
                 }
@@ -384,13 +387,24 @@ public abstract class AbstrDedoublonneur implements Serializable, Cloneable {
         }
     }
 
-    public MediatorCollecteAction getMediatorAReferer() {
-        return mediatorAReferer;
+//    public MediatorCollecteAction getMediatorAReferer() {
+//        return mediatorAReferer;
+//    }
+//
+//    public void setMediatorAReferer(MediatorCollecteAction mediatorAReferer) {
+//        this.mediatorAReferer = mediatorAReferer;
+//    }
+
+    public VisitorCollecteFlux getVisitor() {
+        return visitor;
     }
 
-    public void setMediatorAReferer(MediatorCollecteAction mediatorAReferer) {
-        this.mediatorAReferer = mediatorAReferer;
+    public void setVisitor(VisitorCollecteFlux visitor) {
+        this.visitor = visitor;
     }
+    
+    
+    
 
 
     }

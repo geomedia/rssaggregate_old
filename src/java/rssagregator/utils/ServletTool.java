@@ -701,6 +701,9 @@ public class ServletTool {
         
         String str = request.getParameter(param);
         if(str!=null && !str.isEmpty()){
+            if(str.equals("false")){
+                return false;
+            }
             return true;
         }
         return false;

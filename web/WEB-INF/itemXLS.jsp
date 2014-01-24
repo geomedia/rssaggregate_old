@@ -3,6 +3,8 @@
     Created on : 25 juin 2013, 17:05:15
     Author     : clem
 --%>
+<%@page import="rssagregator.dao.SearchFiltersList"%>
+<%@page import="rssagregator.dao.SearchFilter"%>
 <%@page import="java.util.Map"%>
 <%@page import="java.util.Map"%>
 <%@page import="java.util.HashMap"%>
@@ -32,20 +34,30 @@
 <%
 
 
-    List<Item> listItem = (List<Item>) request.getAttribute("listItem");
+    List<Item> listItem = (List<Item>) request.getAttribute("items");
 
+    // Récupération de la liste des flux demandé par l'utilisateur. Sans avoir celle ci on ne peut retirer les infos non demandé par l'utilisateur
+    SearchFiltersList filtersList = (SearchFiltersList) request.getAttribute("filtersList");
+    List<SearchFilter> listFiltre = filtersList.getFilters();
+    List<Flux> fluxSelectionne = null;
+
+    for (int i = 0; i < listFiltre.size(); i++) {
+        SearchFilter fi = listFiltre.get(i);
+        if (fi.getField().equals("listFlux")) {
+            fluxSelectionne = (List) fi.getData();
+        }
+    }
 
 
     // create a new workbook
     Workbook wb = new HSSFWorkbook();
     // create a new sheet
-    Sheet s = wb.createSheet();
+//    Sheet s = wb.createSheet();
 
     // declare a row object reference
     Row r = null;
     // declare a cell object reference
     Cell c = null;
-
 
     // create 3 cell styles
     CellStyle cs = wb.createCellStyle();
@@ -82,8 +94,8 @@
     // set the font
     cs2.setFont(f2);
     // set the sheet name in Unicode
-    wb.setSheetName(0, "\u0422\u0435\u0441\u0442\u043E\u0432\u0430\u044F "
-            + "\u0421\u0442\u0440\u0430\u043D\u0438\u0447\u043A\u0430");
+//    wb.setSheetName(0, "\u0422\u0435\u0441\u0442\u043E\u0432\u0430\u044F "
+//            + "\u0421\u0442\u0440\u0430\u043D\u0438\u0447\u043A\u0430");
 
     // in case of plain ascii
     // wb.setSheetName(0, "HSSF Test");
@@ -94,89 +106,88 @@
     Map<Long, Sheet> assocsfluxSet = new HashMap<Long, Sheet>();
 
     for (rownum = 0; rownum < listItem.size(); rownum++) {
-
-
-        Integer j;
-        for (j = 0; j < listItem.get(rownum).getListFlux().size(); j++) {
-
+        for (int j = 0; j < listItem.get(rownum).getListFlux().size(); j++) {
             Flux fl = listItem.get(rownum).getListFlux().get(j);
 
-            Sheet sheet = assocsfluxSet.get(fl.getID());
+            // On vérifie que le flux a bien été demandé par l'utilisateur
 
-            if (sheet == null) {
-                String nomsheet = fl.toString();
-                nomsheet = nomsheet.replace(":", "-");
-                nomsheet = nomsheet.replace("/", "");
-                nomsheet = nomsheet.substring(0, 10);
-                sheet = wb.createSheet(nomsheet + rownum + j.toString());
-                assocsfluxSet.put(fl.getID(), sheet);
+            boolean trouve = false;
+            if (fluxSelectionne != null && !fluxSelectionne.isEmpty()) {
+
+                for (int i = 0; i < fluxSelectionne.size(); i++) {
+                    if (fluxSelectionne.get(i).getID().equals(fl.getID())) {
+                        trouve = true;
+                    }
+                }
+            }
+
+            if (trouve) { // Si c'est bien un flux demandé par l'utilisateur
+
+                Sheet sheet = assocsfluxSet.get(fl.getID());
+
+                if (sheet == null) {
+                    String nomsheet = fl.toString();
+                    nomsheet = nomsheet.replace(":", "-");
+                    nomsheet = nomsheet.replace("/", "");
+                    nomsheet = nomsheet.substring(0, 10);
+                    sheet = wb.createSheet(nomsheet + rownum + j);
+
+//                sheet = wb.createSheet(fl.toString());
+
+                    assocsfluxSet.put(fl.getID(), sheet);
 
 
-                r = sheet.createRow(0);
+                    r = sheet.createRow(0);
+                    c = r.createCell(0);
+                    c.setCellValue("ID");
+
+
+                    c = r.createCell(1);
+                    c.setCellValue("Titre");
+                    
+                    
+                    c = r.createCell(2);
+                    c.setCellValue("Description");
+                    
+                    c = r.createCell(3);
+                    c.setCellValue("Lien");
+//                    
+                    
+                }
+
+                // On ajoute la donnée à la sheet
+
+                Integer newindex = sheet.getLastRowNum();
+
+                if (newindex == null) {
+                    newindex = 0;
+                } else {
+                    newindex++;
+                }
+
+
+                r = sheet.createRow(newindex);
+
                 c = r.createCell(0);
-                c.setCellValue("ID");
-
-
-                c = r.createCell(1);
-                c.setCellValue("Titre");
-            }
-
-
-            // On ajoute la donnée à la sheet
-
-            Integer newindex = sheet.getLastRowNum();
-
-            if (newindex == null) {
-                newindex = 0;
-            } else {
-                newindex++;
-            }
-
-
-            r = sheet.createRow(newindex);
-
-            c = r.createCell(0);
-            c.setCellValue(listItem.get(rownum).getID());
+                c.setCellValue(listItem.get(rownum).getID());
 //
-//            
 //                    // Gestion des titre;
-            c = r.createCell(1);
-            c.setCellValue(listItem.get(rownum).getTitre());
+                c = r.createCell(1);
+                c.setCellValue(listItem.get(rownum).getTitre());
 
-
-            // Gestion de la description
-            c = r.createCell(2);
-            c.setCellValue(listItem.get(rownum).getDescription());
-
+                // Gestion de la description
+                c = r.createCell(2);
+                c.setCellValue(listItem.get(rownum).getDescription());
+                
+                c = r.createCell(3);
+                c.setCellValue(listItem.get(rownum).getLink());
+            }
         }
     }
-    //draw a thick black border on the row at the bottom using BLANKS
-    // advance 2 rows
-//    rownum++;
+
     rownum++;
-//    r = s.createRow(rownum);
-    // define the third style to be the default
-    // except with a thick black border at the bottom
+
     cs3.setBorderBottom(cs3.BORDER_THICK);
-    //create 50 cells
-//    for (short cellnum = (short) 0; cellnum < 50; cellnum++) {
-//        //create a blank type cell (no value)
-//        c = r.createCell(cellnum);
-//        // set it to the thick black border style
-//        c.setCellStyle(cs3);
-//    }
-
-    //end draw thick black border
-    // demonstrate adding/naming and deleting a sheet
-    // create a sheet, set its title then delete it
-    s = wb.createSheet();
-    wb.setSheetName(1, "DeletedSheet");
-    wb.removeSheetAt(1);
-    //end deleted sheet
-    // write the workbook to the output stream
-    // close our file (don't blow out our file handles
-
-
 
     OutputStream outt = response.getOutputStream();
     wb.write(outt);

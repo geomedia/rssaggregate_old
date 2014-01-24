@@ -41,6 +41,7 @@ import org.joda.time.Interval;
 import rssagregator.beans.exception.DonneeInterneCoherente;
 import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.CollecteIncident;
+import rssagregator.beans.traitement.ComportementVisitor;
 import rssagregator.beans.traitement.MediatorCollecteAction;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoFlux;
@@ -417,10 +418,12 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    @Override
     public Long getID() {
         return ID;
     }
 
+    @Override
     public void setID(Long ID) {
         this.ID = ID;
     }
@@ -517,6 +520,8 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
         return null;
     }
 
+    
+    
     @Override
     /**
      * *
@@ -864,4 +869,16 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
 
     public class CutoClem extends ClassDescriptor {
     }
+    
+    
+    /***
+     * Permet au flux d'être exploité par un visiteurs.
+     * @param visitor
+     * @throws Exception 
+     */
+        public void accept(ComportementVisitor visitor) throws Exception{
+        visitor.visit(this);
+    }
+    
+    
 }

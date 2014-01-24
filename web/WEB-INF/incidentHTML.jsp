@@ -28,8 +28,13 @@
                 <c:import url="/WEB-INF/redirJspJavascriptPart.jsp" />
             </c:when>
 
+
             <c:when test="${empty redirmap}">
+
+
                 <c:choose>
+
+
                     <c:when test="${action=='recherche'}">
                         <h2>Liste des incidents</h2>
 
@@ -134,7 +139,7 @@
                         </ul>
 
 
-                        <table id="list" width="600"><tr><td></td></tr></table> 
+                        <table id="list" width="600"></table> 
                         <div id="pager"></div> 
 
 
@@ -146,134 +151,17 @@
                         <link rel="stylesheet" type="text/css" media="screen" href="${rootpath}ress/jquery-ui-1.10.3.custom/css/base/jquery-ui.css" />
 
                         <script type="text/javascript">
-                                    /***
-                                     *  Utilisé par JQgrid pour formater le champ journal en un lien
-                                     * @param {type} cellvalue
-                                     * @param {type} options
-                                     * @param {type} rowObjcet
-                                     * @param {type} l4
-                                     * @param {type} l5
-                                     * @returns {String}
-                                     */
-                                    function myLinkFormatter(cellvalue, options, rowObjcet, l4, l5) {
-//        alert("0" + rowObjcet[0]);
-//        alert("1" + rowObjcet[1])
-//        alert("2"+ rowObjcet[2])
-                                        return '<a href = "/RSSAgregate/incidents/read?id=' + rowObjcet[0] + "&type=" + rowObjcet[2] + '">' + rowObjcet[1] + '</a>';
-                                    }
 
-                                    $(function() {
-                                        $("#list").jqGrid({
-                                            loadonce: true,
-                                            url: "${rootpath}incidents/list?vue=grid&type=CollecteIncident",
-//                                            url: "${rootpath}item/list?vue=grid",
-                                            datatype: "json",
-                                            mtype: "GET",
-                                            colNames: ["ID", "intitulé", "type", "messageEreur", "dateDebut", "dateFin"],
-                                            colModel: [
-                                                {name: "ID", width: 55, key: true, hidden: true, searchoptions: {sopt: ['cn', 'eq']}},
-                                                {name: "intitulé", classtype: 'clem', sorttype: 'float', width: 90, formatter: myLinkFormatter, searchoptions: {sopt: ['cn', 'eq']}},
-                                                {name: "type", index: 'type', key: false, search: false, width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
-                                                {name: "messageEreur", index: 'langue', key: false, search: true, width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
-                                                {name: "dateDebut", width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
-                                                {name: "dateFin", width: 80, align: "right", stype: 'select', editoptions: {value: {'': 'tous', 'autre': 'autre', 'quotidien': 'quotidien'}}},
-                                            ],
-                                            pager: "#pager",
-                                            rowNum: 10,
-                                            rowList: [10, 20, 30, 50, 100, 200],
-                                            sortname: "invid",
-                                            sortorder: "desc",
-                                            viewrecords: true,
-                                            gridview: true,
-                                            autoencode: true,
-                                            caption: "Recherche parmis les journaux",
-                                            sortable: true,
-                                            sorttype: 'text',
-                                            autowidth: true,
-                                            exptype: "csvstring",
-                                            root: "grid",
-                                            height: 500,
-                                            multiselect: true,
-                                            ident: "\t"
-//                                    filterToolbar: {searchOperators: true},
-//                                    search: {
-//                                        caption: "Search...",
-//                                        Find: "Find",
-//                                        Reset: "Reset",
-//                                        odata: ['equal', 'not equal', 'less', 'less or equal', 'greater', 'greater or equal', 'begins with', 'does not begin with', 'is in', 'is not in', 'ends with', 'does not end with', 'contains', 'does not contain'],
-//                                        groupOps: [{op: "AND", text: "all"}, {op: "OR", text: "any"}],
-//                                        matchText: " match",
-//                                        rulesText: " rules"
-//                                    }
-                                        }
-                                        );
-
-                                        optionsearch = {searchOperators: true, stringResult: true};
-//                                jQuery("#list").jqGrid('filterToolbar', {searchOperators: true});
-                                        jQuery("#list").filterToolbar(optionsearch);
-                                        jQuery("#list").navGrid('#pager', {edit: false, add: false, del: false, search: false})
-                                                .navButtonAdd('#pager', {
-                                            caption: "'Export To CSV",
-                                            buttonicon: "ui-icon-add",
-                                            onClickButton: function() {
-
-                                                opt = {exptype: "jsonstring"};
-                                                $("#list").jqGrid('excelExport', {tag: 'csv', url: '${rootpath}journaux/list?vue=csv'});
-                                            },
-                                            position: "last"
-                                        })
-                                                .navButtonAdd('#pager', {
-                                            caption: "'Clore ",
-                                                    onClickButton: function() {
-                                                 reponse = confirm('Vous vous apprétez à Clore des incidents manuellement. Confirmez vous votre choix ?');
-                                                if (reponse) {
-                                                    selRowId = $('#list').jqGrid('getGridParam', 'selarrrow');
-                                                    alert('' + selRowId);
-                                                    //chaine = "";
-                                                    //for (i = 0; i < selRowId.length; i++) {
-                                                    //    chaine += 'id=' + selRowId[i] + ',';
-                                                    //}
-                                                    //if (chaine.length > 2) {
-                                                    //    chaine = chaine.substr(0, chaine.length - 1);
-                                                    //}
-                                                    //url = ${rootpath} + 'flux/rem?' + chaine;
-                                                    url = ${rootpath} + 'incidents/close?id=' + selRowId;
-                                                    location.href = url;
-                                                }
-                                                    }
-                                                    
-                                        }
-
-
-
-
-                                        ).navButtonAdd('#pager', {
-                                            caption: "'Supprimer ",
-                                            onClickButton: function() {
-                                                reponse = confirm('Vous vous apprétez à supprimer un flux. Toutes les items associées seront supprimée. Cette manipulation est irréverssible. Confirmez vous votre choix ?');
-                                                if (reponse) {
-                                                    selRowId = $('#list').jqGrid('getGridParam', 'selarrrow');
-                                                    alert('' + selRowId);
-                                                    //chaine = "";
-                                                    //for (i = 0; i < selRowId.length; i++) {
-                                                    //    chaine += 'id=' + selRowId[i] + ',';
-                                                    //}
-                                                    //if (chaine.length > 2) {
-                                                    //    chaine = chaine.substr(0, chaine.length - 1);
-                                                    //}
-                                                    //url = ${rootpath} + 'flux/rem?' + chaine;
-                                                    url = ${rootpath} + 'incidents/rem?id=' + selRowId;
-                                                    location.href = url;
-                                                }
-                                            }
-                                        })
-
-
-                                                ;
-                                    });
                         </script>
 
 
+
+
+                        <c:if test="${admin=='true'}">
+                            <link rel="alternate" href="${rootpath}incidents/rssBakend" title="Le Monde.fr : A la une" type="application/rss+xml">
+                            <p><a href="${rootpath}incidents/rssBakend">Flux RSS des incidents</a></p>
+                        </c:if>
+                            
                     </c:when>
 
 

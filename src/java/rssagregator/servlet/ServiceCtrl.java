@@ -49,7 +49,7 @@ public class ServiceCtrl extends HttpServlet {
         c = Class.forName("rssagregator.services." + servicename);            
         } catch (Exception e) {
 
-            logger.debug("Impossible de récupérer la class " , e);
+//            logger.debug("Impossible de récupérer la class " , e);
         }
 
         

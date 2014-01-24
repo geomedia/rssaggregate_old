@@ -58,6 +58,7 @@ public class CalableAntiDeadBlock implements Callable<Object> {
                             
                             if(abstrTacheSchedule.returnExecutionDuration()> abstrTacheSchedule.getMaxExecuteTime()){
                                   logger.error("La tache " + abstrTacheSchedule+ ". Dépasse son temps d'execuction de " + abstrTacheSchedule.returnExecutionDuration());
+                                  service.relancerTache(abstrTacheSchedule);
                             }
 
 //                            if (executeMaxTime.isBefore(now)) { // Si la tache dépasse son temps d'execution alloué

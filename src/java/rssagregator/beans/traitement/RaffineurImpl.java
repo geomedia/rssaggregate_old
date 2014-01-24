@@ -4,6 +4,7 @@
  */
 package rssagregator.beans.traitement;
 
+import rssagregator.beans.ContentRSS;
 import rssagregator.beans.Item;
 
 /**
@@ -13,7 +14,7 @@ import rssagregator.beans.Item;
 public class RaffineurImpl extends AbstrRaffineur{
 
     @Override
-    public void raffiner(Item i) {
+    public void raffinerContenu(ContentRSS i) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     

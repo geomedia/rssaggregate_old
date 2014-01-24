@@ -51,9 +51,9 @@ public class TacheCalculQualiteFlux extends TacheImpl<TacheCalculQualiteFlux> im
     public TacheCalculQualiteFlux() {
     }
 
-    public TacheCalculQualiteFlux(Observer s) {
-        super(s);
-    }
+//    public TacheCalculQualiteFlux(Observer s) {
+//        super(s);
+//    }
 
     public Flux getFlux() {
         return flux;
@@ -142,11 +142,14 @@ public class TacheCalculQualiteFlux extends TacheImpl<TacheCalculQualiteFlux> im
 
 
         period.setStatEcartTypeLundi(compteItem.getStatEcartypeDayOfWeek()[0]);
-        period.setStatMedLundi(compteItem.getStatMoyDayOfWeek()[0]);
+        period.setStatMedLundi(compteItem.getStatMedDayOfWeek()[0].floatValue());
         period.setStatMoyLundi(compteItem.getStatMoyDayOfWeek()[0]);
+        
+        
+        
 
         period.setStatEcartTypeMardi(compteItem.getStatEcartypeDayOfWeek()[1]);
-        period.setStatMedMardi(compteItem.getStatMoyDayOfWeek()[1]);
+        period.setStatMedMardi(compteItem.getStatMedDayOfWeek()[1].floatValue());
         period.setStatMoyMardi(compteItem.getStatMoyDayOfWeek()[1]);
 
         period.setStatEcartTypeMercredi(compteItem.getStatEcartypeDayOfWeek()[2]);
@@ -154,19 +157,19 @@ public class TacheCalculQualiteFlux extends TacheImpl<TacheCalculQualiteFlux> im
         period.setStatMoyMercredi(compteItem.getStatMoyDayOfWeek()[2]);
 
         period.setStatEcartTypeJeudi(compteItem.getStatEcartypeDayOfWeek()[3]);
-        period.setStatMedJeudi(compteItem.getStatMoyDayOfWeek()[3]);
+        period.setStatMedJeudi(compteItem.getStatMedDayOfWeek()[3].floatValue());
         period.setStatMoyJeudi(compteItem.getStatMoyDayOfWeek()[3]);
 
         period.setStatEcartTypeVendredi(compteItem.getStatEcartypeDayOfWeek()[4]);
-        period.setStatMedVendredi(compteItem.getStatMoyDayOfWeek()[4]);
+        period.setStatMedVendredi(compteItem.getStatMedDayOfWeek()[4].floatValue());
         period.setStatMoyVendredi(compteItem.getStatMoyDayOfWeek()[4]);
 
         period.setStatEcartTypeSamedi(compteItem.getStatEcartypeDayOfWeek()[5]);
-        period.setStatMedSamedi(compteItem.getStatMoyDayOfWeek()[5]);
+        period.setStatMedSamedi(compteItem.getStatMedDayOfWeek()[5].floatValue());
         period.setStatMoySamedi(compteItem.getStatMoyDayOfWeek()[5]);
 
         period.setStatEcartTypeDimanche(compteItem.getStatEcartypeDayOfWeek()[6]);
-        period.setStatMedDimanche(compteItem.getStatMoyDayOfWeek()[6]);
+        period.setStatMedDimanche(compteItem.getStatMedDayOfWeek()[6].floatValue());
         period.setStatMoyDimanche(compteItem.getStatMoyDayOfWeek()[6]);
 
 

@@ -39,16 +39,20 @@ import rssagregator.services.tache.AbstrTacheSchedule;
 public class DAOFactory<T extends AbstrDao> {
 
     protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DAOFactory.class);
-   
-    protected String PERSISTENCE_UNIT_NAME = "RSSAgregatePU2";
-    private static DAOFactory instance = new DAOFactory();
+    
+    /***
+     * Le nom de la persistence unit voir dans persistance.xml
+     */
+    public static String PERSISTENCE_UNIT_NAME = "RSSAgregatePU2";
+    
+    
+//    private static DAOFactory instance = new DAOFactory();
+    private static DAOFactory instance;
     public List<EntityManager> listEm = new ArrayList<EntityManager>();
     EntityManager em;
-
     private DAOConf daoConf;
 //     private static DaoItem daoItem;
     EntityManagerFactory emf;
-    
 
     public static DAOFactory getInstance() {
         if (instance == null) {
@@ -57,14 +61,39 @@ public class DAOFactory<T extends AbstrDao> {
         return instance;
     }
 
+    public static DAOFactory getInstanceWithSpecificPU(String pu) {
+        PERSISTENCE_UNIT_NAME = pu;
+        System.out.println("1 PU " + PERSISTENCE_UNIT_NAME);
+        if (instance == null) {
+            instance = new DAOFactory(pu);
+        }
+        return instance;
+    }
+
     private DAOFactory() {
+        System.out.println("---->CREATION PERSISTENCE CONTEXR PU : " + PERSISTENCE_UNIT_NAME);
         emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
+
+
         em = emf.createEntityManager();
+
 
         // Attention aux singleton et au multi threading
 //        daoItem = new DaoItem(this);
 //        daoflux = new DaoFlux(this);
         daoConf = new DAOConf(this);
+    }
+
+    private DAOFactory(String pu) {
+        System.out.println("---->CREATION PERSISTENCE CONTEXR PU : " + PERSISTENCE_UNIT_NAME);
+
+        PERSISTENCE_UNIT_NAME = pu;
+        emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
+
+        em = emf.createEntityManager();
+        daoConf = new DAOConf(this);
+        
+        System.out.println("2PU " + PERSISTENCE_UNIT_NAME);
     }
 
     public DaoFlux getDAOFlux() {
@@ -102,7 +131,7 @@ public class DAOFactory<T extends AbstrDao> {
 //        }
 ////        DaoItem daoItem = new DaoItem(this);
 //        return daoItem;
-        
+
         DaoItem dao = new DaoItem(this);
         dao.setClassAssocie(Item.class);
         return dao;
@@ -125,7 +154,7 @@ public class DAOFactory<T extends AbstrDao> {
     }
 
     public EntityManager getEntityManager() {
-        
+
         EntityManager nEm = emf.createEntityManager();
 //        em = emf.createEntityManager();
         return nEm;
@@ -134,10 +163,6 @@ public class DAOFactory<T extends AbstrDao> {
     public DAOUser getDAOUser() {
         DAOUser dao = new DAOUser(this);
         return dao;
-    }
-
-    public void closeem() {
-        this.em.close();
     }
 
     /**
@@ -195,26 +220,21 @@ public class DAOFactory<T extends AbstrDao> {
         } else if (beansClass.equals(ServeurSlave.class)) {
             dao = (T) new DAOServeurSlave(this);
             dao.setClassAssocie(beansClass);
-        }
-        else if (beansClass.equals(JMSDiffusionIncident.class)){
+        } else if (beansClass.equals(JMSDiffusionIncident.class)) {
             dao = (T) new DAOIncident<JMSDiffusionIncident>(this);
             dao.setClassAssocie(beansClass);
-        }
-        else if (beansClass.equals(Conf.class)){
+        } else if (beansClass.equals(Conf.class)) {
             dao = (T) daoConf;
-        }
-        else if(beansClass.equals(Item.class)){
-            dao =(T) getDaoItem();
-        }
-        else if(beansClass.equals(NotificationAjoutFlux.class)){
+        } else if (beansClass.equals(Item.class)) {
+            dao = (T) getDaoItem();
+        } else if (beansClass.equals(NotificationAjoutFlux.class)) {
             dao = (T) new DAOIncident<NotificationAjoutFlux>(this);
             dao.setClassAssocie(NotificationAjoutFlux.class);
-        }
-        else if(beansClass.equals(IncidentDecouverteRSS.class)){
+        } else if (beansClass.equals(IncidentDecouverteRSS.class)) {
             dao = (T) new DAOIncident<IncidentDecouverteRSS>(this);
             dao.setClassAssocie(IncidentDecouverteRSS.class);
         }
-        
+
 
         if (dao != null) {
             return dao;
@@ -274,6 +294,20 @@ public class DAOFactory<T extends AbstrDao> {
     public void setEmf(EntityManagerFactory emf) {
         this.emf = emf;
     }
-    
-    
+
+    /**
+     * *
+     * Fermer L'Entity Manager factory. Doit être lancé à la fermeture de l'application
+     */
+    public void closeEMF() {
+
+        if (emf.isOpen()) {
+            try {
+                emf.close();
+            } catch (Exception e) {
+
+                logger.error("Erreur lors de la fermeture de l'EMF ", e);
+            }
+        }
+    }
 }

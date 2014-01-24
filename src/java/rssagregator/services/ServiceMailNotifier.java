@@ -4,9 +4,8 @@
  */
 package rssagregator.services;
 
-import rssagregator.services.tache.TacheFactory;
-import rssagregator.services.tache.TacheEnvoyerMail;
-import rssagregator.services.tache.AbstrTacheSchedule;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Executors;
@@ -15,13 +14,10 @@ import java.util.logging.Logger;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import rssagregator.beans.UserAccount;
-import rssagregator.beans.exception.UnIncidableException;
-import rssagregator.beans.incident.Incidable;
-import rssagregator.beans.incident.IncidentFactory;
-import rssagregator.beans.incident.MailIncident;
 import rssagregator.dao.DAOFactory;
-import rssagregator.dao.DAOIncident;
 import rssagregator.utils.PropertyLoader;
+import javax.mail.Message;
+import javax.mail.internet.MimeMessage;
 
 /**
  * Le service mail gère la vie des Tache : <ul>
@@ -107,121 +103,31 @@ public class ServiceMailNotifier extends ServiceImpl {
         this.propertiesMail = propertiesMail;
     }
 
-//    @Override
-//    public void instancierTaches() {
-//
-//        //--------> Lancement de la tâche d'alerte mail
-//        TacheAlerteMail alerteMail = new TacheAlerteMail(this);
-//        alerteMail.setSchedule(Boolean.TRUE);
-//        executorService.schedule(alerteMail, 30, TimeUnit.SECONDS);
-//
-//
-//        //---------> Lancement de la tâche de vérification journalière
-//        TacheVerifFluxNotificationMail notificationMail = new TacheVerifFluxNotificationMail(this);
-//        notificationMail.setSchedule(Boolean.TRUE);
-//        //calcul du delay
-//        DateTime dtCurrent = new DateTime();
-//        DateTime next = dtCurrent.plusDays(1).withHourOfDay(8);// withDayOfWeek(DateTimeConstants.SUNDAY);
-//        Duration dur = new Duration(dtCurrent, next);
-//        executorService.schedule(notificationMail, dur.getStandardSeconds(), TimeUnit.SECONDS);
-//    }
-    @Override
-    protected void gererIncident(AbstrTacheSchedule tache) {
 
-
-        if (tache.getExeption() != null && Incidable.class.isAssignableFrom(tache.getClass())) {
-            logger.debug("Gestion d'une erreur");
-
-
-            //================================================================================================
-            //                      INSTANCIATION OU RECUPERATION D'INCIDENT
-            //================================================================================================
-            MailIncident si = null;
-            IncidentFactory factory = new IncidentFactory();
-            try {
-                si = (MailIncident) factory.createIncidentFromTask(tache, "Le mail n'a pu être envoyé");
-            } catch (InstantiationException ex) {
-                Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IllegalAccessException ex) {
-                Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (UnIncidableException ex) {
-                Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
-            }
-
-
-
-            //=================================================================================================
-            // ..................... GESTION DES INCIDENTS
-            //=================================================================================================
-
-            if (si != null) {
-                synchronized (si) {
-
-                    //TODO : Reprendre ce qui est dans update pour mieu gérer
-                    if (tache.getClass().equals(TacheEnvoyerMail.class)) {
-                        TacheEnvoyerMail cast = (TacheEnvoyerMail) tache;
-//                    logger.error("Le mail ne semble pas être envoyé : ", cast.getExeption());
-                        si.setMessage(cast.getContent());
-                        si.setObjet(cast.getSubject());
-                        si.setLogErreur(cast.getExeption().toString());
-                        si.setMessage("Le mail n'a pas été envoyé");
-                    }
-
-
-                    //=================================================================================================
-                    //...............................Enregistrment de l'incident
-                    //=================================================================================================
-
-                    DAOIncident dao = (DAOIncident) DAOFactory.getInstance().getDAOFromTask(tache);
-                    try {
-                        if (si.getID() == null) {
-                            dao.beginTransaction();
-                            dao.creer(si);
-                            dao.commit();
-                        } else {
-                            dao.beginTransaction();
-                            dao.modifier(si);
-                            dao.commit();
-                        }
-                    } catch (Exception ex) {
-                        logger.error("Erreur lors de la création : ", ex);
-                    }
-
-
-//                DAOIncident dao = (DAOIncident) DAOFactory.getInstance().getDAOFromTask(tache);
-//                try {
-//                    dao.creer(si);
-//                } catch (Exception ex) {
-//                    logger.error("Erreur lors de la création : " + ex);
-//                    Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-                }
-            }
-
-
-            //=================================================================================================
-            //.........................Terminaison correct des TACHE et FERMETURE DE L'INCIDENT
-            //=================================================================================================
-
-        }
-
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    public static void main(String[] args) throws AddressException {
-        TacheEnvoyerMail envoyerMail = (TacheEnvoyerMail) TacheFactory.getInstance().getNewTask(TacheEnvoyerMail.class, Boolean.FALSE);
-//        TacheEnvoyerMail envoyerMail = new TacheEnvoyerMail(ServiceMailNotifier.getInstance());
-        envoyerMail.setContent("youpi");
-        envoyerMail.setSubject("obj test");
-        envoyerMail.setToMailAdresses(new InternetAddress[]{new InternetAddress("clement.rillon@gmail.com")});
-        envoyerMail.setPropertiesMail(ServiceMailNotifier.getInstance().propertiesMail);
-        ServiceMailNotifier.getInstance().getExecutorService().submit(envoyerMail);
-
-    }
 
     @Override
     public void stopService() throws SecurityException, RuntimeException {
         super.stopService();
 
     }
+    
+    
+    public void writeMailtoFile(Message message){
+        
+        
+//        String varpath = System.getProperty("confpath");
+        String varpath = "/home/clem/testmail";
+        varpath+="/mail/";
+        try {
+            FileOutputStream fileOutputStream = new FileOutputStream(varpath);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(ServiceMailNotifier.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    public static void main(String[] args) {
+ 
+        ServiceMailNotifier.getTestInstance().writeMailtoFile(null);
+    }
+    
 }

@@ -6,6 +6,7 @@ package rssagregator.dao;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,7 +28,10 @@ import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Predicate;
 import org.eclipse.persistence.config.CacheUsage;
 import org.eclipse.persistence.config.QueryHints;
+import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import rssagregator.beans.FluxPeriodeCaptation;
+import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.utils.ExceptionTool;
 
 /**
@@ -168,6 +172,7 @@ public class DaoFlux extends AbstrDao {
      * *
      * Charger les flux depuis la base de données. Les dernier hash des items sont aussi chargé pour résidé en mémoire
      */
+    @Deprecated
     public void chargerDepuisBd() {
         logger.info("Chargement des flux depuis la base de données");
 
@@ -182,7 +187,7 @@ public class DaoFlux extends AbstrDao {
 
             // Pour chaque flux, on va charger les 100 dernier hash 
             DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
-            Set<String> dernierHash = daoItem.findLastHash(fl, 100, false);
+            Set<String> dernierHash = daoItem.findLastHash(fl, 100);
 //            fl.setLastEmpruntes(dernierHash);
 
 
@@ -559,6 +564,45 @@ public class DaoFlux extends AbstrDao {
 
 
         return f;
+    }
+
+    /**
+     * *
+     * Permet de récupérer les incidents de collecte d'un flux signifiant.
+     *
+     * @param f id du flux
+     * @return
+     */
+    public List<CollecteIncident> findPrincipauxIncident(Long f, int nbrrepetition, int nbhour) {
+
+        Query q = em.createQuery("SELECT i FROM i_collecteincident i JOIN i.fluxLie f WHERE f.ID = :fId and i.nombreTentativeEnEchec>:nbr");
+
+        // AND DATEDIFF(i.dateDebut, i.dateFin)>0
+        q.setParameter("fId", f);
+        q.setParameter("nbr", nbrrepetition);
+
+        List<CollecteIncident> resu = q.getResultList();
+        System.out.println("LIST SIZE " + resu.size());
+        for (Iterator<CollecteIncident> it = resu.iterator(); it.hasNext();) {
+            System.out.println("FOR");
+            CollecteIncident collecteIncident = it.next();
+            if (collecteIncident.getDateFin() != null) {
+                DateTime dt1 = new DateTime(collecteIncident.getDateDebut());
+                DateTime dt2 = new DateTime(collecteIncident.getDateFin());
+                Duration dur = new Duration(dt1, dt2);
+                if (dur.getStandardHours() < nbhour) {
+                    it.remove();
+                    System.out.println("REMOVEZ");
+                }
+            }
+        }
+
+        for (int i = 0; i < resu.size(); i++) {
+            CollecteIncident collecteIncident = resu.get(i);
+            System.out.println(collecteIncident);
+        }
+        return resu;
+
     }
 
     /**

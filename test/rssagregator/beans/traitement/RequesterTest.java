@@ -11,6 +11,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+        
+
 /**
  *
  * @author clem
@@ -51,9 +53,21 @@ public class RequesterTest {
         else{
             System.out.println("Code retour  : " + instance.getHttpStatut());
         }
-        if (instance.getHttpStatut() == null || instance.getHttpResult().isEmpty()) {
-            fail("Le contenu retourné es null");
+        
+        
+        
+        byte[] resu = instance.getResu();
+        if(resu.length<1){
+            fail("Aucun octet dans le resu");
         }
+        else{
+            System.out.println("Après requete, on a un tableau d'octet de " + resu.length);
+        }
+        
+//        
+//        if (instance.getHttpStatut() == null || instance.getHttpResult().isEmpty()) {
+//            fail("Le contenu retourné es null ou vide : " );
+//        }
         
 
         // On regarde le retour

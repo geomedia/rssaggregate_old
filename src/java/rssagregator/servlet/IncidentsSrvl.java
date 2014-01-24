@@ -134,7 +134,24 @@ public class IncidentsSrvl extends HttpServlet {
 
             request.setAttribute("fluxsel", fluxSelectionne);
         }
+        //==========================================================================================
+        //                              ACTION RSS
+        //==========================================================================================
+        /***
+         * Permet d'afficher les incidents sous forme d'un flux RSS afin d'aider les administrateur a suivre. 
+         */
+        if(action.equals("rssBakend")){
+           
+            DAOIncident dao = DAOFactory.getInstance().getDAOIncident();
+               List<AbstrIncident> listIncidNonClos = dao.findIncidentNonClos(AbstrIncident.class);
+               
 
+               request.setAttribute("incids", listIncidNonClos);
+               vue = "rss";
+            
+            
+            
+        }
 
         //============================================================================================
         //                              GESTION DES ACTIONS
@@ -225,9 +242,10 @@ public class IncidentsSrvl extends HttpServlet {
 
 
         if (action.equals("list")) {
+            System.out.println("----> LIST INCID");
 
             try {
-                Class c = null;
+                Class c = null; 
                 DAOIncident dao = null;
                 try {
                     System.out.println("AAA");
@@ -246,9 +264,6 @@ public class IncidentsSrvl extends HttpServlet {
 
 
                 AbstrForm form = FORMFactory.getInstance().getForm(c, "list");
-                System.out.println("FOMR : " + form);
-                System.out.println("DAO : " + dao);
-                System.out.println("TYPE : " + c.getName());
                 form.parseListeRequete(request, dao);
                 dao.setCriteriaSearchFilters(form.getFiltersList());
                 ServletTool.actionLIST(request, c, ATT_OBJ, dao);
@@ -365,8 +380,10 @@ public class IncidentsSrvl extends HttpServlet {
 
 // gestion de la vue et de l'envoie vers la JSP
         if (vue.equals("jsondesc")) {
-            System.out.println("JsonDesc");
             VUE = "/WEB-INF/incidentJSONDesc.jsp";
+        }
+        else if(vue.equals("rss")){
+            VUE = "/WEB-INF/incidentRSS.jsp";
         }
 
         if (vue.equals("html")) {

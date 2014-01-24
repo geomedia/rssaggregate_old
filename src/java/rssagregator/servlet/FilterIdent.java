@@ -34,13 +34,15 @@ public class FilterIdent implements Filter {
         Boolean ok = false;
 
         //--------------------URL DE LIBRE PASSAGE
-        //On admet un passage sans authentification pou le répertoire /ress
+        //On admet un passage sans authentification pou le répertoire /ress. Car il contient des image et des javascript. Pareil pour les page situé dans /test qui sont de simple fichier html ou xml 
         String servString = req.getServletPath();
-        if (servString.matches("^/ress/+.*")) {
+
+        if (servString.matches("^/ress/+.*") || servString.matches("^/test/+.*")) {
             ok = true;
         } else {
             ok = false;
         }
+
 
         //-------------------TEST POUR LES URL NON LIBRE DE PASSAGE
         //Si ce n'est pas une url de libre passage
@@ -50,19 +52,23 @@ public class FilterIdent implements Filter {
                 UserAccount u = (UserAccount) session.getAttribute("authuser");
                 if (u == null) {
                     ok = false;
-                }
-                else{
+                } else {
                     ok = true;
                 }
             } catch (Exception e) {
                 ok = false;
             }
         }
+
         //------------------TRATEMENT DE LA REDIRECTION
         if (ok) { // Si le passage est ok (url de libre passage ou authentification ok
             chain.doFilter(request, response);
         } else { // Sinon on redirige l'utilisateur vers la page d'identification. On ajoutye un attribut url demande
-            request.setAttribute("askurl", req.getRequestURL().append('?').append(req.getQueryString()));
+            if (servString == null || servString.isEmpty()) {
+                request.setAttribute("askurl", req.getRequestURL().append("/?").append(req.getQueryString()));
+            } else {
+                request.setAttribute("askurl", req.getRequestURL().append('?').append(req.getQueryString()));
+            }
             request.getRequestDispatcher("/ident").forward(request, response);
         }
     }

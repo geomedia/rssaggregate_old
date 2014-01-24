@@ -160,6 +160,11 @@ public class TacheFactory {
             service = ServiceCollecteur.getInstance();
             maxExecuteTime = 200;
         }
+        else if(c.equals(TacheRemoveOldFile.class)){
+            newTache = new TacheRemoveOldFile();
+            service = ServiceServer.getInstance();
+            maxExecuteTime = 5;
+        }
         
 
 

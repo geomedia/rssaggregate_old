@@ -4,20 +4,14 @@
  */
 package rssagregator.services;
 
-import rssagregator.services.tache.TacheLancerConnectionJMS;
 import rssagregator.services.tache.TacheDiffuserMessageJMS;
-import rssagregator.services.tache.TacheSynchroHebdomadaire;
-import rssagregator.services.tache.TacheSynchroRecupItem;
-import rssagregator.services.tache.AbstrTacheSchedule;
 import java.io.EOFException;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
-import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.jms.ExceptionListener;
@@ -40,22 +34,18 @@ import rssagregator.beans.Flux;
 import rssagregator.beans.FluxType;
 import rssagregator.beans.Item;
 import rssagregator.beans.Journal;
-import rssagregator.beans.exception.UnIncidableException;
-import rssagregator.beans.incident.IncidentFactory;
-import rssagregator.beans.incident.JMSDiffusionIncident;
-import rssagregator.beans.incident.JMSPerteConnectionIncident;
-import rssagregator.beans.incident.SynchroIncident;
 import rssagregator.beans.traitement.MediatorCollecteAction;
 import rssagregator.dao.DAOComportementCollecte;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DAOGenerique;
-import rssagregator.dao.DAOIncident;
 import rssagregator.dao.DaoFlux;
 import rssagregator.dao.DaoItem;
 import rssagregator.dao.DaoJournal;
 import rssagregator.utils.XMLTool;
 
 /**
+ * 
+ * /!\ Retiré des objectifs du projet. Cette classe n'est pas finie.
  * Cette classe utilise le client activeMq en vue de synchroniser les beans
  * ({@link Flux}, {@link MediatorCollecteAction}) entre serveurs du projet GEOMEDIA. La méthode run doit être lancée au
  * démarrage du projet afin de lancer un daemon cherchant à relancer la connection toutes les 30 secondes si le booleen
@@ -118,67 +108,7 @@ public class ServiceSynchro extends ServiceImpl implements MessageListener, Obse
         return instance;
     }
 
-//    @Override
-    /**
-     * *
-     * Démarre un daemon cherchant à activer la connection si besoin est. La vérification est effectuée toutes les 30
-     * secondes
-     */
-//    public void run() {
-//
-//
-//
-//        while (daemmon) {
-//            System.out.println("TOUR DU completion service");
-//            try {
-//
-//                List<Item> listNouvItem = completionService.take().get();
-//                if (listNouvItem != null) {
-//                    System.out.println("Le completion Service a rammené qqchose");
-//
-//                    for (int i = 0; i < listNouvItem.size(); i++) {
-//                        Item item = listNouvItem.get(i);
-//
-//                    }
-//                }
-//                //            if (!this.getStatutConnection()) {
-//                //                try {
-//                //                    openConnection();
-//                //                } catch (Exception ex) {
-//                //                    logger.info("Erreur lors du démarrage de la connection JMS : " + ex);
-//                //                }
-//                //            }
-//
-//            } catch (InterruptedException ex) {
-//                Logger.getLogger(ServiceSynchro.class.getName()).log(Level.SEVERE, null, ex);
-//            } catch (ExecutionException ex) {
-//                Logger.getLogger(ServiceSynchro.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//
-//
-////            try {
-////                Thread.sleep(30000);
-////            } catch (InterruptedException ex) {
-////                logger.error("Erreur lors du Sleep !! Ne devrait pas arriver");
-////            }
-//        }
-//    }
-//    public static void main(String[] args) {
-//
-//
-//        ServiceSynchro serviceJMS = ServiceSynchro.getInstance();
-//        TacheTest t = new TacheTest(serviceJMS);
-//        serviceJMS.run();
-//    }
-//    public void test() {
-//
-//        TacheTest t = new TacheTest(this);
-//
-//        ServiceSynchro serviceJMS = ServiceSynchro.getInstance();
-//        serviceJMS.run();
-//
-//
-//    }
+
     /**
      * *
      * Ouvre la connection ActiveMq et crée le TOPIC permettant aux esclave de recevoir les instructions du maitre
@@ -233,7 +163,8 @@ public class ServiceSynchro extends ServiceImpl implements MessageListener, Obse
      */
     public void diffuser(Object bean, String action) throws JMSException, IOException {
         if (diffusionNecessaire(bean, action)) {
-            TacheDiffuserMessageJMS tacheDiffuserMessageJMS = new TacheDiffuserMessageJMS(this);
+            TacheDiffuserMessageJMS tacheDiffuserMessageJMS = new TacheDiffuserMessageJMS();
+            tacheDiffuserMessageJMS.setService(this);
             tacheDiffuserMessageJMS.setAction(action);
             tacheDiffuserMessageJMS.setBean(bean);
             tacheDiffuserMessageJMS.setConnection(connection);
@@ -653,135 +584,133 @@ public class ServiceSynchro extends ServiceImpl implements MessageListener, Obse
 //        }
 //    }
 
-    /**
-     * *
-     * Méthode permettant de tranformer les exceptions survenues lors de la récupération de taches de synchronisation en
-     * incident (des beans persistés dans la base de données)
-     *
-     * @param tache
-     */
-    @Override
-    protected void gererIncident(AbstrTacheSchedule tache) {
+    
+    
+//    /**
+//     * *
+//     * Méthode permettant de tranformer les exceptions survenues lors de la récupération de taches de synchronisation en
+//     * incident (des beans persistés dans la base de données)
+//     *
+//     * @param tache
+//     */
+//    @Override
+//    protected void gererIncident(AbstrTacheSchedule tache) {
+//
+//        DAOIncident dao = (DAOIncident) DAOFactory.getInstance().getDAOFromTask(tache);
+//        logger.debug("Gestion");
+//        //SI il y a eu des exception lors du traitement de la tache
+//        if (tache.getExeption() != null) {
+//
+//            logger.debug("gestion d'une erreur pour une tâche de type : " + tache.getClass());
+//            SynchroIncident si = null;
+//
+//            //================================================================================================
+//            //                      INSTANCIATION OU RECUPERATION D'INCIDENT
+//            //================================================================================================
+//
+//            //Pour les incident de connection JMS il faut soit créer soit récupérer et incrémenter le compteur
+//            if (tache.getClass().equals(TacheLancerConnectionJMS.class)) {
+//                //On remarde si on a déjà un incident 
+////                DAOIncident<JMSPerteConnectionIncident> dao = (DAOIncident<JMSPerteConnectionIncident>) DAOFactory.getInstance().getDaoFromType(JMSPerteConnectionIncident.class);
+//                dao.setClos(false);
+//                List<JMSPerteConnectionIncident> list = dao.findCriteria(JMSPerteConnectionIncident.class);
+//                if (list.size() > 0) {
+//                    si = list.get(0);
+//                    Integer nb = si.getNombreTentativeEnEchec();
+//                    nb++;
+//                    si.setNombreTentativeEnEchec(nb);
+//                    logger.debug("incrementation de l'incident JMS");
+//                } else {
+//                    IncidentFactory<JMSPerteConnectionIncident> factory = new IncidentFactory<JMSPerteConnectionIncident>();
+//                    si = factory.getIncident(JMSPerteConnectionIncident.class, null, tache.getExeption());
+//                    logger.debug("nouvel incident JMS");
+//                }
+//            }
+//
+//            if (si == null) {
+//                IncidentFactory factory = new IncidentFactory();
+//                try {
+//                    si = (SynchroIncident) factory.createIncidentFromTask(tache, "blabla");
+//                } catch (InstantiationException ex) {
+//                    Logger.getLogger(ServiceSynchro.class.getName()).log(Level.SEVERE, null, ex);
+//                } catch (IllegalAccessException ex) {
+//                    Logger.getLogger(ServiceSynchro.class.getName()).log(Level.SEVERE, null, ex);
+//                } catch (UnIncidableException ex) {
+//                    Logger.getLogger(ServiceSynchro.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//            }
+//
+//
+//            //=================================================================================================
+//            // ..................... GESTION DES INCIDENTS
+//            //=================================================================================================
+//
+//            //---------------Gestion des incident de TacheSynchroRecupItem
+//            if (tache.getClass().equals(TacheSynchroRecupItem.class)) {
+//                TacheSynchroRecupItem cast = (TacheSynchroRecupItem) tache;
+//
+//                si.setMessageEreur("Erreur lors de la récupération des items du serveur : " + cast.getServeurSlave().toString());
+//                //----------------------GESTION DE LA PERTE DE CONNECTION JMS
+//            } else if (tache.getClass().equals(TacheLancerConnectionJMS.class)) {
+////            TacheLancerConnectionJMS cast = (TacheLancerConnectionJMS)tache;
+//                si.setMessageEreur("Erreur de connection au serveur JMS");
+//            } //-----------> ERREUR DE DIFFUSION DE MESSAGE JMS
+//            else if (tache.getClass().equals(TacheDiffuserMessageJMS.class)) {
+//                JMSDiffusionIncident cast = (JMSDiffusionIncident) si;
+//                TacheDiffuserMessageJMS castTache = (TacheDiffuserMessageJMS) tache;
+//
+//                si.setMessageEreur("Erreur lors de l'envoie du message JMS");
+//                cast.setAction(castTache.getAction());
+//                cast.setMsgSerialise(castTache.getBeanSerialise());
+//
+//            }
+//
+//
+//            //=================================================================================================
+//            //...............................Enregistrment de l'incident
+//            //=================================================================================================
+//
+////            DAOIncident dao = (DAOIncident) DAOFactory.getInstance().getDaoFromType(SynchroIncident.class);
+//            if (si != null) {
+//                try {
+//                    dao.beginTransaction();
+//                    dao.creer(si);
+//                    dao.commit();
+//                } catch (Exception ex) {
+//                    Logger.getLogger(ServiceSynchro.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//            }
+//        } //=================================================================================================
+//        //.........................Terminaison correct des TACHE et FERMETURE DE L'INCIDENT
+//        //=================================================================================================
+//        else {
+//            //------------Fermeture des incident de connection JMS si la connection a été retrouvée
+//            if (tache.getClass().equals(TacheLancerConnectionJMS.class)) {
+////                DAOIncident<JMSPerteConnectionIncident> dao = (DAOIncident<JMSPerteConnectionIncident>) DAOFactory.getInstance().getDaoFromType(JMSPerteConnectionIncident.class);
+//                dao.setClos(false);
+//                List<JMSPerteConnectionIncident> l = dao.findCriteria(JMSPerteConnectionIncident.class);
+//                for (int i = 0; i < l.size(); i++) {
+//                    JMSPerteConnectionIncident jMSPerteConnectionIncident = l.get(i);
+//                    jMSPerteConnectionIncident.setDateFin(new Date());
+//                    try {
+//                        logger.debug("fermeture de l'incident");
+//                        dao.beginTransaction();
+//                        dao.modifier(jMSPerteConnectionIncident);
+//                        dao.commit();
+//                    } catch (Exception ex) {
+//                        Logger.getLogger(ServiceSynchro.class.getName()).log(Level.SEVERE, null, ex);
+//                    }
+//                }
+//
+//                // Il faut trouver tous les Incident correspondant à une erreur de connection JMS
+//                //  --Soit on créer un sous type d'incident Synchro
+//                //----Soit on trouve une requete qui permet de retrouver les erreurs JMS
+//
+//            }
+//        }
+//    }
 
-        DAOIncident dao = (DAOIncident) DAOFactory.getInstance().getDAOFromTask(tache);
-        logger.debug("Gestion");
-        //SI il y a eu des exception lors du traitement de la tache
-        if (tache.getExeption() != null) {
-
-            logger.debug("gestion d'une erreur pour une tâche de type : " + tache.getClass());
-            SynchroIncident si = null;
-
-            //================================================================================================
-            //                      INSTANCIATION OU RECUPERATION D'INCIDENT
-            //================================================================================================
-
-            //Pour les incident de connection JMS il faut soit créer soit récupérer et incrémenter le compteur
-            if (tache.getClass().equals(TacheLancerConnectionJMS.class)) {
-                //On remarde si on a déjà un incident 
-//                DAOIncident<JMSPerteConnectionIncident> dao = (DAOIncident<JMSPerteConnectionIncident>) DAOFactory.getInstance().getDaoFromType(JMSPerteConnectionIncident.class);
-                dao.setClos(false);
-                List<JMSPerteConnectionIncident> list = dao.findCriteria(JMSPerteConnectionIncident.class);
-                if (list.size() > 0) {
-                    si = list.get(0);
-                    Integer nb = si.getNombreTentativeEnEchec();
-                    nb++;
-                    si.setNombreTentativeEnEchec(nb);
-                    logger.debug("incrementation de l'incident JMS");
-                } else {
-                    IncidentFactory<JMSPerteConnectionIncident> factory = new IncidentFactory<JMSPerteConnectionIncident>();
-                    si = factory.getIncident(JMSPerteConnectionIncident.class, null, tache.getExeption());
-                    logger.debug("nouvel incident JMS");
-                }
-            }
-
-            if (si == null) {
-                IncidentFactory factory = new IncidentFactory();
-                try {
-                    si = (SynchroIncident) factory.createIncidentFromTask(tache, "blabla");
-                } catch (InstantiationException ex) {
-                    Logger.getLogger(ServiceSynchro.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (IllegalAccessException ex) {
-                    Logger.getLogger(ServiceSynchro.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (UnIncidableException ex) {
-                    Logger.getLogger(ServiceSynchro.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-
-
-            //=================================================================================================
-            // ..................... GESTION DES INCIDENTS
-            //=================================================================================================
-
-            //---------------Gestion des incident de TacheSynchroRecupItem
-            if (tache.getClass().equals(TacheSynchroRecupItem.class)) {
-                TacheSynchroRecupItem cast = (TacheSynchroRecupItem) tache;
-
-                si.setMessageEreur("Erreur lors de la récupération des items du serveur : " + cast.getServeurSlave().toString());
-                //----------------------GESTION DE LA PERTE DE CONNECTION JMS
-            } else if (tache.getClass().equals(TacheLancerConnectionJMS.class)) {
-//            TacheLancerConnectionJMS cast = (TacheLancerConnectionJMS)tache;
-                si.setMessageEreur("Erreur de connection au serveur JMS");
-            } //-----------> ERREUR DE DIFFUSION DE MESSAGE JMS
-            else if (tache.getClass().equals(TacheDiffuserMessageJMS.class)) {
-                JMSDiffusionIncident cast = (JMSDiffusionIncident) si;
-                TacheDiffuserMessageJMS castTache = (TacheDiffuserMessageJMS) tache;
-
-                si.setMessageEreur("Erreur lors de l'envoie du message JMS");
-                cast.setAction(castTache.getAction());
-                cast.setMsgSerialise(castTache.getBeanSerialise());
-
-            }
-
-
-            //=================================================================================================
-            //...............................Enregistrment de l'incident
-            //=================================================================================================
-
-//            DAOIncident dao = (DAOIncident) DAOFactory.getInstance().getDaoFromType(SynchroIncident.class);
-            if (si != null) {
-                try {
-                    dao.beginTransaction();
-                    dao.creer(si);
-                    dao.commit();
-                } catch (Exception ex) {
-                    Logger.getLogger(ServiceSynchro.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        } //=================================================================================================
-        //.........................Terminaison correct des TACHE et FERMETURE DE L'INCIDENT
-        //=================================================================================================
-        else {
-            //------------Fermeture des incident de connection JMS si la connection a été retrouvée
-            if (tache.getClass().equals(TacheLancerConnectionJMS.class)) {
-//                DAOIncident<JMSPerteConnectionIncident> dao = (DAOIncident<JMSPerteConnectionIncident>) DAOFactory.getInstance().getDaoFromType(JMSPerteConnectionIncident.class);
-                dao.setClos(false);
-                List<JMSPerteConnectionIncident> l = dao.findCriteria(JMSPerteConnectionIncident.class);
-                for (int i = 0; i < l.size(); i++) {
-                    JMSPerteConnectionIncident jMSPerteConnectionIncident = l.get(i);
-                    jMSPerteConnectionIncident.setDateFin(new Date());
-                    try {
-                        logger.debug("fermeture de l'incident");
-                        dao.beginTransaction();
-                        dao.modifier(jMSPerteConnectionIncident);
-                        dao.commit();
-                    } catch (Exception ex) {
-                        Logger.getLogger(ServiceSynchro.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-
-                // Il faut trouver tous les Incident correspondant à une erreur de connection JMS
-                //  --Soit on créer un sous type d'incident Synchro
-                //----Soit on trouve une requete qui permet de retrouver les erreurs JMS
-
-            }
-        }
-    }
-
-    public static void main(String[] args) {
-        ServiceSynchro serviceSynchro = ServiceSynchro.getInstance();
-        TacheLancerConnectionJMS t = new TacheLancerConnectionJMS(serviceSynchro);
-        serviceSynchro.submit(t);
-    }
+   
 
     @Override
     public void onException(JMSException jmse) {
@@ -793,18 +722,6 @@ public class ServiceSynchro extends ServiceImpl implements MessageListener, Obse
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-//    @Override
-//    public void instancierTaches() {
-//        //------------Lancement des tâches
-//        TacheLancerConnectionJMS connectionJMS = new TacheLancerConnectionJMS(this);
-//        connectionJMS.setSchedule(true);
-//        executorService.submit(connectionJMS);
-//
-//
-//        TacheSynchroRecupItem recupItem = new TacheSynchroRecupItem(this);
-//        recupItem.setSchedule(true);
-//        executorService.submit(recupItem);
-//    }
     @Override
     public void stopService() throws SecurityException, RuntimeException {
 

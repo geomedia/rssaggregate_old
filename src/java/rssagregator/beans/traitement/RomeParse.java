@@ -8,15 +8,14 @@ import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.ParsingFeedException;
 import com.sun.syndication.io.SyndFeedInput;
 import com.sun.syndication.io.XmlReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.Transient;
-import org.apache.commons.io.IOUtils;
 import rssagregator.beans.Item;
 
 /**
@@ -25,52 +24,36 @@ import rssagregator.beans.Item;
 @Entity
 public class RomeParse extends AbstrParseur implements Cloneable {
 
-    /* {author=clem}*/
-    /***
-     * Le input stream provenant du requester
-     */
+
     public RomeParse() {
     }
 
-    
-    
-    
     
     @Transient
     org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(RomeParse.class);
     private final static String description = "Le parseur ROME est trop super...";
 
+    
+    
     /**
      * *
-     * Parse le contenu XML envoyé au format String pour retourner une liste de
-     * beans. Elle n'est pas dédoublonné, c'est le travail du mediateur de
+     * Retourne une liste d'item. Elle n'est pas dédoublonné, c'est le travail du mediateur de
      * collecte d'organiser le travail entre les différnts objets de traitmenet
      *
      * @param xmlIS
      * @return
      */
     @Override
-    public List<Item> execute(InputStream xmlIS) throws IOException, IllegalArgumentException, FeedException {
+    public List<Item> execute(byte[] xmlIS) throws IOException, IllegalArgumentException, FeedException {
         List<Item> listItems = new ArrayList<Item>();
         
-//        String str = IOUtils.toString(xmlIS);
-//        System.out.println("====");
-//        System.out.println(str);
-//        System.out.println("====");
-
-        XmlReader reader = new XmlReader(xmlIS);
-
-       
+        ByteArrayInputStream bais = new ByteArrayInputStream(xmlIS);
+        XmlReader reader = new XmlReader(bais);
                 
         SyndFeedInput feedInput = new SyndFeedInput();
-
         feedInput.setPreserveWireFeed(true);
         feedInput.setXmlHealerOn(true);
-
         SyndFeed feed = feedInput.build(reader);
-        
-
-//        String result = "";
 
         for (Iterator i = feed.getEntries().iterator(); i.hasNext();) {
             // Création d'un nouveau beans Item
@@ -78,8 +61,6 @@ public class RomeParse extends AbstrParseur implements Cloneable {
             
 
             SyndEntry entry = (SyndEntry) i.next();
-            
-
             
             if (entry.getTitle() != null) {
 //                result += "Title : " + entry.getTitle() + "\n";
@@ -140,9 +121,6 @@ public class RomeParse extends AbstrParseur implements Cloneable {
             Date datecourante = new Date();
             new_item.setDateRecup(datecourante);
 
-//            result += "\n------------------------------------------\n";
-//            System.out.println(result);
-
             listItems.add(new_item);
         }
 
@@ -182,7 +160,7 @@ public class RomeParse extends AbstrParseur implements Cloneable {
     @Override
     public  List<Item> call() throws ParsingFeedException, Exception {
         try {
-            return execute(inputStream);
+            return execute(contenuAParser);
         } catch (Exception e) {
             logger.debug("Exeption : " + e.getClass());
             throw e;

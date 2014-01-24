@@ -12,7 +12,7 @@
     <html>
         <head>
             <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-            <title>RSSAgregate</title>
+            <title>Plateforme ANR Geomedia</title>
 
 
             <link href="${rootpath}/ress/style.css" type="text/css" rel="stylesheet" media="all" />
@@ -31,13 +31,13 @@
         <script src="${rootpath}ress/jqgrid/js/jquery.jqGrid.min.js" type="text/javascript"></script>
         <link rel="stylesheet" type="text/css" media="screen" href="${rootpath}ress/jqgrid/css/ui.jqgrid.css" />
 
-        
+
         <!--highcharts-->
 
-                        <script src="${rootpath}ress/highcharts/exporting.js"></script>
-                        <script src="${rootpath}ress/highcharts/highcharts.js"></script>
-                        <script src="${rootpath}ress/highcharts/highcharts-more.js"></script>
-                            
+        <script src="${rootpath}ress/highcharts/exporting.js"></script>
+        <script src="${rootpath}ress/highcharts/highcharts.js"></script>
+        <script src="${rootpath}ress/highcharts/highcharts-more.js"></script>
+
 
 
 
@@ -45,10 +45,6 @@
         <script src="${rootpath}ress/modernizr.custom.36191.js"></script>
 <!--<script src="${rootpath}ress/jquery-ui.js"></script>-->
         <script src="${rootpath}ress/JMSReconnection.js"></script>
-
-
-
-
 
 
 
@@ -121,14 +117,17 @@
                 %>
 
 
-                Statut JMS <span id="JMSstat"><%
+                <!--                Statut JMS <span id="JMSstat"><%
                     if (ServiceSynchro.getInstance().getStatutConnection()) {
                         out.println("OK");
                     } else {
                         out.println("Erreur");
-                    %></span>
-                <button type="button" id="jmsrecoBT">Reconnection</button>
-                <span id="pinfoJMS"></span>
+                %></span>
+            <button type="button" id="jmsrecoBT">Reconnection</button>
+            <span id="pinfoJMS"></span>
+                -->
+
+
             </div>
 
             <%
@@ -173,21 +172,6 @@
 
                 </li>
 
-                <li <c:if test="${navmenu=='ComportementCollecte'}"> class="current_page_item"</c:if>><a href="${rootpath}ComportementCollecte/recherche">Comportement de collecte</a>
-                        <ul>
-                        <c:if test="${admin == 'true'}"><li><a href="${rootpath}ComportementCollecte/add">Ajouter</a></li></c:if>
-                        <li><a href="${rootpath}ComportementCollecte/recherche">Rechercher</a></li>
-                    </ul>
-
-                </li>
-
-                <c:if test="${admin == 'true'}"> <li <c:if test="${navmenu=='slave'}"> class="current_page_item"</c:if>><a href="${rootpath}slave/recherche">Serveurs esclaves</a>
-                            <ul>
-                                <li><a href="${rootpath}slave/recherche">Recherche</a></li>
-                            <li><a href="${rootpath}slave/add">Ajouter</a></li>
-                            <li><a href="${rootpath}slave/importitem">Synch Manuelle</a></li>
-                        </ul>
-                    </li></c:if>
 
                 <c:if test="${admin == 'true'}"><li <c:if test="${navmenu=='user'}"> class="current_page_item"</c:if>><a href="${rootpath}user/recherche">Utilisateurs</a>
                             <ul>
@@ -198,13 +182,16 @@
 
 
                 <c:if test="${admin == 'true'}"><li <c:if test="${navmenu=='config'}"> class="current_page_item"</c:if>><a href="${rootpath}config/read?id=1">Configuration</a>
-                        <ul>
-                            <li><a href="${rootpath}LogView">Afficher les logs</a></li>
-                        <li><a href="${rootpath}ServiceCtrl">Gestion des services</a></li>
+                            <ul>
+                                <li <c:if test="${navmenu=='ComportementCollecte'}"> class="current_page_item"</c:if>><a href="${rootpath}ComportementCollecte/recherche">Comportement de collecte</a>
+
+                                </li>
+                                <li><a href="${rootpath}LogView">Afficher les logs</a></li>
+                            <li><a href="${rootpath}ServiceCtrl">Gestion des services</a></li>
                         </ul>
-                        
-                        
-                        </li></c:if>
+
+
+                    </li></c:if>
                 <li <c:if test="${navmenu=='aide'}"> class="current_page_item"</c:if>><a href="${rootpath}aide.jsp">Aide</a></li>  
                 </ul>  
             </nav> 
@@ -247,6 +234,6 @@
                         <div id="page-bgbtm">
 
 
-                        <script>
-                            rootpath = ${rootpath}; // Cette variable peu être réutilisé dans les js des pages
+                            <script>
+                                rootpath = ${rootpath}; // Cette variable peu être réutilisé dans les js des pages
                         </script>

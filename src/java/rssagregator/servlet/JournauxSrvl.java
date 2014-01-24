@@ -24,7 +24,6 @@ import rssagregator.beans.exception.DonneeInterneCoherente;
 import rssagregator.beans.exception.IncompleteBeanExeption;
 import rssagregator.beans.form.AbstrForm;
 import rssagregator.beans.form.FORMFactory;
-import rssagregator.beans.form.JournalForm;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoJournal;
 import rssagregator.services.ServiceCollecteur;

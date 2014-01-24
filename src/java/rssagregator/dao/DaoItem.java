@@ -7,27 +7,18 @@ package rssagregator.dao;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.EmptyStackException;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
-import javax.persistence.EntityExistsException;
-import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.Query;
-import javax.persistence.RollbackException;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import org.apache.taglibs.standard.tag.common.core.NullAttributeException;
-import org.eclipse.persistence.config.CacheUsage;
-import org.eclipse.persistence.config.QueryHints;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -401,19 +392,19 @@ public class DaoItem extends AbstrDao {
 
     /**
      * *
-     * Cette méthode est utilisée au démarrage de l'application pour précharger les derniers hash des flux.
+     * Retourne les i dernier hash pour le flux envoyé en argument.
      *
-     * @param fl
-     * @param i
+     * @param fl le flux pour lequel il faut renvoyer les hash
+     * @param i le nombre de hash a renvoyer
      */
-    public Set<String> findLastHash(Flux fl, int i, Boolean onCache) {
+    public Set<String> findLastHash(Flux fl, int i/*, Boolean onCache*/) {
         Query query = em.createQuery("SELECT item FROM Item item JOIN item.listFlux fl WHERE fl.ID=:idfl ORDER BY item.ID DESC");
 
-        if (onCache) {
-//            query.setHint("eclipselink.cache-usage", "CheckCacheOnly");
-            query.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheOnly);
-//            query.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheOnly); - See more at: http://eclipse.org/eclipselink/documentation/2.4/jpa/extensions/q_cacheusage.htm#sthash.BI9rLocd.dpuf
-        }
+//        if (onCache) {
+////            query.setHint("eclipselink.cache-usage", "CheckCacheOnly");
+//            query.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheOnly);
+////            query.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheOnly); - See more at: http://eclipse.org/eclipselink/documentation/2.4/jpa/extensions/q_cacheusage.htm#sthash.BI9rLocd.dpuf
+//        }
 
         query.setParameter("idfl", fl.getID());
         query.setFirstResult(0);

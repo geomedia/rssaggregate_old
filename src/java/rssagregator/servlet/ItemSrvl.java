@@ -4,12 +4,19 @@
  */
 package rssagregator.servlet;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -27,6 +34,8 @@ import rssagregator.beans.form.ItemForm;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoItem;
 import rssagregator.dao.SearchFilter;
+import rssagregator.dao.SearchFiltersList;
+import rssagregator.services.CSVMacker;
 import rssagregator.utils.ServletTool;
 
 /**
@@ -223,7 +232,6 @@ public class ItemSrvl extends HttpServlet {
         //--------------------------------------------------------------------------------------------------------------
         // Va être fusionné avec list
         if (action.equals("list")) {
-            daoItem.initcriteria();
 
             // On récupère l'objet de gestion de formulaire
             AbstrForm formu = null;
@@ -234,18 +242,65 @@ public class ItemSrvl extends HttpServlet {
                 Logger.getLogger(ItemSrvl.class.getName()).log(Level.SEVERE, null, ex);
             }
 
-            if (formu != null) {
-                System.out.println("SERVLET NBR FILTER : " + formu.getFiltersList().getFilters().size());
-                daoItem.setCriteriaSearchFilters(formu.getFiltersList());
-                request.setAttribute("filtersList", formu.getFiltersList());
+            //Si l'objectif est de faire un CSV le traitement est particulier
+            if (vue != null && vue.equals("csv")) {
                 
+                
+                boolean html = ServletTool.getBooleen(request, "html");
+                boolean escapeBySlash = ServletTool.getBooleen(request, "escape");
+                System.out.println("HTML : " + html);
+
+
+                ServletContext servletContext = getServletContext();
+                String webDir = servletContext.getRealPath(File.separator);
+
+                CSVMacker cSVMacker = new CSVMacker(webDir, html, escapeBySlash);
+
+
+//                On récupère la liste des flux demandé et la date. C'est moche mais il faut récupérer les champs dans la SearchFiltersList. Ceux qui ont été précédemment rempli par le formulaire 
+                SearchFiltersList searchFilterList = formu.getFiltersList();
+                List<SearchFilter> listFiltre = searchFilterList.getFilters();
+                for (int i = 0; i < listFiltre.size(); i++) {
+                    SearchFilter searchFilter1 = listFiltre.get(i);
+                    if (searchFilter1.getField().equals("listFlux")) {
+                        System.out.println("------------ LIST FLUX");
+                        List<Flux> fluxDDe = (List<Flux>) searchFilter1.getData();
+                        cSVMacker.setFluxDemande(fluxDDe);
+                    }
+                    if (searchFilter1.getType().equals(Date.class)) {
+                        if (searchFilter1.getOp().equals("gt")) {
+                            Date dateDebut = (Date) searchFilter1.getData();
+                            cSVMacker.setDate1(dateDebut);
+                        }
+                        if (searchFilter1.getOp().equals("lt")) {
+                            Date dateFin = (Date) searchFilter1.getData();
+                            cSVMacker.setDate2(dateFin);
+                        }
+                    }
+                }
+
+
+                cSVMacker.setFiltre(formu.getFiltersList());
+                ExecutorService es = Executors.newCachedThreadPool();
+                try {
+                          Future fut = es.submit(cSVMacker);
+                           fut.get();
+                            request.setAttribute("redir", cSVMacker.getRedirPath());
+                } catch (Exception e) {
+                logger.debug("Erreur lors de la génération du CSV", e);
+                }
+                finally{
+                    es.shutdownNow();
+                }
+          
+
+            } else {
+                if (formu != null) {
+                    daoItem.setCriteriaSearchFilters(formu.getFiltersList());
+                    request.setAttribute("filtersList", formu.getFiltersList());
+                }
+                ServletTool.actionLIST(request, Item.class, ATT_ITEM, daoItem);
             }
-
-
-            // On effectue la recherche
-
-
-            ServletTool.actionLIST(request, Item.class, ATT_ITEM, daoItem);
         }
 
         /**
@@ -255,11 +310,15 @@ public class ItemSrvl extends HttpServlet {
         // Action recherche, correspond à la demande de la page permettant de lister les flux. Il est nécessaire de fournir les paramettres permettant de construire les menus déroulant dans la JSP
         if (action.equals("recherche")) {
             // On récupère la liste des flux utile à la génération du menu déroulant
-            request.setAttribute("listflux", DAOFactory.getInstance().getDAOFlux().findAllFlux(false));
+//            request.setAttribute("listflux", DAOFactory.getInstance().getDAOFlux().findAllFlux(false));
+            request.setAttribute("listflux", new ArrayList<Flux>()); // On donne une liste de flux v ide.
+            
 
             //List des journaux
 //            request.setAttribute("listJournaux", DAOFactory.getInstance().getDaoJournal().findall());
-            request.setAttribute("listJournaux", DAOFactory.getInstance().getDaoJournal().findallOrederByTitre());
+            request.setAttribute("listJournaux", DAOFactory.getInstance().getDaoJournal().findallOrederByTitre(false));
+
+
         }
 
         /**
@@ -286,11 +345,11 @@ public class ItemSrvl extends HttpServlet {
             try {
                 form = (ItemForm) FORMFactory.getInstance().getForm(Item.class, "list");
                 form.parseListeRequete(request, daoItem);
-                
-                System.out.println("FILTER FORM : "+form.getFiltersList());
-                
-                
-                
+
+                System.out.println("FILTER FORM : " + form.getFiltersList());
+
+
+
                 daoItem.setCriteriaSearchFilters(form.getFiltersList());
 
                 // Il faut récupérer les deux date pour le trie
@@ -306,19 +365,19 @@ public class ItemSrvl extends HttpServlet {
                             date2 = (Date) searchFilter.getData();
                         }
                     }
-                    
-                    if(searchFilter.getField().equals("listFlux")){
-                        
+
+                    if (searchFilter.getField().equals("listFlux")) {
+
                         System.out.println(">>>>>>>>>>>>>>>ID FLUX ; " + searchFilter.getData());
                         System.out.println("CLASS " + searchFilter.getData().getClass());
-                        if(searchFilter.getData().getClass().equals(JSONArray.class)){
+                        if (searchFilter.getData().getClass().equals(JSONArray.class)) {
                             System.out.println("ARRAY JSON");
                         }
                         listFlux = (List<Flux>) searchFilter.getData();
                     }
                 }
 
-              
+
                 listItem = daoItem.findCriteria();
                 for (int i = 0; i < listItem.size(); i++) {
                     Item searchFilter = listItem.get(i);
@@ -349,39 +408,6 @@ public class ItemSrvl extends HttpServlet {
             request.setAttribute("compte", compteurFluxItem.getListCompteItem());
 
         }
-//        if(action.equals("donneesbrutes")){
-//            
-//            // récupération de l'id
-//            List<Long> listID = ServletTool.parseidFromRequest(request, null);
-//            for (int i = 0; i < listID.size(); i++) {
-//                Long long1 = listID.get(i);
-//                System.out.println("IDDD" + long1);
-//            }
-//
-//            
-//            
-//            DAOGenerique dao = DAOFactory.getInstance().getDAOGenerique();
-//            dao.setClassAssocie(DonneeBrute.class);
-//            DonneeBrute brute =  (DonneeBrute) dao.find(listID.get(0));
-//            
-//               ObjectMapper mapper = new ObjectMapper();
-//               
-//                 FilterProvider filters = new SimpleFilterProvider().addFilter("serialisePourUtilisateur",
-//                        SimpleBeanPropertyFilter.serializeAllExcept("flux, item"));
-//                
-//                String jsonn =  mapper.writer(filters).writeValueAsString(brute);
-//                request.setAttribute("jsonstr", jsonn);
-//                System.out.println(""+jsonn);
-//                
-//                vue = "jsonstr";
-//                
-//            
-//            
-//            
-//            
-//        }
-
-
 
 
 
@@ -426,8 +452,10 @@ public class ItemSrvl extends HttpServlet {
             VUE = "/WEB-INF/itemHTML.jsp";
         }
         if (vue.equals("csv")) {
-            response.setHeader("Content-Disposition", "attachment; filename = items-export.csv");
-            VUE = "/WEB-INF/itemCSV.jsp";
+            response.sendRedirect((String) request.getAttribute("redir"));
+//            response.setHeader("Content-Disposition", "attachment; filename = items-export.csv");
+//            VUE = "/WEB-INF/itemCSV2.jsp";
+            VUE= null;
         } else if (vue.equals("csvexpert")) {
             response.setHeader("Content-Disposition", "attachment; filename = items-export.csv");
             VUE = "/WEB-INF/itemexpertCSV.jsp";
@@ -444,12 +472,14 @@ public class ItemSrvl extends HttpServlet {
             VUE = "/WEB-INF/itemHighchart.jsp";
         } else if (vue.equals("grid")) {
             VUE = "/WEB-INF/itemJSONGrid.jsp";
-        }
-        else if(vue.equals("jsonstr")){
+        } else if (vue.equals("jsonstr")) {
             VUE = "/WEB-INF/jsonPrint.jsp";
         }
 
-        this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
+        if(VUE != null){
+        this.getServletContext().getRequestDispatcher(VUE).forward(request, response);            
+        }
+
     }
 
     public static String getParam(String param, HttpServletRequest request) {

@@ -7,8 +7,6 @@ package rssagregator.services.tache;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Observer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.persistence.LockModeType;
 import org.apache.log4j.Priority;
 import org.eclipse.persistence.exceptions.EntityManagerSetupException;
@@ -28,9 +26,9 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
     public TacheImpl() {
     }
 
-    public TacheImpl(Observer s) {
-        super(s);
-    }
+//    public TacheImpl(Observer s) {
+//        super(s);
+//    }
 
     /**
      * *
@@ -39,7 +37,7 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
      * dernières données.
      *
      * @param obj
-     * @param lockMode
+     * @param lockMode 
      * @throws NoSuchMethodException
      * @throws IllegalAccessException
      * @throws IllegalArgumentException
@@ -60,20 +58,10 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
         Object retour = getter.invoke(obj);
 
 
-//        if (!em.contains(obj)) {
-////            Object objFind = em.find(obj.getClass(), retour);
-//            obj = em.find(obj.getClass(), retour);
-//            em.lock(obj, lockMode);
-//          
-//        } else {
-//            em.lock(obj, lockMode);
-////            em.refresh(obj); // Il faut s'assurer que la tache possède bien la dernière version de l'objet
-//        }
-        obj = em.find(obj.getClass(), retour, lockMode);
+        obj = em.find(obj.getClass(), retour);
+        
         em.lock(obj, lockMode);
         em.refresh(obj);
-//        listRessourcesLocke.add(obj);
-
     }
 
     /**
@@ -85,20 +73,19 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
 
         // On commence par vérifier que la transaction est bien close
         if (em != null) {
-//            logger.debug("Il y avait un EM !!");
             if (em.isJoinedToTransaction()) {
 
                 // On attend quelque seconde et on roolback
 
                 int i = 0;
                 while (i < 10) {
-                    if (!em.getTransaction().isActive()) {
+                    if (!em.getTransaction().isActive()) { // Si la transaction n'est plus active on quite
                         break;
                     }
-                    try {
+//                    try {
                         Thread.sleep(100);
-                    } catch (Exception e) {
-                    }
+//                    } catch (Exception e) {
+//                    }
                     i++;
                 }
 
@@ -133,6 +120,8 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    
+    
     /**
      * *
      * Le bloc exécuté a la fin de l'appel du traitement de la tache ({@link TacheImpl#executeProcessus()} qui déclanche
@@ -146,17 +135,17 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
     protected T callFinalyse() {
 //        this.nbrTentative++;
 
-        if (annuler) {
+        if (annuler) { // Si La tache est annulé on roolback la transaction
             try {
                 commitTransaction(false);
             } catch (Exception ex) {
-                Logger.getLogger(TacheImpl.class.getName()).log(Level.SEVERE, null, ex);
+                logger.error("Erreur lors du rollback dans call Finalyse tache : "+this, ex);
             }
-        } else {
+        } else { // Sinon, on la commit
             try {
                 commitTransaction(true);
             } catch (Exception ex) {
-                logger.debug("Erreur lors du commit", ex);
+                logger.debug("Erreur lors du commit dans callfinalyse tache : " + this, ex);
             }
         }
 
@@ -173,17 +162,6 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
     protected void callCatchException(Exception e) {
 
         this.exeption = e;
-
-        // Si c'est une interruption on met le booleean d'annulation de la tache
-        if (e.getClass().equals(InterruptedException.class)) {
-            this.annuler = true;
-        }
-
-//        if (!DAOFactory.getInstance().getDAOConf().getConfCourante().getProd()) {
-//            logger.debug("Debug exeption Tache : " + this.getClass().getSimpleName() + "\n " + this, e);
-//        }
-
-
         // En fonction du niveau de log on affiche ou non la trace. Certaine erreur sont récurante (Level info) , on n'affiche alors pas la trace. Si le debug est en error (envoie de mail par log 4j) on affiche la trace
 
         if (org.apache.log4j.Level.toLevel(logErrorLevel).isGreaterOrEqual(Priority.ERROR)) {
@@ -192,7 +170,7 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
             logger.log(Priority.toPriority(logErrorLevel), "erreur sur la tache " + this + e);
         }
 
-        try {
+        try { // On roolback la transaction
             commitTransaction(false);
         } catch (Exception ex) {
             logger.error("RoolbackException", exeption);
@@ -225,7 +203,6 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
 
         } catch (InterruptedException e) { // Pour une interruption on ne déclanche pas le traitement classique de l'erreur
             logger.debug("Interruption de " + this);
-            this.setAnnuler(true);
             throw e;
         } catch (Exception e) { // Si c'est une autre exception on lance la fonction de capture
             callCatchException(e);
@@ -238,13 +215,6 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
 
     @Override
     public synchronized T call() throws Exception {
-//        running = true; //
-//        lasExecution = new Date();
-//        nbrTentative = 0;
-//        this.exeption = null; //
-//        this.annuler = false; //
-//        listRessourcesLocke = new ArrayList<Object>();
-
         initLancementTache();
 
         try {
@@ -260,7 +230,7 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
                     try {
                         Thread.sleep(1000 * nbSleepError);
                     } catch (InterruptedException e) { // Si pendant le sleep annulation on remonte
-                        annuler = true;
+//                        annuler = true;
                         throw e;
                     }
                 }
@@ -277,12 +247,11 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
                 }
             }
             ThreadUtils.interruptCheck(); // 
-            logger.debug("Notification");
 
 
         } catch (InterruptedException e) {
-            logger.debug("Interruption");
-            annuler = true;
+            logger.debug("Interruption de " + this);
+//            annuler = true;
             throw e;
         } catch (Exception e) {
             logger.error("Exception annormale tache " + this, e);
@@ -290,7 +259,6 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
         } finally {
             // On rollback la transaction si une transaction est encore ouverte
             finTache(); // Running = false et completion de la date de prochaine execution ; fermeture de l'em; libération de la semaphore; notification des observer
-            logger.debug("END " + this);
             return (T) this;
         }
     }

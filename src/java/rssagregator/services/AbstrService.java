@@ -21,13 +21,14 @@ import java.util.logging.Level;
 import rssagregator.beans.exception.ArgumentIncorrect;
 import rssagregator.services.tache.TacheActionableSurUnBean;
 import rssagregator.utils.BeansUtils;
+import rssagregator.utils.ExceptionTool;
 
 /**
  *
  * @author clem
  */
 public abstract class AbstrService implements Observer {
-    
+
     org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
     protected ScheduledExecutorService executorService;
     /**
@@ -51,11 +52,11 @@ public abstract class AbstrService implements Observer {
     BlockingQueue<AbstrTacheSchedule> queueTacheALancer = new ArrayBlockingQueue<AbstrTacheSchedule>(999);
     TacheProducteur tacheProducteur = new TacheProducteur(this);
     TacheConsomateur tacheConsomateur = new TacheConsomateur(this);
-    
+
     public AbstrService(ScheduledExecutorService executorService1) {
         executorService = executorService1;
     }
-    
+
     public AbstrService() {
     }
 
@@ -84,7 +85,7 @@ public abstract class AbstrService implements Observer {
     public ScheduledExecutorService getExecutorService() {
         return executorService;
     }
-    
+
     public void setExecutorService(ScheduledExecutorService executorService) {
         this.executorService = executorService;
     }
@@ -97,8 +98,7 @@ public abstract class AbstrService implements Observer {
      *
      * @param tache
      */
-    protected abstract void gererIncident(AbstrTacheSchedule tache);
-
+//    protected abstract void gererIncident(AbstrTacheSchedule tache);
     /**
      * *
      * permet de scheduler une tache suivant les paramettre définit dans la tache. soit par timeScjedule qui définit un
@@ -148,18 +148,24 @@ public abstract class AbstrService implements Observer {
 //    }
     /**
      * *
-     * Soumission de la tâche dans le pool du service.
+     * Soumission de la tâche dans le pool du service. Si la tache est schedulée, elle est enregistrée dans la map
+     * permettant au service de gérer ses taches.
      *
      * @param tache
      * @return
      */
+//    @Deprecated
     public Future submit(AbstrTacheSchedule tache) {
         if (tache == null) {
             throw new NullPointerException("Impossible de soumettre une tache null");
         }
-        
+
         Future fut = executorService.submit(tache);
-        addTask(tache, fut); // Ajout de la tache au map permettant au service de retrouver et gérer l'ensemble de ses tâches.
+
+        if (tache.getSchedule()) {
+            addTask(tache, fut); // Ajout de la tache au map permettant au service de retrouver et gérer l'ensemble de ses tâches.
+        }
+
         return fut;
     }
 
@@ -171,7 +177,7 @@ public abstract class AbstrService implements Observer {
     public void stopService() throws SecurityException, RuntimeException {
         if (this.executorService != null) {
             try {
-            this.executorService.shutdownNow();                
+                this.executorService.shutdownNow();
             } catch (Exception e) {
                 logger.info("Erreur lors de la fermeture du pool central du service " + this, e);
             }
@@ -181,53 +187,76 @@ public abstract class AbstrService implements Observer {
         // fermeture du pool du consommateur de tache
         if (this.tacheProducteur != null) {
             try {
-                this.tacheProducteur.es.shutdownNow();                
+                this.tacheProducteur.es.shutdownNow();
             } catch (Exception e) {
-                logger.info("Erreur lors de la fermeture du pool du tache producteur du service "+ this, e);
+                logger.info("Erreur lors de la fermeture du pool du tache producteur du service " + this, e);
             }
         }
+
+        if (tacheConsomateur != null) {
+            try {
+                tacheConsomateur.es.shutdownNow();
+            } catch (Exception e) {
+                logger.info("Erreur lors de la fermeture du pool du consomateur de tache du service " + this, e);
+            }
+        }
+
+
 
         // Fermeture du pool de thread administratif
         if (this.executorServiceAdministratif != null) {
             try {
-            this.executorServiceAdministratif.shutdownNow();                
+                this.executorServiceAdministratif.shutdownNow();
             } catch (Exception e) {
                 logger.info("Erreur lors de la fermeture du pool administratif du service " + this, e);
             }
         }
     }
-    
+
     public CalableAntiDeadBlock getAntiDeadBlock() {
         return antiDeadBlock;
     }
-    
+
     public void setAntiDeadBlock(CalableAntiDeadBlock antiDeadBlock) {
         this.antiDeadBlock = antiDeadBlock;
     }
-    
+
     public Map<AbstrTacheSchedule, Future> getMapTache() {
         return mapTache;
     }
-    
+
     public void setMapTache(Map<AbstrTacheSchedule, Future> mapTache) {
         this.mapTache = mapTache;
     }
 
     /**
      * *
-     * Ajoute une tâche et son future dans la map permettant au service de gérer ses tâches lancées. Les tache n'ont pas
-     * forcément à être schedulée.
+     * Ajoute une tâche et son future dans la map permettant au service de gérer ses tâches lancées. Pour être
+     * enregistrée les taches doivent être schedulées.
      *
      * @param tache
      * @param fut
+     * @return true si la tache a bien été ajouté a la map. Sinon false.
+     * @throws NullPointerException : Si la tache envoyé en arguement est nuill ou si la valeure de schedule est null pour cette tache. 
      */
-    public void addTask(AbstrTacheSchedule tache, Future fut) {
+    public boolean addTask(AbstrTacheSchedule tache, Future fut) throws NullPointerException{
+
+        ExceptionTool.argumentNonNull(tache);
+        ExceptionTool.argumentNonNull(tache.getSchedule());
         
-        synchronized (mapTache) {
-            mapTache.put(tache, fut);
+        if (tache.getSchedule()) {
+            synchronized (mapTache) {
+                mapTache.put(tache, fut);
+                return true;
+            }
         }
-        
+        return false;
     }
+
+    /***
+     * Supprime une tache de la liste des taches gérée par le service. 
+     * @param tache 
+     */
     
     public void remTask(AbstrTacheSchedule tache) {
         synchronized (mapTache) {
@@ -240,22 +269,35 @@ public abstract class AbstrService implements Observer {
      * Lance le service, notamment en démarrant la tache antideadBlock {@link CalableAntiDeadBlock}
      */
     public void lancerService() {
-        
-        if (antiDeadBlock != null) {
-            antiDeadBlock.setService(this);
-            this.executorService.submit(antiDeadBlock);
+
+//        if (antiDeadBlock != null) {
+//            antiDeadBlock.setService(this);
+//            this.executorService.submit(antiDeadBlock);
+//        }
+
+
+        if (tacheProducteur != null) {
+            logger.debug("Lancement de " + tacheProducteur);
+            this.executorServiceAdministratif.submit(tacheProducteur);
         }
-        
+
+
         if (tacheConsomateur != null) {
-            
+            logger.debug("Lancement de " + tacheConsomateur);
             this.executorServiceAdministratif.submit(tacheConsomateur);
         }
+
+
+        synchronized (tacheConsomateur.lock) {
+            tacheConsomateur.lock.notify();
+        }
+
 
 //        if(tacheProducteur != null){
 //            this.executorServiceAdministratif.submit(tacheProducteur);
 //        }
-        
-        
+
+
     }
 
     /**
@@ -265,7 +307,7 @@ public abstract class AbstrService implements Observer {
      * @param tache
      */
     public void relancerTache(AbstrTacheSchedule tache) throws ArgumentIncorrect {
-        
+
         if (tache == null) {
             throw new NullPointerException("impossible d'annuler une tache null");
         }
@@ -285,11 +327,11 @@ public abstract class AbstrService implements Observer {
                 break;
             }
         }
-        
+
         if (entr != null) {
-            
+
             boolean end = annulerTache(entr);
-            
+
             if (end == false) {
                 logger.error("La tache : " + entr.getKey() + " n'a jamais pu être annulé");
             } else {
@@ -305,36 +347,36 @@ public abstract class AbstrService implements Observer {
 
     /**
      * *
-     * Annule la tache envoyé
+     * Supprime la tache du service. La tache est déterminé comme annulé puis interrompu. Elle n'est plus reschedulée
      *
      * @param entry Une entry tache// future tel qu'on trouve dans la {@link #mapTache}
      * @return true si l'annulation a fonctionné tache interrompu
      */
     public boolean annulerTache(Entry<AbstrTacheSchedule, Future> entry) throws ArgumentIncorrect {
-        
+
         if (entry == null) {
             throw new NullPointerException("l'entry envoyé est null");
         }
-        
+
         Future fut = entry.getValue();
         AbstrTacheSchedule tache = entry.getKey();
-        
+
         if (fut == null) {
             throw new ArgumentIncorrect("La tache envoyé n'a pas de future");
         }
         if (tache == null) {
             throw new ArgumentIncorrect("l'entry envoyé n'a pas de tache !!");
         }
-        
+
         logger.debug("annulation de " + tache);
         try {
             tache.setAnnuler(true);
             fut.cancel(true);
-            
+
             int i = 0; // Il faut attendre que la tache ne soit plus en running pour la rescheduler
 
             boolean end = false;
-            
+
             while (i < 1000 && !end) {
 //                    System.out.println("EXECUTING : " + tache.isRunning());
 
@@ -347,7 +389,7 @@ public abstract class AbstrService implements Observer {
             if (end) {
                 return true;
             }
-            
+
         } catch (Exception e) {
             logger.error("Erreur lors de l'annulation de la tâche" + tache);
         }
@@ -362,12 +404,12 @@ public abstract class AbstrService implements Observer {
      * @return
      */
     protected List< Entry<AbstrTacheSchedule, Future>> retriveAllForBeans(Object bean) {
-        
+
         List< Entry<AbstrTacheSchedule, Future>> listRetourn = new ArrayList< Entry<AbstrTacheSchedule, Future>>();
         for (Entry<AbstrTacheSchedule, Future> entry : mapTache.entrySet()) {
             AbstrTacheSchedule abstrTacheSchedule = entry.getKey();
             Future future = entry.getValue();
-            
+
             if (TacheActionableSurUnBean.class.isAssignableFrom(abstrTacheSchedule.getClass())) {
                 TacheActionableSurUnBean cast = (TacheActionableSurUnBean) abstrTacheSchedule;
                 Object beanCible = cast.returnBeanCible();
@@ -393,33 +435,33 @@ public abstract class AbstrService implements Observer {
      * @param beans
      */
     public void cancelAndRemoveTaskFromAssociedWithBeans(Object beans) {
-        
+
         if (beans == null) {
             throw new NullPointerException("Le beans est null");
         }
 
         // On retrouve les tache
         List< Entry<AbstrTacheSchedule, Future>> list = retriveAllForBeans(beans);
-        
-        
+
+
         for (int i = 0; i < list.size(); i++) {
             Entry<AbstrTacheSchedule, Future> entry = list.get(i);
             AbstrTacheSchedule tache = entry.getKey();
             Future fut = entry.getValue();
-            
+
             try {
                 // Annulation
                 annulerTache(entry);
             } catch (ArgumentIncorrect ex) {
-                java.util.logging.Logger.getLogger(AbstrService.class.getName()).log(Level.SEVERE, null, ex);
+                logger.debug("Impossible d'annuler la tache " , ex);
             }
 
             // Suppression de la tache de la map.
             remTask(tache);
-            
+
         }
     }
-    
+
     public TacheProducteur getTacheProducteur() {
         return tacheProducteur;
     }

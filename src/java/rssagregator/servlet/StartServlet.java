@@ -4,12 +4,14 @@
  */
 package rssagregator.servlet;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import rssagregator.beans.Conf;
@@ -50,6 +52,17 @@ public class StartServlet implements ServletContextListener {
         System.setProperty("confpath", confpath);
 
 
+        // Le répertoire web est parfois difficile a retrouver. On le définit comme une variable system afin de pouvoir le retrouver dans n'importe quelle classe non servlet.
+        ServletContext servletContext = sce.getServletContext();
+        String webDir = servletContext.getRealPath(File.separator);
+        System.setProperty("webdir", webDir);
+
+//                       System.out.println("=============================");
+//                       System.out.println(" WEB DIR START SRVLT " + webDir);
+//                       System.out.println("=============================");
+
+
+
         try {
             Class.forName("com.mysql.jdbc.Driver");
         } catch (ClassNotFoundException ex) {
@@ -83,7 +96,7 @@ public class StartServlet implements ServletContextListener {
 
         // -----------------Chargement des flux
         DaoFlux daoflux = DAOFactory.getInstance().getDAOFlux();
-        daoflux.chargerDepuisBd();
+//        daoflux.chargerDepuisBd();
 
 
         try {
@@ -123,7 +136,8 @@ public class StartServlet implements ServletContextListener {
         //            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, ex);
         //        }
         catch (Exception e) {
-            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, e);
+            logger.error("Erreur lors de l'instanciation des service depuis servicedef.xml ", e);
+//            Logger.getLogger(StartServlet.class.getName()).log(Level.SEVERE, null, e);
         }
 
         // Lancement de la collecte
@@ -158,6 +172,8 @@ public class StartServlet implements ServletContextListener {
 
 
         String prefix = getClass().getSimpleName() + " destroy() ";
+
+        DAOFactory.getInstance().closeEMF();
 
         try {
             Enumeration<Driver> drivers = DriverManager.getDrivers();

@@ -151,11 +151,13 @@ public class PropertyLoader {
             }
 
         } catch (NamingException e) {
-            logger2.error("Impossible de trouver la ressource dans le context" + var, e);
+            logger2.error("!!Impossible de trouver la ressource dans le context" + var, e);
+               return "/var/lib/RSSAgregate/";
         } catch (RessourceIntrouvable e) {
-            logger2.error("Impossible de trouver la ressource dans le context" + var, e);
+            logger2.error("!!Impossible de trouver la ressource dans le context" + var, e);
+            return "/var/lib/RSSAgregate/";
         }
-        return null;
+//        return null;
     }
     
     /***

@@ -5,13 +5,10 @@
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>JSP Page</title>
-    </head>
-    <body>
+<c:import url="/WEB-INF/headerjsp.jsp" />
+
         <h1>Hello World!</h1>
         
         <form>
@@ -23,8 +20,27 @@
             <label>Nombre de ligne :</label><input type="text" name="nbrLigne"/>
             <input type="submit"/>
         </form>
+        <button type="button" id="Colorise" onclick="Colorise();">Colorise</button>
+        
         <hr />
         ${log}
+        
+        
+        <script>
+            function Colorise(){
+                
+                
+                $('p').each(function (index, value ){
+                  alert( index + ": " + $(value).text() );
+                  $(value).text('aaaaa')
+                })
+//                $('p').te
+                
+                nb = $('p').size();
+                alert('nb p :' + nb);
+            }
+            
+        </script>
         
     </body>
 </html>

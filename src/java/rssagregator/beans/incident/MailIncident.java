@@ -11,6 +11,11 @@ import rssagregator.services.ServiceMailNotifier;
 import rssagregator.services.tache.TacheEnvoyerMail;
 
 /**
+ * 
+ * 
+ * /!\ Cette classe N'est plus utilisé ca alourdi trop la base de données.
+ * 
+ * 
  * <p>Incident généré par le service {@link ServiceMailNotifier}, lorsqu'un mail
  * n'a pu être envoyé par la tâche {@link TacheEnvoyerMail}</p>
  * <p>Le corps du message et l'objet sont concervé dans cet incident</p>
@@ -25,9 +30,6 @@ public class MailIncident extends AbstrIncident implements Serializable {
     protected MailIncident() {
     }
 
-    
-    
-    
     /**
      * *
      * Le corps du message qui n'a pu être envoyé

@@ -4,7 +4,10 @@
  */
 package rssagregator.beans.form;
 
+import java.nio.charset.Charset;
 import javax.servlet.http.HttpServletRequest;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import rssagregator.beans.traitement.CSVParse;
 
 /**
@@ -19,8 +22,6 @@ public class ParseCsvForm extends AbstrForm {
     private int line;
     private boolean strictQuotes = false;
     private boolean ignoreLeadingWhiteSpace = false;
-    
-    
     private int cTitre;
     private int cDescription;
     private int cLink;
@@ -29,8 +30,9 @@ public class ParseCsvForm extends AbstrForm {
     private int cDateRecup;
     private int cCat;
     private int cContenu;
-                                                        
-                                                        
+    private String forceEncoding;
+    private String datePattern;
+    
 
     @Override
     public Object bind(HttpServletRequest request, Object objEntre, Class type) {
@@ -42,9 +44,10 @@ public class ParseCsvForm extends AbstrForm {
             parse.setIgnoreLeadingWhiteSpace(ignoreLeadingWhiteSpace);
             parse.setLine(line);
             parse.setQuotechar(quotechar);
+            System.out.println("Sepa bind " + separator);
             parse.setSeparator(separator);
             parse.setStrictQuotes(strictQuotes);
-            
+
             parse.setcTitre(cTitre);
             parse.setcCat(cCat);
             parse.setcContenu(cContenu);
@@ -53,8 +56,10 @@ public class ParseCsvForm extends AbstrForm {
             parse.setcDescription(cDescription);
             parse.setcGuid(cGuid);
             parse.setcLink(cLink);
-            
-            
+            parse.setForceEncoding(forceEncoding);
+            parse.setDatePattern(datePattern);
+
+
             return parse;
         }
         return null;
@@ -69,10 +74,14 @@ public class ParseCsvForm extends AbstrForm {
     public Boolean validate(HttpServletRequest request) {
         String s;
         s = request.getParameter("separator");
-        if (s != null) {
+        if (s != null && !s.isEmpty()) {
             if (s.equals("\\t")) {
                 separator = '\t';
+            } else {
+                separator = s.charAt(0);
+                System.out.println("SEPARATOR : " + separator);
             }
+
         }
 
         s = request.getParameter("quotechar");
@@ -102,45 +111,46 @@ public class ParseCsvForm extends AbstrForm {
         if (s != null) {
             ignoreLeadingWhiteSpace = true;
         }
-        
-        
+
+
         s = request.getParameter("cTitre");
-        if(s!=null){
+        if (s != null) {
             cTitre = new Integer(s);
         }
-        
+
         s = request.getParameter("cDescription");
-        if(s!=null){
+        if (s != null) {
+            System.out.println("C desc " + s);
             cDescription = new Integer(s);
         }
-        
+
         s = request.getParameter("cLink");
-        if(s!=null){
+        if (s != null) {
             cLink = new Integer(s);
         }
 
         s = request.getParameter("cGuid");
-        if(s != null){
+        if (s != null) {
             cGuid = new Integer(s);
         }
-        
+
         s = request.getParameter("cDatePub");
-        if(s!=null){
+        if (s != null) {
             cDatePub = new Integer(s);
         }
-        
+
         s = request.getParameter("cDateRecup");
-        if(s!=null){
+        if (s != null) {
             cDateRecup = new Integer(s);
         }
-        
+
         s = request.getParameter("cCat");
-        if(s!=null){
+        if (s != null) {
             cCat = new Integer(s);
         }
-        
+
         s = request.getParameter("cContenu");
-        if(s!=null){
+        if (s != null) {
             cContenu = new Integer(s);
         }
 
@@ -149,6 +159,34 @@ public class ParseCsvForm extends AbstrForm {
         } else {
             this.valide = false;
         }
+
+
+        s = request.getParameter("forceEncoding");
+        if (s != null && !s.isEmpty()) {
+            if (Charset.isSupported(s)) {
+                System.out.println("Charset supporté");
+                forceEncoding = s;
+            } else {
+                System.out.println("NON supporté");
+            }
+        }
+        
+        
+        s = request.getParameter("datePattern");
+        if(s != null && !s.isEmpty()){
+            
+            try {
+            DateTimeFormatter fmt = DateTimeFormat.forPattern(s); // On tente d'interpréter le pattern 
+            datePattern = s;
+            } catch (Exception e) {
+                logger.debug("Pattern Invalide");
+            }
+
+            
+            
+        }
+
+
 
         return this.valide;
     }

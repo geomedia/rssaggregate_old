@@ -1,0 +1,106 @@
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">
+    <channel>
+        <title>The New Cistercien</title>
+        <link>http://TheNewCistercien.com</link>
+        <description>Flux à la une du pseudo journal The New Cistercien</description>
+        
+        <item>
+            <title>C1</title>
+            <link>http://C1/inter2</link>
+            <description>C1</description>
+            <pubDate>Fri, 13 Dec 2013 13:20:30 GMT</pubDate>
+            <guid>C1</guid>
+            <dc:date>2013-12-13T13:20:30Z</dc:date>
+        </item>
+        
+        <item>
+            <title>C2</title>
+            <link>http://C2/inter2</link>
+            <description>C2</description>
+            <pubDate>Fri, 13 Dec 2013 13:20:30 GMT</pubDate>
+            <guid>C2</guid>
+            <dc:date>2013-12-13T13:20:30Z</dc:date>
+        </item>
+        
+        <item>
+            <title>C3</title>
+            <link>http://C1/inter2</link>
+            <description>C3</description>
+            <pubDate>Fri, 13 Dec 2013 13:20:30 GMT</pubDate>
+            <guid>C3</guid>
+            <dc:date>2013-12-13T13:20:30Z</dc:date>
+        </item>
+        
+        <item>
+            <title>C4</title>
+            <link>http://C1/inter2</link>
+            <description>C1</description>
+            <pubDate>Fri, 13 Dec 2013 13:20:30 GMT</pubDate>
+            <guid>C4</guid>
+            <dc:date>2013-12-13T13:20:30Z</dc:date>
+        </item>
+        
+        <item>
+            <title>C5</title>
+            <link>http://C1/inter5</link>
+            <description>C5</description>
+            <pubDate>Fri, 13 Dec 2013 13:20:30 GMT</pubDate>
+            <guid>C5</guid>
+            <dc:date>2013-12-13T13:20:30Z</dc:date>
+        </item>
+        
+        <item>
+            <title>C6</title>
+            <link>http://C1/inter6</link>
+            <description>C6</description>
+            <pubDate>Fri, 13 Dec 2013 13:20:30 GMT</pubDate>
+            <guid>C6</guid>
+            <dc:date>2013-12-13T13:20:30Z</dc:date>
+        </item>
+        
+
+        
+        <!--Cas étrange d'une item similaire avec un autre journal ne doit jamais arrivé mais bon on sait jamais-->
+        <item>
+            <title>Inter3</title>
+            <link>http://KlemmZeitung.comg/inter1</link>
+            <description>Inter3</description>
+            <pubDate>Fri, 13 Dec 2013 13:20:30 GMT</pubDate>
+            <guid>Inter3</guid>
+            <dc:date>2013-12-13T13:20:30Z</dc:date>
+        </item>
+        
+        <!--Deus item null Elle doivent sauter au dedoub-->
+        <item>
+            <title></title>
+            <link></link>
+            <description></description>
+            <pubDate></pubDate>
+            <guid></guid>
+            <dc:date></dc:date>
+        </item>
+        
+        <item>
+            <title></title>
+            <link></link>
+            <description></description>
+            <pubDate></pubDate>
+            <guid></guid>
+            <dc:date></dc:date>
+        </item>
+        
+        
+        <!--Répétition d'une item basique déja trouvé plus haut. Elle doit sauter au dedoub-->
+        <item>
+            <title>C2</title>
+            <link>http://C2/inter2</link>
+            <description>C2</description>
+            <pubDate>Fri, 13 Dec 2013 13:20:30 GMT</pubDate>
+            <guid>C2</guid>
+            <dc:date>2013-12-13T13:20:30Z</dc:date>
+        </item>
+        
+        
+        
+    </channel>
+</rss>

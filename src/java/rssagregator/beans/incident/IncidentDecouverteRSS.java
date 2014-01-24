@@ -5,6 +5,8 @@
 package rssagregator.beans.incident;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.OneToOne;
 import rssagregator.beans.Journal;
 import rssagregator.services.tache.TacheDecouverteAjoutFlux;
 
@@ -17,6 +19,8 @@ public class IncidentDecouverteRSS extends AbstrIncident{
     /***
      * L'ajour de flux se fait par rapport a un journal
      */
+    
+    @OneToOne(fetch = FetchType.LAZY)
     Journal journal;
 
     public Journal getJournal() {

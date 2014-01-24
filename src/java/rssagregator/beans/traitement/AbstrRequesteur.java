@@ -5,9 +5,9 @@
 package rssagregator.beans.traitement;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.util.concurrent.Callable;
 import javax.naming.TimeLimitExceededException;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -21,26 +21,31 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.ws.http.HTTPException;
 
 /**
- *
+ * Le requesteur est chargé d'effectuer la requete. Il récupère
+ * <ul>
+ * <li>{@link #resu} : un tableau d'octet contenant par exemple le docuement xml récupéré</li>
+ * <li>{@link #httpStatut} 200, 404 , 500 : code retour HTTP</li>
+ * </ul>
  * @author clem
  */
 @Entity
 @Table(name = "tr_requesteur")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @XmlRootElement
-public class AbstrRequesteur implements Serializable, Cloneable {
+public class AbstrRequesteur implements Serializable, Cloneable, Callable<Object> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long ID;
+    @Transient
+    protected transient String url;
 
     public AbstrRequesteur() {
     }
     /**
      * *
-     * par exemple User-Agent", "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:16.0)
-     * Gecko/20100101 Firefox/16.0". Pour certain serveur, si l'on ne spécifie
-     * pas la request property on peut subir une redirection
+     * par exemple User-Agent", "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:16.0) Gecko/20100101 Firefox/16.0". Pour
+     * certain serveur, si l'on ne spécifie pas la request property on peut subir une redirection
      */
     protected String[][] requestProperty;
     /**
@@ -50,17 +55,17 @@ public class AbstrRequesteur implements Serializable, Cloneable {
     protected Integer timeOut;
     /**
      * *
-     * Après avoir effectué la requête, le requester inscrit le code retour
-     * server (200, 404...) dans cette variable
+     * Après avoir effectué la requête, le requester inscrit le code retour server (200, 404...) dans cette variable
      */
     protected Integer httpStatut;
+  
+    
     /**
      * *
-     * Le contenu retourné par la requête (HTML, XML...).
+     * Un tableau d'octet contenant le résultat de la requete. C'est le parseur qui doit lire en déterminant l'encodage
      */
-    protected String HttpResult;
     @Transient
-    protected InputStream httpInputStream;
+    protected byte[] resu;
 
     public Long getID() {
         return ID;
@@ -91,8 +96,8 @@ public class AbstrRequesteur implements Serializable, Cloneable {
                 newTab[i][1] = this.requestProperty[i][1];
             }
         }
-        newTab[newTab.length-1][0] = cle;
-        newTab[newTab.length-1][1] = val;
+        newTab[newTab.length - 1][0] = cle;
+        newTab[newTab.length - 1][1] = val;
         this.requestProperty = newTab;
     }
 
@@ -112,30 +117,47 @@ public class AbstrRequesteur implements Serializable, Cloneable {
         this.httpStatut = httpStatut;
     }
 
-    public String getHttpResult() {
-        return HttpResult;
-    }
-
-    public void setHttpResult(String HttpResult) {
-        this.HttpResult = HttpResult;
-    }
 
     public void requete(String urlArg) throws MalformedURLException, HTTPException, IOException, TimeLimitExceededException, Exception {
     }
 
-    public InputStream getHttpInputStream() {
-        return httpInputStream;
-    }
 
-    public void setHttpInputStream(InputStream httpInputStream) {
-        this.httpInputStream = httpInputStream;
-    }
-
-    public void disconnect() {
+    /***
+     * Methode permettant de clore la source utilisé (un fichier une connection a ressource distante...)
+     */
+    public void clore() {
+        
     }
 
     @Override
     protected Object clone() throws CloneNotSupportedException {
         return super.clone(); //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    public Object call() throws Exception {
+        requete(url);
+        return null;
+
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public byte[] getResu() {
+        return resu;
+    }
+
+    public void setResu(byte[] resu) {
+        this.resu = resu;
+    }
+    
+    
+    
 }

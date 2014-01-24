@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -52,7 +54,18 @@ public class LogView extends HttpServlet {
         Process p = Runtime.getRuntime().exec("tail -n "+nbligne +" "+fileLog);
         InputStream out = new BufferedInputStream(p.getInputStream());
        String s = IOUtils.toString(out);
-       request.setAttribute("log", s);
+//       s = s.replaceAll("(\n)[1-9]{1}", "</p><p>");
+
+       
+       // On remplace les \n par des paragraphes
+       String retour = null;
+       Pattern pattern = Pattern.compile("(\n)[1-9]{1}");
+       Matcher m = pattern.matcher(s);
+       if(m.find()){
+           retour = m.replaceAll("<p></p>");
+       }
+       
+       request.setAttribute("log", retour);
   
  
     } catch (Exception e) {

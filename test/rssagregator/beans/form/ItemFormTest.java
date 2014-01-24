@@ -55,19 +55,19 @@ public class ItemFormTest {
 //    /**
 //     * Test of bind method, of class ItemForm.
 //     */
-//    @Test
-//    public void testBind() {
-//        System.out.println("bind");
-//        HttpServletRequest request = null;
-//        Object objEntre = null;
-//        Class type = null;
-//        ItemForm instance = new ItemForm();
-//        Object expResult = null;
-//        Object result = instance.bind(request, objEntre, type);
-//        assertEquals(expResult, result);
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-//    }
+    @Test
+    public void testBind() {
+        System.out.println("bind");
+        HttpServletRequest request = null;
+        Object objEntre = null;
+        Class type = null;
+        ItemForm instance = new ItemForm();
+        Object expResult = null;
+        Object result = instance.bind(request, objEntre, type);
+        assertEquals(expResult, result);
+        // TODO review the generated test code and remove the default call to fail.
+        fail("The test case is a prototype.");
+    }
 //
 //    /**
 //     * Test of validate method, of class ItemForm.

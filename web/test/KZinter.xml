@@ -1,0 +1,52 @@
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">
+    <channel>
+        <title>Klemm Zeitung</title>
+        <link>http://KlemmZeitung.comg/</link>
+        <description>International</description>
+    
+    
+    
+        <item>
+            <title>Inter1</title>
+            <link>http://KlemmZeitung.comg/inter1</link>
+            <description>Inter1</description>
+            <pubDate>Fri, 13 Dec 2013 13:20:30 GMT</pubDate>
+            <guid>Inter1</guid>
+            <dc:date>2013-12-13T13:20:30Z</dc:date>
+        </item>
+        
+        
+        
+        <item>
+            <title>Inter1</title>
+            <link>http://KlemmZeitung.comg/inter2</link>
+            <description>Inter1</description>
+            <pubDate>Fri, 13 Dec 2013 13:20:30 GMT</pubDate>
+            <guid>Inter2</guid>
+            <dc:date>2013-12-13T13:20:30Z</dc:date>
+        </item>
+        
+        
+        <item>
+            <title>Inter3</title>
+            <link>http://KlemmZeitung.comg/inter1</link>
+            <description>Inter3</description>
+            <pubDate>Fri, 13 Dec 2013 13:20:30 GMT</pubDate>
+            <guid>Inter3</guid>
+            <dc:date>2013-12-13T13:20:30Z</dc:date>
+        </item>
+        
+        
+        <item>
+            <title>Inter4</title>
+            <link>http://KlemmZeitung.comg/inter1</link>
+            <description>Inter4</description>
+            <pubDate>Fri, 13 Dec 2013 13:20:30 GMT</pubDate>
+            <guid>Inter4</guid>
+            <dc:date>2013-12-13T13:20:30Z</dc:date>
+        </item>
+        
+      
+    </channel>
+  
+</rss>

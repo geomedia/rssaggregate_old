@@ -59,7 +59,8 @@ public class Dedoubloneur extends AbstrDedoublonneur {
                     if (itemCapture.getHashContenu().equals(hashMemoire)) {
                         it1.remove();
                         compteCapture[1]++;
-                        mediatorAReferer.nbDedoubMemoire++;
+                        visitor.nbDedoubMemoire++;
+//                        mediatorAReferer.nbDedoubMemoire++;
                     }
                 }
             }
@@ -84,8 +85,19 @@ public class Dedoubloneur extends AbstrDedoublonneur {
 //        }
         this.dedoublonnageInterneduneListDItem(listItemCapture, true, false, false);
 
-        //On désactive
-//        if (false) {
+
+        //---------------------------------------------------------------------------------------------------------------------
+        //.                         Exclusion d'item au contenu véreux
+        //---------------------------------------------------------------------------------------------------------------------
+        // exclusion des items n'ayant pas de titre ni de description
+        if (!listItemCapture.isEmpty()) {
+            for (ListIterator<Item> it = listItemCapture.listIterator(); it.hasNext();) {
+                Item itemCapture = it.next();
+                if(itemCapture.getTitre().isEmpty() && itemCapture.getDescription().isEmpty()){
+                    it.remove();
+                }
+            }
+        }
 
 
         //==========================================================================================
@@ -113,17 +125,17 @@ public class Dedoubloneur extends AbstrDedoublonneur {
 
 
                 Item ItemBDD = dao.findItemAvecHashDansDonneSource(itemCapture.getHashContenu());
-           
+
 
                 //Si on a trouvé une item
                 if (ItemBDD != null) {
-                         System.out.println("ITEM BDD : ");
+                    System.out.println("ITEM BDD : ");
                     //Si l'item BDD posséde déjà le flux observé
                     boolean present = fluxPresentDansList(ItemBDD.getListFlux(), flux);
                     if (present) {
                         // On parcours tout les donnes brutes de l'item BDD
-                        
-                        
+
+
                         it.remove();
 
 //                        boolean trouve = false;

@@ -35,7 +35,7 @@ Cette JSP permet de mettre en forme les données afficher par la grid de présen
     // Poru chaque objet
 
     List<AbstrIncident> listJ = (List<AbstrIncident>) request.getAttribute("items");
-    DateTimeFormatter fmt = DateTimeFormat.forPattern("dd/MM/yyyy");
+    DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd");
     
     if (listJ != null) {
         for (int i = 0; i < listJ.size(); i++) {
@@ -53,7 +53,10 @@ Cette JSP permet de mettre en forme les données afficher par la grid de présen
 
             if (j.getDateDebut() != null) {
                 DateTime dt2 = new DateTime(j.getDateDebut());
+//                        System.out.println("DATE DEBUT : " + j.getDateFin());
+                System.out.println("DATE DEBUT "+ fmt.print(dt2));
                 o1array.add(fmt.print(dt2));
+//                o1array.add(j.getDateDebut());
             }
             else{
                 o1array.add("??");
@@ -63,6 +66,7 @@ Cette JSP permet de mettre en forme les données afficher par la grid de présen
                 System.out.println("DATE : " + j.getDateFin());
                  DateTime dt2 = new DateTime(j.getDateFin());
                 o1array.add(fmt.print(dt2));
+//                o1array.add(j.getDateFin().getTime());
             } else {
                 o1array.add("Non clos");
             }

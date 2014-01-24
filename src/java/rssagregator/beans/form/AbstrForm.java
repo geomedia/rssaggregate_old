@@ -4,10 +4,7 @@
  */
 package rssagregator.beans.form;
 
-import com.fasterxml.jackson.databind.util.BeanUtil;
-import com.fasterxml.jackson.databind.util.ClassUtil;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Date;
@@ -17,13 +14,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
-import junit.framework.Test;
-import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.beanutils.BeanUtilsBean2;
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.beanutils.PropertyUtilsBean;
-import org.apache.commons.collections.ListUtils;
-import org.apache.commons.lang.ClassUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -31,7 +22,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.dao.AbstrDao;
 import rssagregator.dao.DAOFactory;
@@ -289,7 +279,7 @@ public abstract class AbstrForm {
 
 
         // ROW
-        if (request.getParameter("vue") != null && !request.getParameter("vue").equals("csv")) {
+        if (request.getParameter("vue") != null && !request.getParameter("vue").equals("csv") && !request.getParameter("vue").equals("xls")) {
             Integer limit = null;
             if (request.getParameter("rows") != null && !request.getParameter("rows").isEmpty()) {
                 try {
@@ -301,6 +291,21 @@ public abstract class AbstrForm {
                 }
             } else {
             }
+
+
+
+            //totalrows : le nombre total de ligne a charger. Si il est présent, il remplace le paramettre row pour la limite sql
+            if (request.getParameter("totalrows") != null) {
+                try {
+                    limit = new Integer(request.getParameter("totalrows"));
+                } catch (Exception e) {
+                }
+            }
+
+            if (limit != null) {
+                filters.setCriteriaRow(limit);
+            }
+
 
             //-----PAGE
             Integer page = null;
@@ -319,7 +324,16 @@ public abstract class AbstrForm {
             } else {
                 request.setAttribute("page", new Integer(1));
             }
+
+
+
+
+
         }
+
+
+
+
 
 
 
@@ -387,9 +401,12 @@ public abstract class AbstrForm {
 
     protected void recupSpeFilters(HttpServletRequest request, AbstrDao dao, SearchFiltersList filters) {
 
+        System.out.println("--> recup spe");
         if (action.equals("list")) {
+            System.out.println("LIST ");
 
             if (request.getParameter("filters") != null && !request.getParameter("filters").isEmpty()) {
+                System.out.println("--> FILTERS");
                 String filter = request.getParameter("filters");
                 JSONParser parse = new JSONParser();
 
@@ -403,6 +420,7 @@ public abstract class AbstrForm {
                         String field = (String) obj.get("field");
                         String op = (String) obj.get("op");
 
+                        System.out.println("OP : " + op);
 
 
                         /**
@@ -459,6 +477,7 @@ public abstract class AbstrForm {
 
 
                         if (op.equals("inn")) {
+                            System.out.println("INN");
                             SearchFilter nouveauFiltre = new SearchFilter();
                             nouveauFiltre.setOp(op);
                             nouveauFiltre.setField(field);
@@ -467,6 +486,7 @@ public abstract class AbstrForm {
                             filters.getFilters().add(nouveauFiltre);
 
                         } else if (op.equals("isn")) {
+                            System.out.println("ISN");
                             SearchFilter nouveauFiltre = new SearchFilter();
                             nouveauFiltre.setOp(op);
                             nouveauFiltre.setField(field);
@@ -484,7 +504,7 @@ public abstract class AbstrForm {
 
                             Object object = beanClass.newInstance();
 //                            Object prop = PropertyUtils.getPropertyType(object, field);
-                           Class c = PropertyUtils.getPropertyType(object, field);
+                            Class c = PropertyUtils.getPropertyType(object, field);
 
 
                             if (c.equals(Date.class)) {
@@ -497,38 +517,38 @@ public abstract class AbstrForm {
                             }
 
                             newfilter.setType(c);
-                            
+
                             filters.getFilters().add(newfilter);
 
                         } else if (op.equals("gt")) {
                             try {
-                      
-                            SearchFilter newfilter = new SearchFilter();
-                            newfilter.setOp(op);
-                            newfilter.setField(field);
 
-                            // récup du type du champ
-                            Object object = beanClass.newInstance();
-                            Class c = PropertyUtils.getPropertyType(object, field);
-                        
+                                SearchFilter newfilter = new SearchFilter();
+                                newfilter.setOp(op);
+                                newfilter.setField(field);
+
+                                // récup du type du champ
+                                Object object = beanClass.newInstance();
+                                Class c = PropertyUtils.getPropertyType(object, field);
+
 //                            Class c = prop.getClass();
-                            newfilter.setType(c);
-                       
-                             if (c.equals(Date.class)) {
-                                DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+                                newfilter.setType(c);
 
-                                DateTime dt = fmt.parseDateTime((String) obj.get("data"));
-                                newfilter.setData(dt.toDate());
-                            } else {
-                                newfilter.setData(obj.get("data"));
-                            }
-                            
-                            filters.getFilters().add(newfilter);
-                            System.out.println("-- FIN GT");
+                                if (c.equals(Date.class)) {
+                                    DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+
+                                    DateTime dt = fmt.parseDateTime((String) obj.get("data"));
+                                    newfilter.setData(dt.toDate());
+                                } else {
+                                    newfilter.setData(obj.get("data"));
+                                }
+
+                                filters.getFilters().add(newfilter);
+                                System.out.println("-- FIN GT");
                             } catch (Exception e) {
                                 logger.debug("err", e);
                             }
-                         
+
                         }
 
                     }

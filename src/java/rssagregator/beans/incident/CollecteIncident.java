@@ -28,7 +28,7 @@ public class CollecteIncident extends AbstrIncident implements Serializable {
      * Une erreur de collecte est forcement lié à un flux. Un incident ne
      * possède qu'un flux. Un flux peut posséder plusieurs incidents.
      */
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.REFRESH})
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.REFRESH})
     protected Flux fluxLie;
 
     public Flux getFluxLie() {
@@ -44,12 +44,12 @@ public class CollecteIncident extends AbstrIncident implements Serializable {
     }
     
     /***
-     * Une erreur de collecte ne doit être notifiée que si elle a subit 2 répétition. Il faut en effet éviter de notifier dès le premier échec.
+     * Une erreur de collecte ne doit être notifiée que si elle a subit 3 répétition. Il faut en effet éviter de notifier dès le premier échec.
      * @return 
      */
     @Override
     public Boolean doitEtreNotifieParMail() {
-        if(this.nombreTentativeEnEchec>1){
+        if(this.nombreTentativeEnEchec>2){
             return true;
         }
         else{

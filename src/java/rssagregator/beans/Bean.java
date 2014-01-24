@@ -19,7 +19,9 @@ public abstract class Bean {
      */
  public abstract String getReadURL();
 
+    public abstract Long getID();
 
+    public abstract void setID(Long ID);
     
 //@Deprecated
 //    public boolean compareBeans(Object obj, boolean compareId) {

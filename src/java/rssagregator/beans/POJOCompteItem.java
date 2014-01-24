@@ -11,6 +11,7 @@ import java.util.TreeMap;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
+import rssagregator.utils.ExceptionTool;
 
 /**
  * *
@@ -83,12 +84,10 @@ public class POJOCompteItem {
     Integer decilePremier;
     Integer decileNeuf;
     Double ecartType;
-    
     private Float[] statMoyDayOfWeek = new Float[7];
     private Integer[] statMedDayOfWeek = new Integer[7];
     private Double[] statEcartypeDayOfWeek = new Double[7];
-    
-    
+
 //    private Float statMoyLundi;
 //    private Float statMoyMardi;
 //    private Float statMoyMercredi;
@@ -96,7 +95,6 @@ public class POJOCompteItem {
 //    private Float statMoyVendredi;
 //    private Float statMoySamedi;
 //    private Float statMoyDimanche;
-
     public POJOCompteItem() {
         compte = new TreeMap<Date, Integer>();
         items = new ArrayList<Item>();
@@ -238,9 +236,11 @@ public class POJOCompteItem {
         return statMoyDayOfWeek;
     }
 
-    /***
-     * retroune le nombre moyen d'item pour le jour 
-     * @param statMoyDayOfWeek 
+    /**
+     * *
+     * retroune le nombre moyen d'item pour le jour
+     *
+     * @param statMoyDayOfWeek
      */
     public void setStatMoyDayOfWeek(Float[] statMoyDayOfWeek) {
         this.statMoyDayOfWeek = statMoyDayOfWeek;
@@ -261,10 +261,6 @@ public class POJOCompteItem {
     public void setStatEcartypeDayOfWeek(Double[] statEcartypeDayOfWeek) {
         this.statEcartypeDayOfWeek = statEcartypeDayOfWeek;
     }
-    
-    
-    
-    
 
     /**
      * *
@@ -376,20 +372,20 @@ public class POJOCompteItem {
         quartileTrois = ((Double) stats.getPercentile(75)).intValue();
         decilePremier = ((Double) stats.getPercentile(10)).intValue();
         decileNeuf = ((Double) stats.getPercentile(90)).intValue();
-        somme = ((Double)stats.getSum()).longValue();
+        somme = ((Double) stats.getSum()).longValue();
 
 
 
         // Calcul des moyennes par jour
 
 //        Float[] sommeJour = new Float[7]; // Initialisation
-        
-        Map<Integer,  DescriptiveStatistics> mapStatJour = new HashMap<Integer, DescriptiveStatistics>();
-        
+
+        Map<Integer, DescriptiveStatistics> mapStatJour = new HashMap<Integer, DescriptiveStatistics>();
+
         Integer[] nbrJour = new Integer[8];
         for (int i = 0; i < 7; i++) {
             DescriptiveStatistics stat = new DescriptiveStatistics();
-            mapStatJour.put(i+1, stat);
+            mapStatJour.put(i + 1, stat);
 //            Long long1 = sommeJour[i];
 //            sommeJour[i] = new Float(0);
 //            nbrJour[i] = 0;
@@ -409,21 +405,21 @@ public class POJOCompteItem {
         }
 
         for (int i = 0; i < 7; i++) {
-            DescriptiveStatistics statDuJour = mapStatJour.get(i+1);
-            
+            DescriptiveStatistics statDuJour = mapStatJour.get(i + 1);
+
             Double moy = statDuJour.getMean();
-            if(moy.equals(Double.NaN)){
+            if (moy.equals(Double.NaN)) {
                 moy = new Double(0);
             }
-            
+
             Double ecat = statDuJour.getStandardDeviation();
-            if(ecat.equals(Double.NaN)){
+            if (ecat.equals(Double.NaN)) {
             }
-            
+
             statMoyDayOfWeek[i] = moy.floatValue();
             statMedDayOfWeek[i] = ((Double) statDuJour.getPercentile(50)).intValue();
             statEcartypeDayOfWeek[i] = ((Double) statDuJour.getStandardDeviation());
-            
+
         }
 
 
@@ -567,5 +563,50 @@ public class POJOCompteItem {
 
         }
         return dateAnormal;
+    }
+
+    /**
+     * *
+     * trouver les jours consécutif pour lequels on passe en dessous d'un certain nombre d'item capturé par jour
+     *
+     * @param nbrItemMin Le nombre d'item servant de seuil a la détection
+     * @param jour le nombre de jour consécutifs
+     * @return une map (trie par jour avec les jours pour lequel on est passé en dessous du seuil. En valeur de la map
+     * on a le nombre d'item pour le jour;
+     */
+    public Map<Date, Integer> detecterAnomalieNbrMinimalItem(Integer nbrItemMin, Integer jour) {
+        ExceptionTool.argumentNonNull(nbrItemMin);
+        ExceptionTool.argumentNonNull(jour);
+        if (this.compte == null) {
+            throw new NullPointerException("Il faut lancer le compte avant de faire ce calcul");
+        }
+
+        Map<Date, Integer> retour = new TreeMap();
+
+        Map<Date, Integer> ajoutMap = new TreeMap();
+
+        int i = 0;
+        for (Map.Entry<Date, Integer> entry : compte.entrySet()) {
+            Date date = entry.getKey();
+            Integer nbrPourJourObserve = entry.getValue();
+
+            if (nbrPourJourObserve <= nbrItemMin) {
+                ajoutMap.put(date, nbrPourJourObserve);
+            }
+
+            // Si on repasse au dessus du seul ou si c'est la derniere itération
+            if (nbrPourJourObserve > nbrItemMin || i == compte.size() - 1) {
+                if (ajoutMap.size() > jour) { // si le map contient un nombre de jour supérieur au seuil envoyé en argument
+                    System.out.println("PUUT ALL");
+                    retour.putAll(ajoutMap);
+                }
+                ajoutMap.clear();
+            }
+
+            i++;
+
+        }
+
+        return retour;
     }
 }

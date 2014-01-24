@@ -37,32 +37,7 @@ public class MediatorCollecteActionTest {
     public void tearDown() {
     }
 
-    /**
-     * Test of executeActions method, of class MediatorCollecteAction.
-     */
-    @Test
-    public void testExecuteActions() throws Exception {
-        System.out.println("executeActions");
-        Flux flux = new Flux();
-        flux.setUrl("http://rss.lemonde.fr/c/205/f/3050/index.rss");
-
-        Boolean persist = false;
-        MediatorCollecteAction instance = MediatorCollecteAction.getDefaultCollectAction();
-        instance.executeActions(flux);
-        
-
-        // On vérifie que le flux contient bien des items
-        System.out.println("NOMBRE : " + flux.getItem().size());
-
-        if (flux.getItem() == null) {
-            fail("Le flux possède une liste null");
-        }
-        if (flux.getItem() != null && flux.getItem().isEmpty()) {
-            fail("La liste des items du flux est vide");
-        }
-
-
-    }
+  
 
     /**
      * Test of getDefaultCollectAction method, of class MediatorCollecteAction.

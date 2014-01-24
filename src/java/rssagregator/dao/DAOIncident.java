@@ -167,8 +167,6 @@ public class DAOIncident<T> extends AbstrDao {
         Query query = em.createQuery(req);
 
         List<T> l = query.getResultList();
-
-        System.out.println("FIN");
         return l;
     }
 

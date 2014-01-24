@@ -8,11 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.apache.poi.util.Beta;
 
 /**
  *  permet de lancer la collecte d'une liste de {@link TacheRecupCallable} les uns à la suite des autres. Permet par exemple de récupérer tous les flux d'un journal.
- * @author clem
+ * @author clem. N'est pas utilisé
  */
+@Beta
 public class TacheRecupListFlux extends TacheImpl<TacheRecupListFlux> {
 
     List<TacheRecupCallable> taches = new ArrayList<TacheRecupCallable>();

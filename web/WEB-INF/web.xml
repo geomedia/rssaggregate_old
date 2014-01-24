@@ -1,9 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+    
+    
+    
+    <!--Les fichiers d'export sont situé dans le répertoire web/upload. Il est nécessaire de permettra le listing des fichier dans ce rep c'est le role de cette DefaultServlet-->
+    
     <servlet>
+    <servlet-name>DefaultServletOverride</servlet-name>
+    <servlet-class>org.apache.catalina.servlets.DefaultServlet</servlet-class>
+    <init-param>
+        <param-name>listings</param-name>
+        <param-value>true</param-value>
+    </init-param>
+    <load-on-startup>1</load-on-startup>
+</servlet>
+
+<!-- Add a mapping for our new default servlet -->
+<servlet-mapping>
+    <servlet-name>DefaultServletOverride</servlet-name>
+    <url-pattern>/upload/*</url-pattern>
+</servlet-mapping>
+
+
+    
+    
+<!--    <servlet>
         <servlet-name>Index</servlet-name>
-        <servlet-class>rssagregator.servlet.Index</servlet-class>
-    </servlet>
+        <servlet-class>rssagregator.servlet.IndexSrvlt</servlet-class>
+    </servlet>-->
 
     
 <!--    <resource-env-ref>
@@ -18,7 +42,7 @@
     
     
     
-<!--    <resource-env-ref>
+    <!--    <resource-env-ref>
         <resource-env-ref-name>testlink</resource-env-ref-name>
         <resource-env-ref-type>java.lang.String</resource-env-ref-type>
     </resource-env-ref>-->
@@ -41,10 +65,13 @@
         <url-pattern>/jmx/*</url-pattern>
     </servlet-mapping> 
 
-    <servlet-mapping>
+    <!--    <servlet-mapping>
         <servlet-name>Index</servlet-name>
         <url-pattern>/index</url-pattern>
-    </servlet-mapping>
+    </servlet-mapping>-->
+    
+    
+    
     <session-config>
         <session-timeout>
             30
@@ -98,6 +125,7 @@
     </filter>
     <filter-mapping>
         <filter-name>AuthFilter</filter-name>
+        <!--<url-pattern>/*</url-pattern>-->
         <url-pattern>/*</url-pattern>
     </filter-mapping>
     
@@ -114,7 +142,7 @@
         <url-pattern>/journaux/*</url-pattern>
         <url-pattern>/incidents/*</url-pattern>
         <url-pattern>/ComportementCollecte/*</url-pattern>
-        <!--<url-pattern>/user/*</url-pattern>-->
+        <url-pattern>/user/*</url-pattern>
     </filter-mapping>
     
     
@@ -129,10 +157,14 @@
         <!--<url-pattern>/user/*</url-pattern>-->
     </filter-mapping>
     
+    
+    
     <filter>
         <filter-name>UserBeanRestrict</filter-name>
         <filter-class>rssagregator.servlet.FilterUserBean</filter-class>
     </filter>
+    
+    
     <filter-mapping>
         <filter-name>UserBeanRestrict</filter-name>
         <url-pattern>/user/*</url-pattern>

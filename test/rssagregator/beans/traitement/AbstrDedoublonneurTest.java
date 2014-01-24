@@ -115,14 +115,9 @@ public class AbstrDedoublonneurTest {
         List<Item> result = instance.dedoublonne(listItemCapture, flux);
         
         if(!result.isEmpty()){
-            fail("la liste devrait être vide");
+            fail("la liste devrait être vide elle contient " + result.size());
         }
         
-        
-//        List expResult = null;
-//        List result = instance.dedoublonne(listItemCapture, flux);
-//        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
      
     }
 }

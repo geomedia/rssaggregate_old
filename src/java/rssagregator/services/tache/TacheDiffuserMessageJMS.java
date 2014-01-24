@@ -55,9 +55,9 @@ public class TacheDiffuserMessageJMS extends TacheImpl<TacheDiffuserMessageJMS> 
     
     String beanSerialise;
 
-    public TacheDiffuserMessageJMS(Observer s) {
-        super(s);
-    }
+//    public TacheDiffuserMessageJMS(Observer s) {
+//        super(s);
+//    }
 
     @Override
     protected void callCorps() throws Exception {

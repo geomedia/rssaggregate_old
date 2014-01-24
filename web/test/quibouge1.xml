@@ -1,0 +1,36 @@
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">
+    <channel>
+        <title>The New Cistercien</title>
+        <link>http://thenewcistercien.com</link>
+        <description>Flux à la une du pseudo journal The New Cistercien</description>
+        
+        <item>
+            <title>Version 1 de l'article</title>
+            <link>http://leQuibouge.com</link>
+            <description>ici à 2020 par rapport à 1990 tout en portant la part des énergies renouvelables à 20 % du mix-énergétique.</description>
+            <pubDate>Fri, 13 Dec 2013 13:20:30 GMT</pubDate>
+            <guid>CU1</guid>
+            <dc:date>2013-12-13T13:20:30Z</dc:date>
+        </item>
+        
+        
+        <item>
+            <title>Version 1 de l'article2</title>
+            <link>http://leQuibouge.com</link>
+            <description>ici à 2020 par rapport à 1990 tout en portant la part des énergies renouvelables à 20 % du mix-énergétique.</description>
+            <pubDate>Fri, 13 Dec 2013 13:20:30 GMT</pubDate>
+            <guid>CU1</guid>
+            <dc:date>2013-12-13T13:20:30Z</dc:date>
+        </item>
+        
+        
+        <item>
+            <title>Version 1 de l'article3</title>
+            <link>http://leQuibouge.com</link>
+            <description>ici à 2020 par rapport à 1990 tout en portant la part des énergies renouvelables à 20 % du mix-énergétique.</description>
+            <pubDate>Fri, 13 Dec 2013 13:20:30 GMT</pubDate>
+            <guid>CU1</guid>
+            <dc:date>2013-12-13T13:20:30Z</dc:date>
+        </item>
+    </channel>
+</rss>

@@ -7,6 +7,7 @@ package rssagregator.beans;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,6 +18,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import org.eclipse.persistence.annotations.Index;
+import org.joda.time.DateTime;
 import rssagregator.utils.ExceptionTool;
 
 /**
@@ -98,6 +100,9 @@ public class ItemRaffinee implements ContentRSS, Serializable {
      */
     @Column(name = "link", length = 2000)
     private String link;
+    
+    
+    
     @OneToMany(mappedBy = "itemRaffinee")
     private List<Item> itemBrutes = new ArrayList<Item>();
     
@@ -212,4 +217,38 @@ public class ItemRaffinee implements ContentRSS, Serializable {
         }
         return false;
     }
+    
+    /***
+     * L'item raffiné parcour l'ensemble des items qui lui sotn rataché et sélectionne le contenu le plus a jour. Cette item sert de base pour templir le contennu des champs de l'item raffiné
+     */
+    public void miseANiveauduCOntenu(){
+       
+        
+        Item itemRetenu = null;
+        if(itemBrutes!= null && !itemBrutes.isEmpty()){
+            itemRetenu = itemBrutes.get(0);
+        }
+        
+        DateTime dt = null;
+        
+        for (Iterator<Item> it = itemBrutes.iterator(); it.hasNext();) {
+            Item item = it.next();
+            if(item.getDatePub() != null){
+                DateTime dtCurrent = new DateTime(item.getDatePub());
+                
+
+                DateTime dtitemPre = new DateTime(itemRetenu.getDatePub());
+                DateTime dtItemCourrante = new DateTime(item.getDatePub());
+                
+                // Si l'item courrante a été publié après l'item précédente
+                if(dtItemCourrante.isBefore(dtitemPre)){
+                    
+                    
+                }
+            }
+        }
+        
+    }
+    
+    
 }

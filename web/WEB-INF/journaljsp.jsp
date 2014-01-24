@@ -180,12 +180,13 @@
                                 <label title="De nombreux journaux présente un page avec des liens pour chacun des flux RSS disponibles. Cette url sera utilisée si vous utilisez la fonctionnalité de découverte automatique des flux du journal">URL de la page présentant les flux RSS du journal : </label>
                                 <input type="text" name="urlHtmlRecapFlux" value="<c:out value="${bean.urlHtmlRecapFlux}"></c:out>" /><span class="erreur" id="errurlHtmlRecapFlux"></span>
                                     <br />
-                                    <label for="langue">Langue : </label>
+                                    <label for="langue">Langue : <span class="requis">*</span></label>
                                     <select name="langue" id="langue">
+                                        <option></option>
                                     <c:forEach items="${listLocal}" var="loc">
                                         <option value="${loc.key}" <c:if test="${loc.key==bean.langue}"> selected="true"</c:if>>${loc.value}</option>>
                                     </c:forEach>
-                                </select>
+                                </select><span class="erreur" id="errlangue"></span>
 
                                 <br />
 
@@ -199,26 +200,28 @@
 
                                 <label>Découverte automatique des flux du journal</label>
                                 <input type="checkbox" name="autoUpdateFlux" id="autoUpdateFlux" <c:if test="${bean.autoUpdateFlux=='true'}"> checked="checked="</c:if>/>
-                                
-                                <div id="updateDiv"></div>
-                                <br />
 
-                                    <label for="pays">Pays :</label>
+                                    <div id="updateDiv"></div>
+                                    <br />
+
+                                    <label for="pays">Pays : <span class="requis">*</span></label>
                                     <select name="pays" id="pays">
+                                        <option></option>
                                     <c:forEach items="${listCountry}" var="country">
                                         <option value="${country.key}" <c:if test="${country.key==bean.pays}"> selected="true"</c:if>>${country.value}</option>
                                     </c:forEach>
-                                </select>
+                                </select>  <span class="erreur" id="errpays"></span>
 
                                 <br />
-                                
-                                
-                                
-                                
-                                
+
+
+
+
+
 
                                 <label for="">Fuseau Horaire : </label>
                                 <select name="fuseauHorraire">
+                                    <option></option>
                                     <c:forEach items="${fuseau}" var="fus">
                                         <option value="${fus}" <c:if test="${fus==bean.fuseauHorraire}"> selected="true"</c:if> >${fus}</option>
                                     </c:forEach>

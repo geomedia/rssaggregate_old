@@ -60,20 +60,27 @@ public class DaoJournal extends AbstrDao {
         this.classAssocie = Journal.class;
         em = daof.getEntityManager();
     }
-    
-    
-        /***
-     * Retourne la liste des journaux ordonné par titre
-     * @return 
-     */
-    public List<Journal> findallOrederByTitre() {
 
-        Query req = em.createQuery("SELECT j FROM Journal j ORDER BY j.nom");
+    /**
+     * *
+     * Retourne la liste des journaux ordonné par titre
+     *
+     * @return
+     */
+    public List<Journal> findallOrederByTitre(boolean afficherJournauxSansFlux) {
+
+        Query req;
+        if(afficherJournauxSansFlux){
+            req = em.createQuery("SELECT j FROM Journal j ORDER BY j.nom");
+        }
+        else{
+//            req = em.createQuery("SELECT j FROM Journal j ORDER BY j.nom");
+            req = em.createQuery("SELECT DISTINCT(j) FROM Journal j JOIN j.fluxLie f ORDER BY j.nom");
+        }
+//        Query req = em.createQuery("SELECT j FROM Journal j ORDER BY j.nom");
         List<Journal> resu = req.getResultList();
         return resu;
     }
-    
-    
 
     //    public void modifier(Journal journal) {
     //        if (journal.getID() != null && journal.getID() >= 0) {
@@ -135,7 +142,6 @@ public class DaoJournal extends AbstrDao {
 //
 //
 //    }
-
     /**
      * *
      * Recherche une liste de jounaux possédant le nom mentionné. Recherche insensible à la casse caractère
@@ -242,7 +248,6 @@ public class DaoJournal extends AbstrDao {
 //            return tq;
 //        }
 //    }
-
     /**
      * *
      * Retourne une liste de journaux en fonction des paramettre criteria prédéfini dans la dao.
@@ -332,7 +337,6 @@ public class DaoJournal extends AbstrDao {
 //            return null;
 //        }
 //    }
-
     public String getCriteriaLangue() {
         return criteriaLangue;
     }
@@ -356,8 +360,4 @@ public class DaoJournal extends AbstrDao {
     public void setCriteriaTypeJournal(String criteriaTypeJournal) {
         this.criteriaTypeJournal = criteriaTypeJournal;
     }
-
-   
-
-
 }

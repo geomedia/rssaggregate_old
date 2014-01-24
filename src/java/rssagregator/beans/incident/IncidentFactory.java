@@ -111,12 +111,6 @@ public class IncidentFactory<T extends AbstrIncident> {
            
 
             incid.setLogErreur(ExceptionTool.stackTraceToString(tw));
-//            StringWriter sw = new StringWriter();
-//            PrintWriter pw = new PrintWriter(sw);
-//            tw.printStackTrace(pw);
-//             incid.setLogErreur(tw.toString() + "\n " + sw.toString());
-
-
 
         }
     }

@@ -35,6 +35,11 @@ public class StillAlivePOJO {
      * Une liste de tableau de date. chaque ensemble de deux date correspond à un interval de fonctionnement du serveur.
      */
     List<Date[]> alive = new ArrayList<Date[]>();
+    
+    
+    
+    private transient Date debutRupture = null;
+    private transient Date finRupture = null;
 
     /**
      * Constructeur du pojo
@@ -71,11 +76,8 @@ public class StillAlivePOJO {
      * @throws IOException
      */
     public void write(File f) throws IOException {
-
         ObjectMapper mapper = new ObjectMapper();
         mapper.writeValue(f, this);
-
-
     }
 
     /**
@@ -94,7 +96,9 @@ public class StillAlivePOJO {
 
         if (alive != null && alive.size() > 0) {
             Date[] lastDate = alive.get(alive.size() - 1);
-            DateTime dt = new DateTime(lastDate[1]);
+            
+            
+            DateTime dt = new DateTime(lastDate[1]); // Il s'agit de la dernière date d'écriture du fichier
             DateTime dtCurrent = new DateTime();
             //Si la date courante moins 6 minutes est bien avant la derniere date constaté dans le still alive
             if (dtCurrent.minusSeconds(maxNbrSeconde).isBefore(dt)) {
@@ -103,8 +107,14 @@ public class StillAlivePOJO {
                 retour = false;
 
             } else { // Sinon il y a bien eu rupture du service
+                
+                
+                debutRupture = dt.toDate();
+                finRupture = dtCurrent.toDate();
+                
                 //On ajoute un nouveau tableau de date
                 Date[] ndate = new Date[]{new Date(), new Date()};
+                
                 this.alive.add(ndate);
 
                 retour = true;
@@ -132,4 +142,23 @@ public class StillAlivePOJO {
     public void setAlive(List<Date[]> alive) {
         this.alive = alive;
     }
+
+    public Date getDebutRupture() {
+        return debutRupture;
+    }
+
+    public void setDebutRupture(Date debutRupture) {
+        this.debutRupture = debutRupture;
+    }
+
+    public Date getFinRupture() {
+        return finRupture;
+    }
+
+    public void setFinRupture(Date finRupture) {
+        this.finRupture = finRupture;
+    }
+    
+    
+    
 }

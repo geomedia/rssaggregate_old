@@ -34,9 +34,7 @@
             <c:choose>
                 <c:when test="${not empty redirmap}">
 
-                    <p>youpi ${askurl}</p>
-                    <p>lala 
-                    ${rootpath}${redirmap['url']}</p>
+
                     <script type="text/JavaScript">
                         <!--
                         setTimeout("location.href = '${rootpath}${redirmap['url']}';",3000);
@@ -50,7 +48,9 @@
 
                     <h1>Vous devez vous identifier !</h1>
                     <p>
-                        Pour accéder à la page 
+                        L'accès à la page <a href="${askurl}">${askurl}</a> demande une authentification.Veuillez saisir votre email ainsi que votre mot de passe 
+                        
+                                            
                     </p>
 
                     <form method="POST" action="/RSSAgregate/ident/login">

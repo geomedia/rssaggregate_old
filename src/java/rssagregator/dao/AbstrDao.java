@@ -18,6 +18,7 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.apache.poi.util.Beta;
@@ -103,6 +104,7 @@ public abstract class AbstrDao<T> {
 
 
         CriteriaQuery cq = cb.createQuery(classAssocie);
+        cq.distinct(true);
         Root root = cq.from(classAssocie);
         if (criteriaSearchFilters != null && !criteriaSearchFilters.getFilters().isEmpty()) {
 
@@ -139,6 +141,9 @@ public abstract class AbstrDao<T> {
                             // Si le champs concerné dan la classe métier est une liste, alors on va effectuer une jointure
                             if (List.class.isAssignableFrom(c)) {
                                 Join joinFlux = root.join(searchFilter.getField());
+//                                root.fetch(searchFilter.getField());
+                            
+                                
                                 List lf = (List) searchFilter.getData();
                                 listWhere.add(joinFlux.in(lf));
                             }
@@ -208,7 +213,9 @@ public abstract class AbstrDao<T> {
         }
 
         if (count) {
+//              cq.distinct(true);
             cq.select(cb.count(root));
+          
             TypedQuery tq = em.createQuery(cq);
             return tq;
         } else {
@@ -241,12 +248,14 @@ public abstract class AbstrDao<T> {
      */
     public List<T> findCriteria() {
         TypedQuery<T> tq = gestionCriteria(false);
+       
 
         if (criteriaSearchFilters.criteriaStartRow != null && criteriaSearchFilters.criteriaRow != null) {
             tq.setMaxResults(criteriaSearchFilters.criteriaRow);
             tq.setFirstResult(criteriaSearchFilters.criteriaStartRow);
         } else {
         }
+        
         List<T> listResu = tq.getResultList();
 
         return listResu;

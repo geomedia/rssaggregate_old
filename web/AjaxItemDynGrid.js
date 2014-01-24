@@ -4,32 +4,247 @@
  */
 
 //Lors du click sur un bouton de la pagination il faut modifier le paramettre du champ caché en fonction du bouton cliqué, ensuite, on lance la requete
-function paginsubmit(bt) {
+//function paginsubmit(bt) {
+//
+//    // On supprimer la liste 1 des journaux
+//    $('#firstResult').val(bt.value);
+//
+//}
 
-    // On supprimer la liste 1 des journaux
-    $('#firstResult').val(bt.value);
 
-    $('#afin').click();
-//            $('#pagina').submit();
+
+/***
+ *  Utilisé par JQgrid pour formater le champ titre de l'item
+ * @param {type} cellvalue
+ * @param {type} options
+ * @param {type} rowObjcet
+ * @param {type} l4
+ * @param {type} l5
+ * @returns {String}
+ */
+function myLinkFormatter(cellvalue, options, rowObjcet, l4, l5) {
+    return '<a href = "/RSSAgregate/item/read?id=' + rowObjcet[0] + '">' + rowObjcet[1] + '</a>';
+}
+
+
+/***
+ * Utilisé par JQgrid pour formater le champ flux de l'item
+ * @param {type} cellvalue
+ * @param {type} options
+ * @param {type} rowObjcet
+ * @param {type} l4
+ * @returns {String}
+ */
+function  fluxFormatter(cellvalue, options, rowObjcet, l4) {
+    pp = "";
+    for (i = 0; i < cellvalue.length; i++) {
+        pp += "<div class=\"boxelement\">" + cellvalue[i]['val'] + "</div>  ";
+
+    }
+    return pp;
 }
 
 
 
+/***
+ * Supprimer les balise html coté utilisateur
+ * @param {type} cellvalue
+ * @param {type} options
+ * @param {type} rowObjcet
+ * @param {type} l4
+ * @returns {@exp;@call;$@call;text}
+ */
+function descFormatter(cellvalue, options, rowObjcet, l4) {
+    var d = document;
+    var odv = d.createElement("div");
+    $(odv).append(cellvalue);
+    return $(odv).text();
+}
+
+function  dateFormatter(cellvalue, options, rowObjcet, l4) {
+
+    var datePub = $.datepicker.formatDate('yy-mm-dd', new Date(cellvalue));
+    return datePub;
+}
+
+
+
+;
+
 
 $(document).ready(function() {
-    var i;
-    var $btAfin = $('#afin');
-    var $resudiv = $('#resudiv');
 
-// Lors d'un click sur le boutton affin
-    $btAfin.on('click', function truc2() {
+    // Au démarrage on définit date 1 et 2 
+    $('#date1').val("2000-01-01");
 
+    var datePub = $.datepicker.formatDate('yy-mm-dd', new Date(new Date())); // Il s'agit de la date du jour
+    $('#date2').val(datePub);
+
+
+
+    /***
+     * Gestion du click sur le boutton reset pour réinitialiser la selection de l'utilisateur
+     */
+    $('#reset').on('click', function() {
+        $('#fluxSelection2').empty();
+        // Au démarrage on définit date 1 et 2 
+        $('#date1').val("2000-01-01");
+
+        var datePub = $.datepicker.formatDate('yy-mm-dd', new Date(new Date())); // Il s'agit de la date du jour
+        $('#date2').val(datePub);
+
+        $('#afin').click()
+    });
+
+
+
+    /***
+     * Affichage des données brutes d'une items et mise a jour des éléments html. La requête est soumise avec ajax
+     */
+    $('#donneeBrutes').on('change', function truc3() {
+
+        // récupération de l'id
+
+        id = $('#donneeBrutes').val();
+
+        $.ajax({
+            url: "/RSSAgregate/item/donneesbrutes", // le nom du fichier indiqué dans le formulaire
+            type: "POST", // la méthode indiquée dans le formulaire (get ou post)
+            data: 'id=' + id, // je sérialise les données (voir plus loin), ici les $_POST
+            dataType: 'json',
+            success: function(html) { // je récupère la réponse du fichier PHP
+                $('#divDonneeBrutes').empty();
+
+                var datePub = $.datepicker.formatDate('MM dd, yy', new Date(html['datePub'] * 1000));
+                var dateReq = $.datepicker.formatDate('MM dd, yy', new Date(html['dateRecup'] * 1000));
+
+                $('#divDonneeBrutes').append("<p>titre :  " + html['titre'] + "</p>")
+                $('#divDonneeBrutes').append("<p id=\"datePub\">Date publication :  " + datePub + "</p>")
+                $('#divDonneeBrutes').append("<p>Date récupération :  " + dateReq + "</p>")
+                $('#divDonneeBrutes').append("<p>guid :  " + html['guid'] + "</p>")
+                $('#divDonneeBrutes').append("<p>Lien :  " + html['link'] + "</p>")
+
+                $('#QComment').text(html['description']);
+                $('#divDonneeBrutes').append($('<code id=\"co\"> </code>'));
+                $('#co').text(html['description']);
+
+
+            }
+        });
+
+    });
+
+
+
+    $("#list").jqGrid({
+        loadonce: false,
+        url: rootpath + "item/list?vue=grid",
+        datatype: "json",
+        mtype: "GET",
+        colNames: ["ID", "titre", "description", "flux", "date"],
+        colModel: [
+            {name: "ID", width: 55, hidden: true},
+            {name: "titre", width: 90, formatter: myLinkFormatter, searchoptions: {sopt: ['cn', 'eq']}},
+            {name: "description", index: 'description', key: true, formatter: descFormatter, search: true, width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
+            {name: "flux", index: 'flux', key: true, search: true, width: 80, formatter: fluxFormatter, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
+            {name: "date répub", formatter: dateFormatter}
+
+
+
+            //                            {name: "pays", width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
+            //                            {name: "typeJournal", width: 80, align: "right", stype: 'select', editoptions: {value: {'': 'tous', 'autre': 'autre', 'quotidien': 'quotidien'}}},
+            //                            {name: "urlAccueil", width: 150, sortable: true, searchoptions: {sopt: ['cn', 'eq']}}
+        ],
+        pager: '#pager',
+        rowNum: 50,
+        rowList: [50, 100, 200],
+        sortname: "invid",
+        sortorder: "desc",
+        viewrecords: true,
+        gridview: true,
+        autoencode: true,
+        caption: "Recherche parmis les journaux",
+        sortable: true,
+        sorttype: 'text',
+        autowidth: true,
+        exptype: "csvstring",
+        root: "grid",
+        ident: "\t",
+        height: 500,
+        search: true,
+        //                        search: {
+        //                            modal: true,
+        //                            Find: 'txt recherche',
+        //                            multipleSearch: true,
+        //                            sFilter: 'lalalalaa'
+        //                        },
+        multipleSearch: true,
+        postData: {
+            filters: {groupOp: "AND", rules: [/*{field: "titre", op: "gt", data: "truc"}, {field: "nom", op: "lt", data: "ss"}*/]}
+        }
+
+    });
+
+    $("#list").jqGrid('navGrid', '#pager', {add: false, edit: false, del: false, search: true, refresh: true},
+    {}, {}, {}, {multipleSearch: true, multipleGroup: true, showQuery: true});
+
+    optionsSearch = {
+        multipleSearch: true, multipleGroup: true, showQuery: true
+    };
+
+
+    jQuery("#list").navGrid('#pager', {add: false, edit: false, del: false, search: true, refresh: true}, {}, {}, {}, optionsSearch).navButtonAdd('#pager',
+            {
+                caption: "'<strong style=\"font-weight: bolder;color: red;\">Export CSV</strong>",
+                buttonicon: "ui-icon-add",
+                onClickButton: function() {
+                    html = confirm('Voulez-vous supprimer le code HTML des items lors de l\'export');
+                    escape = confirm('utiliser le \\ comme caractère d\'échapement');
+                    
+                    urlReq = rootpath + 'item/list?vue=csv';
+                    if(escape){
+                        urlReq+='&escape=true';
+                    }
+                    if(html){
+                        urlReq += '&html=true';
+                    }
+                      $("#list").jqGrid('excelExport', {tag: 'csv', url: urlReq});
+
+//                    if(html===true){
+//                         $("#list").jqGrid('excelExport', {tag: 'csv', url: urlReq});
+//                    }
+//                    else{
+//                         $("#list").jqGrid('excelExport', {tag: 'csv', url: rootpath + 'item/list?vue=csv&html=false'});
+//                    }
+                    opt = {exptype: "jsonstring"};
+                   
+                },
+                position: "last"
+            });
+
+    jQuery("#list").navGrid('#pager', {add: false, edit: false, del: false, search: true, refresh: true}, {}, {}, {}, optionsSearch).navButtonAdd('#pager',
+            {
+                caption: "'<strong style=\"font-weight: bolder;color: red;\">Export XLS</strong>",
+                buttonicon: "ui-icon-add",
+                onClickButton: function() {
+                    opt = {exptype: "jsonstring"};
+                    $("#list").jqGrid('excelExport', {tag: 'csv', url: rootpath + 'item/list?vue=xls'});
+                },
+                position: "last"
+            });
+
+
+
+
+    /***
+     * Lors du click sur le bouton permettant d'affiner la recherche
+     */
+    $('#afin').on('click', function rechercheItem() {
         // Récupération des paramettre de la requete
-        var $fluxSelection2 = $('#fluxSelection2');
+//        var $fluxSelection2 = $('#fluxSelection2');
         options = $('#fluxSelection2 li');
 
         //on force la sélection dans la liste 2 afin de pouvoir utiliser la fonction val() sur ce composant html
-
 
         idFlux = {
             field: "listFlux",
@@ -47,18 +262,18 @@ $(document).ready(function() {
         }
 //        idFlux['data'].push(strId);
 
-        $resudiv.empty(); // on vide la liste des départements
+        $('#resudiv').empty(); // on vide la liste des départements
 
         //Récupération des paramettres dans le formulaire, il seront utilisé plus bas dans la requête ajax
         $itPrPage = $('#itPrPage');
         $firstResult = $('#firstResult');
         $order = $('#order');
 
-
-
         // Récupération des flux sélectionne
         champSpe = []; // Variable permettant de récupérer les champs spéciaux
-        champSpe.push(idFlux);
+        if (idFlux['data'].length > 0) {
+            champSpe.push(idFlux);
+        }
 
 
         //Gestion des date
@@ -77,7 +292,6 @@ $(document).ready(function() {
         };
         champSpe.push(d2);
         champSpe.push(d1);
-//            param = param.substr(1, param.length);
 
         //-----------------------------------------------------------------
 //              CONSTRUCTION DU FILTRE POUR Recharger la GRID
@@ -91,133 +305,7 @@ $(document).ready(function() {
                 };
 
         $("#list").jqGrid('setGridParam', {data: [], postData: {filters: JSON.stringify(filters)}});
-//        $("#list").jqGrid('setGridParam', {data: [], postData: {filters: ''}});
         $("#list").jqGrid().trigger("reloadGrid");
 
-
-//-----------------------------------------------------------------
-//                  ENVOIE DE LA REQUETE EN AJAX
-//-----------------------------------------------------------------
-//        $.ajax({
-//            url: 'item/list?vue=jsondesc',
-//            data: param + '&firstResult=' + $firstResult.val() + '&itPrPage=' + $itPrPage.val() + '&order=' + $order.val() + "&date1=" + $date1.val() + '&date2=' + $date2.val(), // on envoie $_GET['id_region']
-//            dataType: 'json',
-//            success: function(jsonentre) {
-//
-//                var json = jsonentre['items'];
-//                var i;
-//                var j;
-//                // réécriture du 
-//                for (i = 0; i < json.length; i++) {
-//                    var $str = "";
-//                    $str += '<li class="item"><a href="item/read?id=' + json[i]['id'] + '">' + json[i]['titre'].trim() + '</a>';
-////                        $resudiv.append('<li class="item"><a href="item/read?id=' + json[i]['id'] + '">' + json[i]['titre'].trim() + '</a>');
-//                    var $tabflux = json[i]['flux'];
-//                    for (j = 0; j < $tabflux.length; j++) {
-//                        $str += $tabflux[j] + ' ; ';
-////                            $resudiv.append($tabflux[j] + ' ; ');
-//                    }
-//
-////                        $cont = json[i]['desc'];
-////                        
-////                        alert(json[i]['desc']);
-//
-//                    var p = '<p>' + json[i]['desc'] + '<p>';
-//                    var $p = $(p).text();
-//                    $str += '<p>' + $p + '</p>';
-//
-//                    $str += '</li>';
-////                        alert((json[i]['desc']));
-////                        $resudiv.append('<p>' + json[i]['desc'] + '</p>');
-////                        $resudiv.append('</li>');
-//
-//                    $resudiv.append($str);
-//
-//                }
-//                $('p.descP').each(function(r) {
-////                        $(('p.descP')[r]).replaceWith("d");
-////                        alert($($('p.descP')[r]).text());
-//                });
-//
-//                // Il faut redessiner les boutton 
-//                $('#btPaginDiv').empty();
-//                var $nbitem = jsonentre['nbitem'];
-//                var $itPrPage = parseInt($('#itPrPage').val())
-//                var $firsResult = jsonentre['firsResult'];
-//
-//                var i;
-//                var $debut;
-//                if (($firsResult - 5 * $itPrPage) < 0) {
-//                    $debut = 0;
-//                }
-//                else {
-//                    $debut = $firsResult - 5 * $itPrPage;
-//                }
-//
-//                var fin;
-//                if (($firsResult + 10 * $itPrPage) > $nbitem) {
-//                    fin = $nbitem;
-//                }
-//                else {
-//                    fin = $firsResult + 10 * $itPrPage;
-//                }
-//
-//                for (i = $debut; i < fin; i = i + $itPrPage) {
-//                    $('#btPaginDiv').append('<button class="btPagin" type="button" name="btPagin" value="' + i + '" onclick="paginsubmit(this)">' + i + ' - ' + (i + $itPrPage) + '</button>')
-//                }
-//                $('#btPaginDiv').append('Nombre de résultat au total : ' + $nbitem)
-//
-//
-//                //On colorise le button courant
-//                var $bts = $('button.btPagin').each(function truc(bt) {
-//                    if (this.value == $firsResult) {
-//                        this.setAttribute('class', 'btPaginOn');
-//
-//                    }
-//                });
-//
-//            }
-//        });
     });
-
-//    }
-//    )
-
-
-
-    $('#donneeBrutes').on('change', function truc3() {
-
-        // récupération de l'id
-
-        id = $('#donneeBrutes').val();
-
-        $.ajax({
-            url: "/RSSAgregate/item/donneesbrutes", // le nom du fichier indiqué dans le formulaire
-            type: "POST", // la méthode indiquée dans le formulaire (get ou post)
-            data: 'id=' + id, // je sérialise les données (voir plus loin), ici les $_POST
-            dataType: 'json',
-            success: function(html) { // je récupère la réponse du fichier PHP
-                $('#divDonneeBrutes').empty();
-
-var datePub = $.datepicker.formatDate('MM dd, yy', new Date(html['datePub'] * 1000));
-var dateReq = $.datepicker.formatDate('MM dd, yy', new Date(html['dateRecup'] * 1000));
-
-
-
-                $('#divDonneeBrutes').append("<p>titre :  " + html['titre'] + "</p>")
-                $('#divDonneeBrutes').append("<p id=\"datePub\">Date publication :  " + datePub + "</p>")
-                $('#divDonneeBrutes').append("<p>Date récupération :  " + dateReq + "</p>")
-                $('#divDonneeBrutes').append("<p>guid :  " + html['guid'] + "</p>")
-                $('#divDonneeBrutes').append("<p>Lien :  " + html['link'] + "</p>")
-
-                $('#QComment').text(html['description']);
-                $('#divDonneeBrutes').append($('<code id=\"co\"> </code>'));
-                $('#co').text(html['description']);
-                
-
-            }
-        });
-
-    });
-
 });
