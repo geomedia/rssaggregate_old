@@ -124,10 +124,12 @@ public class ServiceXMLTool {
             if (ElementPool != null) {
                 Attribute attNbThread = ElementPool.getAttribute("nbThread");
                 Integer nbThread = new Integer(attNbThread.getValue());
+                
+                System.out.println("------------> NB Thread " + nbThread);
 
                 Attribute attMethodeInstanciation = ElementPool.getAttribute("methodeInstanciation");
                 Method methodFactory = Executors.class.getMethod(attMethodeInstanciation.getValue(), int.class);
-                ScheduledExecutorService es = (ScheduledExecutorService) methodFactory.invoke(null, nbThread);
+                ScheduledExecutorService es = (ScheduledExecutorService) methodFactory.invoke(null, nbThread.intValue());
                 service.setExecutorService(es);
             }
 

@@ -43,7 +43,6 @@ import rssagregator.services.tache.TacheRaffiner;
  * @author clem
  */
 public class ServiceCollecteur extends ServiceImpl {
-
     org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(ServiceCollecteur.class);
 //    ListeFluxCollecte fluxCollecte; On le récupère maintenant directement depuis le singleton de collecte
     /**
@@ -162,10 +161,10 @@ public class ServiceCollecteur extends ServiceImpl {
         if (j.getAutoUpdateFlux()) { // Si le journal est configuré pour autodécouvrir ses flux.
 
 
-            Entry<AbstrTacheSchedule, Future> entry = retriveTaskJournalDiscover(j);
+            AbstrTacheSchedule entry = retriveTaskJournalDiscover(j);
             if (entry != null) {
                 try {
-                    entry.getValue().cancel(true);
+                    entry.getFuture().cancel(true);
                 } catch (Exception e) {
                     logger.debug("annulation de la tache de découverte des flux " + e);
                 }
@@ -194,18 +193,19 @@ public class ServiceCollecteur extends ServiceImpl {
 
         // On annule l atache
 
-        Entry<AbstrTacheSchedule, Future> entry = retriveTaskJournalDiscover(j);
+        AbstrTacheSchedule entry = retriveTaskJournalDiscover(j);
         if (entry != null) {
             // Annulation de la tache
             try {
-                entry.getValue().cancel(true);
+                entry.getFuture().cancel(true);
             } catch (Exception e) {
                 logger.debug("annulation", e);
             }
 
             // Suppression de la tache a l'intérieur de la liste des tache du service
-            synchronized (mapTache) {
-                mapTache.remove(entry.getKey());
+            synchronized (tacheGereeParLeService) {
+                tacheGereeParLeService.remove(entry);
+//                mapTache.remove(entry.getKey());
             }
 
 
@@ -307,6 +307,9 @@ public class ServiceCollecteur extends ServiceImpl {
 //        }
 //        return null;
 //    }
+    
+    
+    
     /**
      * **
      * Retrouve la tache de découverte de flux associé au journal envoyé en argument parmis la map des tâches propres au
@@ -316,7 +319,7 @@ public class ServiceCollecteur extends ServiceImpl {
      * @return Une entry comprenant le callable ainsi que le future
      * @throws IncompleteBeanExeption Si le journal envoyé en argumetn n'a pas d'id
      */
-    public Entry<AbstrTacheSchedule, Future> retriveTaskJournalDiscover(Journal j) throws IncompleteBeanExeption {
+    public AbstrTacheSchedule retriveTaskJournalDiscover(Journal j) throws IncompleteBeanExeption {
 
         if (j == null) {
             throw new NullPointerException("Le journal est null");
@@ -325,21 +328,18 @@ public class ServiceCollecteur extends ServiceImpl {
             throw new IncompleteBeanExeption("le journal envoyé n'a pas d'id");
         }
 
-
-        for (Entry<AbstrTacheSchedule, Future> entry : mapTache.entrySet()) {
-            AbstrTacheSchedule abstrTacheSchedule = entry.getKey();
-            Future future = entry.getValue();
+        for (int i = 0; i < tacheGereeParLeService.size(); i++) {
+            AbstrTacheSchedule abstrTacheSchedule = tacheGereeParLeService.get(i);
+//            
+            Future future = abstrTacheSchedule.getFuture();
 
             if (abstrTacheSchedule.getClass().equals(TacheDecouverteAjoutFlux.class)) {
                 TacheDecouverteAjoutFlux cast = (TacheDecouverteAjoutFlux) abstrTacheSchedule;
                 if (cast.getJournal().getID().equals(j.getID())) {
-                    return entry;
+                    return abstrTacheSchedule;
                 }
             }
-
         }
-
-
         return null;
     }
 

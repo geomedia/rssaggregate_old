@@ -53,12 +53,17 @@ public class TacheProducteurServiceCollecte extends TacheProducteur implements R
 //                    System.out.println("--");
                     Flux flux = it.next();
 
-                    Map<AbstrTacheSchedule, Future> map = service.getMapTache();
-
-                    // On cherche si le flux est déja dans la map
-                    for (Map.Entry<AbstrTacheSchedule, Future> entry : map.entrySet()) {
-                        AbstrTacheSchedule abstrTacheSchedule = entry.getKey();
-                        Future future = entry.getValue();
+//                    Map<AbstrTacheSchedule, Future> map = service.getMapTache();
+                    List<AbstrTacheSchedule> taches = service.tacheGereeParLeService;
+                    for (int i = 0; i < taches.size(); i++) {
+                        AbstrTacheSchedule abstrTacheSchedule = taches.get(i);
+                        
+//                    }
+//
+//                    // On cherche si le flux est déja dans la map
+//                    for (Map.Entry<AbstrTacheSchedule, Future> entry : map.entrySet()) {
+//                        AbstrTacheSchedule abstrTacheSchedule = entry.getKey();
+                        Future future = abstrTacheSchedule.getFuture();
 
                         if (abstrTacheSchedule.getClass().equals(TacheRecupCallable.class)) {
                             TacheRecupCallable castTache = (TacheRecupCallable) abstrTacheSchedule;

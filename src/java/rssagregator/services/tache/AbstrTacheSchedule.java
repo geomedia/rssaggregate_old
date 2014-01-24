@@ -10,12 +10,10 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Observable;
-import java.util.Observer;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
-import java.util.logging.Level;
 import javax.persistence.EntityManager;
 import org.apache.log4j.Logger;
 import org.apache.poi.util.Beta;
@@ -26,26 +24,44 @@ import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 import rssagregator.beans.exception.ActionNonEffectuee;
 import rssagregator.beans.incident.ObjectIncompatible;
-import rssagregator.dao.DAOFactory;
 import rssagregator.services.AbstrService;
 import rssagregator.services.SemaphoreCentre;
+import rssagregator.services.TacheConsomateur;
 import rssagregator.utils.ExceptionTool;
 
 /**
- * Toutes les tâches schedulées de l'application doivent hériter de cette classe abstraite
+ * <p>Toutes les tâches de l'application doivent hériter de cette classe abstraite. Les tache du projet GEOmedia sont
+ * programmé sous forme de Callable. Une tache doit constitué une action délimité. Il sagit par exemple de collecter un
+ * flux {@link TacheRecupCallable}, de découvrir des flux RSS {@link TacheDecouverteAjoutFlux}. Chaque tache peut ou non
+ * être schedulée. La plupart du temps une tache correspond à une transaction SQL. le début de traitement initialisera
+ * la transaction et la fin effectue un commit ou roolback en fonction du déroulement de la tache. Cette gestion de
+ * transaction permet aussi aux taches de verouiiller des ressources en utilisant les verrou SQL et leur implémentation
+ * en JPA.</p>
+ * <p>Les taches sont enregistrées aupres de service </p>
  *
+ *
+ * @see AbstrService
+ * @see TacheImpl
  * @author clem
  */
 public abstract class AbstrTacheSchedule<T> extends Observable implements Callable<T> {
 
     /**
      * *
-     * Détermine si l'instance de la tache doit avoir ou non un comportment périodique
+     * Détermine si l'instance de la tache doit avoir ou non un comportement périodique
      */
     Boolean schedule;
     /**
      * *
-     * 1 = temps fixe 2 : tous les jour à 3 : un jour par semaine
+     * Si la tache est schedulé, cette variable permet de déterminer la facon de géré son relancement
+     * <ul>
+     * <li>1 = temps fixe </li>
+     * <li>2 : tous les jour à </li>
+     * <li>3 : un jour par semaine</li>
+     * </ul>
+     *
+     * @see AbstrTacheSchedule#heureSchedule
+     * @see AbstrTacheSchedule#timeSchedule
      */
     Byte typeSchedule;
     /**
@@ -105,8 +121,8 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
     AbstrService service;
     /**
      * *
-     * Temps maximal d'execution de la tache en seconde. Le service va interrompre la tache si il est dépassé voit la
-     * tache {@link CalableAntiDeadBlock} . Il faut prévoir 5 x ou plus le temps normal.
+     * Temps maximal d'execution de la tache en seconde. Le service va interrompre la tache si il est dépassé. Voir le
+     * mécanisme prévu dans le consommateur de tache {@link TacheConsomateur}. plus le temps normal.
      */
     protected Short maxExecuteTime = 60;
     /**
@@ -154,18 +170,6 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
         nbrTentative = 0;
     }
 
-//    /**
-//     * *
-//     * Par default le bollean schedule est à false;
-//     *
-//     * @param executorService
-//     */
-//    protected AbstrTacheSchedule(Observer s) {
-//        this.addObserver(s);
-//        this.schedule = false;
-//        exeption = null;
-//        nbrTentative = 0;
-//    }
     /**
      * *
      * Détermine si l'instance de la tache doit avoir ou non un comportment périodique
@@ -381,23 +385,46 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
         this.lasExecution = lasExecution;
     }
 
+    /**
+     * *
+     * Le corps du traitement de la tâche. Doit être redéclaré dans chaque tâche. C'est la seule méthode qu'il faut
+     * obligatoirement redéclarer pour construire une tache
+     *
+     * @throws InterruptedException
+     * @throws Exception
+     */
     protected abstract void callCorps() throws Exception;
 
     /**
      * *
-     * Le bloc exécuté a la fin de l'appel de la tache. Il faut notifier le service. Libérer les ressources, Retourner
-     * la tache elle meme.
+     * Le bloc exécuté a la fin de l'appel de la tache. Libérer les ressources en effectuant le commit si il y a une
+     * transaction. Peut aussi être utilisé pour fermer un Stream... la tache elle meme.
      *
      * @return
      */
     protected abstract T callFinalyse();
 
+    /**
+     * *
+     * Méthode contenant l'ensemble de la procédure de traitement de la tâche. Elle est déclanché par {@link #call() }.
+     * En réexécutant cette méthode il est possible de relancer la tache en la laissant toujorus dans la même thread.
+     * (voir dans les services).
+     *
+     * @return
+     */
     public abstract T executeProcessus() throws InterruptedException;
 
+    /**
+     * @see AbstrTacheSchedule#maxExecuteTime
+     * @return
+     */
     public Short getMaxExecuteTime() {
         return maxExecuteTime;
     }
 
+    /**
+     * @see AbstrTacheSchedule#maxExecuteTime
+     */
     public void setMaxExecuteTime(Short maxExecuteTime) {
         this.maxExecuteTime = maxExecuteTime;
     }
@@ -515,8 +542,8 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
 
         synchronized (SemaphoreCentre.getinstance()) {  // On monopolise le semset afin notamment qu'il soit impossible d'y passer le menage en même temps
             sem = returnSemSet(); // On obtient la dernière version du sem set.
-            
-            if(sem.isEmpty()){
+
+            if (sem.isEmpty()) {
                 return true; // Si aucune semaphore ne devait être acuise poru cette tache on retourne true. En effet les condition requise au lancement sont déjà remplie
             }
 
@@ -537,7 +564,7 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
                     return false; // On retourne false
                 }
             }
-                return true; // Si on a pu acquerir toute les semaphore on retourne true
+            return true; // Si on a pu acquerir toute les semaphore on retourne true
         }
     }
 
@@ -599,6 +626,30 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
         return dur.getStandardSeconds();
     }
 
+    /**
+     * *
+     * Différence entre la now et la date de prochaine execution si la tache n'est pas en cours d'execution
+     *
+     * @return
+     */
+    public long returnRetard() {
+
+        if (!this.running) {
+            DateTime dtNow = new DateTime();
+            DateTime dtNext = new DateTime(nextExecution);
+            Duration dur = new Duration(dtNow, dtNext);
+
+            if (dur.getStandardSeconds() < 0) {
+                Long retard = dur.getStandardSeconds();
+                retard = retard * -1;
+                return retard;
+            }
+            return 0;
+        }
+        return 0;
+
+    }
+
     public int getLogErrorLevel() {
         return logErrorLevel;
     }
@@ -622,7 +673,12 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
 
         if (em != null) {
             if (em.isOpen()) {
-                em.close();
+                try {
+                    em.close();
+                } catch (Exception e) {
+                    logger.error("Erreur a la fermeture de l'EM", e);
+                }
+
             }
         }
         em = null; // supprime la référence à l'em
@@ -687,10 +743,18 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
     public void initEmAndLockRessources() throws Exception {
     }
 
+    /***
+     * @see AbstrTacheSchedule#future
+     * @return 
+     */
     public Future getFuture() {
         return future;
     }
 
+        /***
+     * @see AbstrTacheSchedule#future
+     * @return 
+     */
     public void setFuture(Future future) {
         this.future = future;
     }

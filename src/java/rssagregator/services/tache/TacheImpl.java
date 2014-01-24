@@ -6,12 +6,12 @@ package rssagregator.services.tache;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Observer;
 import javax.persistence.LockModeType;
 import org.apache.log4j.Priority;
 import org.eclipse.persistence.exceptions.EntityManagerSetupException;
 import rssagregator.beans.incident.Incidable;
 import rssagregator.dao.DAOFactory;
+import rssagregator.services.SemaphoreCentre;
 import rssagregator.utils.ThreadUtils;
 
 /**
@@ -76,7 +76,6 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
             if (em.isJoinedToTransaction()) {
 
                 // On attend quelque seconde et on roolback
-
                 int i = 0;
                 while (i < 10) {
                     if (!em.getTransaction().isActive()) { // Si la transaction n'est plus active on quite
@@ -108,13 +107,7 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
         em.getTransaction().begin();
     }
 
-    /**
-     * *
-     * Le corps du traitement de la tâche. Doit être redéclaré dans chaque tâche
-     *
-     * @throws InterruptedException
-     * @throws Exception
-     */
+
     @Override
     protected void callCorps() throws InterruptedException, Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -177,14 +170,7 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
         }
     }
 
-    /**
-     * *
-     * Méthode contenant l'ensemble de la procédure de traitement de la tâche. Elle est déclanché par {@link #call() }.
-     * En réexécutant cette méthode il est possible de relancer la tache en la laissant toujorus dans la même thread.
-     * (voir dans les services).
-     *
-     * @return
-     */
+
     @Override
     public T executeProcessus() throws InterruptedException {
         nbrTentative++;
@@ -219,6 +205,10 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
         try {
             T resu = null;
             boolean continuer = true;
+            
+            //------------------------------------------------------
+            //          Execution du Traitement
+            //------------------------------------------------------
             //On execute le processus de traitement autant juqu'a ce qu'on répasse le nombre max ou que la tache réussisse
             while (nbrTentative < nbMaxReExecution && continuer && !annuler) {
                 resu = executeProcessus();
@@ -249,7 +239,6 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
 
         } catch (InterruptedException e) {
             logger.debug("Interruption de " + this);
-//            annuler = true;
             throw e;
         } catch (Exception e) {
             logger.error("Exception annormale tache " + this, e);

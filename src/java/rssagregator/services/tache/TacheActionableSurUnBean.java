@@ -5,7 +5,7 @@
 package rssagregator.services.tache;
 
 /**
- * Interface indiquant que le tache s'applique sur beans
+ * Interface indiquant que le tache s'applique sur beans . Pour une Collecte : porte sur une Flux. Retrouver journal porte sur un journal...
  * @author clem
  */
 public interface TacheActionableSurUnBean {
