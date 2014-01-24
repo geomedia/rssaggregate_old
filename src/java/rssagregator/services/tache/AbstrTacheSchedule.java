@@ -504,37 +504,40 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
         }
     }
 
-    /***
-     * Tente d'acquerir toutes les sémaphore sans attendre. Si l'une n'est pas dispo libère ce qui est déjà acquis et retourne false;
-     * @return 
+    /**
+     * *
+     * Tente d'acquerir toutes les sémaphore sans attendre. Si l'une n'est pas dispo libère ce qui est déjà acquis et
+     * retourne false. Sinon on retourne true. Le set semset contient les sem acquise
+     *
+     * @return true si toutes les semaphore ont pu être acquise sans attendre. Sinon false
      */
     public boolean tryAcquireSem() {
 
         synchronized (SemaphoreCentre.getinstance()) {  // On monopolise le semset afin notamment qu'il soit impossible d'y passer le menage en même temps
             sem = returnSemSet(); // On obtient la dernière version du sem set.
-
-            boolean allAquire = true;
-            List<Semaphore> acuireed = new ArrayList<Semaphore>();
             
-            for (Iterator<Semaphore> it = sem.iterator(); it.hasNext();) {
-                  Semaphore sema = it.next();
-                 boolean aq = sema.tryAcquire();
-                 
-                 // Si on a pu acquerir la semaphore
-                 if(aq){
-                    acuireed.add(sema);
-                 }
-                 else{
-                      allAquire = false;
-                      for (int i = 0; i < acuireed.size(); i++) {
-                          //On libère les semaphore déjà acquises
-                         Semaphore semaphore = acuireed.get(i);
-                         semaphore.release();
-                         return false;
-                     }
-                 }
+            if(sem.isEmpty()){
+                return true; // Si aucune semaphore ne devait être acuise poru cette tache on retourne true. En effet les condition requise au lancement sont déjà remplie
             }
-            return false;
+
+            List<Semaphore> acuireed = new ArrayList<Semaphore>();
+
+            for (Iterator<Semaphore> it = sem.iterator(); it.hasNext();) { // Pour chaque semaphore de la map On tente l'aquisition
+                Semaphore sema = it.next();
+                boolean aq = sema.tryAcquire();
+
+                // Si on a pu acquerir la semaphore
+                if (aq) {
+                    acuireed.add(sema);
+                } else {
+                    for (int i = 0; i < acuireed.size(); i++) {   //On libère les semaphore déjà acquises
+                        Semaphore semaphore = acuireed.get(i);
+                        semaphore.release();
+                    }
+                    return false; // On retourne false
+                }
+            }
+                return true; // Si on a pu acquerir toute les semaphore on retourne true
         }
     }
 

@@ -201,14 +201,13 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
                 throw new InterruptedException(); // Si la tache est annulé on emmet une interrupt exeption
             }
 
-        } catch (InterruptedException e) { // Pour une interruption on ne déclanche pas le traitement classique de l'erreur
+        } catch (InterruptedException e) { // Pour une interruption on ne déclanche pas le traitement classique de l'erreur mais on remonte l'erreur qui doit aller directement dans le catch du block call
             logger.debug("Interruption de " + this);
             throw e;
-        } catch (Exception e) { // Si c'est une autre exception on lance la fonction de capture
+        } catch (Exception e) { // Si c'est une autre exception on lance la fonction de capture (qui peut être redéclarée dans les sous classe
             callCatchException(e);
 
         } finally {
-
             return callFinalyse(); // > Appel de callFinalyse qui effectue les commit libère les ressources etc.
         }
     }
@@ -218,7 +217,6 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
         initLancementTache();
 
         try {
-
             T resu = null;
             boolean continuer = true;
             //On execute le processus de traitement autant juqu'a ce qu'on répasse le nombre max ou que la tache réussisse
@@ -226,28 +224,28 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
                 resu = executeProcessus();
                 if (this.exeption == null) { // Si la tache s'est executé correctement, on sort de la boucle, pas de réexecution
                     continuer = false;
-                } else {
+                } else { // Sinon on sleep un peu et on réexecute le block
                     try {
                         Thread.sleep(1000 * nbSleepError);
                     } catch (InterruptedException e) { // Si pendant le sleep annulation on remonte
-//                        annuler = true;
                         throw e;
                     }
                 }
             }
 
-            // Gestion des exeception de la tache si c'est incidable
-            if (Incidable.class.isAssignableFrom(this.getClass())) {
-
+            //-----------------------------------------------------
+            //              Gestion des incidents
+            //-----------------------------------------------------
+        
+            if (Incidable.class.isAssignableFrom(this.getClass())) { // Si la tache est incidable
                 Incidable incidableTask = (Incidable) this;
-                if (this.exeption == null) {
+                if (this.exeption == null) { // Si la tache s'est déroulée correctement on ferme les possibles incidents ouverts
                     incidableTask.fermetureIncident();
-                } else {
+                } else { // Sinon si il y a eu des incidents. On ouvre ou incrémente l'incident courent grace a la méthode gererIncident
                     incidableTask.gererIncident();
                 }
             }
-            ThreadUtils.interruptCheck(); // 
-
+            ThreadUtils.interruptCheck();
 
         } catch (InterruptedException e) {
             logger.debug("Interruption de " + this);

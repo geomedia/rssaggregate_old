@@ -4,6 +4,7 @@
  */
 package rssagregator.services.tache;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -17,6 +18,7 @@ import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.beans.incident.Incidable;
 import rssagregator.beans.incident.IncidentFactory;
+import rssagregator.beans.tool.ComparatorBean;
 import rssagregator.beans.traitement.VisitorHTTP;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DAOIncident;
@@ -70,7 +72,6 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
      */
     @Override
     public synchronized void gererIncident() throws InstantiationException, IllegalAccessException, UnIncidableException, Exception {
-        logger.debug("flux--" + flux + "-- Gestion incident");
         try {
             if (this.exeption != null) { // Avant toute chose on s'assure qu'il y a bien eu une Exception pour la tâche
                 CollecteIncident collecteIncident = (CollecteIncident) incident; // Un simple cast
@@ -229,7 +230,6 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
             throw new CollecteUnactiveFlux("Ce flux doit être activé pour être récolté");
         }
 
-        logger.debug("1");
 
         initialiserTransaction();
 ////         Si le flux appartient a un journal, il faut verrouiller le journal afin d'éviter que plusieurs tache collecte les donnes d'un même journal en meme temps
@@ -242,7 +242,6 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
 
         visitorHTTP = new VisitorHTTP();
         visitorHTTP.visit(flux);
-        logger.debug("2");
 
         ThreadUtils.interruptCheck(); // On lance l'execution si la thread n'est pas déjà interrompu
         nouvellesItems = visitorHTTP.getListItem();
@@ -251,10 +250,15 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
 
         //On enregistre chaque item trouvé
         ServiceCollecteur collecteur = ServiceCollecteur.getInstance();
+        
+        
+        //Pour éviter les dead lock il faut respecter un ordre dans la facon de poser les verrour (c'est le collecteur qui pose le verrour). On va simplement trier les items par ID
+        
+       
+        Collections.sort(nouvellesItems, new ComparatorBean());
+        
         for (int i = 0; i < nouvellesItems.size(); i++) {
             Item item = nouvellesItems.get(i);
-            logger.debug("ajout");
-
             collecteur.ajouterItemAuFlux(flux, item, em, false, visitorHTTP); // Il faut préciser au collecteur l'em qu'il doit utiliser, on lui donne celui qui block actuellement le flux. Les enregistrements ne sont alors pas encore commités
  
         }
@@ -346,9 +350,8 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
     public Set<Semaphore> returnSemSet() {
         sem.clear(); // On vide la map pour le reconstruire car les semaphore on pu changer
         if (this.flux != null && this.flux.getJournalLie() != null) {
-
-
             Semaphore s;
+            
             try {
                 s = SemaphoreCentre.getinstance().returnSemaphoreForRessource(this.flux.getJournalLie());
                 sem.add(s);

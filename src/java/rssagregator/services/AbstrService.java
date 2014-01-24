@@ -17,7 +17,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.logging.Level;
 import rssagregator.beans.exception.ArgumentIncorrect;
 import rssagregator.services.tache.TacheActionableSurUnBean;
 import rssagregator.utils.BeansUtils;
@@ -30,6 +29,10 @@ import rssagregator.utils.ExceptionTool;
 public abstract class AbstrService implements Observer {
 
     org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
+    
+    /***
+     *  Le pool d'execution central ou sont placé les taches
+     */
     protected ScheduledExecutorService executorService;
     /**
      * *
@@ -43,13 +46,24 @@ public abstract class AbstrService implements Observer {
      * Permet de retrouver les tache et leur future. Cette map est observer pas la tâche {@link CalableAntiDeadBlock}
      */
     protected Map<AbstrTacheSchedule, Future> mapTache = new HashMap<AbstrTacheSchedule, Future>();
+    
+    
+    protected List<AbstrTacheSchedule> tacheGereeParLeService = new ArrayList<AbstrTacheSchedule>();
+    
+    
+    
     /**
      * *
      * Une thread qui tourne en boucle pour vérifier les taches contenues dans {@link #mapTache}. Permet d'interrompre
      * des tache pou réviter les deadblock
      */
     CalableAntiDeadBlock antiDeadBlock = new CalableAntiDeadBlock();
-    BlockingQueue<AbstrTacheSchedule> queueTacheALancer = new ArrayBlockingQueue<AbstrTacheSchedule>(999);
+    
+    
+    /***
+     * Les taches qui doivent être lancée sont placée dans cette queue. Elle est vidée par un consomateur de tache
+     */
+    BlockingQueue<AbstrTacheSchedule> queueTacheALancer = new ArrayBlockingQueue<AbstrTacheSchedule>(99999);
     TacheProducteur tacheProducteur = new TacheProducteur(this);
     TacheConsomateur tacheConsomateur = new TacheConsomateur(this);
 
@@ -60,28 +74,8 @@ public abstract class AbstrService implements Observer {
     public AbstrService() {
     }
 
-//    public AbstrService() {
-//        ScheduledExecutorService exe = Executors.newScheduledThreadPool(1);
-//        this.executorService = exe;
-//    }
-    /**
-     * *
-     * Lance toutes les tâches par défaut devant être gérée par le service
-     */
-//    public abstract void instancierTaches();
-    //    @Override
-    //    public void update(Observable o, Object arg){
-    //
-    //    };
-    /**
-     * *
-     * La méthode qui permet à un service de scheduler un callable. Cette méthode doit être redéfinit afin d'intéragir
-     * avec le retour du callable. Elle doit notamment rescheduler le callable en fonction du paramettre delay en
-     * argument
-     *
-     * @param c
-     */
-    //    public abstract void scheduleCallable(Callable<T> c, Long delay);
+
+
     public ScheduledExecutorService getExecutorService() {
         return executorService;
     }

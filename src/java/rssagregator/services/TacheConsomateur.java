@@ -4,6 +4,8 @@
  */
 package rssagregator.services;
 
+import java.awt.print.Book;
+import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -33,29 +35,84 @@ public class TacheConsomateur implements Runnable {
     public void run() {
         try {
             while (run) {
-                synchronized (lock) {
-                    lock.wait(30000); // On attend 30 s, Le consomateur peut aussi être notifié pour se réveiller avant la fin du wait
-                }
-                // Récupération des tache a consommer
-                while (!service.queueTacheALancer.isEmpty()) {
+                boolean allaquire = true;
+                logger.debug("iteration " + this);
 
-                   
-                    AbstrTacheSchedule t = service.queueTacheALancer.take(); // ce n'est pas la bonne
-                    
-                    
-                    // Nouvelle version
-                    
-                   
 
-                    //Ancienne version
-                    
-                    // On place la tache dans le pool d'execution, si elle n'est pas annulée
-                    if (!t.getAnnuler()) {
-                        SoumissionTache soumissionTache = new SoumissionTache();
-                        soumissionTache.tache = t;
-                        es.submit(soumissionTache);
+
+
+
+                // Itération sur chaque tache de la queue
+                for (Iterator<AbstrTacheSchedule> it = service.queueTacheALancer.iterator(); it.hasNext();) {
+                    AbstrTacheSchedule t = it.next();
+
+                    if (t != null) {
+                        boolean semPreconditionAquises = t.tryAcquireSem();
+
+                        if (semPreconditionAquises) { // Si la tache a pu acquerir ses pré condition On la lance
+
+                            SoumissionTache soumissionTache = new SoumissionTache();
+                            soumissionTache.setTache(t);
+                            es.submit(soumissionTache);
+
+
+                            service.queueTacheALancer.remove(t); // Supression de la tache du pool
+                        } else {
+                            allaquire = false;
+                        }
                     }
                 }
+
+
+                if (allaquire) {
+                    synchronized (lock) {
+                        lock.wait(30000); // On attend 30 s, Le consomateur peut aussi être notifié pour se réveiller avant la fin du wait
+                    }
+                } else {
+                    synchronized (lock) {
+                        lock.wait(2000); // Si on n'avait pas pu aquerir toutes les sem, on n'attend pas si longtemps.
+                    }
+                }
+
+
+
+
+//                while (!service.queueTacheALancer.isEmpty()) {
+//
+//                    // Nouvelle version
+//
+//                    AbstrTacheSchedule t = service.queueTacheALancer.peek();
+//
+//                    if (t != null) {
+//                        boolean semPreconditionAquises = t.tryAcquireSem();
+//
+//                        if (semPreconditionAquises) { // Si la tache a pu acquerir ses pré condition
+//
+//                            SoumissionTache soumissionTache = new SoumissionTache();
+//                            soumissionTache.setTache(t);
+//                            es.submit(soumissionTache);
+//
+//                            // Supression de la tache du pool
+//                            service.queueTacheALancer.remove(t);
+//                        }
+//
+//
+//                    }
+//
+//
+////             while (!service.queueTacheALancer.isEmpty()) {
+//
+////                    //Ancienne version
+////                    
+////                    // On place la tache dans le pool d'execution, si elle n'est pas annulée
+////                                        AbstrTacheSchedule t = service.queueTacheALancer.take(); // ce n'est pas la bonne
+////                    
+////                    if (!t.getAnnuler()) {
+////                        SoumissionTache soumissionTache = new SoumissionTache();
+////                        soumissionTache.tache = t;
+////                        es.submit(soumissionTache);
+////                    }
+//                }
             }
 
         } catch (InterruptedException e) {
@@ -99,20 +156,18 @@ public class TacheConsomateur implements Runnable {
         @Override
         public void run() {
             if (tache != null) {
-                
-                
-                try {
-//
-                    // On acquier chacune des semaphore de la tache avant de la placer dans le pool d'execution du service.
-                    tache.acquireSem();
 
+       
+
+                try {
 //                   // Soumission de la tache
                     try {
-                             tache.setFuture(service.submit(tache));                        
+                        tache.setFuture(service.submit(tache));
                     } catch (Exception e) {
+                        logger.debug("Exception lors du lancement " + e);
                         service.queueTacheALancer.put(tache);
                     }
-                    
+
                     Future fut = tache.getFuture();
 
                     // Si il y a un temps maximal d'execution pour la tache, alors on limit. En cas de dépassement la tâche doit être tuées
@@ -127,14 +182,14 @@ public class TacheConsomateur implements Runnable {
                         try {
                             fut.get(10, TimeUnit.MINUTES); // Si une tache n'est pas résolue en 10 minutes, on la détruit
                         } catch (Exception e) {
-                            logger.error("Erreur lors de l'attente du futur de la tache"+e);
+                            logger.error("Erreur lors de l'attente du futur de la tache" + e);
                             fut.cancel(true);
                         }
                     }
 
                     // Libération des sémaphores 
-                   tache.releaseSem();
-                    
+                    tache.releaseSem();
+
 
                 } catch (InterruptedException e) {
                     logger.debug("Interruption de " + this);

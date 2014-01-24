@@ -40,7 +40,7 @@ import rssagregator.utils.ExceptionTool;
 //@Cacheable(value = true)
 //@Cache(type = CacheType.CACHE, coordinationType = CacheCoordinationType.SEND_NEW_OBJECTS_WITH_CHANGES, isolation = CacheIsolationType.SHARED, shared = true)
 @XmlRootElement
-public class Item implements Serializable, Comparable<Item>, ContentRSS {
+public class Item extends Bean implements Serializable, Comparable<Item>, ContentRSS {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -368,6 +368,7 @@ public class Item implements Serializable, Comparable<Item>, ContentRSS {
      * @see #ID
      * @return 
      */
+    @Override
     public Long getID() {
         return ID;
     }
@@ -376,6 +377,7 @@ public class Item implements Serializable, Comparable<Item>, ContentRSS {
      * @see #ID
      * @return 
      */
+    @Override
     public void setID(Long ID) {
         this.ID = ID;
     }
@@ -590,6 +592,11 @@ public class Item implements Serializable, Comparable<Item>, ContentRSS {
 
     public void setItemRaffinee(ItemRaffinee itemRaffinee) {
         this.itemRaffinee = itemRaffinee;
+    }
+
+    @Override
+    public String getReadURL() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
     

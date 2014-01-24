@@ -16,19 +16,16 @@ import rssagregator.utils.ThreadUtils;
  *
  * @author clem
  */
-public class TacheProducteur implements Runnable{
+public class TacheProducteur implements Runnable {
 
     ScheduledExecutorService es = Executors.newSingleThreadScheduledExecutor();
     AbstrService service;
-    
     org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
 
     public TacheProducteur(AbstrService service) {
         this.service = service;
 
     }
-
-   
 
     /**
      * *
@@ -70,18 +67,17 @@ public class TacheProducteur implements Runnable{
     @Override
     public void run() {
         try {
-            while(true){
-                
+            while (true) {
+
                 System.out.println("Tour - " + this);
-                Thread.sleep(3600*1000);
+                Thread.sleep(3600 * 1000);
                 ThreadUtils.interruptCheck();
             }
-            
-            
+
         } catch (InterruptedException e) {
             logger.debug("Interruption de  " + this);
         }
-        
+
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -89,10 +85,11 @@ public class TacheProducteur implements Runnable{
     public String toString() {
         return "TacheProducteur{" + "service=" + service + '}';
     }
-    
-    
-    
 
+    /**
+     * *
+     * Thread chargé simplement de placer la tache dans la queue des taches à lancer du service. 
+     */
     private class Lanceur implements Runnable {
 
         AbstrTacheSchedule tache;
@@ -103,52 +100,22 @@ public class TacheProducteur implements Runnable{
             if (!service.queueTacheALancer.contains(tache)) {
 
                 try {
-                    // Acquisition de la semaphore
-//                    Semaphore sema = null;
-
-
-                    // Certaine tache ne doivent pas être executé en même temps. Exemple typyque la collecte de flux de même journaux. Pour ces tache on va donc obtenir une semaphore
-//                    if (tache.getClass().equals(TacheRecupCallable.class)) {
-//                        TacheRecupCallable cast = (TacheRecupCallable) tache;
-//                        if (cast.getFlux() != null && cast.getFlux().getJournalLie() != null) {
-//                            Journal j = cast.getFlux().getJournalLie();
-//                            sema = SemaphoreLancementTache.getinstance().returnSemaphoreForRessource(j);
-//                        }
-//                    }
-//
-//                    if (sema != null) {
-//                        sema.acquire();
-//                    }
 
                     // On ajoute une tache a executer a la queue. Elle va être consommé par le consommateur de tache...
                     service.queueTacheALancer.put(tache);
 
-
-
-                    // On notifi le consomateur
+                    // On notifi le consomateur Pour qu'il boucle et consomme la tache au plus vide
                     synchronized (service.tacheConsomateur.lock) {
                         service.tacheConsomateur.lock.notify();
                     }
 
 
-
-//                    if (sema != null) {
-//                        sema.release();
-//                    }
-
-
-
                 } catch (InterruptedException ex) {
-                    System.out.println("Interruption de " + this);
-//                    Logger.getLogger(TacheProducteur.class.getName()).log(Level.SEVERE, null, ex);
+                    logger.debug("Interruption de " + this);
                 }
-            }
-            else{
+            } else {
                 logger.error("On tente de produire une tache déjà dans la queue du service " + tache);
             }
-
-
-//            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
 
         public AbstrTacheSchedule getTache() {
