@@ -25,8 +25,6 @@ public class FluxTypeForm extends AbstrForm {
     //---------------------------------------
     protected FluxTypeForm() {
     }
-
-    
     
     @Override
     public Boolean validate(HttpServletRequest request) {

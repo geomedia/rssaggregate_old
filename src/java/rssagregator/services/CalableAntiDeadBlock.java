@@ -4,13 +4,10 @@
  */
 package rssagregator.services;
 
-import rssagregator.services.tache.AbstrTacheSchedule;
+import rssagregator.services.tache.AbstrTache;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 import rssagregator.utils.ThreadUtils;
 
 /**
@@ -33,8 +30,7 @@ public class CalableAntiDeadBlock implements Callable<Object> {
 
 
                 ThreadUtils.interruptCheck();
-//                Map<AbstrTacheSchedule, Future> map = service.getMapTache();
-                List<AbstrTacheSchedule> list = service.tacheGereeParLeService;
+                List<AbstrTache> list = service.tacheGereeParLeService;
 
                 synchronized (service.tacheGereeParLeService) {
 
@@ -44,8 +40,8 @@ public class CalableAntiDeadBlock implements Callable<Object> {
 
 
 
-                    for (Iterator<AbstrTacheSchedule> it = list.iterator(); it.hasNext();) {
-                        AbstrTacheSchedule abstrTacheSchedule = it.next();
+                    for (Iterator<AbstrTache> it = list.iterator(); it.hasNext();) {
+                        AbstrTache abstrTacheSchedule = it.next();
 
                         if (abstrTacheSchedule.isRunning()) { // Si la tâche est en cours d'éxécution
 

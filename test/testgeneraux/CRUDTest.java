@@ -14,7 +14,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Journal;
-import rssagregator.beans.traitement.MediatorCollecteAction;
+import rssagregator.beans.traitement.ComportementCollecte;
 import rssagregator.services.crud.ServiceCRUDComportement;
 import rssagregator.services.crud.ServiceCRUDFactory;
 import rssagregator.services.crud.ServiceCRUDFlux;
@@ -26,7 +26,7 @@ import rssagregator.services.crud.ServiceCRUDJournal;
  */
 public class CRUDTest {
 
-    public MediatorCollecteAction comportement;
+    public ComportementCollecte comportement;
     public Journal journal_KlemZeitung;
     public Journal journal_Cist;
 
@@ -61,10 +61,10 @@ public class CRUDTest {
      */
     @Test
     public void create() {
-        ServiceCRUDComportement cRUDComportement = (ServiceCRUDComportement) ServiceCRUDFactory.getInstance().getServiceFor(MediatorCollecteAction.class);
+        ServiceCRUDComportement cRUDComportement = (ServiceCRUDComportement) ServiceCRUDFactory.getInstance().getServiceFor(ComportementCollecte.class);
 
 
-        comportement = new MediatorCollecteAction();
+        comportement = new ComportementCollecte();
         comportement.getDedoubloneur().setDeboubTitle(Boolean.TRUE);
         comportement.getDedoubloneur().setDeboudDesc(Boolean.TRUE);
         comportement.getDedoubloneur().setDedouGUID(Boolean.TRUE);
@@ -127,10 +127,10 @@ public class CRUDTest {
 //
 //
 //        //------------COMPORETEMENT DE COLLECTE
-//        ServiceCRUDComportement cRUDComportement = (ServiceCRUDComportement) ServiceCRUDFactory.getInstance().getServiceFor(MediatorCollecteAction.class);
+//        ServiceCRUDComportement cRUDComportement = (ServiceCRUDComportement) ServiceCRUDFactory.getInstance().getServiceFor(ComportementCollecte.class);
 //
-////        MediatorCollecteAction comportement = new MediatorCollecteAction();
-//        comportement = new MediatorCollecteAction();
+////        ComportementCollecte comportement = new ComportementCollecte();
+//        comportement = new ComportementCollecte();
 //        comportement.getDedoubloneur().setDeboubTitle(Boolean.TRUE);
 //        comportement.getDedoubloneur().setDeboudDesc(Boolean.TRUE);
 //        comportement.getDedoubloneur().setDedouGUID(Boolean.TRUE);

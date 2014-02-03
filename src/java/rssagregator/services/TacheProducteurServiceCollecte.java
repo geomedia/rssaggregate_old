@@ -16,7 +16,7 @@ import rssagregator.beans.Flux;
 import rssagregator.beans.exception.ArgumentIncorrect;
 import rssagregator.beans.exception.IncompleteBeanExeption;
 import rssagregator.dao.DAOFactory;
-import rssagregator.services.tache.AbstrTacheSchedule;
+import rssagregator.services.tache.AbstrTache;
 import rssagregator.services.tache.TacheRecupCallable;
 
 /**
@@ -54,15 +54,15 @@ public class TacheProducteurServiceCollecte extends TacheProducteur implements R
                     Flux flux = it.next();
 
 //                    Map<AbstrTacheSchedule, Future> map = service.getMapTache();
-                    List<AbstrTacheSchedule> taches = service.tacheGereeParLeService;
+                    List<AbstrTache> taches = service.tacheGereeParLeService;
                     for (int i = 0; i < taches.size(); i++) {
-                        AbstrTacheSchedule abstrTacheSchedule = taches.get(i);
+                        AbstrTache abstrTacheSchedule = taches.get(i);
                         
 //                    }
 //
 //                    // On cherche si le flux est déja dans la map
 //                    for (Map.Entry<AbstrTacheSchedule, Future> entry : map.entrySet()) {
-//                        AbstrTacheSchedule abstrTacheSchedule = entry.getKey();
+//                        AbstrTache abstrTacheSchedule = entry.getKey();
                         Future future = abstrTacheSchedule.getFuture();
 
                         if (abstrTacheSchedule.getClass().equals(TacheRecupCallable.class)) {
@@ -99,7 +99,7 @@ public class TacheProducteurServiceCollecte extends TacheProducteur implements R
 //                 */
 //                Map<AbstrTacheSchedule, Future> map = service.getMapTache();
 //                for (Map.Entry<AbstrTacheSchedule, Future> entry : map.entrySet()) {
-//                    AbstrTacheSchedule abstrTacheSchedule = entry.getKey();
+//                    AbstrTache abstrTacheSchedule = entry.getKey();
 //                    Future future = entry.getValue();
 //                    
 //                    

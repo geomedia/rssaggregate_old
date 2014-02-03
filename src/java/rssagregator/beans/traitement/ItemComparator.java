@@ -8,8 +8,13 @@ import java.util.Comparator;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import rssagregator.beans.ContentRSS;
+import rssagregator.services.tache.TacheRaffiner;
 
 /**
+ * Comparator utilisé pour déteminer si deux contenuRSS (Item Brute ou Raffinné) correspondent un un même article. Ce
+ * comparator est utilisé dans le processus de Raffinage des item par la tache {@link TacheRaffiner} Le comparator
+ * permet de déterminer si deux item sont strictement itentique; ont un contenu différent mais proviennent d'un même
+ * article; ou si ce sont deux items différentes
  *
  * @author clem
  */
@@ -33,11 +38,8 @@ public class ItemComparator implements Comparator<ContentRSS> {
         /**
          * *
          * Les statut
-         * 
-         * -1 différent
-         *  0 0 inneploitable
-         *  1 semblable
-         *  2 equal
+         *
+         * -1 différent 0 0 inneploitable 1 semblable 2 equal
          */
         short link = -1;
         short titre = -1;
@@ -129,7 +131,6 @@ public class ItemComparator implements Comparator<ContentRSS> {
         } else {
             guid = 0;
         }
-        System.out.println("");
 
         boolean similaire; // Les contenu doivent provenir du mm article mais ne sont pas strictementEqual
         boolean strictementEqual = false;
@@ -143,23 +144,23 @@ public class ItemComparator implements Comparator<ContentRSS> {
             return 0; // strictement identique
         }
 
-        if (guid > 0 && link == 1 && titre >0) { // MM guid et mm lien m titre
+        if (guid > 0 && link == 1 && titre > 0) { // MM guid et mm lien m titre
             return 1;
         }
 
-        if (titre >0 && desc >0) {
+        if (titre > 0 && desc > 0) {
             return 1;
         }
 
-        if (titre >0 && link >0 ) { // Si le titre et le lien sont ==
+        if (titre > 0 && link > 0) { // Si le titre et le lien sont ==
             return 1;
         }
 
-        if (desc >0 && link >0) {
+        if (desc > 0 && link > 0) {
             return 1;
         }
 
-        if (titre >0 && guid >0 ) {
+        if (titre > 0 && guid > 0) {
             return 1;
         }
 //        System.out.println("--------------------");

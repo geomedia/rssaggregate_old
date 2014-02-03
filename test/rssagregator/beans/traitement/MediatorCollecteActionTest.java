@@ -40,13 +40,13 @@ public class MediatorCollecteActionTest {
   
 
     /**
-     * Test of getDefaultCollectAction method, of class MediatorCollecteAction.
+     * Test of getDefaultCollectAction method, of class ComportementCollecte.
      */
     @Test
     public void testGetDefaultCollectAction() {
         System.out.println("getDefaultCollectAction");
-//        MediatorCollecteAction expResult = null;
-        MediatorCollecteAction result = MediatorCollecteAction.getDefaultCollectAction();
+//        ComportementCollecte expResult = null;
+        ComportementCollecte result = ComportementCollecte.getDefaultCollectAction();
 //        assertEquals(expResult, result);
 
         if (result == null) {

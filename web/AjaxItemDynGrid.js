@@ -198,6 +198,10 @@ $(document).ready(function() {
                 caption: "'<strong style=\"font-weight: bolder;color: red;\">Export CSV</strong>",
                 buttonicon: "ui-icon-add",
                 onClickButton: function() {
+                    
+                    rafine= confirm("Item Rafinée ?");
+                    
+                    
                     html = confirm('Voulez-vous supprimer le code HTML des items lors de l\'export');
                     escape = confirm('utiliser le \\ comme caractère d\'échapement');
                     
@@ -208,6 +212,10 @@ $(document).ready(function() {
                     if(html){
                         urlReq += '&html=true';
                     }
+                    if(rafine){
+                        urlReq+="&rafine=true";
+                    }
+                    
                       $("#list").jqGrid('excelExport', {tag: 'csv', url: urlReq});
 
 //                    if(html===true){

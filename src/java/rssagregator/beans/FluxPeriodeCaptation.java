@@ -31,7 +31,7 @@ import org.joda.time.format.DateTimeFormatter;
 import rssagregator.beans.exception.IncompleteBeanExeption;
 import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.CollecteIncident;
-import rssagregator.beans.traitement.MediatorCollecteAction;
+import rssagregator.beans.traitement.ComportementCollecte;
 
 /**
  * Cette entitée permet de stoquer un intervale de date permettant de renseigner la ou les périodes pendant lesquel le
@@ -117,7 +117,7 @@ public class FluxPeriodeCaptation implements Serializable {
     @OneToOne
 //    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 //    @JsonIgnoreProperties
-    private MediatorCollecteAction comportementDurantLaPeriode;
+    private ComportementCollecte comportementDurantLaPeriode;
 
     /**
      * *
@@ -357,11 +357,11 @@ public class FluxPeriodeCaptation implements Serializable {
         this.flux = flux;
     }
 
-    public MediatorCollecteAction getComportementDurantLaPeriode() {
+    public ComportementCollecte getComportementDurantLaPeriode() {
         return comportementDurantLaPeriode;
     }
 
-    public void setComportementDurantLaPeriode(MediatorCollecteAction comportementDurantLaPeriode) {
+    public void setComportementDurantLaPeriode(ComportementCollecte comportementDurantLaPeriode) {
         this.comportementDurantLaPeriode = comportementDurantLaPeriode;
     }
 

@@ -5,13 +5,14 @@
 package rssagregator.beans.exception;
 
 /**
- * Cette execption peut être levée pour signaler une incohérence de la donnée. Exemple : un flux ayant deux période de capatation ouverte.
+ * Cette execption peut être levée pour signaler une incohérence de la donnée. Exemple : un flux ayant deux période de
+ * capatation ouverte.
+ *
  * @author clem
  */
-public class DonneeInterneCoherente extends Exception{
+public class DonneeInterneCoherente extends Exception {
 
     public DonneeInterneCoherente(String message) {
         super(message);
     }
-    
 }

@@ -4,7 +4,6 @@
  */
 package rssagregator.beans.form;
 
-import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.logging.Level;
@@ -16,7 +15,7 @@ import rssagregator.beans.Flux;
 import rssagregator.beans.FluxType;
 import rssagregator.beans.Journal;
 import static rssagregator.beans.form.AbstrForm.ERR_NE_PEUT_ETRE_NULL;
-import rssagregator.beans.traitement.MediatorCollecteAction;
+import rssagregator.beans.traitement.ComportementCollecte;
 import rssagregator.dao.DAOComportementCollecte;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DAOGenerique;
@@ -33,7 +32,7 @@ public class FluxForm extends AbstrForm {
     //Liste des variables a nourrir à partir de la requête
 
     String url = null;
-    MediatorCollecteAction mediatorFlux = null;
+    ComportementCollecte mediatorFlux = null;
     Boolean active = false;
     String htmlUrl = null;
     Journal journalLie = null;
@@ -179,7 +178,7 @@ public class FluxForm extends AbstrForm {
             //On va chercher le comportement dans la base de données
             try {
                 DAOComportementCollecte dao = DAOFactory.getInstance().getDAOComportementCollecte();
-                mediatorFlux = (MediatorCollecteAction) dao.find(new Long(s));
+                mediatorFlux = (ComportementCollecte) dao.find(new Long(s));
             } catch (Exception e) {
                 erreurs.put("mediatorFlux", new String[]{"Le comportement saisi n'a pu être trouvé", "Incorrect"});
             }
@@ -196,10 +195,20 @@ public class FluxForm extends AbstrForm {
                 Long id = new Long(s);
                 if (id > 0) {
                     journalLie = (Journal) daoj.find(id);
+                    
                 }
+
+                if(journalLie == null){
+                     erreurs.put("journalLie", new String[]{ERR_NE_PEUT_ETRE_NULL, ERR_NE_PEUT_ETRE_NULL});
+                }
+                
             } catch (Exception e) {
-                erreurs.put("journalLie", new String[]{"Incorrect", "Incorrect"});
+//                erreurs.put("journalLie", new String[]{"Incorrect", "Incorrect"});
+                erreurs.put("journalLie", new String[]{ERR_NE_PEUT_ETRE_NULL, ERR_NE_PEUT_ETRE_NULL});
             }
+        }
+        else{
+                 erreurs.put("journalLie", new String[]{ERR_NE_PEUT_ETRE_NULL, ERR_NE_PEUT_ETRE_NULL});
         }
 
         // ---------> TYPE DE FLUX
@@ -260,9 +269,4 @@ public class FluxForm extends AbstrForm {
         }
         return this.valide;
     }
-
-
-    
-    
-    
 }

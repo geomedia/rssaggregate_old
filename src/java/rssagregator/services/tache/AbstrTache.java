@@ -23,7 +23,7 @@ import org.joda.time.Duration;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 import rssagregator.beans.exception.ActionNonEffectuee;
-import rssagregator.beans.incident.ObjectIncompatible;
+import rssagregator.beans.exception.ObjectIncompatible;
 import rssagregator.services.AbstrService;
 import rssagregator.services.SemaphoreCentre;
 import rssagregator.services.TacheConsomateur;
@@ -44,7 +44,7 @@ import rssagregator.utils.ExceptionTool;
  * @see TacheImpl
  * @author clem
  */
-public abstract class AbstrTacheSchedule<T> extends Observable implements Callable<T> {
+public abstract class AbstrTache<T> extends Observable implements Callable<T> {
 
     /**
      * *
@@ -60,8 +60,8 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
      * <li>3 : un jour par semaine</li>
      * </ul>
      *
-     * @see AbstrTacheSchedule#heureSchedule
-     * @see AbstrTacheSchedule#timeSchedule
+     * @see AbstrTache#heureSchedule
+     * @see AbstrTache#timeSchedule
      */
     Byte typeSchedule;
     /**
@@ -163,8 +163,14 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
      * Le future de la tache lorsqu'elle est lancée
      */
     Future future;
+    
+    
+    /***
+     * Un object sur lequel il est possible d'attendre. Il est nififie lorsque la tache est terminé
+     */
+    protected final Object waitFinish = new Object();
 
-    protected AbstrTacheSchedule() {
+    protected AbstrTache() {
         this.schedule = false;
         exeption = null;
         nbrTentative = 0;
@@ -415,7 +421,7 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
     public abstract T executeProcessus() throws InterruptedException;
 
     /**
-     * @see AbstrTacheSchedule#maxExecuteTime
+     * @see AbstrTache#maxExecuteTime
      * @return
      */
     public Short getMaxExecuteTime() {
@@ -423,7 +429,7 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
     }
 
     /**
-     * @see AbstrTacheSchedule#maxExecuteTime
+     * @see AbstrTache#maxExecuteTime
      */
     public void setMaxExecuteTime(Short maxExecuteTime) {
         this.maxExecuteTime = maxExecuteTime;
@@ -744,7 +750,7 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
     }
 
     /***
-     * @see AbstrTacheSchedule#future
+     * @see AbstrTache#future
      * @return 
      */
     public Future getFuture() {
@@ -752,10 +758,14 @@ public abstract class AbstrTacheSchedule<T> extends Observable implements Callab
     }
 
         /***
-     * @see AbstrTacheSchedule#future
+     * @see AbstrTache#future
      * @return 
      */
     public void setFuture(Future future) {
         this.future = future;
     }
+    
+
+    
+    
 }

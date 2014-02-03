@@ -11,7 +11,7 @@ import rssagregator.beans.Journal;
 import rssagregator.beans.ServeurSlave;
 import rssagregator.beans.UserAccount;
 import rssagregator.beans.incident.AbstrIncident;
-import rssagregator.beans.traitement.MediatorCollecteAction;
+import rssagregator.beans.traitement.ComportementCollecte;
 
 /**
  * Cette factory est chargé de délivrer les instances services crud.
@@ -65,7 +65,7 @@ public class ServiceCRUDFactory {
                 serviceCrud = serviceCRUDBeansBasique;
             } else if (AbstrIncident.class.isAssignableFrom(beans)) {
                 serviceCrud = serviceCrudIncident;
-            } else if (beans.equals(MediatorCollecteAction.class)) {
+            } else if (beans.equals(ComportementCollecte.class)) {
                 serviceCrud = serviceCRUDComportement;
             } else if (beans.equals(ServeurSlave.class)) {
                 serviceCrud = serviceCRUDBeansBasique;

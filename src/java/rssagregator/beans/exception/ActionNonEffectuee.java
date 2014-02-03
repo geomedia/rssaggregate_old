@@ -5,7 +5,7 @@
 package rssagregator.beans.exception;
 
 /**
- *
+ * Exception pouvant être levée pour dire que l'action demandée n'a pas été effectuée
  * @author clem
  */
 public class ActionNonEffectuee extends Exception{
@@ -16,7 +16,4 @@ public class ActionNonEffectuee extends Exception{
     public ActionNonEffectuee(String message) {
         super(message);
     }
-    
-    
-    
 }

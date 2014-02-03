@@ -17,7 +17,7 @@ import javax.persistence.Version;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import org.apache.poi.util.Beta;
-import rssagregator.beans.traitement.MediatorCollecteAction;
+import rssagregator.beans.traitement.ComportementCollecte;
 import rssagregator.dao.DAOFactory;
 import rssagregator.services.tache.TacheDecouverteAjoutFlux;
 
@@ -110,11 +110,11 @@ public class Journal extends Bean implements Serializable, BeanSynchronise {
     /**
      * *
      * Lors de la découverte de flux par la tâche {@link TacheDecouverteAjoutFlux}, il est nécessaire d'associer les
-     * {@link Flux} découvert à un {@link MediatorCollecteAction}. C'est ce comportement qui sera attribué au flux du
+     * {@link Flux} découvert à un {@link ComportementCollecte}. C'est ce comportement qui sera attribué au flux du
      * journal présent
      */
     @OneToOne
-    private MediatorCollecteAction comportementParDefaultDesFlux;
+    private ComportementCollecte comportementParDefaultDesFlux;
     
     
     /***
@@ -296,7 +296,7 @@ public class Journal extends Bean implements Serializable, BeanSynchronise {
      * @see #comportementParDefaultDesFlux
      * @return
      */
-    public MediatorCollecteAction getComportementParDefaultDesFlux() {
+    public ComportementCollecte getComportementParDefaultDesFlux() {
         return comportementParDefaultDesFlux;
     }
 
@@ -305,7 +305,7 @@ public class Journal extends Bean implements Serializable, BeanSynchronise {
      * @see #comportementParDefaultDesFlux
      * @return
      */
-    public void setComportementParDefaultDesFlux(MediatorCollecteAction comportementParDefaultDesFlux) {
+    public void setComportementParDefaultDesFlux(ComportementCollecte comportementParDefaultDesFlux) {
         this.comportementParDefaultDesFlux = comportementParDefaultDesFlux;
     }
 

@@ -20,7 +20,7 @@ import rssagregator.utils.ThreadUtils;
  * @version 0.1
  *
  */
-public class TacheImpl<T> extends AbstrTacheSchedule<T> {
+public class TacheImpl<T> extends AbstrTache<T> {
 
 //    org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheImpl.class);
     public TacheImpl() {
@@ -29,7 +29,6 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
 //    public TacheImpl(Observer s) {
 //        super(s);
 //    }
-
     /**
      * *
      * Permet de blocker une ressources dans l'em propre à la Tâche. Si l'objet n'est pas contenu dans l'em il sera
@@ -37,7 +36,7 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
      * dernières données.
      *
      * @param obj
-     * @param lockMode 
+     * @param lockMode
      * @throws NoSuchMethodException
      * @throws IllegalAccessException
      * @throws IllegalArgumentException
@@ -59,7 +58,7 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
 
 
         obj = em.find(obj.getClass(), retour);
-        
+
         em.lock(obj, lockMode);
         em.refresh(obj);
     }
@@ -82,7 +81,7 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
                         break;
                     }
 //                    try {
-                        Thread.sleep(100);
+                    Thread.sleep(100);
 //                    } catch (Exception e) {
 //                    }
                     i++;
@@ -107,14 +106,11 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
         em.getTransaction().begin();
     }
 
-
     @Override
     protected void callCorps() throws InterruptedException, Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    
-    
     /**
      * *
      * Le bloc exécuté a la fin de l'appel du traitement de la tache ({@link TacheImpl#executeProcessus()} qui déclanche
@@ -132,7 +128,7 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
             try {
                 commitTransaction(false);
             } catch (Exception ex) {
-                logger.error("Erreur lors du rollback dans call Finalyse tache : "+this, ex);
+                logger.error("Erreur lors du rollback dans call Finalyse tache : " + this, ex);
             }
         } else { // Sinon, on la commit
             try {
@@ -170,7 +166,6 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
         }
     }
 
-
     @Override
     public T executeProcessus() throws InterruptedException {
         nbrTentative++;
@@ -205,7 +200,7 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
         try {
             T resu = null;
             boolean continuer = true;
-            
+
             //------------------------------------------------------
             //          Execution du Traitement
             //------------------------------------------------------
@@ -226,7 +221,7 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
             //-----------------------------------------------------
             //              Gestion des incidents
             //-----------------------------------------------------
-        
+
             if (Incidable.class.isAssignableFrom(this.getClass())) { // Si la tache est incidable
                 Incidable incidableTask = (Incidable) this;
                 if (this.exeption == null) { // Si la tache s'est déroulée correctement on ferme les possibles incidents ouverts
@@ -246,6 +241,13 @@ public class TacheImpl<T> extends AbstrTacheSchedule<T> {
         } finally {
             // On rollback la transaction si une transaction est encore ouverte
             finTache(); // Running = false et completion de la date de prochaine execution ; fermeture de l'em; libération de la semaphore; notification des observer
+            
+            // Notification de l'object qui permet de réveiller d'autres thread
+//            synchronized (this.waitFinish) {
+//                this.waitFinish.notifyAll();
+                this.notifyAll(); // Des taches threead peuvent s'être mise en attente. Il faut les notifier.
+//            }
+
             return (T) this;
         }
     }

@@ -5,16 +5,9 @@
 package rssagregator.services;
 
 import au.com.bytecode.opencsv.CSVWriter;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -23,7 +16,6 @@ import java.util.regex.Pattern;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import org.apache.commons.io.FileUtils;
-import org.apache.naming.java.javaURLContextFactory;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -47,6 +39,7 @@ public class CSVMacker implements Callable<Object> {
     Date date2;
     int nbrLigneParFichie = 10000;
     boolean escapebySlash = false;
+    boolean rafine = false;
     /**
      * *
      * Détermine si le CSVMacker doit ou non supprimer le code HTML dans la derscription le titre et le contenu
@@ -127,7 +120,17 @@ public class CSVMacker implements Callable<Object> {
 
             try {
                 // Compte pour le flux
-                Query cptQuery = em.createQuery("SELECT COUNT(i) FROM Item i JOIN i.listFlux f WHERE f.ID=:fid");
+                Query cptQuery;
+
+                if (rafine) {
+//                    cptQuery = em.createQuery("SELECT COUNT(i) FROM ItemRaffinee i JOIN i.listFlux f WHERE f.ID=:fid");
+                    cptQuery = em.createQuery("SELECT COUNT(i) FROM ItemRaffinee i JOIN i.itemBrutes br, br.listFlux f WHERE f.ID=:fid");
+                    
+                } else {
+                    cptQuery = em.createQuery("SELECT COUNT(i) FROM Item i JOIN i.listFlux f WHERE f.ID=:fid");
+                }
+
+
                 cptQuery.setParameter("fid", flux.getID());
                 Long countPrFlux = (Long) cptQuery.getResultList().get(0);
 
@@ -462,5 +465,13 @@ public class CSVMacker implements Callable<Object> {
 
     public void setRedirPath(String redirPath) {
         this.redirPath = redirPath;
+    }
+
+    public boolean isRafine() {
+        return rafine;
+    }
+
+    public void setRafine(boolean rafine) {
+        this.rafine = rafine;
     }
 }

@@ -13,7 +13,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import org.joda.time.DateTime;
 import rssagregator.beans.Journal;
-import rssagregator.services.tache.AbstrTacheSchedule;
+import rssagregator.services.tache.AbstrTache;
 import rssagregator.services.tache.TacheRecupCallable;
 import rssagregator.utils.ThreadUtils;
 
@@ -34,7 +34,7 @@ public class CallableCollecteSubmiter implements Callable<Object> {
 //     * *
 //     * Permet de stoquer les taches éxecuté pour un journal
 //     */
-//    Map<Long, AbstrTacheSchedule> mapJournalTache = new HashMap<Long, AbstrTacheSchedule>();
+//    Map<Long, AbstrTache> mapJournalTache = new HashMap<Long, AbstrTache>();
 //
 //    @Override
 //    public Object call() throws Exception {
@@ -58,7 +58,7 @@ public class CallableCollecteSubmiter implements Callable<Object> {
 //                    while (iterator.hasNext()) {
 //
 //                        Map.Entry<AbstrTacheSchedule, Future> entry = iterator.next();
-//                        AbstrTacheSchedule abstrTacheSchedule = entry.getKey();
+//                        AbstrTache abstrTacheSchedule = entry.getKey();
 ////                        logger.debug("IT : " + abstrTacheSchedule);
 //
 //                        
@@ -142,7 +142,7 @@ public class CallableCollecteSubmiter implements Callable<Object> {
 //    private boolean existanceDeTacheEncoursPourleJournal(Journal j) {
 //
 //        Long id = j.getID();
-//        AbstrTacheSchedule tache = mapJournalTache.get(id);
+//        AbstrTache tache = mapJournalTache.get(id);
 ////        logger.debug("tache ds la map : " + mapJournalTache);
 //
 //        if (tache != null && tache.isRunning()) {

@@ -5,7 +5,7 @@
 package rssagregator.beans.exception;
 
 /**
- *  Exception pouvant être levée si un beans ne possède pas toutes les informations nécessaire
+ *  Exception pouvant être levée si un beans ne possède pas toutes les informations nécessaires
  * @author clem
  */
 public class IncompleteBeanExeption extends Exception{

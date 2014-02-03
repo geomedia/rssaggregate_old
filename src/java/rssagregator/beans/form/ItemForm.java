@@ -4,22 +4,7 @@
  */
 package rssagregator.beans.form;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
 import javax.servlet.http.HttpServletRequest;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import rssagregator.beans.Flux;
-import rssagregator.dao.AbstrDao;
-import rssagregator.dao.DAOFactory;
-import rssagregator.dao.SearchFilter;
-import rssagregator.dao.SearchFiltersList;
 
 /**
  * Les Item ne sont pas encore modifiable. Cette fonctionnalité n'est pas perçut comme nécessaire au projet. Cette
@@ -29,15 +14,8 @@ import rssagregator.dao.SearchFiltersList;
  */
 public class ItemForm extends AbstrForm {
 
-    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(ItemForm.class);
-
     protected ItemForm() {
     }
-    
-    
-    
-    
-    
 
     @Override
     public Object bind(HttpServletRequest request, Object objEntre, Class type) {

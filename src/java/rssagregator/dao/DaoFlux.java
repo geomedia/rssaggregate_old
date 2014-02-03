@@ -21,7 +21,7 @@ import rssagregator.beans.Flux;
 import rssagregator.beans.FluxType;
 import rssagregator.beans.Item;
 import rssagregator.beans.Journal;
-import rssagregator.beans.traitement.MediatorCollecteAction;
+import rssagregator.beans.traitement.ComportementCollecte;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Root;
@@ -227,12 +227,12 @@ public class DaoFlux extends AbstrDao {
          * existant, il faut retrouver ces objet et les mettre dans le flux avant de persister. Si on ne le fait pas,
          * l'ORM va chercher à créer 2x la même chose et provoquer une erreur *
          */
-        MediatorCollecteAction m = fl.getMediatorFlux();
+        ComportementCollecte m = fl.getMediatorFlux();
         if (m != null) {
             //Si le médiator n'est pas contenu dans l'em (parce que si il est dans l'em pas de problème, l'ORM se s'emmelera pas les pattes !)
             if (!em.contains(m)) {
                 //On va le chercher dans la base de données
-                MediatorCollecteAction mContenu = em.find(MediatorCollecteAction.class, m.getID());
+                ComportementCollecte mContenu = em.find(ComportementCollecte.class, m.getID());
                 if (mContenu != null) {
                     fl.setMediatorFlux(mContenu);
                 }

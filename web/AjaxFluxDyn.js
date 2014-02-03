@@ -341,27 +341,6 @@ $(document).ready(function() {
 
 
 
-    /***
-     * Fonction ajax pour la soumission du fichier
-     */
-    $('#formUpload').on('submit', function() {
-        $.ajax({
-            url: $(this).attr('action'), // le nom du fichier indiqué dans le formulaire
-            type: $(this).attr('method'), // la méthode indiquée dans le formulaire (get ou post)
-//            data: $(this).serialize(), // je sérialise les données (voir plus loin), ici les $_POST
-//            data: "filters=" + filterJson, // je sérialise les données (voir plus loin), ici les $_POST
-            dataType: 'html',
-            success: function(html) {
-//                $('#container').highcharts(html);
-                alert(html);
-//                alert('succes');
-            }
-
-        });
-//            return false;
-
-    }
-    );
 
 
     $('#formParse').on('submit', function() {

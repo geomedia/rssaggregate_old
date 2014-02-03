@@ -6,7 +6,6 @@ package rssagregator.beans.traitement;
 
 import com.sun.syndication.io.FeedException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.Callable;

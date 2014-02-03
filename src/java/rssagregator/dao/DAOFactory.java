@@ -29,8 +29,8 @@ import rssagregator.beans.incident.MailIncident;
 import rssagregator.beans.incident.NotificationAjoutFlux;
 import rssagregator.beans.incident.ServerIncident;
 import rssagregator.beans.incident.SynchroIncident;
-import rssagregator.beans.traitement.MediatorCollecteAction;
-import rssagregator.services.tache.AbstrTacheSchedule;
+import rssagregator.beans.traitement.ComportementCollecte;
+import rssagregator.services.tache.AbstrTache;
 
 /**
  *
@@ -187,7 +187,7 @@ public class DAOFactory<T extends AbstrDao> {
 //            dao = (T) getDAOIncident();
         } else if (beansClass.equals(Journal.class)) {
             dao = (T) getDaoJournal();
-        } else if (beansClass.equals(MediatorCollecteAction.class)) {
+        } else if (beansClass.equals(ComportementCollecte.class)) {
             dao = (T) getDAOComportementCollecte();
         } else if (beansClass.equals(FluxType.class)) {
             DAOGenerique d = getDAOGenerique();
@@ -260,7 +260,7 @@ public class DAOFactory<T extends AbstrDao> {
      * @return
      * @throws TypeNotPresentException
      */
-    public T getDAOFromTask(AbstrTacheSchedule tache) {
+    public T getDAOFromTask(AbstrTache tache) {
 
         IncidentFactory s = new IncidentFactory();
 

@@ -36,6 +36,9 @@ $(document).ready(function() {
 <label>Enregistrer les flux découverts dans la base de données</label><input type=\"checkbox\" name=\"persist\" /><br />\n\
 <label>Activer flux découverts</label><input type=\"checkbox\" name=\"active\" />\n\
 <input type=\"hidden\" name=\"id\" value=" + $('#id').val() + ">\n\
+           <br /> <label>TimeOut : </label><input type=\"text\"  value=\"60\" name=\"timeout\"/> \n\
+<br /><label>Nbr Req simultannée : </label><input type=\"text\" value =\"20\" name=\"nbThread\" />\n\
+<br />\n\
 <input type=\"submit\">Cette action devrait prendre entre 5 et 30 secondes\n\
 </fieldset>\n\
 </form>");

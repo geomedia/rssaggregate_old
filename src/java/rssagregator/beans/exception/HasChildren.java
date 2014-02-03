@@ -5,11 +5,11 @@
 package rssagregator.beans.exception;
 
 import rssagregator.beans.Flux;
-import rssagregator.beans.traitement.MediatorCollecteAction;
+import rssagregator.beans.traitement.ComportementCollecte;
 
 /**
  * Exception a levée si on tente de supprimer un entité possédant des liens ne pouvant être laissé orphelin (exemple
- * suppression d'un {@link MediatorCollecteAction} possédant des {@link Flux}
+ * suppression d'un {@link ComportementCollecte} possédant des {@link Flux}
  *
  * @author clem
  */

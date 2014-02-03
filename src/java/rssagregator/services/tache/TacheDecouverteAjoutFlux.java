@@ -17,6 +17,10 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -31,8 +35,10 @@ import rssagregator.beans.incident.IncidentFactory;
 import rssagregator.beans.incident.NotificationAjoutFlux;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoFlux;
+import rssagregator.services.SemaphoreCentre;
 import rssagregator.services.crud.AbstrServiceCRUD;
 import rssagregator.services.crud.ServiceCRUDFactory;
+import rssagregator.utils.ThreadUtils;
 
 /**
  * Cette tâche permet de parcourir la page présentant les flux RSS d'un journal afin de découvrir les flux. Chacun des
@@ -84,9 +90,18 @@ public class TacheDecouverteAjoutFlux extends TacheImpl<TacheDecouverteAjoutFlux
      * Executeur service propre à la tache permettant de faire des sous requetes
      */
     ExecutorService es;
+    /**
+     * *
+     * Le temps maximal consacré aux requetes.
+     */
+    short generalRequestTimeOut;
 
     @Override
     protected void callCorps() throws Exception {
+
+
+        es = Executors.newFixedThreadPool(nombredeSousTache); // On lance les tache en parallèle pour chaque lien
+
         // Si la tâche n'est pas annulé on continu le déroulement
 
         if (journal == null || journal.getUrlHtmlRecapFlux() == null || journal.getUrlHtmlRecapFlux().isEmpty()) {
@@ -120,9 +135,23 @@ public class TacheDecouverteAjoutFlux extends TacheImpl<TacheDecouverteAjoutFlux
             throw new AucunFluxDecouvert();
         }
 
-        es = Executors.newFixedThreadPool(nombredeSousTache); // On lance les tache en parallèle pour chaque lien
-        es.invokeAll(listSousTache);
+
+//        es.invokeAll(listSousTache);
+
+        try {
+            es.invokeAll(listSousTache, generalRequestTimeOut, TimeUnit.SECONDS); // On donne 120 secondes pour la découverte         
+        } catch (InterruptedException e) {
+            ThreadUtils.interruptCheck();
+        } catch (Exception e) {
+            logger.debug("Ex" + e);
+        }
+
+
         es.shutdown();
+
+        System.out.println("=======================");
+        System.out.println("Fin des requetes");
+        System.out.println("=======================");
 
         //-------> Ajout des ressouces
 
@@ -191,7 +220,6 @@ public class TacheDecouverteAjoutFlux extends TacheImpl<TacheDecouverteAjoutFlux
         }
         return super.callFinalyse();
     }
-
 
     /**
      * Get the value of journal
@@ -348,7 +376,44 @@ public class TacheDecouverteAjoutFlux extends TacheImpl<TacheDecouverteAjoutFlux
                     }
                 }
             }
+            logger.debug("Page : " + link + "RSS : " + rss);
             return rss;
         }
+    }
+
+    public short getGeneralRequestTimeOut() {
+        return generalRequestTimeOut;
+    }
+
+    public void setGeneralRequestTimeOut(short generalRequestTimeOut) {
+        this.generalRequestTimeOut = generalRequestTimeOut;
+    }
+
+    
+    /***
+     * Cette tache a besoin d'acquerir la sémaphore relative au journal avant de démarrer. 
+     * @return 
+     */
+    @Override
+    public Set<Semaphore> returnSemSet() {
+
+        sem.clear();
+        if (journal != null) {
+//            synchronized (SemaphoreCentre.getinstance()) {
+                try {
+                    Semaphore s = SemaphoreCentre.getinstance().returnSemaphoreForRessource(journal);
+                    sem.add(s);
+                } catch (NullPointerException ex) {
+                    Logger.getLogger(TacheDecouverteAjoutFlux.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IllegalAccessException ex) {
+                    Logger.getLogger(TacheDecouverteAjoutFlux.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+//            }
+
+        }
+
+        return sem;
+
     }
 }

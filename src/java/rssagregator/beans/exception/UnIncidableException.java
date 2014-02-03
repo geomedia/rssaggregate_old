@@ -7,10 +7,12 @@ package rssagregator.beans.exception;
 import rssagregator.beans.incident.IncidentFactory;
 
 /**
- * Exception utilisée par la factory {@link IncidentFactory} lorsqu'on lui demande de créer un incident pour une Tache n'étant pas incidable.
+ * Exception utilisée par la factory {@link IncidentFactory} lorsqu'on lui demande de créer un incident pour une Tache
+ * n'étant pas incidable.
+ *
  * @author clem
  */
-public class UnIncidableException extends Exception{
+public class UnIncidableException extends Exception {
 
     public UnIncidableException(String message) {
         super(message);

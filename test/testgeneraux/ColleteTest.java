@@ -23,7 +23,7 @@ import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.beans.Journal;
 import rssagregator.beans.exception.IncompleteBeanExeption;
-import rssagregator.beans.traitement.MediatorCollecteAction;
+import rssagregator.beans.traitement.ComportementCollecte;
 import rssagregator.dao.DAOFactory;
 import rssagregator.services.ServiceCollecteur;
 import rssagregator.services.ServiceMailNotifier;
@@ -156,7 +156,7 @@ public class ColleteTest {
 
         // --->Comportement de collecte
 
-        MediatorCollecteAction comportement = cRUDTest.comportement;
+        ComportementCollecte comportement = cRUDTest.comportement;
 
 //        // ----> Journaux
         Journal journal_KlemZeitung = cRUDTest.journal_KlemZeitung;

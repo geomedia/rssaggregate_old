@@ -5,7 +5,7 @@
 package rssagregator.services.crud;
 
 import rssagregator.beans.exception.HasChildren;
-import rssagregator.beans.traitement.MediatorCollecteAction;
+import rssagregator.beans.traitement.ComportementCollecte;
 import rssagregator.dao.DAOComportementCollecte;
 import rssagregator.dao.DAOFactory;
 import rssagregator.services.ServiceSynchro;
@@ -30,7 +30,7 @@ public class ServiceCRUDComportement extends ServiceCRUDBeansSynchro {
     public void supprimer(Object obj) throws HasChildren, Exception {
 
         if (obj != null) {
-            MediatorCollecteAction comportement = (MediatorCollecteAction) obj;
+            ComportementCollecte comportement = (ComportementCollecte) obj;
             DAOComportementCollecte dao = DAOFactory.getInstance().getDAOComportementCollecte();
             
             

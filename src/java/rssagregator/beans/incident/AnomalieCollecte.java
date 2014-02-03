@@ -23,8 +23,6 @@ public class AnomalieCollecte extends CollecteIncident implements Notification {
     public AnomalieCollecte() {
     }
     
-    
-    
 
 //    Map<Date, Integer> compteflux;
     /**
@@ -78,6 +76,10 @@ public class AnomalieCollecte extends CollecteIncident implements Notification {
 //
 //        }
 //    }
+    /***
+     * @see #causeTechniqueSiteJournal
+     * @return 
+     */
     public Boolean getCauseTechniqueSiteJournal() {
         return causeTechniqueSiteJournal;
     }
@@ -139,7 +141,4 @@ public class AnomalieCollecte extends CollecteIncident implements Notification {
     public String toString() {
         return "Anomalie de Collecte flux : "+this.fluxLie;
     }
-    
-    
-    
 }

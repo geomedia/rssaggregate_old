@@ -34,7 +34,7 @@ import rssagregator.beans.Flux;
 import rssagregator.beans.FluxType;
 import rssagregator.beans.Item;
 import rssagregator.beans.Journal;
-import rssagregator.beans.traitement.MediatorCollecteAction;
+import rssagregator.beans.traitement.ComportementCollecte;
 import rssagregator.dao.DAOComportementCollecte;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DAOGenerique;
@@ -47,7 +47,7 @@ import rssagregator.utils.XMLTool;
  * 
  * /!\ Retiré des objectifs du projet. Cette classe n'est pas finie.
  * Cette classe utilise le client activeMq en vue de synchroniser les beans
- * ({@link Flux}, {@link MediatorCollecteAction}) entre serveurs du projet GEOMEDIA. La méthode run doit être lancée au
+ * ({@link Flux}, {@link ComportementCollecte}) entre serveurs du projet GEOMEDIA. La méthode run doit être lancée au
  * démarrage du projet afin de lancer un daemon cherchant à relancer la connection toutes les 30 secondes si le booleen
  * statutConnection est à f
  *
@@ -270,7 +270,7 @@ public class ServiceSynchro extends ServiceImpl implements MessageListener, Obse
                                 // Il faut veiller à vérifier l'existence de tous les objet lié au flux. Si on n'a pas par exemple l'objet de traitement adhéquat, on va alors le créer
                                 // Gestion des médiator de collecte
 //                                if (flux.getMediatorFlux() != null) {
-//                                    MediatorCollecteAction comportemnetBDD = (MediatorCollecteAction) DAOFactory.getInstance().getDAOComportementCollecte().find(flux.getMediatorFlux().getID());
+//                                    ComportementCollecte comportemnetBDD = (ComportementCollecte) DAOFactory.getInstance().getDAOComportementCollecte().find(flux.getMediatorFlux().getID());
 //                                    if (comportemnetBDD == null) {
 //                                        DAOFactory.getInstance().getDAOComportementCollecte().creer(flux.getMediatorFlux());
 //                                    }
@@ -338,7 +338,7 @@ public class ServiceSynchro extends ServiceImpl implements MessageListener, Obse
                             }
                         }
                         //====================================BEAN : COMPORTEMENT DE COLLECTE===========================
-                    } else if (bean instanceof MediatorCollecteAction) {
+                    } else if (bean instanceof ComportementCollecte) {
                         if (action.equals("add")) {
                             try {
                                 DAOComportementCollecte dao = DAOFactory.getInstance().getDAOComportementCollecte();
@@ -352,7 +352,7 @@ public class ServiceSynchro extends ServiceImpl implements MessageListener, Obse
                             }
                         } else if (action.equals("mod")) {
                             try {
-                                MediatorCollecteAction cast = (MediatorCollecteAction) bean;
+                                ComportementCollecte cast = (ComportementCollecte) bean;
                                 List<Flux> fluxCollecte = cast.getListeFlux();
                                 Timestamp stampModif = cast.getDateUpdate();
 
@@ -514,7 +514,7 @@ public class ServiceSynchro extends ServiceImpl implements MessageListener, Obse
 //
 //
 //        // SI il s'agit d'un beans devant être diffusé qui précise bien l'action devant être diffusée par un string (add mod rem...)
-////        if ((o instanceof Flux || o instanceof MediatorCollecteAction) && arg instanceof String) {
+////        if ((o instanceof Flux || o instanceof ComportementCollecte) && arg instanceof String) {
 ////            try {
 ////                diffuser(o, (String) arg);
 ////            } catch (JMSException ex) {

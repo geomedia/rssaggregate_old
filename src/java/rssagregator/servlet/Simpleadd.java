@@ -19,7 +19,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Journal;
-import rssagregator.beans.traitement.MediatorCollecteAction;
+import rssagregator.beans.traitement.ComportementCollecte;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoFlux;
 import rssagregator.services.ServiceCollecteur;
@@ -59,7 +59,7 @@ public class Simpleadd extends HttpServlet {
 
 
         if (action.equals("addcompo")) {
-            MediatorCollecteAction action1 = MediatorCollecteAction.getDefaultCollectAction();
+            ComportementCollecte action1 = ComportementCollecte.getDefaultCollectAction();
             try {
                 DAOFactory.getInstance().getDAOComportementCollecte().creer(action1);
             } catch (Exception ex) {
@@ -151,11 +151,11 @@ public class Simpleadd extends HttpServlet {
 
 
             // On récupère le comportement de capture
-            MediatorCollecteAction compo = null;
+            ComportementCollecte compo = null;
             String s2 = request.getParameter("comportement");
             try {
                 Long idc = new Long(s2);
-                compo = (MediatorCollecteAction) DAOFactory.getInstance().getDAOComportementCollecte().find(idc);
+                compo = (ComportementCollecte) DAOFactory.getInstance().getDAOComportementCollecte().find(idc);
 
             } catch (Exception e) {
             }

@@ -9,19 +9,17 @@ import java.util.HashMap;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import rssagregator.beans.traitement.Dedoubloneur;
-//import rssagregator.beans.traitement.DedoubloneurComparaisonTitre;
-import rssagregator.beans.traitement.MediatorCollecteAction;
+import rssagregator.beans.traitement.ComportementCollecte;
 import rssagregator.beans.traitement.Requester;
 import rssagregator.beans.traitement.RomeParse;
 
 /**
- * Le formulaire permettant de valider et binder un beans MediatorCollecteAction
+ * Le formulaire permettant de valider et binder un beans {@link ComportementCollecte}
  *
  * @author clem
  */
 public class ComportementCollecteForm extends AbstrForm {
 
-    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(ComportementCollecteForm.class);
     private Integer requester_time_out;
     private Integer periodiciteCollecte;
     private List<String[]> RequestProperty = new ArrayList<String[]>();
@@ -34,16 +32,15 @@ public class ComportementCollecteForm extends AbstrForm {
     private String comportement_nom;
     private String comportement_desc;
     private Boolean defaut;
-//    private Boolean secondDedoub;
 
     protected ComportementCollecteForm() {
     }
 
     @Override
     public Object bind(HttpServletRequest request, Object objEntre, Class type) {
-        MediatorCollecteAction collecte = (MediatorCollecteAction) objEntre;
+        ComportementCollecte collecte = (ComportementCollecte) objEntre;
         if (collecte == null) {
-            collecte = new MediatorCollecteAction();
+            collecte = new ComportementCollecte();
             if (collecte.getRequesteur() == null) {
                 collecte.setRequesteur(new Requester());
             }
@@ -72,17 +69,9 @@ public class ComportementCollecteForm extends AbstrForm {
             collecte.getDedoubloneur().setDedoubDatePub(dedoubDatePub);
             collecte.getDedoubloneur().setDedoubCategory(dedoubCategory);
 
-
-//            collecte.getDedoublonneur2().setEnable(secondDedoub);
-
-
-
             collecte.setNom(comportement_nom);
             collecte.setDescription(comportement_desc);
             collecte.setDefaut(defaut);
-
-
-
         }
         return collecte;
     }
@@ -186,10 +175,8 @@ public class ComportementCollecteForm extends AbstrForm {
         //------------> NOM DU COMPORTEMENT
         s = request.getParameter("comportement_nom");
         if (s != null && !s.isEmpty()) {
-            System.out.println("--------------------COMPO : " + s);
             comportement_nom = s;
         } else {
-            System.out.println("=+=+=+=++===+===");
             erreurs.put("comportement_nom", new String[]{"ne peut être null", "ne peu"});
         }
 
@@ -197,10 +184,7 @@ public class ComportementCollecteForm extends AbstrForm {
         s = request.getParameter("comportement_desc");
         if (s != null) {
             comportement_desc = s;
-            System.out.println("comportement_desc = " + comportement_desc);
-        } else {
-            System.out.println("comportement_desc = " + comportement_desc);
-        }
+        } 
 
         //----------> COMPORTEMNENT PAR DEFAUT
         s = request.getParameter("defaut");
@@ -210,15 +194,12 @@ public class ComportementCollecteForm extends AbstrForm {
             defaut = true;
         }
 
-
 //        s = request.getParameter("secondDedoub");
 //        if (s == null || s.isEmpty()) {
 //            secondDedoub = false;
 //        } else {
 //            secondDedoub = true;
 //        }
-
-
 
         //---------------------------------------------------------------
         //---------------------------------------------------------------

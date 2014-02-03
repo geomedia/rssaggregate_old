@@ -87,7 +87,6 @@ public class AbstrRequesteur implements Serializable, Cloneable, Callable<Object
         String newTab[][];
         if (this.requestProperty == null) {
             newTab = new String[1][2];
-            System.out.println("lo");
         } else {
             newTab = new String[this.requestProperty.length + 1][2];
             int i;

@@ -9,10 +9,12 @@ import javax.persistence.Entity;
 import rssagregator.services.tache.TacheDiffuserMessageJMS;
 
 /**
+ * <strong>/!\ N'est plus utilisé. La synchronisation est retirée des objectifs du projet</strong>
  * <p>Incident générée par le service
  *
  * @{@link ServiceSynchro} lorsque la tache {@link TacheDiffuserMessageJMS}</p>
  * @author clem
+ * @deprecated 
  */
 @Entity(name = "i_jmsdiffusionincident")
 public class JMSDiffusionIncident extends SynchroIncident {

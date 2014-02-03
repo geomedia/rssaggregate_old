@@ -4,12 +4,17 @@
  */
 package rssagregator.services.tache;
 
+import com.sun.syndication.io.FeedException;
+import com.sun.syndication.io.ParsingFeedException;
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
 import javax.persistence.LockModeType;
+import javax.xml.ws.http.HTTPException;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.beans.exception.CollecteUnactiveFlux;
@@ -18,7 +23,7 @@ import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.beans.incident.Incidable;
 import rssagregator.beans.incident.IncidentFactory;
-import rssagregator.beans.tool.ComparatorBean;
+import rssagregator.utils.comparator.ComparatorBean;
 import rssagregator.beans.traitement.VisitorHTTP;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DAOIncident;
@@ -85,33 +90,50 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
 
                 // Si On observe déjà un incident 
 
-                
+
                 if (listIncidentOuvert != null && listIncidentOuvert.size() == 1) {
                     collecteIncident = listIncidentOuvert.get(0);
 //                     collecteIncident = (CollecteIncident) daoIncident.find(collecteIncident.getID());
                     // On block l'incident
 
                     verrouillerObjectDansLEM(collecteIncident, LockModeType.PESSIMISTIC_WRITE);
-                    
+
                 } else if (listIncidentOuvert != null && listIncidentOuvert.isEmpty()) { // Si il n'y a pas d'incident, il faut en créer un
                     IncidentFactory factory = new IncidentFactory();
-                    collecteIncident = (CollecteIncident) factory.createIncidentFromTask(this, this.exeption.toString());
+
+
+                   
+                    String msg = "";
+                    //Construction du message a destination de l'utilisateur
+
+                    System.out.println("TYPE incident " + exeption.getClass());
+
+                    if (exeption.getClass().equals(java.util.concurrent.ExecutionException.class)) {
+                        ExecutionException cast = (ExecutionException) exeption;
+                        System.out.println("CAUSDE " + cast.getCause().getClass());
+                        msg = constructionMessageErreurDepuisExc(exeption.getCause());
+                    }
+                    else {
+                        msg = constructionMessageErreurDepuisExc(exeption);
+                    }
+
+                    collecteIncident = (CollecteIncident) factory.createIncidentFromTask(this, msg);
                     collecteIncident.setNombreTentativeEnEchec(0);
                 }
-                
+
                 if (collecteIncident != null) { // Si on a un incident alors on va incrémenter son compteur et ajouter des infos comme le flux responsable
                     Integer repetition = collecteIncident.getNombreTentativeEnEchec();
                     repetition++;
                     collecteIncident.setNombreTentativeEnEchec(repetition);
                     collecteIncident.setFluxLie(flux);
-                    
+
                     this.setIncident(collecteIncident);
 
                     //-------ENREGISTREMENT ou modification de l'incident-----------
 
                     ServiceCRUDFactory cRUDFactory = ServiceCRUDFactory.getInstance();
                     AbstrServiceCRUD service = cRUDFactory.getServiceFor(CollecteIncident.class);
-                    
+
                     if (collecteIncident.getID() == null) {
                         service.ajouter(incident, em);
                     } else {
@@ -127,7 +149,7 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
             commitTransaction(true);
         }
     }
-    
+
     @Override
     public synchronized void fermetureIncident() throws Exception {
         //Si la tâche s'est déroulé correctement
@@ -140,18 +162,18 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
                 DAOIncident dao = (DAOIncident) DAOFactory.getInstance().getDaoFromType(CollecteIncident.class);
                 dao.setEm(em);
                 List<CollecteIncident> listIncid = dao.findIncidentOuvert(flux.getID());
-                
-                
+
+
                 ServiceCRUDFactory cRUDFactory = ServiceCRUDFactory.getInstance();
                 AbstrServiceCRUD serviceCrud = cRUDFactory.getServiceFor(CollecteIncident.class);
-                
-                
+
+
                 for (int i = 0; i < listIncid.size(); i++) {
                     CollecteIncident abstrIncident = listIncid.get(i);
                     // On doit le vérouiller
                     em.lock(abstrIncident, LockModeType.PESSIMISTIC_WRITE);
                     abstrIncident.setDateFin(new Date());
-                    
+
                     serviceCrud.modifier(abstrIncident, em); // On utilise le service pour modifier le beans
 
 //                            em.merge(abstrIncident);
@@ -175,7 +197,7 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
     public Class getTypeIncident() {
         return CollecteIncident.class;
     }
-    
+
     @Override
     protected synchronized TacheRecupCallable callFinalyse() {
         logger.debug("" + this + " bloc Finalyse");
@@ -191,15 +213,15 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
                         collecteur.getCacheHashFlux().addHash(flux, item.getHashContenu());
                     }
                 }
-                
-                
+
+
                 try { // Suppression de hash afin d'éviter l'accumulation en mémoire
 
                     if (visitorHTTP != null && visitorHTTP.getNbItTrouve() > 0) {
 //                    if (this.comportementDuFlux.getNbItTrouve() > 0) {
 
                         short nbrItObserve = visitorHTTP.getNbItTrouve();
-                        
+
                         short nbrDsCache = collecteur.getCacheHashFlux().returnNbrHash(flux).shortValue();
                         if (nbrDsCache > (nbrItObserve + 500)) { // Si le nombre d'item dans le cache est supérieur au nombre d'item obs + 500 
                             Integer nbrItASup = nbrDsCache - nbrItObserve - 500; // On en laisse 100 de marge 
@@ -214,21 +236,20 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
             } else { // Si il y a eu des erreur on roolback
                 commitTransaction(false);
             }
-            
+
         } catch (Exception e) {
             logger.error("Erreur sur le flux " + flux, e); // Cette erreur ne devrait pas survenir. On recevra un mail si c'est le cas grace a l'appender de Log4J
         } finally {
         }
         return (TacheRecupCallable) super.callFinalyse();
     }
-    
+
     @Override
     protected void callCorps() throws InterruptedException, Exception {
-        Thread.sleep(500000);
         if (!flux.getActive()) {
             throw new CollecteUnactiveFlux("Ce flux doit être activé pour être récolté");
         }
-        
+
         initialiserTransaction();
 ////         Si le flux appartient a un journal, il faut verrouiller le journal afin d'éviter que plusieurs tache collecte les donnes d'un même journal en meme temps
 //        if (flux.getJournalLie() != null && flux.getJournalLie().getID() != null) {
@@ -240,19 +261,19 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
 
         visitorHTTP = new VisitorHTTP();
         visitorHTTP.visit(flux);
-        
+
         ThreadUtils.interruptCheck(); // On lance l'execution si la thread n'est pas déjà interrompu
         nouvellesItems = visitorHTTP.getListItem();
-        
+
         ThreadUtils.interruptCheck();
 
         //On enregistre chaque item trouvé
         ServiceCollecteur collecteur = ServiceCollecteur.getInstance();
 
         //Pour éviter les dead lock il faut respecter un ordre dans la facon de poser les verrour (c'est le collecteur qui pose le verrour). On va simplement trier les items par ID
-        
+
         Collections.sort(nouvellesItems, new ComparatorBean());
-        
+
         for (int i = 0; i < nouvellesItems.size(); i++) {
             Item item = nouvellesItems.get(i);
             collecteur.ajouterItemAuFlux(flux, item, em, false, visitorHTTP); // Il faut préciser au collecteur l'em qu'il doit utiliser, on lui donne celui qui block actuellement le flux. Les enregistrements ne sont alors pas encore commités
@@ -271,12 +292,12 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
 
         initialiserTransaction();
         logger.debug("Init task " + this);
-        
+
         if (flux != null && flux.getJournalLie() != null) {
             verrouillerObjectDansLEM(flux.getJournalLie(), LockModeType.PESSIMISTIC_WRITE);
-            
+
         }
-        
+
         if (flux != null) {
             verrouillerObjectDansLEM(flux, LockModeType.PESSIMISTIC_WRITE);
         }
@@ -286,49 +307,49 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
 //            logger.debug("Semaphore acquise "+ this );
 //        }
     }
-    
+
     public List<Item> getNouvellesItems() {
         return nouvellesItems;
     }
-    
+
     public void setNouvellesItems(List<Item> nouvellesItems) {
         this.nouvellesItems = nouvellesItems;
     }
-    
+
     public Flux getFlux() {
         return flux;
     }
-    
+
     public void setFlux(Flux flux) {
         this.flux = flux;
     }
-    
+
     public Date getDateDerniereRecup() {
         return DateDerniereRecup;
     }
-    
+
     public void setDateDerniereRecup(Date DateDerniereRecup) {
         this.DateDerniereRecup = DateDerniereRecup;
     }
-    
+
     public AbstrIncident getIncident() {
         return incident;
     }
-    
+
     public void setIncident(AbstrIncident incident) {
         this.incident = incident;
     }
-    
+
     @Override
     protected void finalize() throws Throwable {
         super.finalize(); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
     @Override
     public Object returnBeanCible() {
         return flux;
     }
-    
+
     @Override
     public String toString() {
         return "TacheRecupCallable{" + "flux=" + flux + ", DateDerniereRecup=" + DateDerniereRecup + ", incident=" + incident + '}';
@@ -346,16 +367,16 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
         sem.clear(); // On vide la map pour le reconstruire car les semaphore on pu changer
         if (this.flux != null && this.flux.getJournalLie() != null) {
             Semaphore s;
-            
+
             try {
                 s = SemaphoreCentre.getinstance().returnSemaphoreForRessource(this.flux.getJournalLie());
                 sem.add(s);
             } catch (Exception ex) {
                 logger.debug("Exception  ", ex);
             }
-            
+
         }
-        
+
         if (this.flux != null) {
             try {
                 Semaphore s = SemaphoreCentre.getinstance().returnSemaphoreForRessource(this.flux);
@@ -363,7 +384,7 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
             } catch (Exception e) {
                 logger.debug("Exception", e);
             }
-            
+
         }
         return sem;
     }
@@ -384,5 +405,29 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
      */
     public void setVisitorHTTP(VisitorHTTP visitorHTTP) {
         this.visitorHTTP = visitorHTTP;
+    }
+
+    /**
+     * *
+     * Construit un message d'erreur a stocker dans l'incident a partir du type de l'excpetion
+     */
+    private String constructionMessageErreurDepuisExc(Throwable exception) {
+        // Gestion de HTTPExeption
+        
+        
+        if (exception instanceof HTTPException) {
+            HTTPException ex = (HTTPException) exception;
+            return "HTTPException : Le serveur est joingnable mais retour d'un code erreur : " + ex.getStatusCode();
+
+        } // URL MAL FORMATE
+        else if (exception instanceof UnknownHostException) {
+            return "UnknownHostException : Il est impossible de joindre l'host du flux. Vérifiez l'adresse dans la fiche du flux. Le serveur n'a pas pu être join...";
+        } else if (exception.getClass().equals(ParsingFeedException.class)) {
+                    return "ParsingFeedException : Impossible de parser le flux XML. La page demandée est joignable mais le contenu trouvé n'a pas pu être interprété. Vérifiez à la main le contenu trouvable a l'url du flux. Il se peut que le journal ait supprimé le flux pour l'adresse mentionné (obtention d'une page erreur 404 ?).";
+        } else if (exception instanceof FeedException) { // Erreur de parsage du flux
+            return "FeedException : Impossible de parser le flux XML. Erreur :";
+        }
+         return "Pas de message pour ce type d'exception, regardez les logs";
+        
     }
 }

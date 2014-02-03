@@ -5,7 +5,7 @@
 package rssagregator.services;
 
 import java.util.Observable;
-import rssagregator.services.tache.AbstrTacheSchedule;
+import rssagregator.services.tache.AbstrTache;
 
 /**
  *
@@ -14,15 +14,15 @@ import rssagregator.services.tache.AbstrTacheSchedule;
 public class ServiceImpl extends AbstrService {
 
 //    @Override
-//    protected void gererIncident(AbstrTacheSchedule tache) {
+//    protected void gererIncident(AbstrTache tache) {
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 //    }
 
     @Override
     public void update(Observable o, Object arg) {
-        if (o instanceof AbstrTacheSchedule) {
+        if (o instanceof AbstrTache) {
 
-            AbstrTacheSchedule castTache = (AbstrTacheSchedule) o;
+            AbstrTache castTache = (AbstrTache) o;
 
 //            logger.debug("Notification de la tache");
 

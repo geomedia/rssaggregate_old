@@ -40,7 +40,7 @@ public class VisitorHTTP extends VisitorCollecteFlux implements ComportementVisi
     @Override
     public void visit(Flux flux) throws Exception {
         // On commence par cloner le comportement du flux
-        MediatorCollecteAction cloneCollecteAction = flux.getMediatorFlux().genererClone();
+        ComportementCollecte cloneCollecteAction = flux.getMediatorFlux().genererClone();
 
 
 //        InputStream retourInputStream = null;

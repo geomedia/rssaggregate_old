@@ -11,7 +11,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import javax.print.attribute.standard.Severity;
-import rssagregator.services.tache.AbstrTacheSchedule;
+import rssagregator.services.tache.AbstrTache;
 
 /**
  * Le consomateur est chargé de vider les tache de la queueTacheALancer du service en les lancant dans le pool
@@ -43,8 +43,8 @@ public class TacheConsomateur implements Runnable {
 
 
                 // Itération sur chaque tache de la queue
-                for (Iterator<AbstrTacheSchedule> it = service.queueTacheALancer.iterator(); it.hasNext();) {
-                    AbstrTacheSchedule t = it.next();
+                for (Iterator<AbstrTache> it = service.queueTacheALancer.iterator(); it.hasNext();) {
+                    AbstrTache t = it.next();
 
                     if (t != null) {
                         boolean semPreconditionAquises = t.tryAcquireSem();
@@ -81,7 +81,7 @@ public class TacheConsomateur implements Runnable {
 //
 //                    // Nouvelle version
 //
-//                    AbstrTacheSchedule t = service.queueTacheALancer.peek();
+//                    AbstrTache t = service.queueTacheALancer.peek();
 //
 //                    if (t != null) {
 //                        boolean semPreconditionAquises = t.tryAcquireSem();
@@ -105,7 +105,7 @@ public class TacheConsomateur implements Runnable {
 ////                    //Ancienne version
 ////                    
 ////                    // On place la tache dans le pool d'execution, si elle n'est pas annulée
-////                                        AbstrTacheSchedule t = service.queueTacheALancer.take(); // ce n'est pas la bonne
+////                                        AbstrTache t = service.queueTacheALancer.take(); // ce n'est pas la bonne
 ////                    
 ////                    if (!t.getAnnuler()) {
 ////                        SoumissionTache soumissionTache = new SoumissionTache();
@@ -151,7 +151,7 @@ public class TacheConsomateur implements Runnable {
      */
     private class SoumissionTache implements Runnable {
 
-        AbstrTacheSchedule tache;
+        AbstrTache tache;
 
         @Override
         public void run() {
@@ -199,11 +199,11 @@ public class TacheConsomateur implements Runnable {
             }
         }
 
-        public AbstrTacheSchedule getTache() {
+        public AbstrTache getTache() {
             return tache;
         }
 
-        public void setTache(AbstrTacheSchedule tache) {
+        public void setTache(AbstrTache tache) {
             this.tache = tache;
         }
     }

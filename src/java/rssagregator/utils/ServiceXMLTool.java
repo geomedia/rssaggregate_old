@@ -21,7 +21,7 @@ import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 import rssagregator.beans.exception.RessourceIntrouvable;
 import rssagregator.services.AbstrService;
-import rssagregator.services.tache.AbstrTacheSchedule;
+import rssagregator.services.tache.AbstrTache;
 import rssagregator.services.tache.TacheFactory;
 
 /**
@@ -141,11 +141,11 @@ public class ServiceXMLTool {
                 // Récupération de la class
                 Attribute attClassTache = tacheElement.getAttribute("class");
                 Class cTache = Class.forName(attClassTache.getValue());
-//                AbstrTacheSchedule castTache = (AbstrTacheSchedule) cTache.newInstance();
-                AbstrTacheSchedule castTache = tacheFactory.getNewTask(cTache, Boolean.FALSE);
+//                AbstrTache castTache = (AbstrTache) cTache.newInstance();
+                AbstrTache castTache = tacheFactory.getNewTask(cTache, Boolean.FALSE);
 
                 castTache.addObserver(service);
-//                AbstrTacheSchedule castTache = (AbstrTacheSchedule) tache;
+//                AbstrTache castTache = (AbstrTache) tache;
 
                 // Paramettrage de la tache
 

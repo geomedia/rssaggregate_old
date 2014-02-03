@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import rssagregator.beans.form.ComportementCollecteForm;
-import rssagregator.beans.traitement.MediatorCollecteAction;
+import rssagregator.beans.traitement.ComportementCollecte;
 import rssagregator.dao.DAOComportementCollecte;
 import rssagregator.dao.DAOFactory;
 import rssagregator.utils.ServletTool;
@@ -55,10 +55,10 @@ public class ComportementCollecteSrvlt extends HttpServlet {
         redirmap = null;
 
 
-        MediatorCollecteAction obj = null;
+        ComportementCollecte obj = null;
 
         DAOComportementCollecte dao = DAOFactory.getInstance().getDAOComportementCollecte();
-        dao.setClassAssocie(MediatorCollecteAction.class);
+        dao.setClassAssocie(ComportementCollecte.class);
         request.setAttribute("navmenu", "ComportementCollecte");
 
         // récupération de l'action
@@ -87,14 +87,14 @@ public class ComportementCollecteSrvlt extends HttpServlet {
          *///==============================================================================================
 //        if (action.equals("mod") || action.equals("rem") || action.equals("read")) {
 //            try {
-//                obj = (MediatorCollecteAction) dao.find(new Long(request.getParameter("id")));
+//                obj = (ComportementCollecte) dao.find(new Long(request.getParameter("id")));
 //                obj.enregistrerAupresdesService();
 //            } catch (Exception e) {
 //            }
 //        }
 //
 //        if (request.getMethod().equals("POST")) {
-//            obj = (MediatorCollecteAction) form.bind(request, obj, MediatorCollecteAction.class);
+//            obj = (ComportementCollecte) form.bind(request, obj, ComportementCollecte.class);
 //        }
 
         //----------------------------------------ACTION RECHERCHE ---------------------------------------------
@@ -107,7 +107,7 @@ public class ComportementCollecteSrvlt extends HttpServlet {
 //        if (form.getValide()) {
         //-----------------------------------------ACTION ADD --------------------------------------------
         if (action.equals("add")) {
-            ServletTool.actionADD(request, ATT_BEAN_JSP, ATT_FORM_JSP, MediatorCollecteAction.class, Boolean.TRUE);
+            ServletTool.actionADD(request, ATT_BEAN_JSP, ATT_FORM_JSP, ComportementCollecte.class, Boolean.TRUE);
 //            if (form.getValide()) {
 //                try {
 //                    dao.creer(obj);
@@ -121,11 +121,11 @@ public class ComportementCollecteSrvlt extends HttpServlet {
 //            }
         } //--------------------------------------ACTION MODIF--------------------------------------------------------
         else if (action.equals("mod")) {
-            ServletTool.actionMOD(request, ATT_BEAN_JSP, ATT_FORM_JSP, MediatorCollecteAction.class, Boolean.TRUE);
+            ServletTool.actionMOD(request, ATT_BEAN_JSP, ATT_FORM_JSP, ComportementCollecte.class, Boolean.TRUE);
 
         } //-----------------------------------ACTION REMOVE------------------------------------------------------------
         else if (action.equals("rem")) {
-            ServletTool.actionREM(request, MediatorCollecteAction.class, Boolean.TRUE);
+            ServletTool.actionREM(request, ComportementCollecte.class, Boolean.TRUE);
 //            try {
 //                dao.remove(obj);
 //                obj.forceChangeStatut();
@@ -137,7 +137,7 @@ public class ComportementCollecteSrvlt extends HttpServlet {
 //            }
         } //--------------------------------------------ACTION READ --------------------------------------------------------
         else if (action.equals("read")) {
-            ServletTool.actionREAD(request, MediatorCollecteAction.class, ATT_BEAN_JSP);
+            ServletTool.actionREAD(request, ComportementCollecte.class, ATT_BEAN_JSP);
         }
 
 

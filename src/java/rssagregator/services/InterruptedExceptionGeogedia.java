@@ -4,16 +4,16 @@
  */
 package rssagregator.services;
 
-import rssagregator.services.tache.AbstrTacheSchedule;
+import rssagregator.services.tache.AbstrTache;
 
 /**
  * Une execption propre au projet géomédia. Lorsqu'un Callable est interrompu, il doit emmettre ce type d'exception
  * @author clem
  */
 public class InterruptedExceptionGeogedia extends InterruptedException{
-    AbstrTacheSchedule task;
+    AbstrTache task;
 
-    public InterruptedExceptionGeogedia(AbstrTacheSchedule task, String s) {
+    public InterruptedExceptionGeogedia(AbstrTache task, String s) {
         super(s);
         this.task = task;
     }

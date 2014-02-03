@@ -11,9 +11,7 @@ import rssagregator.services.ServiceMailNotifier;
 import rssagregator.services.tache.TacheEnvoyerMail;
 
 /**
- * 
- * 
- * /!\ Cette classe N'est plus utilisé ca alourdi trop la base de données.
+ * /!\ Cette classe N'est plus utilisé ca alourdi trop la base de données. Les mail qui ne partent pas sont maintenant stocké sur le disque dur du serveur
  * 
  * 
  * <p>Incident généré par le service {@link ServiceMailNotifier}, lorsqu'un mail
@@ -42,20 +40,7 @@ public class MailIncident extends AbstrIncident implements Serializable {
      */
     protected String Objet;
 
-    //    @OneToOne
-    //    private Flux fluxLie;
-    //
-    //    @OneToOne
-    //    private Journal journalLie;
-    //
-    //
-    //    public Flux getFluxLie() {
-    //        return fluxLie;
-    //    }
-    //
-    //    public void setFluxLie(Flux fluxLie) {
-    //        this.fluxLie = fluxLie;
-    //    }
+
     @Override
     public int hashCode() {
         int hash = 7;
@@ -78,19 +63,6 @@ public class MailIncident extends AbstrIncident implements Serializable {
         return true;
     }
 
-    public static void main(String[] args) {
-
-        MailIncident s = new MailIncident();
-        MailIncident s2 = new MailIncident();
-
-//        s2.setLogErreur("dd");
-
-        if (s.equals(s2)) {
-            System.out.println("EQUAL");
-        } else {
-            System.out.println("INNEQUAL");
-        }
-    }
 
     public String getMessage() {
         return Message;

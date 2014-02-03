@@ -5,7 +5,7 @@
 package rssagregator.beans.exception;
 
 /**
- *
+ * N'est pas utilisé
  * @author clem
  */
 public class ConfigurationServeurIncomplete extends Exception{

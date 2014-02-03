@@ -88,9 +88,7 @@ public class UserForm extends AbstrForm {
             if (s.matches(EMAIL_PATTERN)) {
 
                 // On vérifie si il n'a a pas déjà cet email dans la base
-                System.out.println("s : " + s);
                 UserAccount uBdd = dao.findPrMail(s);
-                System.out.println("UBDD : " + uBdd);
                 if (uBdd == null) {
                     mail = s;
                 } else {

@@ -4,10 +4,10 @@
  */
 package rssagregator.beans;
 
-import rssagregator.beans.traitement.MediatorCollecteAction;
+import rssagregator.beans.traitement.ComportementCollecte;
 
 /**
- * <p>Tout beans ({@link Flux}, {@link Journal}, {@link FluxType}, {@link MediatorCollecteAction}) devant être
+ * <p>Tout beans ({@link Flux}, {@link Journal}, {@link FluxType}, {@link ComportementCollecte}) devant être
  * synchronisé sur les autres serveur doit implémenter cette interface. </p>
  * <p>Les DAO lors de l'enregistrement, la modification ou la suppression d'une entité vérifient si le beans implémente
  * cet interface afin de diffuser les modifications. Si la diffusion n'est pas possible, les dao Rollback le changement

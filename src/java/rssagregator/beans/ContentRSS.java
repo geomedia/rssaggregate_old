@@ -7,7 +7,7 @@ package rssagregator.beans;
 import java.util.Date;
 
 /**
- * Interface permettant de manier les variale d'un contenu de type RSS
+ * Interface permettant de manier les variale d'un contenu de type RSS {@link Item} ou {@link ItemRaffinee}
  *
  * @author clem
  */

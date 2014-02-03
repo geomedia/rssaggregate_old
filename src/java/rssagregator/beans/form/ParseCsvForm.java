@@ -11,6 +11,8 @@ import org.joda.time.format.DateTimeFormatter;
 import rssagregator.beans.traitement.CSVParse;
 
 /**
+ * Permet d'interpréter le formulaire de saisie permettant a l'utilisateur de saisir les informations relatives à
+ * l'imports d'items depuis un fichier CSV.
  *
  * @author clem
  */
@@ -32,7 +34,6 @@ public class ParseCsvForm extends AbstrForm {
     private int cContenu;
     private String forceEncoding;
     private String datePattern;
-    
 
     @Override
     public Object bind(HttpServletRequest request, Object objEntre, Class type) {
@@ -64,10 +65,6 @@ public class ParseCsvForm extends AbstrForm {
         }
         return null;
 
-
-
-
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
@@ -170,24 +167,18 @@ public class ParseCsvForm extends AbstrForm {
                 System.out.println("NON supporté");
             }
         }
-        
-        
+
+
         s = request.getParameter("datePattern");
-        if(s != null && !s.isEmpty()){
-            
+        if (s != null && !s.isEmpty()) {
+
             try {
-            DateTimeFormatter fmt = DateTimeFormat.forPattern(s); // On tente d'interpréter le pattern 
-            datePattern = s;
+                DateTimeFormatter fmt = DateTimeFormat.forPattern(s); // On tente d'interpréter le pattern 
+                datePattern = s;
             } catch (Exception e) {
                 logger.debug("Pattern Invalide");
             }
-
-            
-            
         }
-
-
-
         return this.valide;
     }
 }

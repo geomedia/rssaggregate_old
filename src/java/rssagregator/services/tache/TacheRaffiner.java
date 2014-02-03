@@ -169,7 +169,6 @@ public class TacheRaffiner extends TacheImpl<TacheRaffiner> {
                     item.setItemRaffinee(itemRetenu);
                     em.merge(itemRetenu);
                     em.merge(item);
-                    logger.debug("Merge");
                 }
             } catch (Exception e) {
                 logger.debug("err", e);

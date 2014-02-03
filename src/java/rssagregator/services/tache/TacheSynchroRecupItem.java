@@ -21,7 +21,7 @@ import rssagregator.beans.Item;
 import rssagregator.beans.ServeurSlave;
 import rssagregator.beans.incident.Incidable;
 import rssagregator.beans.incident.SynroRecupItemIncident;
-import rssagregator.beans.traitement.MediatorCollecteAction;
+import rssagregator.beans.traitement.ComportementCollecte;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoItem;
 import rssagregator.services.AbstrService;
@@ -142,7 +142,7 @@ public class TacheSynchroRecupItem extends TacheImpl<TacheSynchroRecupItem> impl
                 List<Item> itemTrouvees = (List<Item>) serialisation;
 
                 // Par sécurité, on va utiliser le dédoublonneur du comportement associé au flux pour évincer les icones doublons dans le flux
-                MediatorCollecteAction comportement = flux.getMediatorFlux().genererClone();
+                ComportementCollecte comportement = flux.getMediatorFlux().genererClone();
                 itemTrouvees = comportement.getDedoubloneur().dedoublonne(itemTrouvees, flux);
 
                 //On enregistre chacune des items
@@ -275,7 +275,7 @@ public class TacheSynchroRecupItem extends TacheImpl<TacheSynchroRecupItem> impl
 //                    List<Item> itemTrouvees = (List<Item>) serialisation;
 //
 //                    // Par sécurité, on va utiliser le dédoublonneur du comportement associé au flux pour évincer les icones doublons dans le flux
-//                    MediatorCollecteAction comportement = flux.getMediatorFlux().genererClone();
+//                    ComportementCollecte comportement = flux.getMediatorFlux().genererClone();
 //                    itemTrouvees = comportement.getDedoubloneur().dedoublonne(itemTrouvees, flux);
 //
 //                    //On enregistre chacune des items

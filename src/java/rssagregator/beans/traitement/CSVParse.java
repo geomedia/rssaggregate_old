@@ -19,16 +19,15 @@ import java.util.logging.Logger;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import rssagregator.beans.Item;
+import rssagregator.beans.form.ParseCsvForm;
 
 /**
- * Ce parseur permet de parcourir un fichier CSV afin de générer des beans ${@link Item}. L'ordre des colonne est fixe.
- * Aux utilisateur de fournir un fichier compatible. Ordre : <ul>
- * <li></li>
- * <li></li>
- * <li></li>
- * <li></li>
- * <li></li>
- * </ul>
+ * Ce parseur permet de parcourir un fichier CSV afin de générer des beans ${@link Item}. Ce aprseur est utilisé lors du
+ * processus d'import d'item à partir d'un fichier CSV. Le parseur est alors configurée en fonction de la requête
+ * utilisateur par un objet forumaire : {@link ParseCsvForm}. Le concordance entre les ligne du csv et le champ du beans
+ * Item est déterminée par l'utilisateur. Comme le Rome parseur, ce parseur renvoie une liste d'item qui doivent ensuite
+ * être dédoublonnée puis enregistré dans le base de données.
+ * <p>Ce parseur est utilisé par le visiteur {@link VisitorCollecteActionCSV} </p>
  *
  *
  * @author clem
@@ -54,27 +53,14 @@ public class CSVParse extends AbstrParseur {
     private int cDateRecup;
     private int cCat;
     private int cContenu;
-    
-    
     private String datePattern;
 
     @Override
     public List<Item> execute(byte[] xml) throws IOException, IllegalArgumentException, FeedException {
 
         List<Item> listItem = new ArrayList<Item>();
-            org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
+        org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
 
-
-
-
-//        FileInputStream fileInputStream = new FileInputStream(csvFile);
-
-//        CSVReader cSVReader = new CSVReader(new InputStreamReader(xml));
-
-
-        //Parcours du fichier ligne à ligne
-//        CSVReader reader = new CSVReader(new FileReader(csvFile));
-        System.out.println("LINE : " + line);
 
         CSVReader reader = null;
         if (forceEncoding != null && !forceEncoding.isEmpty()) {
@@ -82,29 +68,27 @@ public class CSVParse extends AbstrParseur {
                 Charset charset = Charset.forName(forceEncoding);
                 ByteArrayInputStream bais = new ByteArrayInputStream(xml);
                 InputStreamReader inputStreamReader1 = new InputStreamReader(bais, charset);
-                
+
                 reader = new CSVReader(inputStreamReader1, separator, quotechar, escape, line, strictQuotes, ignoreLeadingWhiteSpace);
 
             } catch (Exception e) {
-                logger.debug("Impossible de trouver le charset ? " , e);
+                logger.debug("Impossible de trouver le charset ? ", e);
             }
         }
 
 
         if (reader == null) {
-              ByteArrayInputStream bais = new ByteArrayInputStream(xml);
+            ByteArrayInputStream bais = new ByteArrayInputStream(xml);
             reader = new CSVReader(new InputStreamReader(bais), separator, quotechar, escape, line, strictQuotes, ignoreLeadingWhiteSpace);
         }
 
-        System.out.println("Separateur " + separator);
 
         String[] nextLine;
 //        DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
         DateTimeFormatter fmt = DateTimeFormat.forPattern(datePattern);
-        
+
 
         while ((nextLine = reader.readNext()) != null) {
-            System.out.println("ITERATION");
             String titre = nextLine[cTitre];
             String description = nextLine[cDescription];
             String link = nextLine[cLink];
@@ -130,20 +114,12 @@ public class CSVParse extends AbstrParseur {
 
         }
 
-        System.out.println("NOMBRE D'item " + listItem.size());
         return listItem;
     }
 
     public CSVParse() {
     }
 
-//    public File getCsvFile() {
-//        return csvFile;
-//    }
-//
-//    public void setCsvFile(File csvFile) {
-//        this.csvFile = csvFile;
-//    }
     public char getSeparator() {
         return separator;
     }
@@ -263,27 +239,18 @@ public class CSVParse extends AbstrParseur {
     public void setDatePattern(String datePattern) {
         this.datePattern = datePattern;
     }
-    
-    
-    
 
     public static void main(String[] args) {
         try {
             File f = new File("/home/clem/parseTestLeMonde.csv");
             CSVParse parse = new CSVParse();
 
-//              CSVReader reader = new CSVReader(new FileReader(csvFile), separator, quotechar, escape, line, strictQuotes, ignoreLeadingWhiteSpace);
-
-
             parse.setLine(0);
             parse.setEscape('\\');
             parse.setSeparator('\t');
             parse.setQuotechar('"');
-//            parse.setCsvFile(f);
             parse.setStrictQuotes(false);
             parse.setIgnoreLeadingWhiteSpace(true);
-
-
             parse.execute(null);
 
         } catch (IOException ex) {

@@ -40,7 +40,7 @@ import rssagregator.beans.form.ParseCsvForm;
 import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.beans.traitement.CSVParse;
 import rssagregator.beans.traitement.VisitorCollecteActionCSV;
-import rssagregator.beans.traitement.MediatorCollecteAction;
+import rssagregator.beans.traitement.ComportementCollecte;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DAOGenerique;
 import rssagregator.dao.DaoFlux;
@@ -57,9 +57,9 @@ import rssagregator.utils.ServletTool;
  * @author clem
  */
 @WebServlet(name = "Flux", urlPatterns = {"/flux/*"})
-@MultipartConfig(location = "/home/clem", maxFileSize = 10485760, maxRequestSize = 52428800, fileSizeThreshold = 1048576) // Nécessaire pour l'envoie de fichier CSV
+@MultipartConfig(maxFileSize = 10485760, maxRequestSize = 52428800, fileSizeThreshold = 1048576) // Nécessaire pour l'envoie de fichier CSV
 public class FluxSrvl extends HttpServlet {
-
+    
     public static final String ATT_FORM = "form";
     public static final String ATT_OBJ = "bean";
     public static final String ATT_ACTION = "action";
@@ -81,7 +81,7 @@ public class FluxSrvl extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
+        
         response.setCharacterEncoding("UTF-8");
         request.setCharacterEncoding("UTF-8");
 
@@ -96,7 +96,7 @@ public class FluxSrvl extends HttpServlet {
 
         // récupération de l'action (list, mod del ...). Si aucune action n'est précisée, alors on recherche qui correpond à la page d'acceuil de la recherhc des flux.
         String action = ServletTool.configAction(request, "recherche");
-
+        
         request.setAttribute("srlvtname", ATT_SERV_NAME);
 
         // On récupère la vue
@@ -105,10 +105,10 @@ public class FluxSrvl extends HttpServlet {
             vue = "html";
         }
         request.setAttribute("vue", vue);
-
+        
         DaoJournal daoJournal = DAOFactory.getInstance().getDaoJournal();
         DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
-
+        
         List<Journal> journals = daoJournal.findallOrederByTitre(false); // On a besoin de la liste des journaux dans les pages html pour les menus déroulant. Il faut donc un attribut list journaux
         request.setAttribute("listjournaux", journals);
 
@@ -133,7 +133,7 @@ public class FluxSrvl extends HttpServlet {
             request.setAttribute("listtypeflux", dAOGenerique.findall());
             
             journals = daoJournal.findallOrederByTitre(true); // On a besoin de la liste des journaux dans les pages html pour les menus déroulant. Il faut donc un attribut list journaux
-        request.setAttribute("listjournaux", journals);
+            request.setAttribute("listjournaux", journals);
             
             request.setAttribute("listcomportement", DAOFactory.getInstance().getDAOComportementCollecte().findall());
 
@@ -142,7 +142,7 @@ public class FluxSrvl extends HttpServlet {
                 request.setAttribute("jSelect", DAOFactory.getInstance().getDaoJournal().find(new Long(request.getParameter("journal-id"))));
             } catch (Exception e) {
             }
-
+            
             ServletTool.actionADD(request, ATT_OBJ, ATT_FORM, Flux.class, true);
             //------------------------------------------------------------------------------------------------------------
             //.                                .  .  .ACTION : MODIFICATION
@@ -171,12 +171,12 @@ public class FluxSrvl extends HttpServlet {
                     Long long1 = listId.get(i);
                     listFlux.add((Flux) daoFlux.find(long1));
                 }
-
+                
                 List<TacheRecupCallable> listTache = ServiceCollecteur.getInstance().majManuellAll(listFlux);
                 request.setAttribute(ATT_LISTOBJ, listFlux);
                 request.setAttribute("listTache", listTache);
-
-
+                
+                
             } catch (NumberFormatException e) {
                 ServletTool.redir(request, "flux/maj", "Flux Inconnu", true);
             } catch (NoResultException e) {
@@ -186,7 +186,7 @@ public class FluxSrvl extends HttpServlet {
 //                AbstrIncident incid = ServiceGestionIncident.getInstance().gererIncident(e, flux);
 //                ServletTool.redir(request, "flux/maj", "ERREUR LORS DE La récup DU FLUX. : " + e.toString(), true);
             }
-
+            
         } // Si l'action est liste, on récupère la liste des flux
         //-------------------------------------------------------- ACTION LIST --------------------------------------------------------
         else if (action.equals("list")) {
@@ -196,11 +196,11 @@ public class FluxSrvl extends HttpServlet {
                 request.setAttribute("journalid", idJournal);
                 journalLie = (Journal) daoJournal.find(idJournal);
                 daoFlux.setCriteriaJournalLie(journalLie);
-
+                
             } catch (Exception e) {
                 logger.debug(e);
             }
-
+            
             ServletTool.actionLIST(request, Flux.class, null, daoFlux);
             //------------------------------------------------------------------------------------------------------------
             //-----------------------------------------------------ACTION REMOVE ---------------------------------------
@@ -212,7 +212,7 @@ public class FluxSrvl extends HttpServlet {
                 List<Flux> listFlux = ServletTool.getListFluxFromRequest(request, daoFlux);
                 ServiceCRUDFlux service = (ServiceCRUDFlux) ServiceCRUDFactory.getInstance().getServiceFor(Flux.class);
                 service.SupprimerListFlux(listFlux, true, null);
-
+                
                 ServletTool.redir(request, "flux", "Suppression du flux effecué.", false);
             } catch (NoResultException e) {
                 ServletTool.redir(request, "flux", "Vous demandez a supprimer des flux qui n'existent pas.", true);
@@ -232,23 +232,23 @@ public class FluxSrvl extends HttpServlet {
          * Pour la lecture des information d'un beans
          */
         else if (action.equals("read")) {
-            
+
             // récupération des principaux incidents de collecte
             try {
-                    Long id = new Long(request.getParameter("id"));
-                    
-                    List<CollecteIncident> indids = daoFlux.findPrincipauxIncident(id, 1, 5);
-                    request.setAttribute("indids", indids);
-                          ServletTool.actionREAD(request, Flux.class, ATT_OBJ);
+                Long id = new Long(request.getParameter("id"));
+                
+                List<CollecteIncident> indids = daoFlux.findPrincipauxIncident(id, 1, 5);
+                request.setAttribute("indids", indids);
+                ServletTool.actionREAD(request, Flux.class, ATT_OBJ);
             } catch (Exception e) {
-                 ServletTool.redir(request, "flux", "flux qui n'existent pas.", true);
+                ServletTool.redir(request, "flux", "flux qui n'existent pas.", true);
             }
             
-        
             
             
             
-      
+            
+            
         } //------------------------------------------------------------------------------------------------------------
         //--------------------------------------------ACTION IMPORT CSV
         //------------------------------------------------------------------------------------------------------------
@@ -257,77 +257,81 @@ public class FluxSrvl extends HttpServlet {
          * Gère l'import d'items en trois phase : upload, parse, enregistrement.
          */
         else if (action.equals("importcsv")) {
-            String varPath = (String) PropertyLoader.returnConfPath();
-
+            
             String phase = request.getParameter("phase");   //On récupère la phase (upload, parse, save...)
             if (request.getParameter("init") != null && !request.getParameter("init").isEmpty() && request.getParameter("init").equals("true")) {
                 phase = "";
                 request.setAttribute("phase", "");
             }
-
+            System.out.println("PHASE" + phase);
+            
             if (request.getMethod().equals("POST")) {
 
                 //---------------> Phase : upload
                 if (phase != null && phase.equals("upload")) {
-                    HttpSession session = request.getSession();
+                    try {
+                        HttpSession session = request.getSession();
 
-                    // Dans cette phase, on récupère le fichier, puis on instancie le collecteur pour le flux et l'on associe le fichier a ce comportement qui sera utilisé dans la phase suivant : le parsing
+                        // Dans cette phase, on récupère le fichier, puis on instancie le collecteur pour le flux et l'on associe le fichier a ce comportement qui sera utilisé dans la phase suivant : le parsing
 
-                    // On récupère le flux
-                    Part part = request.getPart("csvfile");
-                   
-                    
-                    String nomFichier = getNomFichier(part);
+                        // On récupère le flux
+                        Part part = request.getPart("csvfile");
+                        
+                        
+                        String nomFichier = getNomFichier(part);
 //Traitement du fichier envoyé
-                    if (nomFichier != null && !nomFichier.isEmpty()) {
-                        String nomChamp = part.getName();
-                        request.setAttribute(nomChamp, nomFichier);
-                        System.out.println("Le nom de fichier : " + nomFichier);
+                        if (nomFichier != null && !nomFichier.isEmpty()) {
+                            String nomChamp = part.getName();
+                            request.setAttribute(nomChamp, nomFichier);
+                            System.out.println("Le nom de fichier : " + nomFichier);
 
-                        // écriture du fichier sur le disque
+                            // écriture du fichier sur le disque
 
-                        Date dateCurrent = new Date();
-                        Long l = new Long(dateCurrent.getTime());
-                        UserAccount user = (UserAccount) session.getAttribute("authuser");
-                        String nomFichierUpload = "importCSV_" + l.toString() + "_" + user.getUsername() + ".csv";
-                        System.out.println("fileName : " + nomFichierUpload);
-
-                        byte[] resu = returnByteFromUploadedFile(part);
-                        session.setAttribute("stringCSV", resu);
-                        request.setAttribute("phase", "parse");
-
-                        Flux fl = (Flux) DAOFactory.getInstance().getDAOFlux().find(new Long(request.getParameter("id")));
-                        VisitorCollecteActionCSV visitorCollecteActionCSV = new VisitorCollecteActionCSV();
-                        session.setAttribute("visitor", visitorCollecteActionCSV);
-
-                        visitorCollecteActionCSV.setByteCSV(resu);
+                            Date dateCurrent = new Date();
+                            Long l = new Long(dateCurrent.getTime());
+                            UserAccount user = (UserAccount) session.getAttribute("authuser");
+                            String nomFichierUpload = "importCSV_" + l.toString() + "_" + user.getUsername() + ".csv";
+                            System.out.println("fileName : " + nomFichierUpload);
+                            
+                            byte[] resu = returnByteFromUploadedFile(part);
+                            session.setAttribute("stringCSV", resu);
+                            request.setAttribute("phase", "parse");
+                            
+                            Flux fl = (Flux) DAOFactory.getInstance().getDAOFlux().find(new Long(request.getParameter("id")));
+                            VisitorCollecteActionCSV visitorCollecteActionCSV = new VisitorCollecteActionCSV();
+                            session.setAttribute("visitor", visitorCollecteActionCSV);
+                            
+                            visitorCollecteActionCSV.setByteCSV(resu);
+                            
+                        }
+                    } catch (Exception e) {
                         
-                        
-
+                        logger.debug("Erreur", e);
                     }
+
 
                     //---------> Phase : parse
                 } else if (phase != null && phase.equals("parse")) {
                     HttpSession session = request.getSession();
-
+                    
                     request.setAttribute("phase", "parse");
                     ParseCsvForm form = new ParseCsvForm();
                     form.validate(request);
-
+                    
                     Flux fl = (Flux) DAOFactory.getInstance().getDAOFlux().find(new Long(request.getParameter("id")));
                     try {
 
                         // Création du visiteur permettant de récupérer les items depuis un CSV
                         VisitorCollecteActionCSV visitorCollecteActionCSV = (VisitorCollecteActionCSV) session.getAttribute("visitor");
-
-                        MediatorCollecteAction clonemediator = fl.getMediatorFlux().genererClone();
+                        
+                        ComportementCollecte clonemediator = fl.getMediatorFlux().genererClone();
                         CSVParse parser = (CSVParse) form.bind(request, null, CSVParse.class);
                         clonemediator.setParseur(parser);
                         visitorCollecteActionCSV.setComportementCollecte(clonemediator);
-
+                        
                         visitorCollecteActionCSV.visit(fl); // On lance la visite du flux. C'est à dire le travail de parsing
                         request.setAttribute("items", visitorCollecteActionCSV.getListItem());
-
+                        
                     } catch (CloneNotSupportedException ex) {
                         Logger.getLogger(FluxSrvl.class.getName()).log(Level.SEVERE, null, ex);
                     } catch (HTTPException ex) {
@@ -338,12 +342,12 @@ public class FluxSrvl extends HttpServlet {
                     request.setAttribute("phase", "presave");
                 } //------------> phase : saveItem
                 else if (phase != null && phase.equals("saveItem")) {
-
+                    
                     try {
                         //On récupère les items précédemment checké dans la requête
                         HttpSession session = request.getSession();
-
-
+                        
+                        
                         VisitorCollecteActionCSV visiteur = (VisitorCollecteActionCSV) session.getAttribute("visitor");
                         //Récupération du flux
 
@@ -352,10 +356,10 @@ public class FluxSrvl extends HttpServlet {
 //                    ServiceCRUDFlux serviceCrud = (ServiceCRUDFlux) ServiceCRUDFactory.getInstance().getServiceFor(Flux.class);
                         ServiceCollecteur collecteur = ServiceCollecteur.getInstance();
                         List<Item> items = visiteur.getListItem();
-
+                        
                         EntityManager em = DAOFactory.getInstance().getEntityManager();
                         em.getTransaction().begin();
-
+                        
                         for (int i = 0; i < items.size(); i++) {
                             Item item = items.get(i);
                             collecteur.ajouterItemAuFlux(fl, item, em, false, null);
@@ -381,24 +385,24 @@ public class FluxSrvl extends HttpServlet {
 
             // On récup l'ID de la période de captation
             List<Long> ids = ServletTool.parseidFromRequest(request, null);
-
+            
             if (!ids.isEmpty()) {
-
+                
                 DAOGenerique dao = DAOFactory.getInstance().getDAOGenerique();
                 dao.setClassAssocie(FluxPeriodeCaptation.class);
                 FluxPeriodeCaptation periode = (FluxPeriodeCaptation) dao.find(ids.get(0));
-
+                
                 System.out.println("PERIODE DEMANDE : " + periode);
-
+                
                 ObjectMapper mapper = new ObjectMapper();
-
+                
                 FilterProvider filters = new SimpleFilterProvider().addFilter("serialisePourUtilisateur",
                         SimpleBeanPropertyFilter.serializeAllExcept("flux", "comportementDurantLaPeriode"));
-
+                
                 String jsonn = mapper.writer(filters).writeValueAsString(periode);
                 request.setAttribute("jsonstr", jsonn);
                 System.out.println("" + jsonn);
-
+                
                 request.setAttribute("text", "Ok enregistrement réalisé");
                 vue = "jsonPrint";
             }
@@ -436,7 +440,7 @@ public class FluxSrvl extends HttpServlet {
             VUE = "/WEB-INF/jsonPrint.jsp";
         } else if (action.equals("importcsv")) {
             String phase = request.getParameter("phase");
-
+            
             System.out.println("PHSE" + phase);
             if (phase == null || (phase != null && phase.isEmpty())) {
                 VUE = "/WEB-INF/fluxHTML.jsp";
@@ -448,17 +452,14 @@ public class FluxSrvl extends HttpServlet {
             } else if (phase.equals("saveItem")) {
                 System.out.println("Phase : saveItem");
                 VUE = "/WEB-INF/printText.jsp";
-
+                
             }
-
-        } 
-        else if(vue.equals("printText")){
-              VUE = "/WEB-INF/printText.jsp";
-        }
-        else if(vue.equals("jsonPrint")){
-              VUE = "/WEB-INF/jsonPrint.jsp";
-        }
-        else {
+            
+        } else if (vue.equals("printText")) {
+            VUE = "/WEB-INF/printText.jsp";
+        } else if (vue.equals("jsonPrint")) {
+            VUE = "/WEB-INF/jsonPrint.jsp";
+        } else {
             response.setContentType("text/html;charset=UTF-8");
             response.setCharacterEncoding("UTF-8");
             VUE = "/WEB-INF/fluxHTML.jsp";
@@ -468,7 +469,7 @@ public class FluxSrvl extends HttpServlet {
             this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
         }
     }
-
+    
     private static String getNomFichier(Part part) {
         /* Boucle sur chacun des paramètres de l'en-tête "content-disposition". */
         for (String contentDisposition : part.getHeader("content-disposition").split(";")) {
@@ -481,7 +482,7 @@ public class FluxSrvl extends HttpServlet {
         /* Et pour terminer, si rien n'a été trouvé... */
         return null;
     }
-
+    
     private byte[] returnByteFromUploadedFile(Part part) throws IOException {
         /* Prépare les flux. */
         BufferedInputStream entree = null;
@@ -489,7 +490,7 @@ public class FluxSrvl extends HttpServlet {
         try {
             /* Ouvre les flux. */
             entree = new BufferedInputStream(part.getInputStream(), TAILLE_TAMPON);
-
+            
             sortie = new ByteArrayOutputStream(TAILLE_TAMPON);
 
             /*
@@ -503,7 +504,7 @@ public class FluxSrvl extends HttpServlet {
 //                sortie.write(tampon, 0, longueur);
 
             }
-
+            
             byte[] resu = sortie.toByteArray();
 //            System.out.println("BAOS : " + sortie.toString());
             return resu;
@@ -512,7 +513,7 @@ public class FluxSrvl extends HttpServlet {
                 if (sortie != null) {
                     sortie.close();
                 }
-
+                
             } catch (IOException ignore) {
             }
             try {

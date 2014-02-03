@@ -4,7 +4,7 @@
  */
 package rssagregator.services;
 
-import rssagregator.services.tache.AbstrTacheSchedule;
+import rssagregator.services.tache.AbstrTache;
 
 /**
  * Cette classe permet de gérer le lancement et le maintient des services de
@@ -215,7 +215,7 @@ public class ServiceServer extends ServiceImpl {
 //     * </ul>
 //     */
 //    public void update(Observable o, Object arg) {
-//        if (o instanceof AbstrTacheSchedule) {
+//        if (o instanceof AbstrTache) {
 //            if (o.getClass().equals(TacheStillAlive.class)) {
 //                TacheStillAlive cast = (TacheStillAlive) o;
 //                if (cast.getRupture()) {
@@ -235,7 +235,7 @@ public class ServiceServer extends ServiceImpl {
 //                
 //            }
 //            
-////            gererIncident((AbstrTacheSchedule) o);
+////            gererIncident((AbstrTache) o);
 //        }
 //
 ////        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.

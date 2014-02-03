@@ -32,6 +32,7 @@ import rssagregator.beans.form.AbstrForm;
 import rssagregator.beans.form.FORMFactory;
 import rssagregator.beans.form.ItemForm;
 import rssagregator.dao.DAOFactory;
+import rssagregator.dao.DaoFlux;
 import rssagregator.dao.DaoItem;
 import rssagregator.dao.SearchFilter;
 import rssagregator.dao.SearchFiltersList;
@@ -230,7 +231,7 @@ public class ItemSrvl extends HttpServlet {
         //--------------------------------------------------------------------------------------------------------------
         //.........................LIST GRID
         //--------------------------------------------------------------------------------------------------------------
-        // Va être fusionné avec list
+        // Permet de lister les items. Mais aussi de réaliser l'esport (traitement particulier en fonction de la vue
         if (action.equals("list")) {
 
             // On récupère l'objet de gestion de formulaire
@@ -244,10 +245,11 @@ public class ItemSrvl extends HttpServlet {
 
             //Si l'objectif est de faire un CSV le traitement est particulier
             if (vue != null && vue.equals("csv")) {
-                
-                
+
+
                 boolean html = ServletTool.getBooleen(request, "html");
                 boolean escapeBySlash = ServletTool.getBooleen(request, "escape");
+                boolean rafine = ServletTool.getBooleen(request, "rafine");
                 System.out.println("HTML : " + html);
 
 
@@ -266,8 +268,8 @@ public class ItemSrvl extends HttpServlet {
                         System.out.println("------------ LIST FLUX");
                         List<Flux> fluxDDe = (List<Flux>) searchFilter1.getData();
                         cSVMacker.setFluxDemande(fluxDDe);
-                    }
-                    if (searchFilter1.getType().equals(Date.class)) {
+                    } 
+                   if (searchFilter1.getType().equals(Date.class)) {
                         if (searchFilter1.getOp().equals("gt")) {
                             Date dateDebut = (Date) searchFilter1.getData();
                             cSVMacker.setDate1(dateDebut);
@@ -283,16 +285,16 @@ public class ItemSrvl extends HttpServlet {
                 cSVMacker.setFiltre(formu.getFiltersList());
                 ExecutorService es = Executors.newCachedThreadPool();
                 try {
-                          Future fut = es.submit(cSVMacker);
-                           fut.get();
-                            request.setAttribute("redir", cSVMacker.getRedirPath());
+                    Future fut = es.submit(cSVMacker);
+                    fut.get(); // On attend la fin du travail 
+                    Thread.sleep(6000000);
+                    request.setAttribute("redir", cSVMacker.getRedirPath());
                 } catch (Exception e) {
-                logger.debug("Erreur lors de la génération du CSV", e);
-                }
-                finally{
+                    logger.debug("Erreur lors de la génération du CSV", e);
+                } finally {
                     es.shutdownNow();
                 }
-          
+
 
             } else {
                 if (formu != null) {
@@ -312,7 +314,7 @@ public class ItemSrvl extends HttpServlet {
             // On récupère la liste des flux utile à la génération du menu déroulant
 //            request.setAttribute("listflux", DAOFactory.getInstance().getDAOFlux().findAllFlux(false));
             request.setAttribute("listflux", new ArrayList<Flux>()); // On donne une liste de flux v ide.
-            
+
 
             //List des journaux
 //            request.setAttribute("listJournaux", DAOFactory.getInstance().getDaoJournal().findall());
@@ -329,13 +331,6 @@ public class ItemSrvl extends HttpServlet {
 
             // Récupération du filter
             String filterString = request.getParameter("filters");
-            System.out.println("===========================");
-            System.out.println(filterString);
-            System.out.println("===========================");
-
-
-
-
 
             List<Item> listItem = null;
             Date date1 = null;
@@ -346,7 +341,6 @@ public class ItemSrvl extends HttpServlet {
                 form = (ItemForm) FORMFactory.getInstance().getForm(Item.class, "list");
                 form.parseListeRequete(request, daoItem);
 
-                System.out.println("FILTER FORM : " + form.getFiltersList());
 
 
 
@@ -367,13 +361,14 @@ public class ItemSrvl extends HttpServlet {
                     }
 
                     if (searchFilter.getField().equals("listFlux")) {
-
-                        System.out.println(">>>>>>>>>>>>>>>ID FLUX ; " + searchFilter.getData());
-                        System.out.println("CLASS " + searchFilter.getData().getClass());
-                        if (searchFilter.getData().getClass().equals(JSONArray.class)) {
-                            System.out.println("ARRAY JSON");
-                        }
                         listFlux = (List<Flux>) searchFilter.getData();
+
+                        // On raffraichi Les flux. Ca peut sembler bete mais dans les objet de la liste içl n'y a que l'ID.
+                        DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
+                        for (int j = 0; j < listFlux.size(); j++) {
+                            Flux f = listFlux.get(j);
+                            listFlux.set(j, (Flux) daoFlux.find(f.getID()));
+                        }
                     }
                 }
 
@@ -388,22 +383,14 @@ public class ItemSrvl extends HttpServlet {
             } catch (Exception ex) {
                 Logger.getLogger(ItemSrvl.class.getName()).log(Level.SEVERE, null, ex);
             }
-            System.out.println("################################");
-            System.out.println("---> date 1 " + date1);
-            System.out.println("date 2 : " + date2);
-            System.out.println("################################");
-
-            System.out.println("--> LIST SIZE IT : " + listItem.size());
 
             POJOCompteurFluxItem compteurFluxItem = new POJOCompteurFluxItem();
             compteurFluxItem.setListItem(listItem);
-            System.out.println("---> LIST ITEM : " + listItem.size());
             compteurFluxItem.setDate1(date1);
             compteurFluxItem.setDate2(date2);
             compteurFluxItem.setListFlux(listFlux);
 
             compteurFluxItem.compter();
-
 
             request.setAttribute("compte", compteurFluxItem.getListCompteItem());
 
@@ -448,6 +435,7 @@ public class ItemSrvl extends HttpServlet {
          * ...............................GESTION DE LA VUE
          *///=================================================================================
         //utilisation de la vue en fonction des paramettres envoyé par l'utilisateur.
+//        System.out.println("vue " + vue);
         if (vue.equals("html")) {
             VUE = "/WEB-INF/itemHTML.jsp";
         }
@@ -455,7 +443,7 @@ public class ItemSrvl extends HttpServlet {
             response.sendRedirect((String) request.getAttribute("redir"));
 //            response.setHeader("Content-Disposition", "attachment; filename = items-export.csv");
 //            VUE = "/WEB-INF/itemCSV2.jsp";
-            VUE= null;
+            VUE = null;
         } else if (vue.equals("csvexpert")) {
             response.setHeader("Content-Disposition", "attachment; filename = items-export.csv");
             VUE = "/WEB-INF/itemexpertCSV.jsp";
@@ -476,8 +464,8 @@ public class ItemSrvl extends HttpServlet {
             VUE = "/WEB-INF/jsonPrint.jsp";
         }
 
-        if(VUE != null){
-        this.getServletContext().getRequestDispatcher(VUE).forward(request, response);            
+        if (VUE != null) {
+            this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
         }
 
     }

@@ -42,7 +42,7 @@ import rssagregator.beans.exception.DonneeInterneCoherente;
 import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.beans.traitement.ComportementVisitor;
-import rssagregator.beans.traitement.MediatorCollecteAction;
+import rssagregator.beans.traitement.ComportementCollecte;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoFlux;
 //import rssagregator.services.TacheVerifComportementFLux;
@@ -52,7 +52,7 @@ import rssagregator.dao.DaoFlux;
  * aux entitées suivante : <ul>
  * <li>{@link Journal} : Un flux peut appartenir à 0 à 1 journal</li>
  * <li>{@link FluxType} : Un flux peut appartenir à 0 à 1 type de flux (international, à la une ...)</li>
- * <li>{@link MediatorCollecteAction} : Une flux possède un comportement de collecte permettant de collecter les
+ * <li>{@link ComportementCollecte} : Une flux possède un comportement de collecte permettant de collecter les
  * {@link Item}</li>
  * <li>{@link Item} : Un flux possède 0 à N item. </li>
  * <li>{@link CollecteIncident} : un flux peut posséder 0 à N incidents de Collecte.</li>
@@ -220,7 +220,7 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
      * utilisé, il sont visibles dans les période de captations.
      */
 //    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
-//    private MediatorCollecteAction mediatorFlux;
+//    private ComportementCollecte mediatorFlux;
     /**
      * Le mediator flux permet d'assigner un flux un comportement de collecte. Un médiator est une configuration de
      * parseur Raffineur etc. IL s4AGIT DU COMPTEMENT DE COLLECTE ACTUELLE. Si auparavant d'autres comportement ont été
@@ -230,7 +230,7 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
 //    @ManyToOne
 //    @ManyToOne(cascade = {CascadeType.MERGE})
     @ManyToOne()
-    private MediatorCollecteAction mediatorFlux;
+    private ComportementCollecte mediatorFlux;
     public static final String PROP_MEDIATORFLUX = "mediatorFlux";
 
     /**
@@ -238,7 +238,7 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
      *
      * @return the value of mediatorFlux
      */
-    public MediatorCollecteAction getMediatorFlux() {
+    public ComportementCollecte getMediatorFlux() {
         return mediatorFlux;
     }
 
@@ -247,8 +247,8 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
      *
      * @param mediatorFlux new value of mediatorFlux
      */
-    public void setMediatorFlux(MediatorCollecteAction mediatorFlux) {
-        MediatorCollecteAction oldMediatorFlux = this.mediatorFlux;
+    public void setMediatorFlux(ComportementCollecte mediatorFlux) {
+        ComportementCollecte oldMediatorFlux = this.mediatorFlux;
         this.mediatorFlux = mediatorFlux;
         propertyChangeSupport.firePropertyChange(PROP_MEDIATORFLUX, oldMediatorFlux, mediatorFlux);
     }
@@ -765,8 +765,8 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
              * le rôle de ce bloc.
              */
             else if (evt.getPropertyName().equals(PROP_MEDIATORFLUX)) {
-                MediatorCollecteAction oldValue = (MediatorCollecteAction) evt.getOldValue();
-                MediatorCollecteAction newValue = (MediatorCollecteAction) evt.getNewValue();
+                ComportementCollecte oldValue = (ComportementCollecte) evt.getOldValue();
+                ComportementCollecte newValue = (ComportementCollecte) evt.getNewValue();
 
                 //Si il s'agit d'(un changement de comportement
                 if (oldValue != null && newValue != null) {

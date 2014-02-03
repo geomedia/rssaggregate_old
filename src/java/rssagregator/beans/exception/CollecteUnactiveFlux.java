@@ -14,5 +14,4 @@ public class CollecteUnactiveFlux extends Exception{
         super(message);
     }
     
-    
 }

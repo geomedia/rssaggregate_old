@@ -35,23 +35,32 @@ import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoItem;
 
 /**
- * Cette classe gère les relations entre un ou plusieurs flux et les differents objets de traitement(parseurs,
- * raffinneurs...). Il est ainsi possible de créer plusieurs comportement de collecte et de les concerver (ces
- * comportements sont persistés dans la base de données). Un flux n'est associé qu'à un comportement de collecte. Il est
- * possible d'obtenir le comportement par defaut, celui ci est écrit en dur dans le code. La méthode static
- * getDefaultCollectAction retourne une instance de ce mediateur par défault. Celui ci doit permettre de collecter sans
- * préciser de configuration la majorité des flux. Si aucun médiator n'est associé à un flux c'est par le biais de cette
- * méthode qu'on va obtenir le comportement par défault
+ * <p>Beans Permettant de stocker le comportement de collecte lié a un flux. Dans la mesure du possible, on essaiera de
+ * n'avoir qu'un comportement de collecte pour tout le projet Geomedia. Par composistion il est tout de même possible
+ * d'associer un comportement particulier a chaque flux.</p>
+ *
+ *
+ * <p>Un comportement de collecte est une entité composé des différents outil de traitement permettant d'effectuer la
+ * collecte :
+ * <ul>
+ * <li>{@link Requester} Pour effectuer la requete sur le serveur distant</li>
+ * <li>{@link AbstrParseur} interpréter les données du flux RSS afin de compléter les données d'un Bean</li>
+ * <li>{@link AbstrDedoublonneur} Permet de dédoublonner les items afin de savoir si elle doit ou non être de nouveau
+ * enregistré dans la base de données</li>
+ * <li></li>
+ * </ul>
+ * </p>
+ *
  */
 @Entity
 @Table(name = "tr_mediatocollecteaction")
 //@Cacheable(true)
 //@Cache(type = CacheType.FULL, coordinationType = CacheCoordinationType.INVALIDATE_CHANGED_OBJECTS, isolation = CacheIsolationType.SHARED)
 @XmlRootElement
-public class MediatorCollecteAction implements Serializable, Cloneable, BeanSynchronise {
+public class ComportementCollecte implements Serializable, Cloneable, BeanSynchronise {
 
     @Transient
-    org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(MediatorCollecteAction.class);
+    org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(ComportementCollecte.class);
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long ID;
@@ -89,8 +98,8 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
     @OneToOne(cascade = CascadeType.ALL)
     private AbstrRequesteur requesteur;
     /**
-     * Le mediatorAReferer flux permet d'assigner un flux un comportement de collecte. Un médiator est une configuration de
-     * parseur Raffineur etc.
+     * Le mediatorAReferer flux permet d'assigner un flux un comportement de collecte. Un médiator est une configuration
+     * de parseur Raffineur etc.
      *
      * @element-type Flux
      */
@@ -106,12 +115,10 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
      */
 //    @Transient    LE RAFFINAGE NEST PLUS CONSIDÉRÉ COMME UN TRAITEMENT DE COLECTE; IL N'EST DESTINEE QUA FAIRE DES EXPORT EN CSV
 //    private List<MediatorTraitementRafinage> rafineurHTML;
-    /**
-     * *
-     * Nettoyeur, une classe pas encore certaine.
-     */
-    @Transient
-    private Nettoyeur myNettoyeur;
+    
+    
+    
+    
     /**
      * *
      * Dédoublonneur du médiateur.
@@ -150,24 +157,6 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
 //    }
     @Version
     private Timestamp dateUpdate;
-    
-    
-    
-    
-//    @Transient
-//    protected transient short nbItTrouve= 0;
-//    @Transient
-//    protected transient short nbDedoubMemoire = 0;
-//    @Transient
-//    protected transient short nbDedoubBdd = 0;
-//    @Transient
-//    protected transient short nbLiaisonCree = 0;
-//    @Transient
-//    protected transient short nbNouvelle = 0;
-//    @Transient
-//    protected transient short nbDoublonInterneAuflux =0;
-            
-    
 
     public Timestamp getDateUpdate() {
         return dateUpdate;
@@ -178,7 +167,8 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
     }
 
     /**
-     * Le médiator récolte les item les parse et les dédoublonne. DEPRECATED . IL FAUT UTILISER LES VISITOR POUR EFEFCTUER l'ACTION DE COLLECTER
+     * Le médiator récolte les item les parse et les dédoublonne. DEPRECATED . IL FAUT UTILISER LES VISITOR POUR
+     * EFEFCTUER l'ACTION DE COLLECTER
      */
     @Deprecated
     public List<Item> executeActions(Flux flux) throws MalformedURLException, IOException, HTTPException, FeedException, HTTPException, Exception {
@@ -197,9 +187,9 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
                 }
                 this.requesteur.requete(flux.getUrl());
 //                retourInputStream = this.requesteur.getHttpInputStream();
-                
+
 //                System.out.println("retour : " + retourInputStream.toString());
-                
+
                 if (parseur != null) {
 //                    parseur.setInputStream(retourInputStream);
                 }
@@ -215,9 +205,9 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
             futurs = executor.submit(parseur);
             if (requesteur == null) {
                 try {
-                listItem = futurs.get(12, TimeUnit.SECONDS);                    
+                    listItem = futurs.get(12, TimeUnit.SECONDS);
                 } catch (Exception e) {
-                logger.debug("ERR", e);
+                    logger.debug("ERR", e);
                 }
 
             } else {
@@ -225,7 +215,7 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
             }
 
             this.nbrItemCollecte = listItem.size();
-            
+
 //            this.nbItTrouve = (short) listItem.size();
 
 
@@ -413,13 +403,13 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
     }
 
     /**
-     * Retourne un objet mediatorAReferer par default. Il permet de répondre à 95% des flux en se basant sur le parse par defaut
-     * de l'API Rome, le connecteur standart.... Cette methode n'est plus maintenue. Déterminer le comportement par
-     * défault par du code compilé et non changeable est mal, juste bon pour faire des test!
+     * Retourne un objet mediatorAReferer par default. Il permet de répondre à 95% des flux en se basant sur le parse
+     * par defaut de l'API Rome, le connecteur standart.... Cette methode n'est plus maintenue. Déterminer le
+     * comportement par défault par du code compilé et non changeable est mal, juste bon pour faire des test!
      */
     @Deprecated
-    public static MediatorCollecteAction getDefaultCollectAction() {
-        MediatorCollecteAction collecteAction = new MediatorCollecteAction();
+    public static ComportementCollecte getDefaultCollectAction() {
+        ComportementCollecte collecteAction = new ComportementCollecte();
 
         collecteAction.setDefaut(false);
         collecteAction.periodiciteCollecte = 3600;
@@ -486,7 +476,7 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
      * *
      * Constructeur par défault. Des objets de traitement basique sont crée pour le Comportement.
      */
-    public MediatorCollecteAction() {
+    public ComportementCollecte() {
         this.dedoubloneur = new Dedoubloneur();
         this.requesteur = new Requester();
         this.dedoubloneur = new Dedoubloneur();
@@ -502,13 +492,7 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
         this.parseur = parseur;
     }
 
-    public Nettoyeur getMyNettoyeur() {
-        return myNettoyeur;
-    }
 
-    public void setMyNettoyeur(Nettoyeur myNettoyeur) {
-        this.myNettoyeur = myNettoyeur;
-    }
 
     //    public AbstrDedoublonneur getDedoubloneur() {
     //        return dedoubloneur;
@@ -596,12 +580,11 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
 //    public void setDedoublonneur2(AbstrDedoublonneur dedoublonneur2) {
 //        this.dedoublonneur2 = dedoublonneur2;
 //    }
-
     @Override
-    protected MediatorCollecteAction clone() throws CloneNotSupportedException {
-        MediatorCollecteAction clone = null;
+    protected ComportementCollecte clone() throws CloneNotSupportedException {
+        ComportementCollecte clone = null;
 
-        clone = (MediatorCollecteAction) super.clone();
+        clone = (ComportementCollecte) super.clone();
 
         clone.parseur = (AbstrParseur) this.parseur.clone();
         clone.dedoubloneur = (AbstrDedoublonneur) this.dedoubloneur.clone();
@@ -620,10 +603,9 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
 //        return super.clone(); //To change body of generated methods, choose Tools | Templates.
     }
 
-    public MediatorCollecteAction genererClone() throws CloneNotSupportedException {
+    public ComportementCollecte genererClone() throws CloneNotSupportedException {
         return this.clone();
     }
-
 
 //    @Override
 //    /***
@@ -652,13 +634,12 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final MediatorCollecteAction other = (MediatorCollecteAction) obj;
+        final ComportementCollecte other = (ComportementCollecte) obj;
         if (this.ID != other.ID && (this.ID == null || !this.ID.equals(other.ID))) {
             return false;
         }
         return true;
     }
-
 //    public short getNbItTrouve() {
 //        return nbItTrouve;
 //    }
@@ -706,8 +687,4 @@ public class MediatorCollecteAction implements Serializable, Cloneable, BeanSync
 //    public void setNbDoublonInterneAuflux(short nbDoublonInterneAuflux) {
 //        this.nbDoublonInterneAuflux = nbDoublonInterneAuflux;
 //    }
-    
-
-
-    
 }

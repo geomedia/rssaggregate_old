@@ -4,7 +4,6 @@
  */
 package rssagregator.beans.incident;
 
-import rssagregator.beans.exception.UnIncidableException;
 import rssagregator.services.tache.TacheRecupCallable;
 
 /**
@@ -14,21 +13,8 @@ import rssagregator.services.tache.TacheRecupCallable;
  * @author clem
  */
 public interface Incidable {
-
-//    /**
-//     * *
-//     * Ferme tous les incidents ouvert pour l'entitée
-//     */
-//    @Deprecated
-//    public void fermerLesIncidentOuvert();
-//
-//    /**
-//     * *
-//     * Retourne la liste des incident ouvert pour l'entitée.
-//     *
-//     * @return
-//     */
-//    public AbstrIncident getIncidenOuvert();
+   
+    
     /**
      * *
      * Retourne le type d'incident permettant de gérer les incidents de la tâche. Exemple pour la tâche

@@ -3,6 +3,10 @@
     Created on : 25 juin 2013, 17:05:15
     Author     : clem
 --%>
+<%@page import="org.joda.time.DateTime"%>
+<%@page import="org.joda.time.format.DateTimeFormatter"%>
+<%@page import="org.joda.time.format.DateTimeFormat"%>
+<%@page import="org.joda.time.format.DateTimeFormat"%>
 <%@page import="rssagregator.dao.SearchFiltersList"%>
 <%@page import="rssagregator.dao.SearchFilter"%>
 <%@page import="java.util.Map"%>
@@ -35,6 +39,8 @@
 
 
     List<Item> listItem = (List<Item>) request.getAttribute("items");
+
+    DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
 
     // Récupération de la liste des flux demandé par l'utilisateur. Sans avoir celle ci on ne peut retirer les infos non demandé par l'utilisateur
     SearchFiltersList filtersList = (SearchFiltersList) request.getAttribute("filtersList");
@@ -144,15 +150,25 @@
 
                     c = r.createCell(1);
                     c.setCellValue("Titre");
-                    
-                    
+
+
                     c = r.createCell(2);
                     c.setCellValue("Description");
-                    
+
                     c = r.createCell(3);
                     c.setCellValue("Lien");
+
+                    c = r.createCell(4);
+                    c.setCellValue("Contenu");
+
+                    c = r.createCell(5);
+                    c.setCellValue("DatePub");
+
+                    c = r.createCell(6);
+                    c.setCellValue("DateRecup");
+
 //                    
-                    
+
                 }
 
                 // On ajoute la donnée à la sheet
@@ -178,9 +194,39 @@
                 // Gestion de la description
                 c = r.createCell(2);
                 c.setCellValue(listItem.get(rownum).getDescription());
-                
+
+
+
                 c = r.createCell(3);
                 c.setCellValue(listItem.get(rownum).getLink());
+
+
+                // Gestion du contenu
+                c = r.createCell(4);
+                c.setCellValue(listItem.get(rownum).getContenu());
+
+                //Gestion date recuo
+
+                c = r.createCell(5);
+                if (listItem.get(rownum).getDatePub() != null) {
+                    c.setCellValue(fmt.print(new DateTime(listItem.get(rownum).getDatePub())));
+                } else {
+                    c.setCellValue("");
+                }
+
+
+
+                //Gestion de la date de publication
+                c = r.createCell(6);
+                if (listItem.get(rownum).getDateRecup() != null) {
+//                    c = r.createCell(6);
+                    c.setCellValue(fmt.print(new DateTime(listItem.get(rownum).getDateRecup())));
+                } else {
+                    c.setCellValue("");
+                }
+
+
+
             }
         }
     }

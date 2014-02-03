@@ -4,18 +4,9 @@
  */
 package rssagregator.utils;
 
-import com.fasterxml.jackson.databind.util.BeanUtil;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import javax.persistence.EntityManager;
-import javax.persistence.TransactionRequiredException;
-import org.apache.commons.beanutils.BeanToPropertyValueTransformer;
-import org.apache.commons.beanutils.BeanUtilsBean;
-import org.apache.commons.beanutils.BeanUtilsBean2;
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.beanutils.PropertyUtilsBean;
 
 /**
  *

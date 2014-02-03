@@ -15,10 +15,7 @@ import rssagregator.beans.ServeurSlave;
 
 /**
  * La class permettant de vérifier et binder les données saisie par l'utilisateur avec le beans <strong>Conf</strong
- * @aut
- *
- *
- * hor clem
+ * @author clem
  */
 public class ConfForm extends AbstrForm {
     //-------------------------------------

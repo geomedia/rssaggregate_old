@@ -312,9 +312,9 @@ public class JournauxSrvl extends HttpServlet {
             Journal j = (Journal) DAOFactory.getInstance().getDaoJournal().find(new Long(request.getParameter("id")));
   
             try {
-                Future<TacheDecouverteAjoutFlux> fut = ServiceCollecteur.getInstance().decouverteFluxJournal(j, ServletTool.getBooleen(request, "persist"), ServletTool.getBooleen(request, "active"));
+                Future<TacheDecouverteAjoutFlux> fut = ServiceCollecteur.getInstance().decouverteFluxJournal(j, ServletTool.getBooleen(request, "persist"), ServletTool.getBooleen(request, "active"), new Short(request.getParameter("timeout")), new Short(request.getParameter("nbThread")));
                 
-                TacheDecouverteAjoutFlux tache = fut.get(1, TimeUnit.MINUTES);
+                TacheDecouverteAjoutFlux tache = fut.get(3, TimeUnit.MINUTES);
                 request.setAttribute("tacheDecouverte", tache);
                 
             } catch (IncompleteBeanExeption ex) {

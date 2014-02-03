@@ -7,7 +7,7 @@ package rssagregator.services;
 import rssagregator.services.tache.TacheLancerConnectionJMS;
 import rssagregator.services.tache.TacheFactory;
 import rssagregator.services.tache.TacheEnvoyerMail;
-import rssagregator.services.tache.AbstrTacheSchedule;
+import rssagregator.services.tache.AbstrTache;
 import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.ParsingFeedException;
 import java.io.IOException;
@@ -280,7 +280,7 @@ public class ServiceGestionIncident {
      * Lorsqu'une tâche s'est déroulé avec succes le service gérant la tache doit prévenir le service des exeption pour que celui solve potentiellement les exeptions ouvertes
      * @param tache 
      */
-    public void succes(AbstrTacheSchedule tache){
+    public void succes(AbstrTache tache){
         if(tache instanceof TacheLancerConnectionJMS){
             DAOIncident<MailIncident> dao = (DAOIncident<MailIncident>) DAOFactory.getInstance().getDaoFromType(MailIncident.class);
             

@@ -84,7 +84,6 @@ public abstract class AbstrIncident implements Serializable {
      */
     @Column(name = "logErreur", columnDefinition = "text")
     protected String logErreur;
-
     /**
      * *
      * Nombre de répétition de l'incident. A chaque échec la tâche concerné va incrémenter ce compteur tant qu'elle
@@ -138,25 +137,39 @@ public abstract class AbstrIncident implements Serializable {
     public void setModified(Timestamp modified) {
         this.modified = modified;
     }
+
     /**
      * *
-     * Permet de déterminer si un incident doit ou non être notifié par la tache {@link TacheAlerteMail}
+     * @see #messageEreur
+     * @return
      */
-    @Column(name = "notificationImperative")
-    protected Boolean notificationImperative;
-
     public String getMessageEreur() {
         return messageEreur;
     }
 
+    /**
+     * *
+     * @see #messageEreur
+     * @param messageEreur
+     */
     public void setMessageEreur(String messageEreur) {
         this.messageEreur = messageEreur;
     }
 
+    /**
+     * *
+     * @see #noteIndicent
+     * @return
+     */
     public String getNoteIndicent() {
         return noteIndicent;
     }
 
+    /**
+     * *
+     * @see #noteIndicent
+     * @param noteIndicent
+     */
     public void setNoteIndicent(String noteIndicent) {
         this.noteIndicent = noteIndicent;
     }
@@ -165,51 +178,79 @@ public abstract class AbstrIncident implements Serializable {
         return logErreur;
     }
 
+    /**
+     * *
+     * @see #logErreur
+     * @param logErreur
+     */
     public void setLogErreur(String logErreur) {
         this.logErreur = logErreur;
     }
 
-
+    /**
+     * *
+     * @see #nombreTentativeEnEchec
+     * @return
+     */
     public Integer getNombreTentativeEnEchec() {
         return nombreTentativeEnEchec;
     }
 
+    /***
+     * @see #nombreTentativeEnEchec
+     * @param nombreTentativeEnEchec 
+     */
     public void setNombreTentativeEnEchec(Integer nombreTentativeEnEchec) {
         this.nombreTentativeEnEchec = nombreTentativeEnEchec;
     }
 
+    /***
+     * @see #lastNotification
+     * @return 
+     */
     public Date getLastNotification() {
         return lastNotification;
     }
 
+    /***
+     * @see #lastNotification
+     * @param lastNotification 
+     */
     public void setLastNotification(Date lastNotification) {
         this.lastNotification = lastNotification;
     }
 
+    /***
+     * @see #dateDebut
+     * @return 
+     */
     public Date getDateDebut() {
         return dateDebut;
     }
 
+    /***
+     * @see #dateDebut
+     * @param dateDebut 
+     */
     public void setDateDebut(Date dateDebut) {
         this.dateDebut = dateDebut;
     }
 
+    /***
+     * @see #dateFin
+     * @return 
+     */
     public Date getDateFin() {
         return dateFin;
     }
 
+    /***
+     * @see #dateFin
+     * @param dateFin 
+     */
     public void setDateFin(Date dateFin) {
         this.dateFin = dateFin;
     }
-
-    public Boolean getNotificationImperative() {
-        return notificationImperative;
-    }
-
-    public void setNotificationImperative(Boolean notificationImperative) {
-        this.notificationImperative = notificationImperative;
-    }
-
 
     /**
      * *
@@ -270,7 +311,10 @@ public abstract class AbstrIncident implements Serializable {
 
     @Override
     public int hashCode() {
-        int hash = 7;
+        int hash = 5;
+        hash = 89 * hash + (this.messageEreur != null ? this.messageEreur.hashCode() : 0);
+        hash = 89 * hash + (this.logErreur != null ? this.logErreur.hashCode() : 0);
+        hash = 89 * hash + (this.dateDebut != null ? this.dateDebut.hashCode() : 0);
         return hash;
     }
 
@@ -286,15 +330,9 @@ public abstract class AbstrIncident implements Serializable {
         if ((this.messageEreur == null) ? (other.messageEreur != null) : !this.messageEreur.equals(other.messageEreur)) {
             return false;
         }
-        if ((this.noteIndicent == null) ? (other.noteIndicent != null) : !this.noteIndicent.equals(other.noteIndicent)) {
-            return false;
-        }
         if ((this.logErreur == null) ? (other.logErreur != null) : !this.logErreur.equals(other.logErreur)) {
             return false;
         }
-//        if (this.bloquant != other.bloquant && (this.bloquant == null || !this.bloquant.equals(other.bloquant))) {
-//            return false;
-//        }
         if (this.dateDebut != other.dateDebut && (this.dateDebut == null || !this.dateDebut.equals(other.dateDebut))) {
             return false;
         }
@@ -328,5 +366,4 @@ public abstract class AbstrIncident implements Serializable {
     public String incidDesc() {
         return desc;
     }
-    
 }

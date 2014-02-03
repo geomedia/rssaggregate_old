@@ -91,9 +91,9 @@ public class TacheFactory {
     public Short TacheCalculQualiteFluxLancementTous_maxExecuteTime = 600;
     public Byte TacheCalculQualiteFluxLancementTous_typeSchedule = 2;
 
-    public AbstrTacheSchedule getNewTask(Class c, Boolean scheduled) {
+    public AbstrTache getNewTask(Class c, Boolean scheduled) {
 
-        AbstrTacheSchedule newTache = null;
+        AbstrTache newTache = null;
         Short maxExecuteTime = null;
         AbstrService service = null;
         Byte typeSchedule = null;
@@ -164,6 +164,12 @@ public class TacheFactory {
             newTache = new TacheRemoveOldFile();
             service = ServiceServer.getInstance();
             maxExecuteTime = 5;
+        }
+        else if(c.equals(TacheDecouverteAjoutFlux.class)){
+            newTache = new TacheDecouverteAjoutFlux();
+            service = ServiceCollecteur.getInstance();
+            maxExecuteTime = 300;
+            newTache.setSchedule(false);
         }
         
 

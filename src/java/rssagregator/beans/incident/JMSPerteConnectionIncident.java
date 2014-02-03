@@ -10,6 +10,7 @@ import org.joda.time.Duration;
 import rssagregator.services.tache.TacheLancerConnectionJMS;
 
 /**
+ * <strong>/!\ N'est plus utilisé. La synchronisation est retirée des objectifs du projet</strong>
  * <p>Incident générée par le service {@link ServerIncident} lorsque la tâche
  * {@link TacheLancerConnectionJMS} ne parvient pas à étéblir la connection
  * JMS</p>
@@ -18,6 +19,7 @@ import rssagregator.services.tache.TacheLancerConnectionJMS;
  * chaque nouvel échec on incremente le compteur nbrRepetition.<p>
  *
  * @author clem
+ * @deprecated 
  */
 @Entity(name = "i_jmsperteconnectionincident")
 public class JMSPerteConnectionIncident extends SynchroIncident {

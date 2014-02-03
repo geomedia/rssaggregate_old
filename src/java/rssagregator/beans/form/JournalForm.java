@@ -4,14 +4,13 @@
  */
 package rssagregator.beans.form;
 
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.servlet.http.HttpServletRequest;
 import rssagregator.beans.Journal;
-import rssagregator.beans.traitement.MediatorCollecteAction;
+import rssagregator.beans.traitement.ComportementCollecte;
 import rssagregator.dao.AbstrDao;
 import rssagregator.dao.DAOComportementCollecte;
 import rssagregator.dao.DAOFactory;
@@ -35,19 +34,15 @@ public class JournalForm extends AbstrForm {
     private String fuseauHorraire;
     private String information;
     private String typeJournal;
-    private MediatorCollecteAction comportementParDefaultDesFlux;
+    private ComportementCollecte comportementParDefaultDesFlux;
     private Boolean autoUpdateFlux;
     private Boolean activerFluxDecouvert;
     private Integer periodiciteDecouverte;
     //--------------------------------------
-    org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(JournalForm.class);
 
     protected JournalForm() {
     }
 
-//    public JournalForm() {
-//        super();
-//    }
     @Override
     public Object bind(HttpServletRequest request, Object objEntre, Class type) {
 //        return super.bind(request, objEntre, type); //To change body of generated methods, choose Tools | Templates.
@@ -193,7 +188,7 @@ public class JournalForm extends AbstrForm {
             // On utiliser la dao pour rechercher
             try {
                 DAOComportementCollecte dao = DAOFactory.getInstance().getDAOComportementCollecte();
-                comportementParDefaultDesFlux = (MediatorCollecteAction) dao.find(new Long(s));
+                comportementParDefaultDesFlux = (ComportementCollecte) dao.find(new Long(s));
             } catch (Exception e) {
             }
         }
@@ -223,7 +218,6 @@ public class JournalForm extends AbstrForm {
 
     @Override
     public void parseListeRequete(HttpServletRequest request, AbstrDao dao) throws Exception {
-//        super.parseListeRequete(request); //To change body of generated methods, choose Tools | Templates.
         this.recupStandartFilters(request, dao, filtersList);
 
     }

@@ -4,19 +4,18 @@
  */
 package rssagregator.beans.incident;
 
-import java.io.PrintWriter;
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import rssagregator.beans.exception.CollecteUnactiveFlux;
 import rssagregator.beans.exception.UnIncidableException;
-import rssagregator.services.tache.AbstrTacheSchedule;
+import rssagregator.services.tache.AbstrTache;
 import rssagregator.utils.ExceptionTool;
 
 /**
- * Permet de créer un incident
+ * Permet de créer un incident. Il est possible de générer un incident à partir d'une tache {@link #createIncidentFromTask(rssagregator.services.tache.AbstrTache, java.lang.String)
+ * } ou en spécifiant directement le type d'incident que l'on souhaite créer {@link #getIncident(java.lang.Class, java.lang.String, java.lang.Throwable)
+ * }
  *
  * @author clem
  */
@@ -45,9 +44,6 @@ public class IncidentFactory<T extends AbstrIncident> {
         }
 
         configurerIncident(incid, message, tw);
-        System.out.println("C'est un incident de type  : " + incid.getClass());
-
-
         return incid;
     }
 
@@ -58,7 +54,7 @@ public class IncidentFactory<T extends AbstrIncident> {
      * @param tache :
      * @param message
      */
-    public T createIncidentFromTask(AbstrTacheSchedule tache, String message) throws InstantiationException, IllegalAccessException, UnIncidableException {
+    public T createIncidentFromTask(AbstrTache tache, String message) throws InstantiationException, IllegalAccessException, UnIncidableException {
         AbstrIncident incid;
 
         // On vérifie que la tache est incidable;
@@ -101,15 +97,13 @@ public class IncidentFactory<T extends AbstrIncident> {
 
         incid.setDateDebut(new Date());
 
-        if (incid.getClass().equals(MailIncident.class)) {
-            incid.setNotificationImperative(false);
-        } else {
-            incid.setNotificationImperative(true);
-        }
+//        if (incid.getClass().equals(MailIncident.class)) {
+//            incid.setNotificationImperative(false);
+//        } else {
+//            incid.setNotificationImperative(true);
+//        }
 
         if (tw != null) {
-           
-
             incid.setLogErreur(ExceptionTool.stackTraceToString(tw));
 
         }

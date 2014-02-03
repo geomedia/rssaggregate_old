@@ -32,7 +32,7 @@ import rssagregator.dao.DaoJournal;
 import rssagregator.services.tache.TacheDecouverteAjoutFlux;
 import rssagregator.services.tache.TacheFactory;
 import rssagregator.services.tache.TacheRecupCallable;
-import rssagregator.services.tache.AbstrTacheSchedule;
+import rssagregator.services.tache.AbstrTache;
 import rssagregator.services.tache.TacheRaffiner;
 
 /**
@@ -43,6 +43,7 @@ import rssagregator.services.tache.TacheRaffiner;
  * @author clem
  */
 public class ServiceCollecteur extends ServiceImpl {
+
     org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(ServiceCollecteur.class);
 //    ListeFluxCollecte fluxCollecte; On le récupère maintenant directement depuis le singleton de collecte
     /**
@@ -146,6 +147,14 @@ public class ServiceCollecteur extends ServiceImpl {
         }
     }
 
+    /**
+     * *
+     * Enregistre un journal auprès du service de collecte. Le service de collecte va créer un tache périodique de
+     * découverte des flux RSS pour le journal si celui ci est configuré pour
+     *
+     * @param j
+     * @throws IncompleteBeanExeption
+     */
     public synchronized void enregistrerJournalAupresduService(Journal j) throws IncompleteBeanExeption {
         if (j == null) {
             throw new NullPointerException("Le journal est null");
@@ -159,9 +168,12 @@ public class ServiceCollecteur extends ServiceImpl {
 
 
         if (j.getAutoUpdateFlux()) { // Si le journal est configuré pour autodécouvrir ses flux.
-
-
-            AbstrTacheSchedule entry = retriveTaskJournalDiscover(j);
+            
+            if(j.getPeriodiciteDecouverte() == null){
+                throw new IncompleteBeanExeption("Le journal n'a pas de variable int PeriodiciteDecouverte");
+            }
+ 
+           AbstrTache entry = retriveTaskJournalDiscover(j);
             if (entry != null) {
                 try {
                     entry.getFuture().cancel(true);
@@ -177,9 +189,16 @@ public class ServiceCollecteur extends ServiceImpl {
             tache.setPersist(true);
             tache.setActiverLesFLux(j.getActiverFluxDecouvert());
             tache.setNombredeSousTache(30); // TODO : doit être tiré du beans Journal
+            tache.setSchedule(Boolean.TRUE);
+            tache.setTimeSchedule(j.getPeriodiciteDecouverte());
+
+            byte byt = 1;
+            tache.setTypeSchedule(byt);
+
 
 
             this.tacheProducteur.produire(tache);
+            System.out.println("====================");
         }
     }
 
@@ -193,7 +212,7 @@ public class ServiceCollecteur extends ServiceImpl {
 
         // On annule l atache
 
-        AbstrTacheSchedule entry = retriveTaskJournalDiscover(j);
+        AbstrTache entry = retriveTaskJournalDiscover(j);
         if (entry != null) {
             // Annulation de la tache
             try {
@@ -233,7 +252,7 @@ public class ServiceCollecteur extends ServiceImpl {
 //        List<AbstrTacheSchedule> listtacheDuFLux = this.mapFluxTache.get(f.getID());
 //        if (listtacheDuFLux != null) {
 //            for (int i = 0; i < listtacheDuFLux.size(); i++) {
-//                AbstrTacheSchedule abstrTacheSchedule = listtacheDuFLux.get(i);
+//                AbstrTache abstrTacheSchedule = listtacheDuFLux.get(i);
 //                try {
 //                    abstrTacheSchedule.annuler();
 //                } catch (Exception ex) {
@@ -249,7 +268,7 @@ public class ServiceCollecteur extends ServiceImpl {
         cancelAndRemoveTaskFromAssociedWithBeans(f);
 //            for (int i = 0; i < tacheDuBeans.size(); i++) {
 //                Entry<AbstrTacheSchedule, Future> entry1 = tacheDuBeans.get(i);
-//                AbstrTacheSchedule tache = entry1.getKey();
+//                AbstrTache tache = entry1.getKey();
 //                Future futur = entry1.getValue();
 //                  synchronized(mapTache){
 //                      
@@ -293,7 +312,7 @@ public class ServiceCollecteur extends ServiceImpl {
 //
 //
 //        for (Entry<AbstrTacheSchedule, Future> entry : mapTache.entrySet()) {
-//            AbstrTacheSchedule abstrTacheSchedule = entry.getKey();
+//            AbstrTache abstrTacheSchedule = entry.getKey();
 //            Future future = entry.getValue();
 //
 //            // Si c'est une tache de récup
@@ -307,9 +326,6 @@ public class ServiceCollecteur extends ServiceImpl {
 //        }
 //        return null;
 //    }
-    
-    
-    
     /**
      * **
      * Retrouve la tache de découverte de flux associé au journal envoyé en argument parmis la map des tâches propres au
@@ -319,7 +335,7 @@ public class ServiceCollecteur extends ServiceImpl {
      * @return Une entry comprenant le callable ainsi que le future
      * @throws IncompleteBeanExeption Si le journal envoyé en argumetn n'a pas d'id
      */
-    public AbstrTacheSchedule retriveTaskJournalDiscover(Journal j) throws IncompleteBeanExeption {
+    public AbstrTache retriveTaskJournalDiscover(Journal j) throws IncompleteBeanExeption {
 
         if (j == null) {
             throw new NullPointerException("Le journal est null");
@@ -329,7 +345,7 @@ public class ServiceCollecteur extends ServiceImpl {
         }
 
         for (int i = 0; i < tacheGereeParLeService.size(); i++) {
-            AbstrTacheSchedule abstrTacheSchedule = tacheGereeParLeService.get(i);
+            AbstrTache abstrTacheSchedule = tacheGereeParLeService.get(i);
 //            
             Future future = abstrTacheSchedule.getFuture();
 
@@ -481,7 +497,7 @@ public class ServiceCollecteur extends ServiceImpl {
         for (i = 0; i < listFlux.size(); i++) {
 
             TacheRecupCallable task = (TacheRecupCallable) TacheFactory.getInstance().getNewTask(TacheRecupCallable.class, Boolean.FALSE);
-            
+
             task.setFlux(listFlux.get(i));
             taches.add(task);
         }
@@ -501,18 +517,18 @@ public class ServiceCollecteur extends ServiceImpl {
 
             for (Iterator<TacheRecupCallable> it = remainTask.iterator(); it.hasNext();) {
                 TacheRecupCallable tacheRecupCallable = it.next();
-                
-                if(tacheRecupCallable.getFuture() != null){
-                    
+
+                if (tacheRecupCallable.getFuture() != null) {
+
                     Future fut = tacheRecupCallable.getFuture();
-                    if(fut.isDone()){
-                         it.remove();
+                    if (fut.isDone()) {
+                        it.remove();
                     }
                 }
             }
             Thread.sleep(500);
         }
-        
+
 
 
 //        // Attente des résultats
@@ -532,7 +548,7 @@ public class ServiceCollecteur extends ServiceImpl {
 
     @Override
     public void update(Observable o, Object arg) {
-        
+
 
         super.update(o, arg); //To change body of generated methods, choose Tools | Templates.
 
@@ -541,24 +557,24 @@ public class ServiceCollecteur extends ServiceImpl {
         if (o.getClass().equals(TacheRecupCallable.class)) { // Cette partie est désactivé pour le moement
 
             TacheRecupCallable recupCallable = (TacheRecupCallable) o;
-            logger.debug("Update de " + o+"\n Annulé : " + recupCallable.getAnnuler());
+            logger.debug("Update de " + o + "\n Annulé : " + recupCallable.getAnnuler());
             List<Item> listItem = recupCallable.getNouvellesItems();
 
-            
+
 //            List<Future> listFuture = new ArrayList<Future>();
             for (int i = 0; i < listItem.size(); i++) {
 
                 Item item = listItem.get(i);
                 // Si la nouvelle item ne possède pas d'item raffiné on lance une tache dédié a cela
                 if (item.getItemRaffinee() == null) {
-          
+
                     //TODO : Le rafinnage est pour l'instant désactivé
                     TacheRaffiner raffiner = (TacheRaffiner) TacheFactory.getInstance().getNewTask(TacheRaffiner.class, false);
                     raffiner.setItem(item);
                     raffiner.setSchedule(false);
-                    
+
                     tacheProducteur.produireMaintenant(raffiner);
-                    
+
                 }
             }
         }
@@ -610,15 +626,15 @@ public class ServiceCollecteur extends ServiceImpl {
         Runnable chargement = new Runnable() {
             @Override
             public void run() {
-                      cacheHashFlux.ChargerLesHashdesFluxdepuisBDD(); // Au démarrage du service, il faut charger les hash pour tout les flux dans le cache
+                cacheHashFlux.ChargerLesHashdesFluxdepuisBDD(); // Au démarrage du service, il faut charger les hash pour tout les flux dans le cache
 //                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
         };
-        
+
         executorServiceAdministratif.submit(chargement);
-        
-        
-  
+
+
+
 
 
         //---------------TACHES DE COLLECTE--------------
@@ -666,7 +682,6 @@ public class ServiceCollecteur extends ServiceImpl {
 
     }
 
-
     /**
      * *
      * Cette méthode permet d'ajouter un item à un flux. Si l'item est déja présente dans la base de donnée, le service
@@ -676,7 +691,7 @@ public class ServiceCollecteur extends ServiceImpl {
      * @param flux Le flux pour lequel il faut ajouter une item
      * @param item L'item devant être ajouté
      */
-    public synchronized void ajouterItemAuFlux(Flux flux, Item item, EntityManager em, Boolean commiter, VisitorHTTP visitor/* MediatorCollecteAction comportementCollecte*/) {
+    public synchronized void ajouterItemAuFlux(Flux flux, Item item, EntityManager em, Boolean commiter, VisitorHTTP visitor/* ComportementCollecte comportementCollecte*/) {
         DaoItem dao = DAOFactory.getInstance().getDaoItem();
 
 //        Semaphore sem = null;
@@ -693,18 +708,17 @@ public class ServiceCollecteur extends ServiceImpl {
         if (item.getID() != null) { // Une item possédant un ID n'est pas nouvelle, il faut alors changer le booleean
             itemEstNouvelle = false;
         }
-        
+
         // Si elle n'est pas nouvelle, il faut le blocker dans l'em
-        if(!itemEstNouvelle){
-            
-            if(!em.contains(item)){
-                 item = em.find(Item.class, item.getID(), LockModeType.PESSIMISTIC_WRITE);
-            }
-            else{
+        if (!itemEstNouvelle) {
+
+            if (!em.contains(item)) {
+                item = em.find(Item.class, item.getID(), LockModeType.PESSIMISTIC_WRITE);
+            } else {
                 em.lock(item, LockModeType.PESSIMISTIC_WRITE);
             }
-            
-            
+
+
 //            //Acquisition de la sem
 //            try {
 //                sem = SemaphoreCentre.getinstance().returnSemaphoreForRessource(item);
@@ -716,8 +730,8 @@ public class ServiceCollecteur extends ServiceImpl {
 //            } catch (InterruptedException ex) {
 //                Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
 //            }
-            
-            
+
+
         }
 
 
@@ -777,10 +791,10 @@ public class ServiceCollecteur extends ServiceImpl {
             }
         }
 
-  // Si l'item n'est pas nouvelle. 
+        // Si l'item n'est pas nouvelle. 
         if (!itemEstNouvelle) {
             try {
-               
+
                 em.merge(item);
 
             } catch (Exception e) {
@@ -793,16 +807,16 @@ public class ServiceCollecteur extends ServiceImpl {
 
 
         // Si le traitement s'est bien déroulé
-            try {
-                if (commiter) { // Si aucun em n'a été précisé alors c'est de la responsabilité du service de demander le comit. Sinon c'est l'appelan qui doit se débrouiller avec son em
-                    em.getTransaction().commit();
-                    // On ajoute le hash au cache. Cette action ne sera réalisé que si le comit s'est bien déroulé
-                    cacheHashFlux.addHash(flux, item.getHashContenu());
-                }
-
-            } catch (Exception e) {
-                logger.error("erreur lors du commit", e);
+        try {
+            if (commiter) { // Si aucun em n'a été précisé alors c'est de la responsabilité du service de demander le comit. Sinon c'est l'appelan qui doit se débrouiller avec son em
+                em.getTransaction().commit();
+                // On ajoute le hash au cache. Cette action ne sera réalisé que si le comit s'est bien déroulé
+                cacheHashFlux.addHash(flux, item.getHashContenu());
             }
+
+        } catch (Exception e) {
+            logger.error("erreur lors du commit", e);
+        }
         // Il faudra trouver qqchose en cas a nouveau d'erreur exemple la base de de donnée ne répond pas.
 
     }
@@ -904,7 +918,7 @@ public class ServiceCollecteur extends ServiceImpl {
      * @throws IncompleteBeanExeption Si le journal est null n'a pas d'ID ou si il ne possède pas de champs
      * {@link Journal#urlHtmlRecapFlux}
      */
-    public Future<TacheDecouverteAjoutFlux> decouverteFluxJournal(Journal journal, Boolean persisterAjout, Boolean activerFlux) throws IncompleteBeanExeption, DonneeInterneCoherente {
+    public Future<TacheDecouverteAjoutFlux> decouverteFluxJournal(Journal journal, Boolean persisterAjout, Boolean activerFlux, short timeOut, short nbThread) throws IncompleteBeanExeption, DonneeInterneCoherente {
         if (journal == null) {
             throw new NullPointerException("Le journal est null");
         }
@@ -921,14 +935,37 @@ public class ServiceCollecteur extends ServiceImpl {
 
 
 
-        TacheDecouverteAjoutFlux tache = new TacheDecouverteAjoutFlux();
+//        TacheDecouverteAjoutFlux tache = new TacheDecouverteAjoutFlux();
+        TacheDecouverteAjoutFlux tache = (TacheDecouverteAjoutFlux) TacheFactory.getInstance().getNewTask(TacheDecouverteAjoutFlux.class, false);
+        
         tache.addObserver(this);
         tache.setJournal(journal);
-        tache.setNombredeSousTache(30);
+        tache.setNombredeSousTache(new Integer(nbThread));
         tache.setActiverLesFLux(activerFlux);
         tache.setPersist(persisterAjout);
-        Future<TacheDecouverteAjoutFlux> fut = submit(tache);
-        return fut;
+        tache.setGeneralRequestTimeOut(timeOut);
+        
+        tacheProducteur.produireMaintenant(tache);
+        
+  
+        synchronized(tache){
+            try {
+                System.out.println("WAIT");
+                tache.wait();
+                System.out.println("FIN WAIT");
+            } catch (InterruptedException ex) {
+                Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        
+        
+        
+        return tache.getFuture();
+        
+        
+        
+//        Future<TacheDecouverteAjoutFlux> fut = submit(tache);
+//        return fut;
 
     }
 

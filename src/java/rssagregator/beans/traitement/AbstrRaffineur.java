@@ -5,11 +5,11 @@
 package rssagregator.beans.traitement;
 
 import rssagregator.beans.ContentRSS;
-import rssagregator.beans.Item;
 
 /**
- *
+ * <strong>N'est plus utilisé</strong>. Reviendra peut être par la suite
  * @author clem
+ * @deprecated 
  */
 public abstract class AbstrRaffineur {
 

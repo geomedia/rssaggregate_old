@@ -9,7 +9,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import rssagregator.services.tache.AbstrTacheSchedule;
+import rssagregator.services.tache.AbstrTache;
 import rssagregator.utils.ThreadUtils;
 
 /**
@@ -33,7 +33,7 @@ public class TacheProducteur implements Runnable {
      *
      * @param t
      */
-    public void produire(AbstrTacheSchedule t) {
+    public void produire(AbstrTache t) {
 
         Lanceur lanceur = new Lanceur();
         lanceur.setTache(t);
@@ -52,7 +52,7 @@ public class TacheProducteur implements Runnable {
      *
      * @param t
      */
-    public void produireMaintenant(AbstrTacheSchedule t) {
+    public void produireMaintenant(AbstrTache t) {
         try {
             service.queueTacheALancer.put(t);
             synchronized (service.tacheConsomateur.lock) {
@@ -92,7 +92,7 @@ public class TacheProducteur implements Runnable {
      */
     private class Lanceur implements Runnable {
 
-        AbstrTacheSchedule tache;
+        AbstrTache tache;
 
         @Override
         public void run() {
@@ -118,11 +118,11 @@ public class TacheProducteur implements Runnable {
             }
         }
 
-        public AbstrTacheSchedule getTache() {
+        public AbstrTache getTache() {
             return tache;
         }
 
-        public void setTache(AbstrTacheSchedule tache) {
+        public void setTache(AbstrTache tache) {
             this.tache = tache;
         }
     }

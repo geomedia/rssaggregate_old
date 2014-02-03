@@ -52,18 +52,7 @@
     </resource-ref>
     
     
-    <servlet>
-        <servlet-name>JmxMiniConsoleServlet</servlet-name>
-        <servlet-class>
-            org.jminix.console.servlet.MiniConsoleServlet
-        </servlet-class>
-    </servlet> 
 
-
-    <servlet-mapping>
-        <servlet-name>JmxMiniConsoleServlet</servlet-name>
-        <url-pattern>/jmx/*</url-pattern>
-    </servlet-mapping> 
 
     <!--    <servlet-mapping>
         <servlet-name>Index</servlet-name>

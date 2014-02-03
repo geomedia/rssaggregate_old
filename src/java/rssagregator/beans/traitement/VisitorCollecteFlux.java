@@ -31,7 +31,7 @@ public abstract class VisitorCollecteFlux implements ComportementVisitor {
      * *
      * Pour spécifier un comportement de collecte a utiliser. Sinon c'est le comportement du flux qui doit être utilisé.
      */
-    MediatorCollecteAction comportementCollecte;
+    ComportementCollecte comportementCollecte;
     /**
      * *
      * Le logger
@@ -97,11 +97,11 @@ public abstract class VisitorCollecteFlux implements ComportementVisitor {
         this.nbDoublonInterneAuflux = nbDoublonInterneAuflux;
     }
 
-    public MediatorCollecteAction getComportementCollecte() {
+    public ComportementCollecte getComportementCollecte() {
         return comportementCollecte;
     }
 
-    public void setComportementCollecte(MediatorCollecteAction comportementCollecte) {
+    public void setComportementCollecte(ComportementCollecte comportementCollecte) {
         this.comportementCollecte = comportementCollecte;
     }
 

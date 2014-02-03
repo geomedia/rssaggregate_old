@@ -30,6 +30,11 @@ import rssagregator.dao.DaoItem;
 
 /**
  *
+ * Le dedoublonneur est l'objet de traitement chargé de déterminer si un item ou ou non être enregistré dans la base de données. Le dédoublonneur est un objet composant un {@link ComportementCollecte}. Cette classe abstraite permet de déterminer le formalisme devant être respecter par tout les objet de dédoublonnage. Pour l'instant, deux dédoublonneur hérite de cette classe : 
+ * <ul>
+ * <li>{@link Dedoubloneur} qui est le dédoublonneur de base utilisé pour savoir si il faut ou enregistrer une nouvelle item brute</li>
+ * <li>Le second dédoublonneur n'est plus utilisé</li>
+ * </ul>
  * @author clem
  */
 //@Entity()
@@ -278,6 +283,12 @@ public abstract class AbstrDedoublonneur implements Serializable, Cloneable {
         }
     }
 
+    /***
+     * Détermine si le flux envoyé en agument est présent dans la liste de flux envoyé en argument. La comparaison est effectué sur l'ID.
+     * @param listFlux
+     * @param flux
+     * @return 
+     */
     protected Boolean fluxPresentDansList(List<Flux> listFlux, Flux flux) {
         Boolean trouve = false;
         for (int i = 0; i < listFlux.size(); i++) {

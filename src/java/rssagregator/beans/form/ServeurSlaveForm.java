@@ -9,9 +9,11 @@ import javax.servlet.http.HttpServletRequest;
 import rssagregator.beans.ServeurSlave;
 
 /**
+ * /!\ N'est plus utilisé dans la mesure ou la synchronisation a été retiré des objectifs du projet.
  * Class permettant de valider et binder les données issues de la requête dans un beans <strong>ServeurSlave</strong>
  *
  * @author clem
+ * @deprecated 
  */
 public class ServeurSlaveForm extends AbstrForm {
 

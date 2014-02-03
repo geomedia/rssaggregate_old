@@ -47,7 +47,7 @@ public class VisitorHTTPTest {
                 Flux flux = new Flux();
         flux.setUrl("http://rss.lemonde.fr/c/205/f/3050/index.rss");
         
-                MediatorCollecteAction comportement = MediatorCollecteAction.getDefaultCollectAction();
+                ComportementCollecte comportement = ComportementCollecte.getDefaultCollectAction();
                 flux.setMediatorFlux(comportement);
                 
         

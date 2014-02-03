@@ -258,7 +258,12 @@
 
                     </c:when>
                     <c:when test="${action=='read'}">
-                        <c:import url="/WEB-INF/inc/editionBean.jsp" />
+          
+                      
+                         <p><a href="${rootpath}${srlvtname}/mod?id=${bean.ID}">Editer</a> | <a href="${rootpath}flux/add?journal-id=${bean.ID}">Ajouter un flux au journal</a></p>
+                        
+                         
+                        
                         <p><strong>Titre :</strong> ${bean.nom}</p>
                         <p><strong>Page accueil : </strong>${bean.urlAccueil}</p>
                         <p><strong>Page HTML recaptulatif des flux : </strong>${bean.urlHtmlRecapFlux}</p>

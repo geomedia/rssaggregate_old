@@ -17,6 +17,7 @@ import rssagregator.dao.AbstrDao;
  * <li>note d'incident </li>
  * <li>date fin : pour clore manuellement un incident</li>
  * </ul>
+ * <p>Seul ces paramètres sont gérés par ce formulaire</p>
  *
  * @author clem
  */
@@ -71,8 +72,5 @@ public class IncidentForm extends AbstrForm {
     @Override
     public void parseListeRequete(HttpServletRequest request, AbstrDao dao) throws Exception {
         super.parseListeRequete(request, dao); //To change body of generated methods, choose Tools | Templates
-
-
-        // Recup du spe
     }
 }

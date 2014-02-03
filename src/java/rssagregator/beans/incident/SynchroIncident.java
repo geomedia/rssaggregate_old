@@ -9,6 +9,8 @@ import javax.persistence.Entity;
 import rssagregator.services.ServiceSynchro;
 
 /**
+ * <strong>/!\ N'est plus utilisé. La synchronisation est retirée des objectifs du projet</strong>
+ * 
  * <p>Tous les incidents des tâches gérée par le service {@link ServiceSynchro}
  * héritent de cette classe à savoir : <ul>
  * <li>{@link JMSDiffusionIncident }</li>
@@ -17,6 +19,7 @@ import rssagregator.services.ServiceSynchro;
  * </p>
  *
  * @author clem
+ * @deprecated 
  */
 //@Entity(name = "synchroincident")
 @Entity(name = "i_synchro")

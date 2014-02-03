@@ -4,6 +4,7 @@
  */
 package rssagregator.beans.tool;
 
+import rssagregator.utils.comparator.ComparatorBean;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

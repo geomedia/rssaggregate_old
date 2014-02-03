@@ -11,6 +11,26 @@ import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoItem;
 import rssagregator.services.ServiceCollecteur;
 
+/**
+ * *
+ * Le dédoublonneur utilisé pour déterminer si une item brute doit ou non être enregistrée. Le dédoublonnage s'effectue
+ * par pluieurs phases successives. Le dédoublonnage est effectué en se basanst sur les hash calculé les flux. La
+ * construction des hash est effectué par le dédoublonneur avant d'effectuer l'action de dédoubolnnage en utilisant la
+ * méthode {@link #calculHash(java.util.List) ). Ce calcul de hash {@link ComportementCollecte}} lié au {@link Flux}
+ * <ul>
+ * <li>Dédoublonnage interne : A l'intérieur de certain flux RSS, on peut trouver des déblons (au sein du fichier XML
+ * renvoyé par le serveur). C'est particuliairement vrai pour les flux à la une qui rassemble les information de
+ * plusieurs rubriques des journaux.</li>
+ * <li>dédoublonnage mémoire : L'agrgrégateur concerve en mémoire les dernier hash de chacun des flux. Lors de la phase
+ * de dédoublonnage mémoire, on vérifie si le hash de l'item inspecté n'est pas déjà présent en mémoire. Cela permet
+ * d'éviter d'executer des requete SQL qui peuvent être lente.</li>
+ * <li>Dédoublonnage BDD. On vérifi si on ne trouve pas déjà dans la base de donnée une item possédant un hash
+ * similaire. Si ou peut trouver un tel hash, on créer une liasion pour l'item inspecté. Si cette liaison existe déjà le
+ * dédoublonneur suprime l'item inspecté de la liste des item a sauvegarder</li>
+ * </ul>
+ *
+ * @author clem
+ */
 @Entity(name = "Dedoubloneur")
 public class Dedoubloneur extends AbstrDedoublonneur {
 
@@ -70,7 +90,7 @@ public class Dedoubloneur extends AbstrDedoublonneur {
 
         // On commence par vérifier que deux items capturée n'ont pas le même hash. Certain journaux fournissent des flux avec plusieurs fois le même items...
 //        for (Iterator<Item> it = listItemCapture.iterator(); it.hasNext();) {
-//            Item item1 = it.next();
+//            Item item1 = it.nex(t);
 //            int cpt = 0;
 //            for (int i = 0; i < listItemCapture.size(); i++) {
 //                Item item = listItemCapture.get(i);
@@ -93,7 +113,7 @@ public class Dedoubloneur extends AbstrDedoublonneur {
         if (!listItemCapture.isEmpty()) {
             for (ListIterator<Item> it = listItemCapture.listIterator(); it.hasNext();) {
                 Item itemCapture = it.next();
-                if(itemCapture.getTitre().isEmpty() && itemCapture.getDescription().isEmpty()){
+                if (itemCapture.getTitre().isEmpty() && itemCapture.getDescription().isEmpty()) {
                     it.remove();
                 }
             }
@@ -129,7 +149,6 @@ public class Dedoubloneur extends AbstrDedoublonneur {
 
                 //Si on a trouvé une item
                 if (ItemBDD != null) {
-                    System.out.println("ITEM BDD : ");
                     //Si l'item BDD posséde déjà le flux observé
                     boolean present = fluxPresentDansList(ItemBDD.getListFlux(), flux);
                     if (present) {
@@ -159,7 +178,6 @@ public class Dedoubloneur extends AbstrDedoublonneur {
                     } else {
 //                        ItemBDD.verserLesDonneeBruteAutreItem(itemCapture);
                         it.set(ItemBDD);
-                        System.out.println("---> Inversion");
                     }
                 }
             }

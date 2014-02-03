@@ -31,12 +31,32 @@ import rssagregator.servlet.JournauxSrvl;
 import rssagregator.utils.ServletTool;
 
 /**
- * Tout les formulaires doivent implémenter cette classe abstraite. Ces objets formulaires permettent de valider les
- * données envoyées par les utilisateurs et ensuite de nourrir les java beans. Les servlets doivent ainsi utiliser les
- * formulaires en commencant par valider la donnée. les données envoyée par l'utilisateur sont alors vérifiée et stockée
- * dans l'objet form. Le déclanchement de la méthode bind permet d'inscrire les données stockées dans le formulaire dans
- * le bean envoyé en argument (uniquement si le formulaire est valide).
- * <p></p>
+ * <p>
+ * Les objets formulaires permettent de valider les données envoyées par l'utilisateur et d'hydrater un beans. Ces
+ * objets sont utilisés par les servlet qui instancient des objets formulaires et utilisent les méthode
+ * {@link #validate(javax.servlet.http.HttpServletRequest)} et
+ * {@link #bind(javax.servlet.http.HttpServletRequest, java.lang.Object, java.lang.Class)} pour interpréter la requete
+ * utilisateur et crée ou modifier des beans (Flux, Journaux...)
+ * </p>
+ * <ul>
+ * <li>{@link #validate(javax.servlet.http.HttpServletRequest)} : doit être redéclaré par tout les sous formulaires.
+ * Permet la vérification des données. Les données sont extraites de la requete et stoquées dans des variables privées
+ * du formulaire. En cas de non conformité le fomulaire stocke les erreurs dans la map {@link #erreurs}.</li>
+ *
+ * <li>{@link #bind(javax.servlet.http.HttpServletRequest, java.lang.Object, java.lang.Class) } nourrit le beans avec
+ * les données précédemment validée</li>
+ * </ul>
+ *
+ * <p>Les formulaires permettent aussi d'interpréter des requetes de list générée par Jqgrid. Il faut utiliser la
+ * méthode {@link #parseListeRequete(javax.servlet.http.HttpServletRequest, rssagregator.dao.AbstrDao)} qui parcours la
+ * requête afin de générer un objet de type {@link SearchFiltersList} qui peut être utilisé par les dao pour lister des
+ * beans en s'appuyant sur la base de données en s'appuyant sur l'api Criteria.</p>
+ *
+ * <p>Un formulaire doit être instancier en passant par {@link FORMFactory}. L'instanciaiton et l'utilisation des
+ * formulaires est en générale effectué par les outils définit dans la classe static {@link ServletTool} qui permet de
+ * factoriser l'usage des formulaires pour des action CRUD.</p>
+ *
+ * <hr />
  *
  * @author clem
  */
@@ -58,8 +78,10 @@ public abstract class AbstrForm {
     protected static org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(AbstrForm.class);
     /**
      * *
-     * Ce hash map d'erreur permet de stocker des messages d'erreurs lorsque l'utilisateur cherche à inscrire une donnée
-     * invalide.
+     * Ce hash map d'erreur permet de stocker des messages d'erreurs lorsque l'utilisateur cherche à inscrire une
+     * donnée. La clé correspond au champs sur lequel porte l'erreur. Le tableau de valeur permet de stoquer le message
+     * d'erreur. Le message doit être stocké dans la première rcellule du tableau. La seconde était au départ pensée
+     * pour accueillir la valeur saisie mais n'est plus utilisée..
      */
     protected Map<String, String[]> erreurs = new HashMap<String, String[]>();
     /**
@@ -188,10 +210,20 @@ public abstract class AbstrForm {
         this.resultat = resultat;
     }
 
+    /**
+     * *
+     * @see #valide
+     * @return
+     */
     public Boolean getValide() {
         return valide;
     }
 
+    /**
+     * *
+     * @see #valide
+     * @return
+     */
     public void setValide(Boolean valide) {
         this.valide = valide;
     }
@@ -289,9 +321,7 @@ public abstract class AbstrForm {
 //                    dao.setCriteriaRow(limit);
                 } catch (Exception e) {
                 }
-            } else {
             }
-
 
 
             //totalrows : le nombre total de ligne a charger. Si il est présent, il remplace le paramettre row pour la limite sql
@@ -306,16 +336,13 @@ public abstract class AbstrForm {
                 filters.setCriteriaRow(limit);
             }
 
-
             //-----PAGE
             Integer page = null;
             if (request.getParameter("page") != null && !request.getParameter("page").isEmpty()) {
                 try {
                     page = new Integer(request.getParameter("page"));
-
                     request.setAttribute("page", new Integer(request.getParameter("page")));
                     Integer startRows = limit * page - limit;
-//                    dao.setCriteriaStartRow(startRows);
                     filters.setCriteriaStartRow(startRows);
 
                 } catch (Exception e) {
@@ -324,18 +351,7 @@ public abstract class AbstrForm {
             } else {
                 request.setAttribute("page", new Integer(1));
             }
-
-
-
-
-
         }
-
-
-
-
-
-
 
         // Traitement de l'ordre 
         if (request.getParameter("sidx") != null && !request.getParameter("sidx").isEmpty()) {
@@ -351,8 +367,6 @@ public abstract class AbstrForm {
             request.setAttribute("sord", request.getParameter("sord"));
         }
 
-
-
         //Gestion des paramettre filtre permet de configurer les where clause dans criteria en fonction de ce qui est envoyé par JQGRID
         if (request.getParameter("filters") != null && !request.getParameter("filters").isEmpty()) {
             String filter = request.getParameter("filters");
@@ -366,19 +380,14 @@ public abstract class AbstrForm {
                     String field = (String) object.get("field");
                     String op = (String) object.get("op");
                     String data = (String) object.get("data");
-                    System.out.println("field : " + field);
-                    System.out.println("op : " + op);
-                    System.out.println("data : " + data);
 
                     SearchFilter filt = new SearchFilter();
-
 
                     filt.setData(data);
                     filt.setField(field);
                     filt.setOp(op);
                     //On essai de retrouver le type du champs par reflexivité
                     try {
-                        System.out.println("On tente de trouver le type");
                         filt.setType(this.beanClass.getDeclaredField(field).getType());
 
                     } catch (NoSuchFieldException ex) {
@@ -387,10 +396,7 @@ public abstract class AbstrForm {
                         Logger.getLogger(ServletTool.class.getName()).log(Level.SEVERE, null, ex);
                     }
 
-
                     this.filtersList.getFilters().add(filt);
-//                    dao.getCriteriaSearchFilters().getFilters().add(filt);
-//                    System.out.println("--> nb filter : " + dao.getCriteriaSearchFilters().getFilters().size());
                 }
 
             } catch (ParseException ex) {
@@ -403,10 +409,8 @@ public abstract class AbstrForm {
 
         System.out.println("--> recup spe");
         if (action.equals("list")) {
-            System.out.println("LIST ");
 
             if (request.getParameter("filters") != null && !request.getParameter("filters").isEmpty()) {
-                System.out.println("--> FILTERS");
                 String filter = request.getParameter("filters");
                 JSONParser parse = new JSONParser();
 
@@ -420,9 +424,6 @@ public abstract class AbstrForm {
                         String field = (String) obj.get("field");
                         String op = (String) obj.get("op");
 
-                        System.out.println("OP : " + op);
-
-
                         /**
                          * *
                          * On parse un critère IN
@@ -434,9 +435,7 @@ public abstract class AbstrForm {
 
                             if (List.class.isAssignableFrom(c)) {
 
-
                                 SearchFilter newFilter = new SearchFilter();
-//                                Object prop = PropertyUtils.getIndexedProperty(object, field);
 
                                 Field stringListField = Item.class.getDeclaredField(field);
                                 ParameterizedType stringListType = (ParameterizedType) stringListField.getGenericType();
@@ -472,12 +471,12 @@ public abstract class AbstrForm {
                                 newFilter.setOp("in");
                                 newFilter.setField(field);
                                 filters.getFilters().add(newFilter);
+
                             }
                         }
 
 
                         if (op.equals("inn")) {
-                            System.out.println("INN");
                             SearchFilter nouveauFiltre = new SearchFilter();
                             nouveauFiltre.setOp(op);
                             nouveauFiltre.setField(field);
@@ -486,14 +485,12 @@ public abstract class AbstrForm {
                             filters.getFilters().add(nouveauFiltre);
 
                         } else if (op.equals("isn")) {
-                            System.out.println("ISN");
                             SearchFilter nouveauFiltre = new SearchFilter();
                             nouveauFiltre.setOp(op);
                             nouveauFiltre.setField(field);
                             nouveauFiltre.setData("NULL"); // Is not ne demande pas de data mais ca va gueler sinon
                             nouveauFiltre.setType(String.class);
                             filters.getFilters().add(nouveauFiltre);
-
 
 
                         } else if (op.equals("lt")) {
@@ -531,9 +528,7 @@ public abstract class AbstrForm {
                                 Object object = beanClass.newInstance();
                                 Class c = PropertyUtils.getPropertyType(object, field);
 
-//                            Class c = prop.getClass();
                                 newfilter.setType(c);
-
                                 if (c.equals(Date.class)) {
                                     DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -548,12 +543,8 @@ public abstract class AbstrForm {
                             } catch (Exception e) {
                                 logger.debug("err", e);
                             }
-
                         }
-
                     }
-
-
                 } catch (Exception e) {
                     logger.debug("err", e);
                 }
@@ -579,32 +570,5 @@ public abstract class AbstrForm {
      */
     public void setBeanClass(Class beanClass) {
         this.beanClass = beanClass;
-    }
-
-    public static void main(String[] args) {
-        try {
-            List<String> stringList = new ArrayList<String>();
-            List<Integer> integerList = new ArrayList<Integer>();
-
-
-            Field stringListField = Item.class.getDeclaredField("listFlux");
-            ParameterizedType stringListType = (ParameterizedType) stringListField.getGenericType();
-            Class<?> stringListClass = (Class<?>) stringListType.getActualTypeArguments()[0];
-            System.out.println(stringListClass); // class java.lang.String.
-
-
-
-
-
-
-
-//        System.out.println(""it.getListFlux().getClass().);
-        } catch (NoSuchFieldException ex) {
-            Logger.getLogger(AbstrForm.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SecurityException ex) {
-            Logger.getLogger(AbstrForm.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-
     }
 }
