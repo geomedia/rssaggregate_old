@@ -58,7 +58,6 @@ public class JournauxSrvl extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        System.out.println("SRVLTTT");
         response.setContentType("text/html;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
         request.setCharacterEncoding("UTF-8");
@@ -78,7 +77,6 @@ public class JournauxSrvl extends HttpServlet {
         // récupération de l'action
         String action = ServletTool.configAction(request, "recherche");
         request.setAttribute("srlvtname", ATT_SERV_NAME);
-        System.out.println("--->" + action);
 
 
         DaoJournal daoJournal = DAOFactory.getInstance().getDaoJournal();
@@ -109,10 +107,6 @@ public class JournauxSrvl extends HttpServlet {
         } //---------------------------------ACTION LIST --------------------------------------
         else if (action.equals("list")) {
             DaoJournal dao = DAOFactory.getInstance().getDaoJournal();
-
-            System.out.println("--------------");
-            System.out.println("ACTION LIST ");
-            System.out.println("--------------");
 
             AbstrForm form = null;
             try {
@@ -146,7 +140,6 @@ public class JournauxSrvl extends HttpServlet {
 ////                daoJournal.setCriteriaPays(request.getParameter("pays"));
 ////            }
 //            
-//            System.out.println("Les Filters : " + request.getParameter("filters"));
 //            
 //            if(request.getParameter("filters")!= null && !request.getParameter("filters").isEmpty()){
 //                String filter = request.getParameter("filters");
@@ -157,13 +150,9 @@ public class JournauxSrvl extends HttpServlet {
 //                    JSONArray rules = (JSONArray) obj2.get("rules");
 //                    for (int i = 0; i < rules.size(); i++) {
 //                        JSONObject object = (JSONObject) rules.get(i);
-//                        System.out.println("##### " + object.getClass());
 //                       String field = (String) object.get("field");
 //                       String op = (String) object.get("op");
 //                       String data = (String) object.get("data");
-//                        System.out.println("field : " + field);
-//                        System.out.println("op : " + op);
-//                        System.out.println("data : " + data);
 //                        SearchFilter filt = new SearchFilter();
 //                        filt.setData(data);
 //                        filt.setField(field);
@@ -172,9 +161,6 @@ public class JournauxSrvl extends HttpServlet {
 //                    }
 //
 //                    
-//                    System.out.println("rules : " + rules.getClass().getName());
-//                    
-//                    System.out.println("obj 2 " + obj2.getClass().getName());
 //                } catch (ParseException ex) {
 //                    Logger.getLogger(JournauxSrvl.class.getName()).log(Level.SEVERE, null, ex);
 //                }
@@ -189,7 +175,6 @@ public class JournauxSrvl extends HttpServlet {
 //            for (Map.Entry<String, String[]> entry : map.entrySet()) {
 //                String string = entry.getKey();
 //                String[] strings = entry.getValue();
-//                System.out.println("-- key : " + string+" // value : " + strings[0]+" size "+ strings.length);
 //            }
 //            
 //

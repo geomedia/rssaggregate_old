@@ -139,7 +139,6 @@ public class TacheLancerConnectionJMS extends TacheImpl<TacheLancerConnectionJMS
 
             List<JMSPerteConnectionIncident> listIncid = dao.findIncidentNonClos(JMSPerteConnectionIncident.class);
 
-            System.out.println("LIST INCIDE ----> " + listIncid.size());
             JMSPerteConnectionIncident incid = null;
 
             if (!listIncid.isEmpty()) {

@@ -39,7 +39,6 @@ public class TacheFactory {
 
             try {
                 fact = mapper.readValue(f, TacheFactory.class);
-                System.out.println("OK");
                 instance = fact;
             } catch (IOException ex) {
                 logger2.error("Impossible de charger le fichier " + f, ex);
@@ -72,6 +71,10 @@ public class TacheFactory {
     public Byte TacheAlerteMail_typeSchedule = 1;
     //--
     public Short TacheEnvoyerMail_maxExecuteTime = 20;
+    //--
+    public Short TacheReenvoiMail_maxExecuteTime=60;
+    public Byte TacheReenvoiMail_typeSchedule = 1;
+    
     //--
     public Short TacheStillAlive_maxExecuteTime = 10;
     public Byte TacheStillAlive_typeSchedule = 1;
@@ -171,8 +174,19 @@ public class TacheFactory {
             maxExecuteTime = 300;
             newTache.setSchedule(false);
         }
-        
+        else if(c.equals(TacheRaffinerPeriodique.class)){
+            newTache = new TacheRaffinerPeriodique();
+            service = ServiceCollecteur.getInstance();
+            maxExecuteTime = 3600*3; // 3 heures max
+            newTache.setSchedule(false);
 
+        }
+        else if (c.equals(TacheReenvoiMail.class)){
+            newTache = new TacheReenvoiMail();
+            typeSchedule = TacheReenvoiMail_typeSchedule;
+            maxExecuteTime = TacheReenvoiMail_maxExecuteTime;
+            service = ServiceMailNotifier.getInstance();
+        }
 
         if (newTache == null) {
             throw new UnsupportedOperationException("La tache n'est pas configuré dans la factory : " + c.getName());
@@ -192,26 +206,5 @@ public class TacheFactory {
         }
     }
 
-    public static void main(String[] args) {
-//        try {
 
-
-        TacheFactory factory = TacheFactory.getInstance();
-        System.out.println("facto : " + factory);
-        System.out.println("tache TacheEnvoyerMail" + factory.TacheEnvoyerMail_maxExecuteTime);
-        System.out.println("tache Recup" + factory.TacheRecupCallable_maxExecuteTime);
-
-        //        ObjectMapper mapper = new ObjectMapper();
-        //        File f = new File("/var/lib/RSSAgregate/tacheFactory.json");
-        //        try {
-        //            mapper.writeValue(f, factory);
-        //        } catch (IOException ex) {
-        //        } 
-        //        }
-//        } catch (NamingException ex) {
-//            Logger.getLogger(TacheFactory.class.getName()).log(Level.SEVERE, null, ex);
-//        } catch (RessourceIntrouvable ex) {
-//            Logger.getLogger(TacheFactory.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-    }
 }

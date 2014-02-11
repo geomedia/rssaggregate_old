@@ -127,7 +127,6 @@ public class JournalForm extends AbstrForm {
 
         s = request.getParameter("urlAccueil");
         if (s != null && !s.isEmpty()) {
-            System.out.println("111");
             if (!s.matches(REG_EXP_HTTP_URL)) {
                 erreurs.put("urlAccueil", new String[]{ERR_URL_INCORRECTE, ERR_URL_INCORRECTE});
             }

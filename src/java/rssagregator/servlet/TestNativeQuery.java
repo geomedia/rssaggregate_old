@@ -2,29 +2,26 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package rssagregator.services;
+package rssagregator.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.persistence.LockModeType;
+import java.util.List;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import rssagregator.beans.incident.AbstrIncident;
-import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.dao.DAOFactory;
-import rssagregator.dao.DAOIncident;
 
 /**
  *
  * @author clem
  */
-@WebServlet(name = "TestLockIncid", urlPatterns = {"/TestLockIncid"})
-public class TestLockIncid extends HttpServlet {
+@WebServlet(name = "TestNativeQuery", urlPatterns = {"/TestNativeQuery"})
+public class TestNativeQuery extends HttpServlet {
 
     /**
      * Processes requests for both HTTP
@@ -39,31 +36,56 @@ public class TestLockIncid extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
+        
+        
+        EntityManager em = DAOFactory.getInstance().getEntityManager();
+        
         PrintWriter out = response.getWriter();
-        
-        DAOIncident dao = (DAOIncident) DAOFactory.getInstance().getDaoFromType(CollecteIncident.class);
-        
-        AbstrIncident incid = (AbstrIncident) dao.find(new Long(8755));
-        dao.getEm().getTransaction().begin();
-        dao.getEm().lock(incid, LockModeType.PESSIMISTIC_WRITE);
-        
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(TestLockIncid.class.getName()).log(Level.SEVERE, null, ex);
+       
+                Query qCount = em.createNativeQuery("SELECT \n" +
+"date_trunc('day', item.daterecup) as \"day\", COUNT(*)\n" +
+"\n" +
+"FROM \n" +
+"  public.item, \n" +
+"  public.flux, \n" +
+"  public.item_flux\n" +
+"WHERE \n" +
+"  item.id = item_flux.item_id AND\n" +
+"  flux.id = item_flux.listflux_id\n" +
+"AND flux.id=1674\n" +
+"AND item.daterecup BETWEEN '?' and '?'\n" +
+"GROUP BY 1\n" +
+"ORDER BY 1\n" +
+"  ;");
+                
+                List<Object[]> results = qCount.getResultList();
+                for (int i = 0; i < results.size(); i++) {
+            Object[] objects = results.get(i);
+                    System.out.println(""+objects[0] + " " + objects[1]);
+            
+                    System.out.println("Type" + objects[0].getClass());
+                    System.out.println("Type" + objects[1].getClass());
         }
-        dao.commit();
+                
+//        List<Object> resuCpt = qCount.getResultList();
+//        for (int i = 0; i < resuCpt.size(); i++) {
+//            Object integer = resuCpt.get(i);
+//            Double cast = (Double) integer;
+//            System.out.println("CPT " + integer);
+//            System.out.println("Double  " + cast);
+//        }
+        
+        
         
         try {
             /* TODO output your page here. You may use following sample code. */
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet TestLockIncid</title>");            
+            out.println("<title>Servlet TestNativeQuery</title>");            
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet TestLockIncid at " + request.getContextPath() + "</h1>");
-            out.println("<h1>Servlet TestLockIncid at " + incid + "</h1>");
+            out.println("<h1>Servlet TestNativeQuery at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
         } finally {            

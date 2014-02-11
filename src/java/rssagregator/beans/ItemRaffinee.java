@@ -37,10 +37,12 @@ public class ItemRaffinee implements ContentRSS, Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long ID;
 
+    @Override
     public Long getID() {
         return ID;
     }
 
+    @Override
     public void setID(Long ID) {
         this.ID = ID;
     }
@@ -169,10 +171,12 @@ public class ItemRaffinee implements ContentRSS, Serializable {
         this.guid = guid;
     }
 
+    @Override
     public String getCategorie() {
         return categorie;
     }
 
+    @Override
     public void setCategorie(String categorie) {
         this.categorie = categorie;
     }

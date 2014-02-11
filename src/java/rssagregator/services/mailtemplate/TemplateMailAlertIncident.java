@@ -132,7 +132,6 @@ public class TemplateMailAlertIncident {
         }
         corps += "</ul>";
 
-        System.out.println("CORPS : " + corps);
         logger.debug("conenu" + corps);
         return corps;
     }

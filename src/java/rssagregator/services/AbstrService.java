@@ -106,7 +106,6 @@ public abstract class AbstrService implements Observer {
 //                // pour une tache devant être schedulé suivant un nombre fixe de seconde
 //
 //                try {
-//                    System.out.println("TACHE : " + tache);
 ////                    tache.initTask();
 //                    tache.completerNextExecution();
 //                    fut = this.executorService.schedule(tache, tache.returnNextDuration(), TimeUnit.SECONDS);
@@ -339,7 +338,6 @@ public abstract class AbstrService implements Observer {
                 logger.error("La tache : " + tacheDsMap + " n'a jamais pu être annulé");
             } else { // Si elle a pu être annulé et que c'était une tache schedulé alors, on la reschedules
                 if (tache.getSchedule()) {
-                    System.out.println("Reschedule");
                     tacheProducteur.produire(tache);
                 }
             }

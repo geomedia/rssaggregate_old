@@ -559,10 +559,10 @@ public abstract class AbstrTache<T> extends Observable implements Callable<T> {
                 Semaphore sema = it.next();
                 boolean aq = sema.tryAcquire();
 
-                // Si on a pu acquerir la semaphore
-                if (aq) {
+              
+                if (aq) {  // Si on a pu acquerir la semaphore
                     acuireed.add(sema);
-                } else {
+                } else { // Sinon on les libère toutes et on retourne false
                     for (int i = 0; i < acuireed.size(); i++) {   //On libère les semaphore déjà acquises
                         Semaphore semaphore = acuireed.get(i);
                         semaphore.release();

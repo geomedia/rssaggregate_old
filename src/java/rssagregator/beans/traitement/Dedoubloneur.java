@@ -33,14 +33,14 @@ import rssagregator.services.ServiceCollecteur;
  */
 @Entity(name = "Dedoubloneur")
 public class Dedoubloneur extends AbstrDedoublonneur {
-
+    
     private static String description = "le dédoublonneur permet .....";
-
+    
     public Dedoubloneur() {
         super();
-
+        
     }
-
+    
     public String getDescription() {
         return description;
     }
@@ -56,7 +56,7 @@ public class Dedoubloneur extends AbstrDedoublonneur {
      */
     @Override
     public List<Item> dedoublonne(List<Item> listItemCapture, Flux flux) {
-
+        
         compteCapture[0] = listItemCapture.size(); // première case du tableau de capture : nombre d'item capturés dans le flux
 
         //======================================================================================
@@ -69,7 +69,6 @@ public class Dedoubloneur extends AbstrDedoublonneur {
          */
 //        Set<String> listLastEmprunte = flux.getLastEmpruntes();
         Set<String> listLastEmprunte = ServiceCollecteur.getInstance().getCacheHashFlux().returnLashHash(flux);
-//        System.out.println("TAILLER DU SET : " + listLastEmprunte.size());
         if (listLastEmprunte != null) {
             for (Iterator<String> it = listLastEmprunte.iterator(); it.hasNext();) {
                 String hashMemoire = it.next();
@@ -113,6 +112,14 @@ public class Dedoubloneur extends AbstrDedoublonneur {
         if (!listItemCapture.isEmpty()) {
             for (ListIterator<Item> it = listItemCapture.listIterator(); it.hasNext();) {
                 Item itemCapture = it.next();
+                if (itemCapture.getTitre() == null) {
+                    itemCapture.setTitre("");
+                }
+                if(itemCapture.getDescription()==null){
+                    itemCapture.setDescription("");
+                }
+                
+                
                 if (itemCapture.getTitre().isEmpty() && itemCapture.getDescription().isEmpty()) {
                     it.remove();
                 }
@@ -142,8 +149,8 @@ public class Dedoubloneur extends AbstrDedoublonneur {
             // Pour chaque item
             for (ListIterator<Item> it = listItemCapture.listIterator(); it.hasNext();) {
                 Item itemCapture = it.next();
-
-
+                
+                
                 Item ItemBDD = dao.findItemAvecHashDansDonneSource(itemCapture.getHashContenu());
 
 
@@ -154,7 +161,7 @@ public class Dedoubloneur extends AbstrDedoublonneur {
                     if (present) {
                         // On parcours tout les donnes brutes de l'item BDD
 
-
+                        
                         it.remove();
 
 //                        boolean trouve = false;

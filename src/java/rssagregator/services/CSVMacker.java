@@ -21,6 +21,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.jsoup.Jsoup;
 import rssagregator.beans.Conf;
+import rssagregator.beans.ContentRSS;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.dao.DAOFactory;
@@ -104,9 +105,6 @@ public class CSVMacker implements Callable<Object> {
 //            fileWriter.close();
 //        }
 
-        System.out.println("-----------------------------------");
-        System.out.println("Date1 " + date1);
-        System.out.println("Date2 " + date2);
         EntityManager em = DAOFactory.getInstance().getEntityManager();
 
         for (int i = 0; i < fluxDemande.size(); i++) {
@@ -125,7 +123,7 @@ public class CSVMacker implements Callable<Object> {
                 if (rafine) {
 //                    cptQuery = em.createQuery("SELECT COUNT(i) FROM ItemRaffinee i JOIN i.listFlux f WHERE f.ID=:fid");
                     cptQuery = em.createQuery("SELECT COUNT(i) FROM ItemRaffinee i JOIN i.itemBrutes br, br.listFlux f WHERE f.ID=:fid");
-                    
+
                 } else {
                     cptQuery = em.createQuery("SELECT COUNT(i) FROM Item i JOIN i.listFlux f WHERE f.ID=:fid");
                 }
@@ -139,7 +137,17 @@ public class CSVMacker implements Callable<Object> {
 
                     em.clear(); // Il va y avoir des millier//millions d'entité dans l'em pour eviter un prob on clear a chaque tout de boucle
 //                    Query query = em.createQuery("SELECT DISTINCT(i) FROM Item i LEFT JOIN i.listFlux f, i.listFlux.typeFlux t, i.listFlux.journalLie j WHERE f.ID = :idf");
-                    Query query = em.createQuery("SELECT DISTINCT(i) FROM Item i JOIN FETCH i.listFlux As f LEFT JOIN FETCH f.typeFlux t, f.journalLie j WHERE f.ID = :idf"); // On fetch toute les entité qui seront utilisée pendant le traitement
+
+                    Query query;
+                    if (rafine) {
+                        query = em.createQuery("SELECT DISTINCT(i) FROM ItemRaffinee i JOIN i.itemBrutes b JOIN FETCH b.listFlux As f LEFT JOIN FETCH f.typeFlux t, f.journalLie j WHERE f.ID = :idf");
+//                                + "i. i.listFlux As f LEFT JOIN FETCH f.typeFlux t, f.journalLie j WHERE f.ID = :idf"); // On fetch toute les entité qui seront utilisée pendant le traitement
+
+                    } else {
+                        query = em.createQuery("SELECT DISTINCT(i) FROM Item i JOIN FETCH i.listFlux As f LEFT JOIN FETCH f.typeFlux t, f.journalLie j WHERE f.ID = :idf"); // On fetch toute les entité qui seront utilisée pendant le traitement
+                    }
+                    
+                    
                     query.setParameter("idf", flux.getID());
                     query.setFirstResult(j);
                     query.setMaxResults(10000);
@@ -147,9 +155,9 @@ public class CSVMacker implements Callable<Object> {
 
                     // Pour chaque item
 
-                    List<Item> items = query.getResultList();
+                    List<ContentRSS> items = query.getResultList();
                     for (int k = 0; k < items.size(); k++) {
-                        Item item = items.get(k);
+                        ContentRSS item = items.get(k);
 
                         String id = "";
                         if (item.getID() != null) {
@@ -191,6 +199,7 @@ public class CSVMacker implements Callable<Object> {
                             cat = item.getCategorie();
                         }
 
+                       
                         String contenu = "";
                         if (item.getContenu() != null) {
                             contenu = item.getContenu();
@@ -222,7 +231,6 @@ public class CSVMacker implements Callable<Object> {
 
                         data.add(new String[]{id, titre, desc, contenu, cat, lien, dateRecup, datePub, idflux, typeFlux, journal});
                         itemEnregistre++;
-//                        System.out.println("ITEM : " + item);
 
                         //Enregistrement du fichier si on a itere sur plus de 10 000 items
                         if (itemEnregistre > nbrLigneParFichie) {
@@ -259,7 +267,6 @@ public class CSVMacker implements Callable<Object> {
         String repName = "EXPORT--" + rssagregator.utils.FileUtils.contructMailFileName() + "/";
 //        String path = System.getProperty("confpath");
         exportPath = webDir + "upload/" + repName;
-        System.out.println("EXP Path " + exportPath);
         new File(exportPath).mkdir();
 
         Conf c = DAOFactory.getInstance().getDAOConf().getConfCourante();
@@ -271,7 +278,6 @@ public class CSVMacker implements Callable<Object> {
 
     public static void main(String[] args) {
         String chaine = "youpAi : ! \\ zouzu";
-//        System.out.println("replace" + chaine.replaceAll("[!:\\\\] ", ""));
 
         Pattern parPattern = Pattern.compile("[a-z]*");
 
@@ -336,7 +342,6 @@ public class CSVMacker implements Callable<Object> {
 
             }
 
-            System.out.println("Enregistrement data leangh " + data.size());
             cSVWriter2.writeAll(data);
 
         } catch (Exception e) {
@@ -412,10 +417,8 @@ public class CSVMacker implements Callable<Object> {
 //
 //
 //
-//        System.out.println("Assemblage");
 //
 //        for (int i = 0; i <= nbrfichier; i++) {
-//            System.out.println("IT");
 //            String nomfichier = "/home/clem/CSV" + nbrfichier + ".csv";
 //            FileInputStream fis = new FileInputStream(nomfichier);
 //

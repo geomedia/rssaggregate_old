@@ -75,6 +75,8 @@ public class CollecteIncident extends AbstrIncident implements Serializable {
     public String toString() {
         return "Incident de collecte FLux : "+fluxLie;
     }
+
+
     
     
     

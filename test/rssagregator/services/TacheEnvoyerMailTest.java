@@ -191,26 +191,7 @@ public class TacheEnvoyerMailTest {
 //        fail("The test case is a prototype.");
 //    }
 //
-    /**
-     * Test of gererIncident method, of class TacheEnvoyerMail.
-     */
-    @Test
-    public void testGererIncident() throws Exception {
-        System.out.println("gererIncident");
-        
-        ServiceMailNotifier service = ServiceMailNotifier.getTestInstance();
-//        TacheEnvoyerMail instance = new TacheEnvoyerMail(service);
-        TacheEnvoyerMail instance = (TacheEnvoyerMail) TacheFactory.getInstance().getNewTask(TacheEnvoyerMail.class, Boolean.FALSE);
-        
-        instance.setExeption(new Exception("Une exeption de test"));
-        instance.setContent("Un contenu qui n'a jamais existé");
-        instance.setPropertiesMail(service.getPropertiesMail());
-        instance.setSubject("Sujet de test");
-        
-        instance.gererIncident();
-        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-    }
+
 //
 //    /**
 //     * Test of fermetureIncident method, of class TacheEnvoyerMail.

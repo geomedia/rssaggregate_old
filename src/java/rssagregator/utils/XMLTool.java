@@ -30,7 +30,6 @@ public class XMLTool {
             encoder.writeObject(bean);
             encoder.flush();
         } catch (Exception e) {
-            System.out.println(""+e);
         } finally {
             arrayOutputStream.close();
             encoder.close();
@@ -93,12 +92,6 @@ public class XMLTool {
 //        String r = null;
 //        try {
 //            r = XMLTool.serialise(bean);
-//            System.out.println("=================");
-//            System.out.println("SERALISE");
-//            System.out.println(r);
-//            System.out.println("=================");
-//
-//            System.out.println("DESERIALISE");
 //        } catch (IOException ex) {
 //            Logger.getLogger(XMLTool.class.getName()).log(Level.SEVERE, null, ex);
 //        }
@@ -107,9 +100,6 @@ public class XMLTool {
 //        MessageBean mb;
 //        try {
 //            mb = XMLTool.unSerialize(r);
-//            System.out.println("=======");
-//            System.out.println("ID beans : " + mb.getID());
-//            System.out.println("MESSAGE beans : " + mb.getMessage());
 //
 //        } catch (IOException ex) {
 //            Logger.getLogger(XMLTool.class.getName()).log(Level.SEVERE, null, ex);
@@ -127,7 +117,6 @@ public class XMLTool {
 //        bean.setMessage("toto");
 //        
 //        String r = XMLTool.serialise(bean);
-//        System.out.println(r);
 //        
 //    }
 }

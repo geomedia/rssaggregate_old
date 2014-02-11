@@ -95,7 +95,6 @@ public class OLD_RecapActivite {
             daoItem.setDate2(this.getDate2());
 
             result = daoItem.findCretaria();
-//            System.out.println("Nombre de d'item : " + result.size());
             JSONArray jSONArray = jsonGraphEncode(result, this);
             tabResult.add(jSONArray);
 //            return jSONArray.toJSONString();
@@ -103,9 +102,6 @@ public class OLD_RecapActivite {
         
         
         
-//        System.out.println("dd");
-//        System.out.println("");
-//        System.out.println(""+tabResult.toJSONString());
         return tabResult.toJSONString();
     }
 

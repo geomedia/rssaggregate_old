@@ -95,11 +95,9 @@ public class PropertyLoader {
     public static void save(Properties prop, String filename, String comment) throws URISyntaxException, FileNotFoundException, IOException {
 
         URL resourceUrl = PropertyLoader.class.getClassLoader().getResource(filename);
-        System.out.println("URL DU FICHIER PROP : " + resourceUrl.toURI());
 //        URL truc = PropertyLoader.class.getClassLoader().getResourceAsStream(filename).;
 
         File file = new File(resourceUrl.toURI());
-        System.out.println("LA PATH : " + file.getAbsolutePath());
         OutputStream os = new FileOutputStream(file);
         prop.store(os, "lalala");
         os.close();
@@ -196,7 +194,6 @@ public class PropertyLoader {
         try {
             fis = new FileInputStream("/var/lib/RSSAgregate/conf.properties");
             p.load(fis);
-            System.out.println("name : " + p.getProperty("name"));
 
         } catch (FileNotFoundException ex) {
             Logger.getLogger(PropertyLoader.class.getName()).log(Level.SEVERE, null, ex);

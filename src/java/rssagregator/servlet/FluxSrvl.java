@@ -85,7 +85,6 @@ public class FluxSrvl extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
         request.setCharacterEncoding("UTF-8");
 
-//        System.out.println("TEST : " + TacheFactory.ATT_TacheRecupCallable_maxExecuteTime);
         //Liste des clause servant à criteria, ces variables seront envoyé dans la dao par la suite
         Journal journalLie;
         redirmap = null;
@@ -263,7 +262,6 @@ public class FluxSrvl extends HttpServlet {
                 phase = "";
                 request.setAttribute("phase", "");
             }
-            System.out.println("PHASE" + phase);
             
             if (request.getMethod().equals("POST")) {
 
@@ -283,7 +281,6 @@ public class FluxSrvl extends HttpServlet {
                         if (nomFichier != null && !nomFichier.isEmpty()) {
                             String nomChamp = part.getName();
                             request.setAttribute(nomChamp, nomFichier);
-                            System.out.println("Le nom de fichier : " + nomFichier);
 
                             // écriture du fichier sur le disque
 
@@ -291,7 +288,6 @@ public class FluxSrvl extends HttpServlet {
                             Long l = new Long(dateCurrent.getTime());
                             UserAccount user = (UserAccount) session.getAttribute("authuser");
                             String nomFichierUpload = "importCSV_" + l.toString() + "_" + user.getUsername() + ".csv";
-                            System.out.println("fileName : " + nomFichierUpload);
                             
                             byte[] resu = returnByteFromUploadedFile(part);
                             session.setAttribute("stringCSV", resu);
@@ -392,7 +388,6 @@ public class FluxSrvl extends HttpServlet {
                 dao.setClassAssocie(FluxPeriodeCaptation.class);
                 FluxPeriodeCaptation periode = (FluxPeriodeCaptation) dao.find(ids.get(0));
                 
-                System.out.println("PERIODE DEMANDE : " + periode);
                 
                 ObjectMapper mapper = new ObjectMapper();
                 
@@ -401,7 +396,6 @@ public class FluxSrvl extends HttpServlet {
                 
                 String jsonn = mapper.writer(filters).writeValueAsString(periode);
                 request.setAttribute("jsonstr", jsonn);
-                System.out.println("" + jsonn);
                 
                 request.setAttribute("text", "Ok enregistrement réalisé");
                 vue = "jsonPrint";
@@ -426,14 +420,12 @@ public class FluxSrvl extends HttpServlet {
             VUE = "/WEB-INF/fluxJSONDesc.jsp";
         } else if (vue.equals("fluxXMLsync")) {
             VUE = "/WEB-INF/fluxXMLsync.jsp";
-            System.out.println("coucou");
         } else if (vue.equals("jsonform")) {
             VUE = "/WEB-INF/jsonform.jsp";
         } else if (vue.equals("highchart")) {
             VUE = "/WEB-INF/highchartFlux.jsp";
         } else if (vue.equals("grid")) {
             VUE = "/WEB-INF/fluxJSONGrid.jsp";
-            System.out.println("GRID VUEE");
         } else if (vue.equals("csv")) {
             VUE = "/WEB-INF/fluxCSV.jsp";
         } else if (vue.equals("jsonstr")) {
@@ -441,16 +433,13 @@ public class FluxSrvl extends HttpServlet {
         } else if (action.equals("importcsv")) {
             String phase = request.getParameter("phase");
             
-            System.out.println("PHSE" + phase);
             if (phase == null || (phase != null && phase.isEmpty())) {
                 VUE = "/WEB-INF/fluxHTML.jsp";
             } else if (phase.equals("upload")) {
                 VUE = "/WEB-INF/fluxHTML.jsp";
             } else if (phase.equals("parse")) {
-                System.out.println("PARSE");
                 VUE = "/WEB-INF/itemJSONGrid2.jsp";
             } else if (phase.equals("saveItem")) {
-                System.out.println("Phase : saveItem");
                 VUE = "/WEB-INF/printText.jsp";
                 
             }
@@ -464,7 +453,6 @@ public class FluxSrvl extends HttpServlet {
             response.setCharacterEncoding("UTF-8");
             VUE = "/WEB-INF/fluxHTML.jsp";
         }
-        System.out.println("VUE " + VUE);
         if (VUE != null && !VUE.isEmpty()) {
             this.getServletContext().getRequestDispatcher(VUE).forward(request, response);
         }
@@ -506,7 +494,6 @@ public class FluxSrvl extends HttpServlet {
             }
             
             byte[] resu = sortie.toByteArray();
-//            System.out.println("BAOS : " + sortie.toString());
             return resu;
         } finally {
             try {

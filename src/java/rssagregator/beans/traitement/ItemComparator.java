@@ -30,7 +30,6 @@ public class ItemComparator implements Comparator<ContentRSS> {
     @Override
     public int compare(ContentRSS o1, ContentRSS o2) {
 
-//        System.out.println("Comparaison");
 
 
 
@@ -39,7 +38,7 @@ public class ItemComparator implements Comparator<ContentRSS> {
          * *
          * Les statut
          *
-         * -1 différent 0 0 inneploitable 1 semblable 2 equal
+         * -1 différent 0 nineploitable 1 semblable 2 equal
          */
         short link = -1;
         short titre = -1;
@@ -61,8 +60,6 @@ public class ItemComparator implements Comparator<ContentRSS> {
 
         // Desc 
         if (o1.getDescription() != null && o2.getDescription() != null && o2.getDescription().length() > 10 && o2.getDescription().length() > 10) {
-//            System.out.println("Desc 1 " + o1.getDescription());
-//            System.out.println("Desc 2 " + o2.getDescription());
 
 
             if (o1.getDescription().trim().equals(o2.getDescription().trim())) { // equalité stricte
@@ -132,10 +129,8 @@ public class ItemComparator implements Comparator<ContentRSS> {
             guid = 0;
         }
 
-        boolean similaire; // Les contenu doivent provenir du mm article mais ne sont pas strictementEqual
-        boolean strictementEqual = false;
 
-        // On exclu les item dont le titre et l'item ne sont pas exploitable
+        // On exclu les item dont le titre OU l'item ne sont pas exploitable
         if (titre == 0 || link == 0) {
             return -1; // Le comparator dit que les articles proviennent d'article different pour éviter de se tromper
         }
@@ -144,7 +139,7 @@ public class ItemComparator implements Comparator<ContentRSS> {
             return 0; // strictement identique
         }
 
-        if (guid > 0 && link == 1 && titre > 0) { // MM guid et mm lien m titre
+        if (guid > 0 && link >0 && titre > 0) { // MM guid et mm lien m titre
             return 1;
         }
 
@@ -152,25 +147,24 @@ public class ItemComparator implements Comparator<ContentRSS> {
             return 1;
         }
 
-        if (titre > 0 && link > 0) { // Si le titre et le lien sont ==
+        if (titre > 0 && link > 0) { // Si le titre et le lien sont ~=
             return 1;
         }
 
-        if (desc > 0 && link > 0) {
+        if (desc > 0 && link > 0) { // desc et lien ~=
             return 1;
         }
 
-        if (titre > 0 && guid > 0) {
+        if (titre > 0 && guid > 0) { // titre gui ~=
             return 1;
         }
-//        System.out.println("--------------------");
-//        System.out.println("CAS NON GERE ");
-//        System.out.println("TITRE : " + titre);
-//        System.out.println("Desc : " + desc);
-//        System.out.println("link : " + link);
-//        System.out.println("guid : " + guid);
-//        System.out.println("Date : " + date);
-//        System.out.println("----------------");
+        
+        if(link>0 && guid>0 && titre !=0){ //lien et guid == et titre exploitable
+            return 1;
+        }
+        
+
+        
         return -1; // tout autre cas il retourne -1
 
 

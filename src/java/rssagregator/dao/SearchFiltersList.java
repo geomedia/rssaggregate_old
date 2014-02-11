@@ -51,7 +51,6 @@ public class SearchFiltersList {
 //     */
 //    @Deprecated // ----> C'est maintenant une fonction inclu dans les objet formulaire. Chaque formulaire est propre a un beans et peu sépcifier comment on récupère les parametres lors d'un action list
 //    public void feedFromJSONString(String string) {
-//        System.out.println("ICI");
 //        if (string != null && !string.isEmpty()) {
 //
 //            JSONParser parse = new JSONParser();
@@ -62,13 +61,9 @@ public class SearchFiltersList {
 //            try {
 //                JSONObject filter = (JSONObject) parse.parse(string);
 //                JSONArray speFieldsArray = (JSONArray) filter.get("spefield");
-//                System.out.println("Nombre de CHAMPS SPE : " + speFieldsArray.size());
 //
 //                if (speFieldsArray != null) {
 //                    for (int i = 0; i < speFieldsArray.size(); i++) {
-//                        System.out.println("=============================");
-//                        System.out.println("----> IT : " + i);
-//                        System.out.println("=============================");
 //                        SearchFilter searchFilter = new SearchFilter();
 //                        JSONObject speField = (JSONObject) speFieldsArray.get(i);
 //
@@ -84,10 +79,8 @@ public class SearchFiltersList {
 //                            for (int j = 0; j < dataArray.size(); j++) {
 //                                Long id = (Long) dataArray.get(j);
 //                                concat += id + ",";
-//                                System.out.println("ID : " + id);
 //                            }
 //                            concat = concat.substring(0, concat.length() - 1);
-//                            System.out.println("Concat : " + concat);
 //                            List<Long> listLongId = ServletTool.parseidFromRequest(null, concat);
 //                            List<Flux> listFlux = new ArrayList<Flux>();
 //                            for (int j = 0; j < listLongId.size(); j++) {
@@ -103,13 +96,11 @@ public class SearchFiltersList {
 //                            searchFilter.setField(field);
 //                            this.filters.add(searchFilter);
 //
-//                            System.out.println("--------------");
 //                        }
 //
 //                        //---------Interprétation d'une date
 //                        if (dataArray.size() == 1 && dataArray.get(0).getClass().equals(String.class)) {
 //                            String data = (String) dataArray.get(0);
-//                            System.out.println("---> STRING DATE : " + data);
 //                            // On cherche a vérifier par rapport à un pattern de date
 //                            DateTimeFormatter fmt = DateTimeFormat.forPattern("dd/MM/yyyy");
 //                            try {
@@ -122,9 +113,6 @@ public class SearchFiltersList {
 //                                logger.error("e", e);
 //                            }
 //                        } else {
-//                            System.out.println("DEBUG");
-//                            System.out.println("SIZE : " + dataArray.size());
-//                            System.out.println("CLASS : " + dataArray.get(0).getClass());
 //                        }
 //
 //

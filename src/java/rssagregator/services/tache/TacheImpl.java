@@ -156,7 +156,7 @@ public class TacheImpl<T> extends AbstrTache<T> {
         if (org.apache.log4j.Level.toLevel(logErrorLevel).isGreaterOrEqual(Priority.ERROR)) {
             logger.log(Priority.toPriority(logErrorLevel), "erreur sur la tache " + this + e, e);
         } else {
-            logger.log(Priority.toPriority(logErrorLevel), "erreur sur la tache " + this + e);
+            logger.log(Priority.toPriority(logErrorLevel), "erreur sur la tache " + this + e, e);
         }
 
         try { // On roolback la transaction

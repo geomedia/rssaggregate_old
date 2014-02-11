@@ -5,10 +5,13 @@
 --%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+
+
 <%@taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>  <!--Il faut bien utiliser la vesion 1.1 d ela jstl l'autre ne permet pas d'utiliser les EL-->
 <%--<%@page contentType="text/html" pageEncoding="UTF-8"%>--%>
 <!--Inclusion du menu haut-->
 <c:import url="/WEB-INF/headerjsp.jsp" />
+
 
 <div id="header-wrapper">
     <div id="header">
@@ -19,8 +22,9 @@
 </div>
 
 <div id="content">
-
+    
     <c:choose>
+        
         <c:when test="${action=='read'}">
             <div class="post">
                 <h2><a href="${item.link}">${item.titre}</a></h2>

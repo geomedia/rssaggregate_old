@@ -87,13 +87,10 @@ public class DaoFlux extends AbstrDao {
 //
 ////        em.refresh(flux);
 ////        
-////        System.out.println("=====================");
 ////        List<FluxIncident> listI = flux.getIncidentsLie();
 ////        for (int i = 0; i < listI.size(); i++) {
 ////            CollecteIncident fluxIncident = listI.get(i);
-////            System.out.println("INCIDEBNT : " + fluxIncident);
 ////        }
-////        System.out.println("=====================");
 //
 //
 //        // On doit suppimer les items liées si il sont orphelin. Une cascade classique de l'ORM ne peut convenir 
@@ -155,11 +152,9 @@ public class DaoFlux extends AbstrDao {
 //    }
     @Override
     public void criteriaTraitementDeschampsSpecifique(CriteriaQuery cq, CriteriaBuilder cb, Root root, List listWhere) {
-        System.out.println("------------------ Traitement Spécifique");
         //Gestion des journaux liés
         if (criteriaJournalLie != null) {
             Join joinFlux = root.join("journalLie");
-            System.out.println("--->>> Journal");
             listWhere.add(cb.and(cb.equal(joinFlux.get("ID"), criteriaJournalLie.getID())));
         }
     }
@@ -261,7 +256,6 @@ public class DaoFlux extends AbstrDao {
             }
         }
 
-        System.out.println("PERIODE : " + fl.getPeriodeCaptations().size());
         super.creer(fl);
 
 
@@ -350,7 +344,6 @@ public class DaoFlux extends AbstrDao {
 //
 //        } catch (RollbackException e) {
 //            ServiceGestionIncident.getInstance().gererIncident(e, flux);
-//            System.out.println("EXEPTION BDD");
 //            throw e;
 //        }
 //    }
@@ -512,15 +505,8 @@ public class DaoFlux extends AbstrDao {
         query.setHint(QueryHints.CACHE_USAGE, CacheUsage.NoCache);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         List resu = query.getResultList();
-        System.out.println("RESU 1 : " + resu.size());
 
-        for (int i = 0; i < resu.size(); i++) {
-            Flux object = (Flux) resu.get(i);
-            System.out.println("COUNTAIN " + em.contains(object));
-            System.out.println("CACHE 2 : " + em.getEntityManagerFactory().getCache().contains(Flux.class, object.getID()));
 
-            System.out.println("ID : " + object.getID());
-        }
 
 
         String req2 = "SELECT f FROM Flux f where f.ID is not null";
@@ -528,7 +514,6 @@ public class DaoFlux extends AbstrDao {
 //        query2.setParameter("id", new Long(160))
         query2.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheOnly);
         List resu2 = query2.getResultList();
-        System.out.println("NBR RESU : " + resu2.size());
     }
 
 //    /***
@@ -582,9 +567,7 @@ public class DaoFlux extends AbstrDao {
         q.setParameter("nbr", nbrrepetition);
 
         List<CollecteIncident> resu = q.getResultList();
-        System.out.println("LIST SIZE " + resu.size());
         for (Iterator<CollecteIncident> it = resu.iterator(); it.hasNext();) {
-            System.out.println("FOR");
             CollecteIncident collecteIncident = it.next();
             if (collecteIncident.getDateFin() != null) {
                 DateTime dt1 = new DateTime(collecteIncident.getDateDebut());
@@ -592,14 +575,12 @@ public class DaoFlux extends AbstrDao {
                 Duration dur = new Duration(dt1, dt2);
                 if (dur.getStandardHours() < nbhour) {
                     it.remove();
-                    System.out.println("REMOVEZ");
                 }
             }
         }
 
         for (int i = 0; i < resu.size(); i++) {
             CollecteIncident collecteIncident = resu.get(i);
-            System.out.println(collecteIncident);
         }
         return resu;
 

@@ -168,24 +168,7 @@ public class TacheEnvoyerMailTest {
 //        // TODO review the generated test code and remove the default call to fail.
 //        fail("The test case is a prototype.");
 //    }
-    /**
-     * Test of gererIncident method, of class TacheEnvoyerMail.
-     */
-    @Test
-    public void testGererIncident() throws Exception {
-        System.out.println("gererIncident");
-        TacheEnvoyerMail instance = new TacheEnvoyerMail();
-        instance.setContent("truc");
 
-
-
-        testEnvoyerUnmail();
-        instance.setExeption(new Exception());
-
-        instance.gererIncident();
-        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-    }
 
     @Test
     public void testEnvoyerUnmail() throws AddressException {

@@ -44,7 +44,6 @@ public class ServletTool {
 
         String action = request.getPathInfo();
 
-        System.out.println("Path i" + action);
         if (action == null) {
             action = defaultAction;
         } else if (action.length() > 0) {
@@ -129,7 +128,6 @@ public class ServletTool {
     public static List getListFluxFromRequest(HttpServletRequest request, AbstrDao dao) throws NumberFormatException, NoResultException {
         List<Object> listFlux = new ArrayList<Object>();
         String[] tabIdf = request.getParameterValues("id");
-        System.out.println("°à°+====");
 
         //Il y a plein de façon de passer des ID
         Boolean err = false;
@@ -139,7 +137,6 @@ public class ServletTool {
                 Long intVal = new Long(tabIdf[0]);
                 Object o = dao.find(intVal);
                 listFlux.add(o);
-                System.out.println("Pouet");
                 return listFlux;
             } catch (Exception e) {
                 err = true;
@@ -206,7 +203,6 @@ public class ServletTool {
         // Obtenssion de la dao
 //        AbstrDao dao = DAOFactory.getInstance().getDaoFromType(beansClass);
 //        dao.initcriteria();
-//        System.out.println("nbr filt tool a l'entree" + dao.getCriteriaSearchFilters().getFilters().size());
 //
 //        //Gestion des paramettre filtre permet de configurer les where clause dans criteria en fonction de ce qui est envoyé par JQGRID
 //        if (request.getParameter("filters") != null && !request.getParameter("filters").isEmpty()) {
@@ -221,9 +217,6 @@ public class ServletTool {
 //                    String field = (String) object.get("field");
 //                    String op = (String) object.get("op");
 //                    String data = (String) object.get("data");
-//                    System.out.println("field : " + field);
-//                    System.out.println("op : " + op);
-//                    System.out.println("data : " + data);
 //
 //                    SearchFilter filt = new SearchFilter();
 //
@@ -233,7 +226,6 @@ public class ServletTool {
 //                    filt.setOp(op);
 //                    //On essai de retrouver le type du champs par reflexivité
 //                    try {
-//                        System.out.println("On tente de trouver le type");
 //                        filt.setType(beansClass.getDeclaredField(field).getType());
 //
 //                    } catch (NoSuchFieldException ex) {
@@ -244,14 +236,12 @@ public class ServletTool {
 //
 //
 //                    dao.getCriteriaSearchFilters().getFilters().add(filt);
-//                    System.out.println("--> nb filter : " + dao.getCriteriaSearchFilters().getFilters().size());
 //                }
 //
 //            } catch (ParseException ex) {
 //                Logger.getLogger(JournauxSrvl.class.getName()).log(Level.SEVERE, null, ex);
 //            }
 //        }
-//        System.out.println("NB FILT DS TOOL " + dao.getCriteriaSearchFilters().getFilters().size());
 //
 //        //Compte du nombre total de résultat
 //        Integer count = null;
@@ -268,10 +258,8 @@ public class ServletTool {
 //        for (Map.Entry<String, String[]> entry : map.entrySet()) {
 //            String string = entry.getKey();
 //            String[] strings = entry.getValue();
-//            System.out.println("-- key : " + string + " // value : " + strings[0] + " size " + strings.length);
 //        }
 //
-//        System.out.println("AV ROW");
 //        // ROW
 //        if (request.getParameter("vue") != null && !request.getParameter("vue").equals("csv")) {
 //            Integer limit = null;
@@ -284,12 +272,10 @@ public class ServletTool {
 //                }
 //            } else {
 //            }
-//            System.out.println("°1");
 //
 //            //-----PAGE
 //            Integer page = null;
 //            if (request.getParameter("page") != null && !request.getParameter("page").isEmpty()) {
-//                System.out.println("°°°°°°°°°))");
 //                try {
 //                    page = new Integer(request.getParameter("page"));
 //
@@ -302,7 +288,6 @@ public class ServletTool {
 //                    if (count != null && limit != null && count > 0 && limit > 0) {
 //                        totalPagedbl = Math.ceil(count.doubleValue() / limit.doubleValue());
 //                        totalPage = totalPagedbl.intValue();
-//                        System.out.println("--->> TOTAL PAGE : " + totalPage);
 //
 //                        request.setAttribute("total", totalPage);
 //                    } else {
@@ -340,15 +325,12 @@ public class ServletTool {
         for (Map.Entry<String, String[]> entry : mapTest.entrySet()) {
             String string = entry.getKey();
             String[] strings = entry.getValue();
-            System.out.println("--> Request Key : " + string);
             for (int i = 0; i < strings.length; i++) {
                 String string1 = strings[i];
-                System.out.println("--> Value for " + string+ " : " + string1);
                 
             }
         }
 
-        System.out.println("SIZE DANS ACTION : " +dao.getCriteriaSearchFilters().getFilters().size() );        
 
         // On récupère la liste des items en utilisant la dao
         List<Object> items = dao.findCriteria();
@@ -356,7 +338,6 @@ public class ServletTool {
 
         // On effectue les comptes
         Integer records = dao.cptCriteria(); // records corresponds au nombre total d'enregistrement
-        System.out.println("RECORDS : " + records);
 
         // Calcul du nombre de pages
         Double totalPagedbl;
@@ -390,7 +371,6 @@ public class ServletTool {
 
         try {
             Object bean = dao.find(new Long(id));
-            System.out.println("beans " + bean);
 
             if (bean == null) {
                 throw new NoResultException();
@@ -427,13 +407,11 @@ public class ServletTool {
             Object bean = dao.find(new Long(id));
             request.setAttribute(beansname, bean);
             if (bean == null) {
-                System.out.println("------------ NO RESULT");
                 throw new NoResultException();
             }
             //On bind
             //On crée un formulaire 
             f = FORMFactory.getInstance().getForm(bean.getClass(), "mod");
-            System.out.println(" FORM DS TOOL : " + f);
             f.setAction("mod");
             request.setAttribute("form", f);
 
@@ -500,7 +478,6 @@ public class ServletTool {
 
     public static void actionADD(HttpServletRequest request, String beansnameJSP, String formNameJSP, Class beansClass, Boolean notifiObserver) {
         String srlvtname = (String) request.getAttribute("srlvtname");
-        System.out.println("--->>>>>> ADD ");
         AbstrForm form = null;
         try {
             Object o = null;
@@ -545,7 +522,6 @@ public class ServletTool {
 //    @Deprecated
 //    public static void actionADD2(HttpServletRequest request, String beansnameJSP, String formNameJSP, Class beansClass, Boolean notifiObserver) {
 //        String srlvtname = (String) request.getAttribute("srlvtname");
-//        System.out.println("--->>>>>> ADD ");
 //        try {
 //            Object o = null;
 //
@@ -569,13 +545,11 @@ public class ServletTool {
 //                    }
 //                    redir(request, srlvtname + "/recherche", "AJOUT effectué : ", Boolean.FALSE);
 //                } else { // Si le formulaire n'est pas valide
-//                    System.out.println("Servlet : pas valid ");
 //                }
 //            }
 //
 //        } catch (Exception e) {
 //            redir(request, srlvtname + "/add", "ERREUR lors du traitement : " + e, Boolean.TRUE);
-//            System.out.println("ERR : " + e);
 //        }
 //    }
     public static void actionREM(HttpServletRequest request, Class beansClass, Boolean notifiObserver) {

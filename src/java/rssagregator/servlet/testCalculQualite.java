@@ -48,9 +48,7 @@ public class testCalculQualite extends HttpServlet {
         TacheCalculQualiteFlux tache = new TacheCalculQualiteFlux();
         tache.setFlux(f);
         try {
-            System.out.println("-----");
             tache.call();
-            System.out.println("------");
         } catch (DonneeInterneCoherente ex) {
             Logger.getLogger(testCalculQualite.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {

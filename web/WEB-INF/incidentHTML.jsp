@@ -8,7 +8,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>  <!--Il faut bien utiliser la vesion 1.1 d ela jstl l'autre ne permet pas d'utiliser les EL-->
-
 <c:import url="/WEB-INF/headerjsp.jsp" />
 
 
@@ -33,8 +32,6 @@
 
 
                 <c:choose>
-
-
                     <c:when test="${action=='recherche'}">
                         <h2>Liste des incidents</h2>
 
@@ -55,13 +52,14 @@
                                 <label>Type D'incident :</label>
                                 <label>Tous : </label><input type="radio" name="type" value="AbstrIncident" /><br />
                                 <label>Collecte </label>:<input type="radio" name="type" value="CollecteIncident" checked="checked" id="type" /><br />
-                                <label>Synchronisation </label>: <input type="radio" name="type" value="SynchroIncident"><br />
+                                <label>Anomalie de Collecte </label>:<input type="radio" name="type" value="AnomalieCollecte" checked="checked" id="type" /><br />
+                                <!--<label>Synchronisation </label>: <input type="radio" name="type" value="SynchroIncident"><br />-->
                                 <label>Serveur :</label> <input type="radio" name="type" value="ServerIncident"><br />
-                                <label>Mail :</label> <input type="radio" name="type" value="MailIncident"/>
+                                <!--<label>Mail :</label> <input type="radio" name="type" value="MailIncident"/>-->
 
 
-
-                                <br />
+                                <hr />
+                                <!--<br />-->
                                 <!--                                <label>Entité par page</label>
                                                                 <select id="itPrPage" name="itPrPage" onChange="this.form.submit();"> 
                                 <c:forEach var="i" begin="25" end="150" step="25">
@@ -161,7 +159,7 @@
                             <link rel="alternate" href="${rootpath}incidents/rssBakend" title="Le Monde.fr : A la une" type="application/rss+xml">
                             <p><a href="${rootpath}incidents/rssBakend">Flux RSS des incidents</a></p>
                         </c:if>
-                            
+
                     </c:when>
 
 
@@ -206,14 +204,24 @@
                             <p>Des flux ont automatiquement été ajouté pour le journal : <a href="${bean.journal.readURL}"> ${bean.journal}</a></p>
                             <h2>Flux ajouté :</h2> 
                             <ul>
+                                
                                 <c:forEach items="${bean.fluxAjoute}" var="fl">
                                     <li><a href="${fl.readURL}">${fl}</a></li>
                                     </c:forEach>
                             </ul>
                         </c:if>
+                            
 
-
-
+                        <c:if test="${bean['class'].simpleName=='AnomalieCollecte'}">
+                            
+                            <p><strong>Flux concerné : </strong>${bean.fluxLie}</p>
+                            <h3>Durée de l'anomalie</h3>
+                            <ul>
+                            <c:forEach items="${bean.periodeAnormale}" var="p">
+                                <li><fmt:formatDate value="${p.dateAnomalie}" pattern="dd/MM/yyyy"/> : ${p.nbrItemCollecte} items collectés</li>
+                            </c:forEach>
+                                </ul>
+                        </c:if>
 
                         <p><strong>Date début :</strong> <fmt:formatDate value="${bean.dateDebut}" pattern="dd/MM/yyyy hh:mm:ss"/></p>
                         <p><strong>Date fin :</strong> <fmt:formatDate value="${bean.dateFin}" pattern="dd/MM/yyyy hh:mm:ss"/></p>

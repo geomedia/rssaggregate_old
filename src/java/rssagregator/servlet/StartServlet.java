@@ -57,11 +57,6 @@ public class StartServlet implements ServletContextListener {
         String webDir = servletContext.getRealPath(File.separator);
         System.setProperty("webdir", webDir);
 
-//                       System.out.println("=============================");
-//                       System.out.println(" WEB DIR START SRVLT " + webDir);
-//                       System.out.println("=============================");
-
-
 
         try {
             Class.forName("com.mysql.jdbc.Driver");

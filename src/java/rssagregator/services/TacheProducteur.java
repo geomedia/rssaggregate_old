@@ -55,6 +55,7 @@ public class TacheProducteur implements Runnable {
     public void produireMaintenant(AbstrTache t) {
         try {
             service.queueTacheALancer.put(t);
+      
             synchronized (service.tacheConsomateur.lock) {
                 service.tacheConsomateur.lock.notify();
             }
@@ -62,14 +63,13 @@ public class TacheProducteur implements Runnable {
         } catch (InterruptedException ex) {
             Logger.getLogger(TacheProducteur.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
+    } 
 
     @Override
     public void run() {
         try {
             while (true) {
 
-                System.out.println("Tour - " + this);
                 Thread.sleep(3600 * 1000);
                 ThreadUtils.interruptCheck();
             }

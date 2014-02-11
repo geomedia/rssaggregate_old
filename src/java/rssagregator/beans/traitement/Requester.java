@@ -64,7 +64,6 @@ public class Requester extends AbstrRequesteur implements java.util.concurrent.C
 
 
         this.httpStatut = conn.getResponseCode();
-//        System.out.println("CODE : " + httpStatut);
         if (httpStatut != 200) {
             logger.info("Erreur HTTP : " + httpStatut + ". " + urlArg);
             throw new HTTPException(httpStatut);

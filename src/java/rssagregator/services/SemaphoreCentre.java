@@ -72,7 +72,7 @@ public class SemaphoreCentre implements Runnable {
      * *
      * Object sur lequel il faut attendre lorsque le manage est en cours
      */
-    private Object lockMenage = new Object();
+    private Object finMenage = new Object();
     /**
      * *
      * Notifier cet object provoque le ménage
@@ -181,8 +181,8 @@ public class SemaphoreCentre implements Runnable {
 //                        semMenage.release(drainPerm);
 
                         menage = false;
-                        synchronized (lockMenage) {
-                            lockMenage.notifyAll();
+                        synchronized (finMenage) {
+                            finMenage.notifyAll();
                         }
 
                         logger.debug("Fin de purge \n -------------------------------------------");
@@ -225,22 +225,12 @@ public class SemaphoreCentre implements Runnable {
      *
      * @see #run()
      */
-//    public void declancherMenage() {
-//        synchronized (lockMenage) {
-//            lockMenage.notify();
-//        }
-//    }
-    /**
-     * *
-     * Block la thread demandant si le menage est en cours.
-     *
-     * @throws InterruptedException
-     */
-//    public void waitMenage() throws InterruptedException {
-//        if (menage) {
-//            synchronized (lockMenage) {
-//                lockMenage.wait();
-//            }
-//        }
-//    }
+    public void declancherMenage() {
+        
+        synchronized(declancherMenage){
+            declancherMenage.notifyAll();
+        }
+
+    }
+
 }

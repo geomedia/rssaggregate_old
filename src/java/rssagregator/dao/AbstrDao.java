@@ -98,7 +98,6 @@ public abstract class AbstrDao<T> {
      * @return
      */
     protected TypedQuery gestionCriteria(Boolean count) {
-        System.out.println("");
         CriteriaBuilder cb = em.getCriteriaBuilder();
         List<Predicate> listWhere = new ArrayList<Predicate>();
 
@@ -188,7 +187,6 @@ public abstract class AbstrDao<T> {
         //---------Gestion de l'ordre.
         if (!count) {
             if (criteriaSearchFilters.criteriaSidx != null && !criteriaSearchFilters.criteriaSidx.isEmpty() && !criteriaSearchFilters.criteriaSidx.equals("invid") && criteriaSearchFilters.criteriaSord != null && (criteriaSearchFilters.criteriaSord.toLowerCase().equals("asc") || criteriaSearchFilters.criteriaSord.toLowerCase().equals("desc"))) {
-                System.out.println("--> criteria sidx : " + criteriaSearchFilters.criteriaSidx);
                 if (criteriaSearchFilters.criteriaSord.toLowerCase().equals("desc")) {
                     cq.orderBy(cb.desc(root.get(criteriaSearchFilters.criteriaSidx)));
                 } else if (criteriaSearchFilters.criteriaSord.toLowerCase().equals("asc")) {

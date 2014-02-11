@@ -4,13 +4,11 @@
  */
 package rssagregator.services;
 
-import java.awt.print.Book;
 import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import javax.print.attribute.standard.Severity;
 import rssagregator.services.tache.AbstrTache;
 
 /**
@@ -35,46 +33,46 @@ public class TacheConsomateur implements Runnable {
     public void run() {
         try {
             while (run) {
-                boolean allaquire = true;
-                logger.debug("iteration " + this);
+                synchronized (lock) {
 
 
 
+                    boolean allaquire = true;
+//                    logger.debug("iteration " + this);
+
+                    // Itération sur chaque tache de la queue
+                    for (Iterator<AbstrTache> it = service.queueTacheALancer.iterator(); it.hasNext();) {
+                        AbstrTache t = it.next();
+
+                        if (t != null) {
+                            boolean semPreconditionAquises = t.tryAcquireSem();
+
+                            if (semPreconditionAquises) { // Si la tache a pu acquerir ses pré condition On la lance
+
+                                SoumissionTache soumissionTache = new SoumissionTache();
+                                soumissionTache.setTache(t);
+                                es.submit(soumissionTache);
 
 
-                // Itération sur chaque tache de la queue
-                for (Iterator<AbstrTache> it = service.queueTacheALancer.iterator(); it.hasNext();) {
-                    AbstrTache t = it.next();
-
-                    if (t != null) {
-                        boolean semPreconditionAquises = t.tryAcquireSem();
-
-                        if (semPreconditionAquises) { // Si la tache a pu acquerir ses pré condition On la lance
-
-                            SoumissionTache soumissionTache = new SoumissionTache();
-                            soumissionTache.setTache(t);
-                            es.submit(soumissionTache);
-
-
-                            service.queueTacheALancer.remove(t); // Supression de la tache du pool
-                        } else {
-                            allaquire = false;
+                                service.queueTacheALancer.remove(t); // Supression de la tache du pool
+                            } else {
+                                allaquire = false;
+                            }
                         }
                     }
-                }
 
 
-                if (allaquire) {
-                    synchronized (lock) {
-                        lock.wait(30000); // On attend 30 s, Le consomateur peut aussi être notifié pour se réveiller avant la fin du wait
+                    if (allaquire) {
+//                        synchronized (lock) {
+                            lock.wait(30000); // On attend 30 s, Le consomateur peut aussi être notifié pour se réveiller avant la fin du wait
+//                        }
+                    } else {
+//                        synchronized (lock) {
+                            lock.wait(2000); // Si on n'avait pas pu aquerir toutes les sem, on n'attend pas si longtemps.
+//                        }
                     }
-                } else {
-                    synchronized (lock) {
-                        lock.wait(2000); // Si on n'avait pas pu aquerir toutes les sem, on n'attend pas si longtemps.
-                    }
+
                 }
-
-
 
 
 //                while (!service.queueTacheALancer.isEmpty()) {
@@ -157,7 +155,7 @@ public class TacheConsomateur implements Runnable {
         public void run() {
             if (tache != null) {
 
-       
+
 
                 try {
 //                   // Soumission de la tache

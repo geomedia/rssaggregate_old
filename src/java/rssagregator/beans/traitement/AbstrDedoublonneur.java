@@ -388,7 +388,6 @@ public abstract class AbstrDedoublonneur implements Serializable, Cloneable {
                             }
                         }
                         if (cpt > 1) {
-                            System.out.println("---COUCOU");
                             it.remove();
                         }
                     }

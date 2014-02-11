@@ -40,4 +40,17 @@ public interface ContentRSS {
     public String getGuid();
 
     public void setGuid(String guid);
+
+    public Long getID();
+
+    public void setID(Long ID);
+
+    public String getCategorie();
+
+    public void setCategorie(String categorie);
+    
+    public String getContenu();
+
+    public void setContenu(String contenu);
+      
 }

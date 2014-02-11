@@ -47,7 +47,6 @@ public class ClemBeanUtils {
      */
     @Deprecated
     public static void populate(Object bean, HttpServletRequest request, AbstrForm form) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        System.out.println("EXE");
 
 
         // On initialise le hashmap d'erreur;
@@ -61,7 +60,6 @@ public class ClemBeanUtils {
 
 //        // Il faut ajouter les field de la classe parente si elle exite
 //        
-//        //System.out.println("Classe mère : "+ bean.getClass().getSuperclass().getSimpleName());
 //        Field[] tabfieldmere=  bean.getClass().getSuperclass().getDeclaredFields();
 //           int i;
 //           
@@ -79,10 +77,8 @@ public class ClemBeanUtils {
 
 
         int i;
-//        System.out.println("Nombre de fiels : " + tabfield.length);
 
         for (i = 0; i < tabfield.length; i++) {
-//            System.out.println("Nom du fields" + tabfield[i].getName());
             String nomVariable = tabfield[i].getName();
             String nomSetter = "set" + nomVariable.substring(0, 1).toUpperCase() + nomVariable.substring(1, nomVariable.length());
             Method setter = simpleGetMethod(bean, nomSetter);
@@ -113,7 +109,6 @@ public class ClemBeanUtils {
 
                             form.getErreurs().put(nomVariable, new String[]{contenuRequest, "Il faut inscrire un nombre entier"});
 
-//                            System.out.println("Exeption ne n'est pas un int pas de parsage");
                         }
                     }
                 }
@@ -123,7 +118,6 @@ public class ClemBeanUtils {
                     String parameter = request.getParameter(nomVariable);
 
                     if (parameter != null) {
-//                        System.out.println("Nom var : " + nomVariable);
                         try {
                             Long id = new Long(parameter);
                             EntityManager em;
@@ -179,7 +173,6 @@ public class ClemBeanUtils {
 //                Method getter = beans.getClass().getMethod(nomGetter);
 //                beans.getClass().getMethod(nomGetter);
 //                Object contenuFieldBean = getter.invoke(beans);
-//                System.out.println("Contenu Fields : " + contenuFieldBean);
 //                // On lanche la methode de check
 //                if (mCheck != null) {
 //                    try {
@@ -235,7 +228,6 @@ public class ClemBeanUtils {
                         Logger.getLogger(ClemBeanUtils.class.getName()).log(Level.SEVERE, null, ex);
                     } catch (InvocationTargetException ex) {
 //                        erreurs.put(beanFields[i].getName(), ex.getTargetException().getMessage());
-                        System.out.println("ereur sur : " + beanFields[i].getName());
                         objetFormulaire.getErreurs().put(beanFields[i].getName(), new String[]{contenuFieldBean.toString(), ex.getTargetException().getMessage()});
                     } catch (Exception ex) {
                     }

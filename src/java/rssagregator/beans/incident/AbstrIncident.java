@@ -19,6 +19,7 @@ import org.joda.time.Duration;
 import rssagregator.beans.Conf;
 import rssagregator.dao.DAOFactory;
 import rssagregator.services.tache.TacheAlerteMail;
+import rssagregator.utils.ExceptionTool;
 
 /**
  * *
@@ -33,7 +34,7 @@ import rssagregator.services.tache.TacheAlerteMail;
 //@MappedSuperclass()
 //@Cache(size = 100, type = CacheType.CACHE, isolation = CacheIsolationType.SHARED, coordinationType = CacheCoordinationType.SEND_NEW_OBJECTS_WITH_CHANGES)
 @Inheritance(strategy = InheritanceType.JOINED) // Peu de champs supplémentaires dans les autres entités, on va conserver la stratégie la plus simple
-public abstract class AbstrIncident implements Serializable {
+public abstract class AbstrIncident implements Serializable, Comparable<AbstrIncident> {
 
     public static final String desc = "ddd";
 
@@ -196,57 +197,64 @@ public abstract class AbstrIncident implements Serializable {
         return nombreTentativeEnEchec;
     }
 
-    /***
+    /**
+     * *
      * @see #nombreTentativeEnEchec
-     * @param nombreTentativeEnEchec 
+     * @param nombreTentativeEnEchec
      */
     public void setNombreTentativeEnEchec(Integer nombreTentativeEnEchec) {
         this.nombreTentativeEnEchec = nombreTentativeEnEchec;
     }
 
-    /***
+    /**
+     * *
      * @see #lastNotification
-     * @return 
+     * @return
      */
     public Date getLastNotification() {
         return lastNotification;
     }
 
-    /***
+    /**
+     * *
      * @see #lastNotification
-     * @param lastNotification 
+     * @param lastNotification
      */
     public void setLastNotification(Date lastNotification) {
         this.lastNotification = lastNotification;
     }
 
-    /***
+    /**
+     * *
      * @see #dateDebut
-     * @return 
+     * @return
      */
     public Date getDateDebut() {
         return dateDebut;
     }
 
-    /***
+    /**
+     * *
      * @see #dateDebut
-     * @param dateDebut 
+     * @param dateDebut
      */
     public void setDateDebut(Date dateDebut) {
         this.dateDebut = dateDebut;
     }
 
-    /***
+    /**
+     * *
      * @see #dateFin
-     * @return 
+     * @return
      */
     public Date getDateFin() {
         return dateFin;
     }
 
-    /***
+    /**
+     * *
      * @see #dateFin
-     * @param dateFin 
+     * @param dateFin
      */
     public void setDateFin(Date dateFin) {
         this.dateFin = dateFin;
@@ -365,5 +373,55 @@ public abstract class AbstrIncident implements Serializable {
      */
     public String incidDesc() {
         return desc;
+    }
+
+    /**
+     * *
+     * Les incident peutvent être comparé par leur date de début et date de fin. Cela permet de faciement les trier dans
+     * une liste
+     *
+     * @param o
+     * @return
+     */
+    @Override
+    public int compareTo(AbstrIncident o) {
+
+        ExceptionTool.argumentNonNull(o);
+
+        if(this.getDateDebut()==null){
+            if(o.getDateDebut()==null){
+                return 0;
+            }
+            else{
+                return -1;
+            }
+        }
+        
+        if(o.getDateDebut()==null){
+            if(this.getDateDebut()==null){
+                return 0;
+            }
+            else{
+                return 1;
+            }
+        }
+        
+        if(this.getDateDebut().equals(o.getDateDebut())){
+            return 0;
+        }
+        else if(this.dateDebut.before(o.dateDebut)){
+            return -1;
+        }
+        else{
+            return 1;
+        }
+        
+        
+        
+        
+        
+        
+
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

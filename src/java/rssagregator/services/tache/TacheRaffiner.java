@@ -7,9 +7,8 @@ package rssagregator.services.tache;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.persistence.LockModeType;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -18,7 +17,6 @@ import javax.persistence.criteria.Root;
 import rssagregator.beans.Item;
 import rssagregator.beans.ItemRaffinee;
 import rssagregator.beans.traitement.ItemComparator;
-import rssagregator.services.SemaphoreCentre;
 
 /**
  *
@@ -26,6 +24,11 @@ import rssagregator.services.SemaphoreCentre;
  */
 public class TacheRaffiner extends TacheImpl<TacheRaffiner> {
 
+    
+    private static Semaphore semUnique = new Semaphore(1);
+    
+    
+    
     /**
      * *
      * L'item (brute) que la tâche doit analyser afin de générer une item raffiné ou lié a une item raffiné existante.
@@ -41,33 +44,51 @@ public class TacheRaffiner extends TacheImpl<TacheRaffiner> {
     protected void callCorps() throws InterruptedException, Exception {
 //        super.callCorps(); //To change body of generated methods, choose Tools | Templates.
 
-
         if (item != null && item.getID() != null) {
             initialiserTransaction();
-//            verrouillerObjectDansLEM(item, LockModeType.PESSIMISTIC_WRITE);
-            
-            item = em.find(Item.class, item.getID(), LockModeType.PESSIMISTIC_WRITE);
-            
-//            em.lock(item, LockModeType.PESSIMISTIC_WRITE);
-//            em.refresh(item);
+            ItemRaffinee itemRetenu = null; // L'item raffinée que l'on cherche 
 
-//            em.lock(item, LockModeType.PESSIMISTIC_WRITE);
-
-            // On cherche les items rafinnée qui pourraient correspondre
-            String titre = item.getTitre();
-            String guid = item.getGuid();
-            String link = item.getLink();
-            String hash = item.getHashContenu();
+            item = em.find(Item.class, item.getID(), LockModeType.PESSIMISTIC_WRITE); // On lock l'item brute par JPA
 
 
+            //-----------------------------------------------------------------------
+            //Recherche d'une item raffinnée possédant le même Hash
+            //-----------------------------------------------------------------------
+            /**
+             * * 
+             * On commence par chercher si on peut trouver dans la base de données une itemsRéffinée possédant le même
+             * hash que l'item observe. Si on la trouve innutile de procéder a un traitement plus complexe.
+             */
+            Query q = em.createQuery("SELECT i FROM ItemRaffinee i WHERE i.hashContenu LIKE(:hash)");
+            q.setParameter("hash", item.getHashContenu());
+            Object result = null;
             try {
-                //--------------------------------------------------------------------
-                //           CONSTRUCTION DE LA REQUETE CRITERIA
-                //--------------------------------------------------------------------
+                result = q.getSingleResult();
+                if (result != null) {
+                    itemRetenu = (ItemRaffinee) result;
+                    em.lock(itemRetenu, LockModeType.PESSIMISTIC_READ);
+                }
+            } catch (Exception e) {
+            }
+
+
+
+
+//            try {
+            //--------------------------------------------------------------------
+            //           CONSTRUCTION DE LA REQUETE CRITERIA
+            //--------------------------------------------------------------------
+            if (itemRetenu == null) { // Si on n'a pas déjà trouvé une item raffinnée par son hash alors on cherche des items ressemblante ou strictement semblable par le block ci dessous
+                // On cherche les items rafinnée qui pourraient correspondre
+                String titre = item.getTitre();
+                String guid = item.getGuid();
+                String link = item.getLink();
+                String hash = item.getHashContenu();
 
                 CriteriaBuilder cb = em.getCriteriaBuilder();
                 CriteriaQuery<Item> cq = cb.createQuery(Item.class);
                 Root root = cq.from(Item.class);
+                root.fetch("itemRaffinee");
 
                 Predicate where = null;
 
@@ -75,10 +96,8 @@ public class TacheRaffiner extends TacheImpl<TacheRaffiner> {
                     if (where == null) {
                         where = cb.like(root.get("titre"), "%" + titre + "%");
                     } else {
-
-                        where = cb.or(where, cb.like(root.get("titre"), "%" + titre + "A%"));
+                        where = cb.or(where, cb.like(root.get("titre"), "%" + titre + "%"));
                     }
-                    System.out.println("titre" + titre);
                 }
 
                 if (guid != null && !guid.isEmpty()) {
@@ -97,26 +116,40 @@ public class TacheRaffiner extends TacheImpl<TacheRaffiner> {
                     }
                 }
 //                
-                if (hash != null && !hash.isEmpty()) {
-                    if (where == null) {
-                        where = cb.equal(root.get("hashContenu"), hash);
-                    } else {
-                        where = cb.or(where, cb.equal(root.get("hashContenu"), hash));
-                    }
-                }
+//                if (hash != null && !hash.isEmpty()) {
+//                    if (where == null) {
+//                        where = cb.equal(root.get("hashContenu"), hash);
+//                    } else {
+//                        where = cb.or(where, cb.equal(root.get("hashContenu"), hash));
+//                    }
+//                }
 
                 cq.where(where);
+               
                 TypedQuery<Item> tq = em.createQuery(cq);
+               
                 List<Item> resu = tq.getResultList();
-                System.out.println("NB RESULT " + resu.size());
-                ItemRaffinee itemRetenu = null;
-
+ 
 
                 //-------------------------------------------------------------------
                 //Exploitation des résultats
                 //-------------------------------------------------------------------
-
+                /**
+                 * *
+                 * On commence par chercher si simplement il n'existe pas une item raffinée possédant le même hash
+                 */
+                /**
+                 * *
+                 * Dans ce block on parcours chacune des items ressemblante ou similaire trouvé dans la base de données.
+                 * On utilise ensuite le comparator qui détermine si on peut considérer les deux itemsBrute comme
+                 * provenant du même article. Si un résultat concorde et que l'item ressemblante possède déjà une item
+                 * rafiné alors on retient l'item de l'item observé comme item rafiné pour l'item sur laquelle le
+                 * travail de la thread est effectué.
+                 */
+      
+        
                 for (int i = 0; i < resu.size(); i++) {
+
                     Item iteration = resu.get(i);
                     int retour = -5;
                     try {
@@ -125,54 +158,56 @@ public class TacheRaffiner extends TacheImpl<TacheRaffiner> {
                         logger.debug("err", e);
                     }
 
-                    System.out.println("retour : " + retour);
-                    if (retour >= 0) {
-                        itemRetenu = resu.get(i).getItemRaffinee();
-                        System.out.println("ITEM RETENU : " + itemRetenu);
+                    if (retour >= 0) { // Si l'item inspecté est ressemblante ou semblable
+                        if (iteration.getItemRaffinee() != null) { // sii l'item ressemblante ou semblable possède une item rafiné
+                            itemRetenu = iteration.getItemRaffinee();
+                            break;
+                        }
                     }
                 }
-
-                //---------------------------------------------------------------------
-                // Enregistrement de l'item rafiné
-                //---------------------------------------------------------------------
-
-                if (itemRetenu == null) { // Si on n'a pas trouvé d'item ressemblante ou strictment identique, on crée une itemRafinné a partir de l'item courante 
-                    itemRetenu = new ItemRaffinee();
-                    itemRetenu.setTitre(item.getTitre());
-                    itemRetenu.setCategorie(item.getCategorie());
-                    itemRetenu.setDatePub(item.getDatePub());
-                    itemRetenu.setDateRecup(item.getDateRecup());
-                    itemRetenu.setGuid(item.getGuid());
-                    itemRetenu.setHashContenu(item.getHashContenu());
-                    itemRetenu.setLink(item.getLink());
-                    itemRetenu.addItem(item);
-                    item.setItemRaffinee(itemRetenu);
-
-
-                    itemRetenu.setDescription(item.getDescription());
-                    em.merge(item);
-                    em.persist(itemRetenu);
-
-                    logger.debug("persite");
-                } else { // SInon on ajoute l'item (brute) courante à l'item rafiné et on modifi l'item raffiné.
-
-                    // On lock l'item raffiné
-//                    Semaphore semItRaf = SemaphoreCentre.getinstance().returnSemaphoreForRessource(itemRetenu);
-//                    sem.add(semItRaf);
-//                    semItRaf.acquire();
-                    em.lock(itemRetenu, LockModeType.PESSIMISTIC_WRITE);
-                    em.refresh(itemRetenu);
-
-
-
-                    itemRetenu.addItem(item);
-                    item.setItemRaffinee(itemRetenu);
-                    em.merge(itemRetenu);
-                    em.merge(item);
-                }
-            } catch (Exception e) {
-                logger.debug("err", e);
+              
             }
+
+            //---------------------------------------------------------------------
+            // Enregistrement de l'item rafiné
+            //---------------------------------------------------------------------
+            /**
+             * *
+             * Block permettant de lier l'item raffinnée si elle existe à l'item observé. Si on n'a pas trouvé d'item
+             * raffiné, on en crée une
+             */
+            if (itemRetenu == null) { // Si on n'a pas trouvé d'item ressemblante ou strictment identique, on crée une itemRafinné a partir de l'item courante 
+                itemRetenu = new ItemRaffinee();
+                itemRetenu.setTitre(item.getTitre());
+                itemRetenu.setCategorie(item.getCategorie());
+                itemRetenu.setDatePub(item.getDatePub());
+                itemRetenu.setDateRecup(item.getDateRecup());
+                itemRetenu.setGuid(item.getGuid());
+                itemRetenu.setHashContenu(item.getHashContenu());
+                itemRetenu.setLink(item.getLink());
+                itemRetenu.addItem(item);
+                item.setItemRaffinee(itemRetenu);
+
+                itemRetenu.setDescription(item.getDescription());
+                em.merge(item);
+                em.persist(itemRetenu);
+
+//                logger.debug("persite");
+            } else { // SInon on ajoute l'item (brute) courante à l'item rafiné et on modifi l'item raffiné.
+
+                // On lock l'item raffiné
+                em.lock(itemRetenu, LockModeType.PESSIMISTIC_WRITE);
+                em.refresh(itemRetenu);
+
+
+                itemRetenu.addItem(item);
+                item.setItemRaffinee(itemRetenu);
+                em.merge(itemRetenu);
+                em.merge(item);
+            }
+//            } catch (Exception e) {
+//                logger.debug("err", e);
+//            }
         }
     }
 
@@ -180,7 +215,8 @@ public class TacheRaffiner extends TacheImpl<TacheRaffiner> {
     public Set<Semaphore> returnSemSet() {
 
         sem.clear();
-        
+        sem.add(semUnique);
+
 //        if (item != null) {
 //            try {
 //                
@@ -209,4 +245,6 @@ public class TacheRaffiner extends TacheImpl<TacheRaffiner> {
     public void setItem(Item item) {
         this.item = item;
     }
+
+    
 }

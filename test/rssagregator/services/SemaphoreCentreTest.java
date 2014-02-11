@@ -165,7 +165,7 @@ public class SemaphoreCentreTest {
         
         // On déclanche le menage et on attend qu'il soit fait
         instance.declancherMenage();
-        Thread.sleep(100);
+        Thread.sleep(1000);
                 
         
         // On compte

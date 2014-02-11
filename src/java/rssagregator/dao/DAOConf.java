@@ -126,7 +126,6 @@ public class DAOConf extends AbstrDao {
             try {
                 Integer val = new Integer(purgeDuration);
                 conf.setPurgeDuration(val);
-                System.out.println(val);
             } catch (Exception e) {
                 throw new Exception("impossible de lire la valeur purgeduration dans le fichier conf.properties");
             }
@@ -221,7 +220,6 @@ public class DAOConf extends AbstrDao {
      * @throws Exception
      */
     public void modifierConf(Conf conf) throws Exception {
-        System.out.println("MOF DE LA CONFF");
 //        Properties prop = PropertyLoader.load("conf.properties");
         
 //        Properties prop = PropertyLoader.loadFromFile(propfile);
@@ -336,7 +334,6 @@ public class DAOConf extends AbstrDao {
             daou.modifier(uBdd);
             daou.commit();
         }
-        System.out.println("================================================");
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -364,7 +361,6 @@ public class DAOConf extends AbstrDao {
      */
     @Override
     public Object find(Long id) {
-        System.out.println("FIND CONF : " + this.confCourante);
         return confCourante;
 //        return super.find(id); //To change body of generated methods, choose Tools | Templates.
     }

@@ -133,7 +133,6 @@ public class DAOIncident<T> extends AbstrDao {
         List l = tq.getResultList();
         for (int j = 0; j < l.size(); j++) {
             Object object = l.get(j);
-            System.out.println(object);
         }
         return l;
     }
@@ -250,10 +249,8 @@ public class DAOIncident<T> extends AbstrDao {
 //        DAOIncident<JMSPerteConnectionIncident> dao = new DAOIncident<JMSPerteConnectionIncident>(DAOFactory.getInstance());
 //        dao.setClos(false);
 //        List l = dao.findCriteria(JMSPerteConnectionIncident.class);
-//        System.out.println("LIST SIZE : " + l.size());
 //        for (int i = 0; i < l.size(); i++) {
 //            Object object = l.get(i);
-//            System.out.println("" + object);
 //        }
     }
 
@@ -327,7 +324,6 @@ public class DAOIncident<T> extends AbstrDao {
 
         try {
             Integer retour = new Integer(resu.get(0).toString());
-            System.out.println("NB MAX : " + retour);
             return retour;
         } catch (Exception e) {
             return null;

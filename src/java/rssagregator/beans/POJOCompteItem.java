@@ -8,9 +8,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.joda.time.Chronology;
 import org.joda.time.DateTime;
+import org.joda.time.Days;
+import org.joda.time.Duration;
 import org.joda.time.Interval;
+import org.joda.time.chrono.CopticChronology;
+import rssagregator.dao.DAOFactory;
 import rssagregator.utils.ExceptionTool;
 
 /**
@@ -98,6 +105,20 @@ public class POJOCompteItem {
     public POJOCompteItem() {
         compte = new TreeMap<Date, Integer>();
         items = new ArrayList<Item>();
+    }
+
+    /**
+     * *
+     * Ajoute une information au tableau de compte (le jour et le nombre d'item). Cette méthode peut être utiliser afin
+     * de ne pas passer par la méthode compte s'appuyant sur une liste d'item. En effet cette méthode peut bugger si la
+     * liste est très importante (centaine de millier d'item). On préfère alors faire les compte en s'appuyant sur des
+     * requete sql native et en envoyant les résultat ici
+     *
+     * @param d
+     * @param nbr
+     */
+    public void addCompte(Date d, Integer nbr) {
+        compte.put(new DateTime(d).withTimeAtStartOfDay().toDate(), nbr);
     }
 
     /**
@@ -337,6 +358,71 @@ public class POJOCompteItem {
         }
     }
 
+    public void initialiserCompte() {
+        // On commence par initialiser la map de compte
+        DateTime dt1 = new DateTime(date1).withTimeAtStartOfDay();
+        DateTime dt2 = new DateTime(date2).withEarlierOffsetAtOverlap();
+        DateTime dtIt = new DateTime(date1).withTimeAtStartOfDay();
+        Interval interval = new Interval(dt1, dt2);
+
+
+
+//        while (dtIt.isBefore(dt2)) {
+        while (interval.contains(dtIt)) {
+            compte.put(dtIt.toDate(), 0);
+            dtIt = dtIt.plusDays(1);
+        }
+    }
+
+    
+    /***
+     * Comme la méthode {@link #compte} mais en utilisant sql pour remplir le compte par jour
+     * @param em 
+     */
+    public void comptItemJourSemaineBySQL(EntityManager em) {
+        // Si aucun Em n'est envoyé on démarre
+        if (em == null) {
+            em = DAOFactory.getInstance().getEntityManager();
+        }
+
+
+        Query qCount = em.createNativeQuery("SELECT \n"
+                + "date_trunc('day', item.daterecup) as \"day\", COUNT(*)\n"
+                + "\n"
+                + "FROM \n"
+                + "  public.item, \n"
+                + "  public.flux, \n"
+                + "  public.item_flux\n"
+                + "WHERE \n"
+                + "  item.id = item_flux.item_id AND\n"
+                + "  flux.id = item_flux.listflux_id\n"
+                + "AND flux.id=? \n"
+                + "AND item.daterecup BETWEEN ? and ? \n"
+                + "GROUP BY 1 \n"
+                + "ORDER BY 1 \n"
+                + "  ;");
+
+        qCount.setParameter(1, flux.getID());
+        qCount.setParameter(2, date1);
+        qCount.setParameter(3, date2);
+
+
+        qCount.setParameter(1, flux.getID());
+        qCount.setParameter(2, date1);
+        qCount.setParameter(3, date2);
+
+        List<Object[]> results = qCount.getResultList();
+        initialiserCompte();
+
+// On fournit a l'objet de compte les résultat de la native query
+        for (int i = 0; i < results.size(); i++) {
+            Object[] objects = results.get(i);
+            java.sql.Timestamp ts = (java.sql.Timestamp) objects[0];
+            Long val = (Long) objects[1];
+            addCompte(ts, val.intValue());
+        }
+    }
+
     /**
      * *
      * Calcul la moyenne médiane décile et quartile pour les items envoyés.
@@ -396,7 +482,6 @@ public class POJOCompteItem {
             DateTime dt = new DateTime(date);
             Integer integer = entry.getValue();
             int dayOfWeek = dt.getDayOfWeek();
-//            System.out.println("IT" );
             mapStatJour.get(dayOfWeek).addValue(integer);
 
 //            sommeJour[dayOfWeek] += integer;
@@ -421,57 +506,6 @@ public class POJOCompteItem {
             statEcartypeDayOfWeek[i] = ((Double) statDuJour.getStandardDeviation());
 
         }
-
-
-
-//        //------ Calcul de la médiane
-//        List<Integer> listInt = new ArrayList<Integer>();
-//
-//        for (Map.Entry<Date, Integer> entry : compte.entrySet()) {
-//            Date date = entry.getKey();
-//            Integer integer = entry.getValue();
-//            listInt.add(integer);
-//        }
-//
-//        Collections.sort(listInt);
-//
-//        System.out.println("size : " + listInt.size());
-//
-//        // MEDIANE
-//        int indMediant;
-//        if ((listInt.size() % 2) != 0) {
-//            indMediant = listInt.size() / 2;
-//        } else {
-//            indMediant = (listInt.size() + 1) / 2;
-//        }
-//        mediane = listInt.get(indMediant);
-//
-//        //Minimum
-//        min = listInt.get(0);
-//
-//        //Max
-//        if (listInt.size() > 0) {
-//            max = listInt.get(listInt.size() - 1);
-//        }
-//
-//        // quartile
-//        Integer quartileId = Math.round(new Float(0.25 * listInt.size()));
-//        if (quartileId < listInt.size()) {
-//            quartile = listInt.get(Math.round(quartileId));
-//        }
-//        
-//
-//        Integer decileId = Math.round(new Float(0.75 * listInt.size()));
-//        if (decileId < listInt.size()) {
-//            decile = listInt.get(decileId);
-//        }
-////        this.decile = (int) Math.round(listInt.get(decileId.intValue()));
-//
-//        System.out.println("min : " + min);
-//        System.out.println("quartile " + quartile);
-//        System.out.println("med : " + mediane);
-//        System.out.println("decile " + decile);
-//        System.out.println("max : " + max);
 
     }
 
@@ -532,6 +566,7 @@ public class POJOCompteItem {
      * @return Une hash map avec en cle la date ou danormale. En valeur le nombre d'item
      * @throws NullPointerException : si le seuil envoyé en argument est null
      */
+    @Deprecated
     public Map<Date, Integer> detecterAnomalieParrapportAuSeuil(Integer seuil) {
 
 
@@ -569,20 +604,22 @@ public class POJOCompteItem {
      * *
      * trouver les jours consécutif pour lequels on passe en dessous d'un certain nombre d'item capturé par jour
      *
-     * @param nbrItemMin Le nombre d'item servant de seuil a la détection
+     * @param nbrItemMin Le nombre d'item servant de seuil a la détection. Si on a pour un jour un nombre d'item
+     * strictement inférieur, on considère le jour comme anormale
      * @param jour le nombre de jour consécutifs
+     * @param aPartidu : date a partir de laquel le calcul est effectué. Les jour précédent cette date seront ignorées.
+     * Si ce paramettre est null toutes les date sont ispecté
      * @return une map (trie par jour avec les jours pour lequel on est passé en dessous du seuil. En valeur de la map
      * on a le nombre d'item pour le jour;
      */
-    public Map<Date, Integer> detecterAnomalieNbrMinimalItem(Integer nbrItemMin, Integer jour) {
+    public Map<Date, Integer> detecterAnomalieNbrMinimalItem(Integer nbrItemMin, Integer jour, Date aPartidu) {
         ExceptionTool.argumentNonNull(nbrItemMin);
         ExceptionTool.argumentNonNull(jour);
         if (this.compte == null) {
             throw new NullPointerException("Il faut lancer le compte avant de faire ce calcul");
         }
 
-        Map<Date, Integer> retour = new TreeMap();
-
+        Map<Date, Integer> retour = new TreeMap(); // La map qui sera retournée comprenant les jours anormaux ainsi que le nombre d'item
         Map<Date, Integer> ajoutMap = new TreeMap();
 
         int i = 0;
@@ -590,19 +627,24 @@ public class POJOCompteItem {
             Date date = entry.getKey();
             Integer nbrPourJourObserve = entry.getValue();
 
-            if (nbrPourJourObserve <= nbrItemMin) {
-                ajoutMap.put(date, nbrPourJourObserve);
-            }
 
-            // Si on repasse au dessus du seul ou si c'est la derniere itération
-            if (nbrPourJourObserve > nbrItemMin || i == compte.size() - 1) {
-                if (ajoutMap.size() > jour) { // si le map contient un nombre de jour supérieur au seuil envoyé en argument
-                    System.out.println("PUUT ALL");
+            if ((aPartidu != null && aPartidu.before(date)) || aPartidu == null) {
+                // Si le nombre d'item pour cette journée est anormale, on ajoute à la map
+                if (nbrPourJourObserve < nbrItemMin) {
+                    ajoutMap.put(date, nbrPourJourObserve);
+                }
+
+                // Si on a un nombre de jours consécutif supérieur à la var jour envoyé en argument
+                if (ajoutMap.size() >= jour) {
                     retour.putAll(ajoutMap);
                 }
-                ajoutMap.clear();
-            }
 
+                // Si on repasse au dessus du seuil d'item, on clear 
+
+                if (nbrPourJourObserve >= nbrItemMin) {
+                    ajoutMap.clear();
+                }
+            }
             i++;
 
         }

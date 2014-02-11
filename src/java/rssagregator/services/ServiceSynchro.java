@@ -184,7 +184,6 @@ public class ServiceSynchro extends ServiceImpl implements MessageListener, Obse
 //                MapMessage mapMessage = sessionDiff.createMapMessage();
 //                String beanSerialise = XMLTool.serialise(bean);
 //
-////                System.out.println("" + beanSerialise);
 //
 //                mapMessage.setStringProperty("bean", beanSerialise);
 //                mapMessage.setStringProperty("action", action);
@@ -470,8 +469,6 @@ public class ServiceSynchro extends ServiceImpl implements MessageListener, Obse
 
             //Si le message provient du même client ID que le serveur, alors on l'acquite
         } else {
-            System.out.println("C'est mon message");
-
 
             try {
                 msg.acknowledge();
@@ -531,7 +528,6 @@ public class ServiceSynchro extends ServiceImpl implements MessageListener, Obse
 //        if (o instanceof AbstrTacheSchedule) {
 //            //--------Une tache de test qui ne sert a rien...
 ////            if (o.getClass().equals(TacheTest.class)) {
-////                System.out.println(" Une Tache test bien de se notifier");
 //
 //                //--------La tâche de vérification de la connection JMS
 ////            } 
@@ -747,7 +743,6 @@ public class ServiceSynchro extends ServiceImpl implements MessageListener, Obse
      */
     public Boolean diffusionNecessaire(Object bean, String action) {
         Conf c = DAOFactory.getInstance().getDAOConf().getConfCourante();
-        System.out.println("C : " + c);
 
         // Le contexte demande t'il la synchronisation (Serveur maitre en possession d'esclave)
         if (c.getMaster() && c.getServeurSlave().size() > 0) {

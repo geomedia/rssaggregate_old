@@ -65,7 +65,6 @@ public class ConfigSrvl extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        System.out.println("AAA");
 
         response.setContentType("text/html;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
@@ -87,7 +86,6 @@ public class ConfigSrvl extends HttpServlet {
 
         confcourante = DAOFactory.getInstance().getDAOConf().getConfCourante();
 
-        System.out.println("ACTION : " + action);
 
         // Configuration de la vue
         vue = request.getParameter("vue");
@@ -211,7 +209,6 @@ public class ConfigSrvl extends HttpServlet {
             jsp = "/WEB-INF/jsonform.jsp";
         }
 
-        System.out.println("-------------JSP : " + jsp);        
         this.getServletContext().getRequestDispatcher(jsp).forward(request, response);
     }
 

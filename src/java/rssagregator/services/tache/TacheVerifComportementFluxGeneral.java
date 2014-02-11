@@ -78,7 +78,6 @@ package rssagregator.services.tache;
 //        List<Flux> li = dao.findCretaria(null, null, null, null, null, true, true);
 //        for (int i = 0; i < li.size(); i++) {
 //            Flux flux = li.get(i);
-//            System.out.println("flux : " + flux);
 //        }
 //    }
 //}

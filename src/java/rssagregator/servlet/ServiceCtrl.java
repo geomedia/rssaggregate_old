@@ -60,10 +60,7 @@ public class ServiceCtrl extends HttpServlet {
                 
                 AbstrService instance = (AbstrService) methode.invoke(c);
                 request.setAttribute("service", instance);
-//                instance.getMapTache().keySet()
-//                instance.getMapTache().keySet()
                 
-                System.out.println("OBJ : " + instance);
             } catch (NoSuchMethodException ex) {
                 Logger.getLogger(ServiceCtrl.class.getName()).log(Level.SEVERE, null, ex);
             } catch (SecurityException ex) {

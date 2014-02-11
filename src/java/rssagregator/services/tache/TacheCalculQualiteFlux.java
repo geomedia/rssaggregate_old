@@ -4,10 +4,10 @@
  */
 package rssagregator.services.tache;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Observer;
 import javax.persistence.LockModeType;
 import javax.persistence.Query;
 import org.joda.time.DateTime;
@@ -54,7 +54,6 @@ public class TacheCalculQualiteFlux extends TacheImpl<TacheCalculQualiteFlux> im
 //    public TacheCalculQualiteFlux(Observer s) {
 //        super(s);
 //    }
-
     public Flux getFlux() {
         return flux;
     }
@@ -68,7 +67,7 @@ public class TacheCalculQualiteFlux extends TacheImpl<TacheCalculQualiteFlux> im
 
         initialiserTransaction();
 
-//        verrouillerObjectDansLEM(flux, LockModeType.PESSIMISTIC_WRITE);
+        verrouillerObjectDansLEM(flux, LockModeType.PESSIMISTIC_WRITE);
         DaoFlux daof = DAOFactory.getInstance().getDAOFlux();
         daof.setEm(em);
         DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
@@ -80,11 +79,9 @@ public class TacheCalculQualiteFlux extends TacheImpl<TacheCalculQualiteFlux> im
         q.setParameter("idfl", flux.getID());
         flux = (Flux) q.getSingleResult();
 
-
         FluxPeriodeCaptation period = flux.returnDerniereFluxPeriodeCaptation();// daof.findDernierePeriodeCaptation(flux);
 
         verrouillerObjectDansLEM(period, LockModeType.PESSIMISTIC_WRITE);
-
 
 
         //------------------------------CALCUL DE L'incide de captation
@@ -105,7 +102,6 @@ public class TacheCalculQualiteFlux extends TacheImpl<TacheCalculQualiteFlux> im
         }
         ThreadUtils.interruptCheck();
 
-
         //-----------------Calcul de la moyenne médiane quartiele décile....
 
 
@@ -117,17 +113,15 @@ public class TacheCalculQualiteFlux extends TacheImpl<TacheCalculQualiteFlux> im
             date2 = new Date();
         }
 
-
-        List<Item> items = daoItem.itemCaptureParleFluxDurantlaCollecte(flux, period);
-
-
         POJOCompteItem compteItem = new POJOCompteItem();
         compteItem.setFlux(flux);
-        compteItem.setItems(items);
+//        compteItem.setItems(items);
         compteItem.setDate1(date1);
         compteItem.setDate2(date2);
+        
+//On compte les items jour en s'appuyant sur sql        
+        compteItem.comptItemJourSemaineBySQL(em);
 
-        compteItem.compte();
         compteItem.calculterBoxPloat();
 
 
@@ -144,9 +138,6 @@ public class TacheCalculQualiteFlux extends TacheImpl<TacheCalculQualiteFlux> im
         period.setStatEcartTypeLundi(compteItem.getStatEcartypeDayOfWeek()[0]);
         period.setStatMedLundi(compteItem.getStatMedDayOfWeek()[0].floatValue());
         period.setStatMoyLundi(compteItem.getStatMoyDayOfWeek()[0]);
-        
-        
-        
 
         period.setStatEcartTypeMardi(compteItem.getStatEcartypeDayOfWeek()[1]);
         period.setStatMedMardi(compteItem.getStatMedDayOfWeek()[1].floatValue());
@@ -172,38 +163,27 @@ public class TacheCalculQualiteFlux extends TacheImpl<TacheCalculQualiteFlux> im
         period.setStatMedDimanche(compteItem.getStatMedDayOfWeek()[6].floatValue());
         period.setStatMoyDimanche(compteItem.getStatMoyDayOfWeek()[6]);
 
-
-
-
-        //--------------Detection des anomalies 
         compteItem.calculerMoyenne(date1, date2);
-        Map<Date, Integer> anomalies = compteItem.detecterAnomalieParrapportAuSeuil(33);
+        //----------------------------------------------------------
+        //Détection des anomalies
+        //----------------------------------------------------------
 
-        IncidentFactory<AnomalieCollecte> factory = new IncidentFactory<AnomalieCollecte>();
+        DateTime dtAPartirdu = new DateTime().minusDays(20);//On ne pratique la detection que pour les vingt dernier jours
+        Map<Date, Integer> anomalies = compteItem.detecterAnomalieNbrMinimalItem(1, 4, dtAPartirdu.toDate());
+
         ServiceCrudIncident serviceCrud = (ServiceCrudIncident) ServiceCRUDFactory.getInstance().getServiceFor(AnomalieCollecte.class);
 
-        DAOIncident<AnomalieCollecte> daoIncident = (DAOIncident<AnomalieCollecte>) DAOFactory.getInstance().getDaoFromType(AnomalieCollecte.class);
+        for (Map.Entry<Date, Integer> entry : anomalies.entrySet()) {
+            Date date = entry.getKey();
+            Integer nbtConstate = entry.getValue();
+            System.out.println("ADD");
+            serviceCrud.ajouterAnomaliePourJour(flux, date, nbtConstate.shortValue(), em, false); // Le service ajoute si besoin est une anoamlie ou une période a une anomalie existante
 
-        List<AnomalieCollecte> AnomalieDsBSS = daoIncident.findOpenCollecteIncident(flux, AnomalieCollecte.class, null);
-
-
-        if (false) { // Désactivé pour le moment
-            for (Map.Entry<Date, Integer> entry : anomalies.entrySet()) {
-                Date date = entry.getKey();
-                Integer nbtConstate = entry.getValue();
-                AnomalieCollecte anomalieIncident = factory.getIncident(AnomalieCollecte.class, "Le nombre d'item capturé pour ce jour est anormalement haut ou bas", null);
-                anomalieIncident.setDateDebut(date);
-                anomalieIncident.setNombreCaptureConstate(nbtConstate);
-                anomalieIncident.setFluxLie(flux);
-                anomalieIncident.setMoyenneDesCapture(compteItem.getMoyenne());
-                anomalieIncident.setSeuil(33);
-                ThreadUtils.interruptCheck();
-                serviceCrud.ajouterIncidentdeCollecte(anomalieIncident, flux, em, false);
-            }
         }
 
         //------------Enregistrement
         em.merge(period); // On modifi la période
+   
 
     }
 

@@ -42,7 +42,6 @@ public class FluxPeriodeCaptationTest {
      */
 //    @Test
 //    public void testGetStatMoyLundi() {
-//        System.out.println("getStatMoyLundi");
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        Float expResult = null;
 //        Float result = instance.getStatMoyLundi();
@@ -55,7 +54,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testSetStatMoyLundi() {
-//        System.out.println("setStatMoyLundi");
 //        Float statMoyLundi = null;
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        instance.setStatMoyLundi(statMoyLundi);
@@ -67,7 +65,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testGetStatMoyMardi() {
-//        System.out.println("getStatMoyMardi");
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        Float expResult = null;
 //        Float result = instance.getStatMoyMardi();
@@ -80,7 +77,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testSetStatMoyMardi() {
-//        System.out.println("setStatMoyMardi");
 //        Float statMoyMardi = null;
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        instance.setStatMoyMardi(statMoyMardi);
@@ -92,7 +88,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testGetStatMoyMercredi() {
-//        System.out.println("getStatMoyMercredi");
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        Float expResult = null;
 //        Float result = instance.getStatMoyMercredi();
@@ -105,7 +100,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testSetStatMoyMercredi() {
-//        System.out.println("setStatMoyMercredi");
 //        Float statMoyMercredi = null;
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        instance.setStatMoyMercredi(statMoyMercredi);
@@ -117,7 +111,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testGetStatMoyJeudi() {
-//        System.out.println("getStatMoyJeudi");
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        Float expResult = null;
 //        Float result = instance.getStatMoyJeudi();
@@ -130,7 +123,6 @@ public class FluxPeriodeCaptationTest {
      */
 //    @Test
 //    public void testSetStatMoyJeudi() {
-//        System.out.println("setStatMoyJeudi");
 //        Float statMoyJeudi = null;
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        instance.setStatMoyJeudi(statMoyJeudi);
@@ -142,7 +134,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testGetStatMoyVendredi() {
-//        System.out.println("getStatMoyVendredi");
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        Float expResult = null;
 //        Float result = instance.getStatMoyVendredi();
@@ -155,7 +146,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testSetStatMoyVendredi() {
-//        System.out.println("setStatMoyVendredi");
 //        Float statMoyVendredi = null;
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        instance.setStatMoyVendredi(statMoyVendredi);
@@ -165,22 +155,12 @@ public class FluxPeriodeCaptationTest {
 //    /**
 //     * Test of getStatMoySamedi method, of class FluxPeriodeCaptation.
 //     */
-    @Test
-    public void testGetStatMoySamedi() {
-        System.out.println("getStatMoySamedi");
-        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
-        Float expResult = null;
-        Float result = instance.getStatMoySamedi();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
+
 //    /**
 //     * Test of setStatMoySamedi method, of class FluxPeriodeCaptation.
 //     */
 //    @Test
 //    public void testSetStatMoySamedi() {
-//        System.out.println("setStatMoySamedi");
 //        Float statMoySamedi = null;
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        instance.setStatMoySamedi(statMoySamedi);
@@ -192,7 +172,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testGetStatMoyDimanche() {
-//        System.out.println("getStatMoyDimanche");
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        Float expResult = null;
 //        Float result = instance.getStatMoyDimanche();
@@ -206,7 +185,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testSetStatMoyDimanche() {
-//        System.out.println("setStatMoyDimanche");
 //        Float statMoyDimanche = null;
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        instance.setStatMoyDimanche(statMoyDimanche);
@@ -219,7 +197,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testGetStatMedLundi() {
-//        System.out.println("getStatMedLundi");
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        Float expResult = null;
 //        Float result = instance.getStatMedLundi();
@@ -233,7 +210,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testSetStatMedLundi() {
-//        System.out.println("setStatMedLundi");
 //        Float statMedLundi = null;
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        instance.setStatMedLundi(statMedLundi);
@@ -246,7 +222,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testGetStatMedMardi() {
-//        System.out.println("getStatMedMardi");
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        Float expResult = null;
 //        Float result = instance.getStatMedMardi();
@@ -260,7 +235,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testSetStatMedMardi() {
-//        System.out.println("setStatMedMardi");
 //        Float statMedMardi = null;
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        instance.setStatMedMardi(statMedMardi);
@@ -273,7 +247,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testGetStatMedMercredi() {
-//        System.out.println("getStatMedMercredi");
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        Float expResult = null;
 //        Float result = instance.getStatMedMercredi();
@@ -287,7 +260,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testSetStatMedMercredi() {
-//        System.out.println("setStatMedMercredi");
 //        Float statMedMercredi = null;
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        instance.setStatMedMercredi(statMedMercredi);
@@ -300,7 +272,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testGetStatMedJeudi() {
-//        System.out.println("getStatMedJeudi");
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        Float expResult = null;
 //        Float result = instance.getStatMedJeudi();
@@ -314,7 +285,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testSetStatMedJeudi() {
-//        System.out.println("setStatMedJeudi");
 //        Float statMedJeudi = null;
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        instance.setStatMedJeudi(statMedJeudi);
@@ -327,7 +297,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testGetStatMedVendredi() {
-//        System.out.println("getStatMedVendredi");
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        Float expResult = null;
 //        Float result = instance.getStatMedVendredi();
@@ -341,7 +310,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testSetStatMedVendredi() {
-//        System.out.println("setStatMedVendredi");
 //        Float statMedVendredi = null;
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        instance.setStatMedVendredi(statMedVendredi);
@@ -354,7 +322,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testGetStatMedSamedi() {
-//        System.out.println("getStatMedSamedi");
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        Float expResult = null;
 //        Float result = instance.getStatMedSamedi();
@@ -368,7 +335,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testSetStatMedSamedi() {
-//        System.out.println("setStatMedSamedi");
 //        Float statMedSamedi = null;
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        instance.setStatMedSamedi(statMedSamedi);
@@ -381,7 +347,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testGetStatMedDimanche() {
-//        System.out.println("getStatMedDimanche");
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        Float expResult = null;
 //        Float result = instance.getStatMedDimanche();
@@ -395,7 +360,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testSetStatMedDimanche() {
-//        System.out.println("setStatMedDimanche");
 //        Float statMedDimanche = null;
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        instance.setStatMedDimanche(statMedDimanche);
@@ -408,7 +372,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testGetStatEcartTypeLundi() {
-//        System.out.println("getStatEcartTypeLundi");
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        Double expResult = null;
 //        Double result = instance.getStatEcartTypeLundi();
@@ -422,7 +385,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testSetStatEcartTypeLundi() {
-//        System.out.println("setStatEcartTypeLundi");
 //        Double statEcartTypeLundi = null;
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        instance.setStatEcartTypeLundi(statEcartTypeLundi);
@@ -435,7 +397,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testGetStatEcartTypeMardi() {
-//        System.out.println("getStatEcartTypeMardi");
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        Double expResult = null;
 //        Double result = instance.getStatEcartTypeMardi();
@@ -449,7 +410,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testSetStatEcartTypeMardi() {
-//        System.out.println("setStatEcartTypeMardi");
 //        Double statEcartTypeMardi = null;
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        instance.setStatEcartTypeMardi(statEcartTypeMardi);
@@ -462,7 +422,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testGetStatEcartTypeMercredi() {
-//        System.out.println("getStatEcartTypeMercredi");
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        Double expResult = null;
 //        Double result = instance.getStatEcartTypeMercredi();
@@ -476,7 +435,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testSetStatEcartTypeMercredi() {
-//        System.out.println("setStatEcartTypeMercredi");
 //        Double statEcartTypeMercredi = null;
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        instance.setStatEcartTypeMercredi(statEcartTypeMercredi);
@@ -489,7 +447,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testGetStatEcartTypeJeudi() {
-//        System.out.println("getStatEcartTypeJeudi");
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        Double expResult = null;
 //        Double result = instance.getStatEcartTypeJeudi();
@@ -503,7 +460,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testSetStatEcartTypeJeudi() {
-//        System.out.println("setStatEcartTypeJeudi");
 //        Double statEcartTypeJeudi = null;
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        instance.setStatEcartTypeJeudi(statEcartTypeJeudi);
@@ -516,7 +472,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testGetStatEcartTypeVendredi() {
-//        System.out.println("getStatEcartTypeVendredi");
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        Double expResult = null;
 //        Double result = instance.getStatEcartTypeVendredi();
@@ -530,7 +485,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testSetStatEcartTypeVendredi() {
-//        System.out.println("setStatEcartTypeVendredi");
 //        Double statEcartTypeVendredi = null;
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        instance.setStatEcartTypeVendredi(statEcartTypeVendredi);
@@ -543,7 +497,6 @@ public class FluxPeriodeCaptationTest {
 //     */
 //    @Test
 //    public void testGetStatEcartTypeSamedi() {
-//        System.out.println("getStatEcartTypeSamedi");
 //        FluxPeriodeCaptation instance = new FluxPeriodeCaptation();
 //        Double expResult = null;
 //        Double result = instance.getStatEcartTypeSamedi();

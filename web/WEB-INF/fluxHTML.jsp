@@ -1,5 +1,8 @@
 <%@page import="java.util.Map"%>
 <%@page import="java.nio.charset.Charset"%>
+<%@page import="javax.el.ValueExpression"%>
+<%@page import="rssagregator.servlet.FluxSrvl"%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="sql" uri="http://java.sun.com/jsp/jstl/sql"%>
 <%-- 
     Document   : index
@@ -7,19 +10,16 @@
     Author     : clem
 Cette JSP est utilisée pour afficher les informations relatives aux flux a l'utilisateur sous forme de page HTML. Gestion des différentes actions de l'utilisateur
 --%>
-<%@page import="javax.el.ValueExpression"%>
-<%@page import="rssagregator.servlet.FluxSrvl"%>
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>  
-
+<%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>  
 <%@taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>  <!--Il faut bien utiliser la vesion 1.1 d ela jstl l'autre ne permet pas d'utiliser les EL-->
-<%--<%@taglib uri="http://java.sun.com/jstl/fmt" prefix="fmt" %>--%>
-<%--<%@page contentType="text/html" pageEncoding="UTF-8"%>--%>
-<!--Inclusion du menu haut-->
+
+
+
 <c:import url="/WEB-INF/headerjsp.jsp" />
 
-<script src="${rootpath}AjaxFluxDyn.js"></script>
+
+<script src="${rootpath}AjaxFluxDyn.js" />
 
 
 <div id="header-wrapper">
@@ -867,6 +867,7 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
 
 
                         </c:if>
+                        
 
 
                     </c:when>

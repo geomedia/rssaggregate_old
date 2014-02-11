@@ -99,7 +99,6 @@ public class FluxForm extends AbstrForm {
      */
     @Deprecated
     public void check_url(String url) throws Exception {
-        System.out.println("---> CHECK URL");
         if (url == null || url.isEmpty()) {
             throw new Exception("L'url est vide");
         }

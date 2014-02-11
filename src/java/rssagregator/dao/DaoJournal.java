@@ -39,7 +39,6 @@ public class DaoJournal extends AbstrDao {
 //        Journal resu = em.find(Journal.class, id);
 //
 //        em.getTransaction().commit();
-//        System.out.println("journal +++ " + resu);
 //        return resu;
 //    }
     public static void main(String[] args) {
@@ -95,7 +94,6 @@ public class DaoJournal extends AbstrDao {
     //        initEntityManager();
     //        em.getTransaction().begin();
     //
-    //        System.out.println("JE suis : " + this.getClass().getCanonicalName());
     //        Query query = em.createQuery(REQ_FIND_ALL);
     //        List<Object> result = query.getResultList();
     //
@@ -105,7 +103,6 @@ public class DaoJournal extends AbstrDao {
     //    public void remove(Object object) {
     //        initEntityManager();
     //        em.getTransaction().begin();
-    //        System.out.println("");
     //        em.remove(em.merge(object));
     //        em.getTransaction().commit();
     //    }
@@ -117,14 +114,12 @@ public class DaoJournal extends AbstrDao {
 //        Journal journal = (Journal) obj;
 //        List<Flux> listflux = journal.getFluxLie();
 //        DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
-//        System.out.println("NOMBRE DE JOURNAUX AU MOMENT DU DELET : " + listflux.size());
 //        int i;
 //        for (i = 0; i < listflux.size(); i++) {
 //            daoFlux.remove(listflux.get(i));
 //            // On désactive le flux pour que l'objet cesse d'être ajouté au collecteur
 //            listflux.get(i).setActive(false);
 //
-//            System.out.println("SUPPRESSION D'UN FLUX A PARTIR DU JOURNAL");
 //
 //
 //        }
@@ -207,7 +202,6 @@ public class DaoJournal extends AbstrDao {
 //        //---------Gestion de l'ordre.
 //        if (!count) {
 //            if (criteriaSidx != null && !criteriaSidx.isEmpty() && !criteriaSidx.equals("invid") && criteriaSord != null && (criteriaSord.toLowerCase().equals("asc") || criteriaSord.toLowerCase().equals("desc"))) {
-//                System.out.println("--> criteria sidx : " + criteriaSidx);
 //                if (criteriaSord.toLowerCase().equals("desc")) {
 //                    cq.orderBy(cb.desc(root.get(criteriaSidx)));
 //                } else if (criteriaSord.toLowerCase().equals("asc")) {
@@ -222,11 +216,9 @@ public class DaoJournal extends AbstrDao {
 //        // On applique les wheres
 //        int i;
 //        if (listWhere.size() == 1) {
-//            System.out.println("LIST WHERE = 1");
 //
 //            cq.where(listWhere.get(0));
 //        } else if (listWhere.size() > 1) {
-//            System.out.println("LIST WEHERE " + listWhere.size());
 //            Predicate pr = cb.and(listWhere.get(0));
 //            for (i = 1; i < listWhere.size(); i++) {
 //                pr = cb.and(pr, listWhere.get(i));
@@ -279,7 +271,6 @@ public class DaoJournal extends AbstrDao {
 ////
 ////        //---------Gestion de l'ordre.
 ////        if (criteriaSidx != null && !criteriaSidx.isEmpty() && !criteriaSidx.equals("invid") && criteriaSord != null && (criteriaSord.toLowerCase().equals("asc") || criteriaSord.toLowerCase().equals("desc"))) {
-////            System.out.println("--> criteria sidx : " + criteriaSidx);
 ////            if (criteriaSord.toLowerCase().equals("desc")) {
 ////                cq.orderBy(cb.desc(root.get(criteriaSidx)));
 ////            } else if (criteriaSord.toLowerCase().equals("asc")) {
@@ -292,11 +283,9 @@ public class DaoJournal extends AbstrDao {
 ////        // On applique les wheres
 ////        int i;
 ////        if (listWhere.size() == 1) {
-////            System.out.println("LIST WHERE = 1");
 ////
 ////            cq.where(listWhere.get(0));
 ////        } else if (listWhere.size() > 1) {
-////            System.out.println("LIST WEHERE " + listWhere.size());
 ////            Predicate pr = cb.and(listWhere.get(0));
 ////            for (i = 1; i < listWhere.size(); i++) {
 ////                pr = cb.and(pr, listWhere.get(i));
@@ -313,8 +302,6 @@ public class DaoJournal extends AbstrDao {
 //        } else {
 //        }
 //        List<Journal> listResu = tq.getResultList();
-//        System.out.println("-@@" + tq.getMaxResults());
-//        System.out.println("--> List resu size : " + listResu.size());
 //        return listResu;
 //    }
 //

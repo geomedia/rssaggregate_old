@@ -6,14 +6,12 @@ package rssagregator.services;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import rssagregator.beans.Flux;
-import rssagregator.beans.exception.ArgumentIncorrect;
 import rssagregator.beans.exception.IncompleteBeanExeption;
 import rssagregator.dao.DAOFactory;
 import rssagregator.services.tache.AbstrTache;
@@ -50,7 +48,6 @@ public class TacheProducteurServiceCollecte extends TacheProducteur implements R
                 Query query = em.createQuery("SELECT f FROM Flux f WHERE f.active = TRUE");
                 List<Flux> lf = query.getResultList();
                 for (Iterator<Flux> it = lf.iterator(); it.hasNext();) {
-//                    System.out.println("--");
                     Flux flux = it.next();
 
 //                    Map<AbstrTacheSchedule, Future> map = service.getMapTache();

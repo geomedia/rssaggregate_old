@@ -98,7 +98,6 @@ public class ItemSrvl extends HttpServlet {
         Item item = null;
 
 
-        System.out.println("ACTION : " + action);
         request.setAttribute("navmenu", "item");
         request.setAttribute("srlvtname", ATT_SERV_NAME);
         /**
@@ -143,11 +142,9 @@ public class ItemSrvl extends HttpServlet {
 //                firsResult = new Integer(request.getParameter("firstResult"));
 //                daoItem.setFistResult(firsResult);
 //                request.setAttribute("firstResult", firsResult);
-//                System.out.println("FIRST result  : " + firsResult);
 //
 //            } catch (Exception e) {
 //                firsResult = 0;
-//                System.out.println("ERR first");
 //            }
 //            request.setAttribute("firsResult", firsResult);
 //            daoItem.setFistResult(firsResult);
@@ -167,7 +164,6 @@ public class ItemSrvl extends HttpServlet {
 //                daoItem.setWhere_clause_Flux(listFluxEntites);
 //
 //            } catch (Exception e) {
-//                System.out.println("ERRRRRRRR" + e);
 //                daoItem.setWhere_clause_Flux(null);
 //            }
 //
@@ -250,13 +246,12 @@ public class ItemSrvl extends HttpServlet {
                 boolean html = ServletTool.getBooleen(request, "html");
                 boolean escapeBySlash = ServletTool.getBooleen(request, "escape");
                 boolean rafine = ServletTool.getBooleen(request, "rafine");
-                System.out.println("HTML : " + html);
-
-
+                
                 ServletContext servletContext = getServletContext();
                 String webDir = servletContext.getRealPath(File.separator);
 
                 CSVMacker cSVMacker = new CSVMacker(webDir, html, escapeBySlash);
+                cSVMacker.setRafine(rafine);
 
 
 //                On récupère la liste des flux demandé et la date. C'est moche mais il faut récupérer les champs dans la SearchFiltersList. Ceux qui ont été précédemment rempli par le formulaire 
@@ -265,7 +260,6 @@ public class ItemSrvl extends HttpServlet {
                 for (int i = 0; i < listFiltre.size(); i++) {
                     SearchFilter searchFilter1 = listFiltre.get(i);
                     if (searchFilter1.getField().equals("listFlux")) {
-                        System.out.println("------------ LIST FLUX");
                         List<Flux> fluxDDe = (List<Flux>) searchFilter1.getData();
                         cSVMacker.setFluxDemande(fluxDDe);
                     } 
@@ -287,7 +281,6 @@ public class ItemSrvl extends HttpServlet {
                 try {
                     Future fut = es.submit(cSVMacker);
                     fut.get(); // On attend la fin du travail 
-                    Thread.sleep(6000000);
                     request.setAttribute("redir", cSVMacker.getRedirPath());
                 } catch (Exception e) {
                     logger.debug("Erreur lors de la génération du CSV", e);
@@ -348,10 +341,8 @@ public class ItemSrvl extends HttpServlet {
 
                 // Il faut récupérer les deux date pour le trie
                 List<SearchFilter> filtresList = form.getFiltersList().getFilters();
-                System.out.println("NB FILTER : " + filtresList.size());
                 for (int i = 0; i < filtresList.size(); i++) {
                     SearchFilter searchFilter = filtresList.get(i);
-                    System.out.println("TYPE : " + searchFilter.getType());
                     if (searchFilter.getType().equals(Date.class)) {
                         if (date1 == null) {
                             date1 = (Date) searchFilter.getData();
@@ -376,7 +367,6 @@ public class ItemSrvl extends HttpServlet {
                 listItem = daoItem.findCriteria();
                 for (int i = 0; i < listItem.size(); i++) {
                     Item searchFilter = listItem.get(i);
-                    System.out.println("--> IT : " + searchFilter);
                 }
 
 
@@ -435,7 +425,6 @@ public class ItemSrvl extends HttpServlet {
          * ...............................GESTION DE LA VUE
          *///=================================================================================
         //utilisation de la vue en fonction des paramettres envoyé par l'utilisateur.
-//        System.out.println("vue " + vue);
         if (vue.equals("html")) {
             VUE = "/WEB-INF/itemHTML.jsp";
         }
@@ -448,13 +437,11 @@ public class ItemSrvl extends HttpServlet {
             response.setHeader("Content-Disposition", "attachment; filename = items-export.csv");
             VUE = "/WEB-INF/itemexpertCSV.jsp";
         } else if (vue.equals("jsondesc")) {
-            System.out.println("ZOUZou");
             VUE = "/WEB-INF/itemJSONDesc.jsp";
         } else if (vue.equals("xls")) {
             response.setHeader("Content-Disposition", "attachment; filename = itemss-export.xls");
             VUE = "/WEB-INF/itemXLS.jsp";
         } else if (vue.equals("xmlsync")) {
-            System.out.println("OUIIIII");
             VUE = "/WEB-INF/itemXMLsync.jsp";
         } else if (vue.equals("hightchart")) {
             VUE = "/WEB-INF/itemHighchart.jsp";
@@ -474,7 +461,6 @@ public class ItemSrvl extends HttpServlet {
 
         String s = request.getParameter(param);
         if (s != null && !s.isEmpty()) {
-            System.out.println("laa");
             return s;
 
         }

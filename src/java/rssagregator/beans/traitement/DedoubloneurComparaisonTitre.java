@@ -84,7 +84,6 @@
 //
 //                                int retour = comparator.compare(donneeBruteCapture, donneeBruteITBDD);
 //                                if (retour == 0) { // Les donnée brutes sont strictement identique
-//                                    System.out.println("---> STRINCTEMNET IDENTIQUE");
 //
 //                                    if (donneeBruteITBDD.getFlux().getID().equals(flux.getID())) {
 //                                        it.remove();

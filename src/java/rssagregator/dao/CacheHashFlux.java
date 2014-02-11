@@ -16,7 +16,7 @@ import rssagregator.beans.Item;
 import rssagregator.services.ServiceCollecteur;
 
 /**
- * Un singleton permettant de concerver les hash des flux. Il est utilisé par la ou les dao flux ou item
+ * Un singleton permettant de concerver les hash des flux. Il est utilisé par le dédoublonneur
  *
  * @author clem
  */

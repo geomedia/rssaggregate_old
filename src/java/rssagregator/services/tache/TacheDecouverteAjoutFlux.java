@@ -149,10 +149,6 @@ public class TacheDecouverteAjoutFlux extends TacheImpl<TacheDecouverteAjoutFlux
 
         es.shutdown();
 
-        System.out.println("=======================");
-        System.out.println("Fin des requetes");
-        System.out.println("=======================");
-
         //-------> Ajout des ressouces
 
         DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();

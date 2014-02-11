@@ -55,7 +55,6 @@ public class DAOUser extends AbstrDao {
         List<UserAccount> list = dao.findUserANotifier();
         for (int i = 0; i < list.size(); i++) {
             UserAccount userAccount = list.get(i);
-            System.out.println(""+userAccount);
         }
     }
 

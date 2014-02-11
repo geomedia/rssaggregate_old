@@ -48,7 +48,6 @@ public class Simpleadd extends HttpServlet {
         request.setAttribute("listcompo", DAOFactory.getInstance().getDAOComportementCollecte().findall());
         request.setAttribute("listjournaux", DAOFactory.getInstance().getDaoJournal().findall());
 
-        System.out.println("SIZE : " + DAOFactory.getInstance().getDAOComportementCollecte().findall().size());
 
 
         String action = request.getParameter("action");
@@ -132,7 +131,6 @@ public class Simpleadd extends HttpServlet {
 
             DateTime dtFIN = new DateTime();
             Interval interval = new Interval(dtDebut, dtFIN);
-            System.out.println("Temps d'exe : " + interval.toDuration().getStandardSeconds());
 
         }
 
@@ -169,7 +167,6 @@ public class Simpleadd extends HttpServlet {
 
             int i;
             String tatdeFlux = request.getParameter("txt");
-            System.out.println(tatdeFlux);
 
             StringTokenizer st = new StringTokenizer(tatdeFlux);
             DaoFlux dao = DAOFactory.getInstance().getDAOFlux();
@@ -196,7 +193,6 @@ public class Simpleadd extends HttpServlet {
 
                 } catch (Exception ex) {
                     Logger.getLogger(Simpleadd.class.getName()).log(Level.SEVERE, null, ex);
-                    System.out.println("err");
                 }
 
             }

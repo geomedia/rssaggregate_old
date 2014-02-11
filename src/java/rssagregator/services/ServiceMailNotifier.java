@@ -17,7 +17,6 @@ import rssagregator.beans.UserAccount;
 import rssagregator.dao.DAOFactory;
 import rssagregator.utils.PropertyLoader;
 import javax.mail.Message;
-import javax.mail.internet.MimeMessage;
 
 /**
  * Le service mail gère la vie des Tache : <ul>
@@ -34,6 +33,7 @@ public class ServiceMailNotifier extends ServiceImpl {
     private Properties propertiesMail;
     private final static String MAILER_VERSION = "Java";
     protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(ServiceMailNotifier.class);
+    
     
     
 

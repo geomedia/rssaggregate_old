@@ -188,7 +188,6 @@ public class ComportementCollecte implements Serializable, Cloneable, BeanSynchr
                 this.requesteur.requete(flux.getUrl());
 //                retourInputStream = this.requesteur.getHttpInputStream();
 
-//                System.out.println("retour : " + retourInputStream.toString());
 
                 if (parseur != null) {
 //                    parseur.setInputStream(retourInputStream);
@@ -306,7 +305,6 @@ public class ComportementCollecte implements Serializable, Cloneable, BeanSynchr
 //        int i;
 //        DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
 //        for (i = 0; i < listItem.size(); i++) {
-//            System.out.println("ITEMM");
 //            //On précise à la nouvelle item qu'elle appartient au flux collecté
 //            listItem.get(i).getListFlux().add(flux);
 ////                if (persit) {
@@ -359,7 +357,6 @@ public class ComportementCollecte implements Serializable, Cloneable, BeanSynchr
             int i;
             DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
             for (i = 0; i < listItem.size(); i++) {
-                System.out.println("ITEMM");
                 //On précise à la nouvelle item qu'elle appartient au flux collecté
                 listItem.get(i).getListFlux().add(flux);
 //                if (persit) {
@@ -596,7 +593,6 @@ public class ComportementCollecte implements Serializable, Cloneable, BeanSynchr
 
 
 
-        System.out.println("");
 
         clone.requesteur = (AbstrRequesteur) this.requesteur.clone();
         return clone;

@@ -43,10 +43,7 @@ public class CountryList {
         // of countries collection object.
         //
         Collections.sort(countries, new CountryComparator());
-        System.out.println("NOMBRE : " + countries.size());
-        for (Country country : countries) {
-            System.out.println(country);
-        }
+
     }
 
     /**

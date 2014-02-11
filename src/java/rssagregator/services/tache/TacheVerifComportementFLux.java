@@ -91,7 +91,6 @@ package rssagregator.services.tache;
 //
 //            //---------------------CREATION DE L'Anomalie et persistance
 //            if (mapAnomalie.size() > 0) {
-//                System.out.println("---------> ON A UNE ANOMALIE");
 //                IncidentFactory<AnomalieCollecte> factory = new IncidentFactory<AnomalieCollecte>();
 //                AbstrServiceCRUD serviceCrud = ServiceCRUDFactory.getInstance().getServiceFor(AnomalieCollecte.class);
 //

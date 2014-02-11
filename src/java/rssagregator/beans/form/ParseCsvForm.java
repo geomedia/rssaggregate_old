@@ -45,7 +45,6 @@ public class ParseCsvForm extends AbstrForm {
             parse.setIgnoreLeadingWhiteSpace(ignoreLeadingWhiteSpace);
             parse.setLine(line);
             parse.setQuotechar(quotechar);
-            System.out.println("Sepa bind " + separator);
             parse.setSeparator(separator);
             parse.setStrictQuotes(strictQuotes);
 
@@ -76,7 +75,6 @@ public class ParseCsvForm extends AbstrForm {
                 separator = '\t';
             } else {
                 separator = s.charAt(0);
-                System.out.println("SEPARATOR : " + separator);
             }
 
         }
@@ -117,7 +115,6 @@ public class ParseCsvForm extends AbstrForm {
 
         s = request.getParameter("cDescription");
         if (s != null) {
-            System.out.println("C desc " + s);
             cDescription = new Integer(s);
         }
 
@@ -161,10 +158,9 @@ public class ParseCsvForm extends AbstrForm {
         s = request.getParameter("forceEncoding");
         if (s != null && !s.isEmpty()) {
             if (Charset.isSupported(s)) {
-                System.out.println("Charset supporté");
                 forceEncoding = s;
             } else {
-                System.out.println("NON supporté");
+                logger.debug("Charset non supporté");
             }
         }
 

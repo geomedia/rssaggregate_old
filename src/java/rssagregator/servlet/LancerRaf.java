@@ -2,29 +2,25 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package rssagregator.services;
+package rssagregator.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.persistence.LockModeType;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import rssagregator.beans.incident.AbstrIncident;
-import rssagregator.beans.incident.CollecteIncident;
-import rssagregator.dao.DAOFactory;
-import rssagregator.dao.DAOIncident;
+import rssagregator.services.tache.TacheRaffinerPeriodique;
 
 /**
  *
  * @author clem
  */
-@WebServlet(name = "TestLockIncid", urlPatterns = {"/TestLockIncid"})
-public class TestLockIncid extends HttpServlet {
+@WebServlet(name = "LancerRaf", urlPatterns = {"/LancerRaf"})
+public class LancerRaf extends HttpServlet {
 
     /**
      * Processes requests for both HTTP
@@ -41,29 +37,20 @@ public class TestLockIncid extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
         
-        DAOIncident dao = (DAOIncident) DAOFactory.getInstance().getDaoFromType(CollecteIncident.class);
-        
-        AbstrIncident incid = (AbstrIncident) dao.find(new Long(8755));
-        dao.getEm().getTransaction().begin();
-        dao.getEm().lock(incid, LockModeType.PESSIMISTIC_WRITE);
-        
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(TestLockIncid.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        dao.commit();
+        TacheRaffinerPeriodique periodique = new TacheRaffinerPeriodique();
+        ExecutorService es = Executors.newSingleThreadExecutor();
+        es.submit(periodique);
+        es.shutdown();
         
         try {
             /* TODO output your page here. You may use following sample code. */
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet TestLockIncid</title>");            
+            out.println("<title>Servlet LancerRaf</title>");            
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet TestLockIncid at " + request.getContextPath() + "</h1>");
-            out.println("<h1>Servlet TestLockIncid at " + incid + "</h1>");
+            out.println("<h1>Servlet LancerRaf at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
         } finally {            

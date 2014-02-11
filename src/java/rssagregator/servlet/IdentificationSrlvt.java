@@ -42,7 +42,6 @@ public class IdentificationSrlvt extends HttpServlet {
         String action = ServletTool.configAction(request, "login");
         
         DAOUser dao = DAOFactory.getInstance().getDAOUser();
-        System.out.println("LOG SRVLT");
         
         //============================================================================================
         //................................GESTION DES ACTIONS
@@ -65,7 +64,6 @@ public class IdentificationSrlvt extends HttpServlet {
                         } else {
                             request.setAttribute("err", "Echec de l'identification");
                             request.setAttribute("askurl", request.getParameter("askurl"));
-                            System.out.println("Askurl" + request.getParameter("askurl"));
                         }
                     } catch (NoSuchAlgorithmException ex) {
                         Logger.getLogger(UserSrlvt.class.getName()).log(Level.SEVERE, null, ex);
@@ -79,7 +77,6 @@ public class IdentificationSrlvt extends HttpServlet {
         
          //------------------------------------DECONNECTION ---------------------------------------------
         else if(action.equals("logout")){
-            System.out.println("OUT");
             HttpSession session = request.getSession();
             session.invalidate();
             ServletTool.redir(request, request.getContextPath()+"/index", "Deconnection effectuée avec succès", Boolean.FALSE);

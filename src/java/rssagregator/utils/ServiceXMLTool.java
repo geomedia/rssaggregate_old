@@ -6,6 +6,7 @@ package rssagregator.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -15,6 +16,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.naming.NamingException;
+import org.apache.commons.beanutils.PropertyUtils;
 import org.jdom.Attribute;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -37,7 +39,7 @@ public class ServiceXMLTool {
      */
     public static void instancierServiceEtTache() throws IOException, JDOMException, ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NamingException, RessourceIntrouvable, Exception {
 
-        String varPath = (String) PropertyLoader.returnConfPath()+"servicedef.xml";
+        String varPath = (String) PropertyLoader.returnConfPath() + "servicedef.xml";
 
         SAXBuilder sxb = new SAXBuilder();
         org.jdom.Document document;
@@ -52,7 +54,6 @@ public class ServiceXMLTool {
         TacheFactory tacheFactory = TacheFactory.getInstance();
 //        List listTacheconf = racine.getChildren("tachedefaultconf");
 //        for (int i = 0; i < listTacheconf.size(); i++) {
-//            System.out.println("--> tachedefaultconf ");
 //            
 //            Element elementTachedefaultconf = (Element) listTacheconf.get(i);
 //            Attribute att_ClassTache = elementTachedefaultconf.getAttribute("class");
@@ -60,7 +61,6 @@ public class ServiceXMLTool {
 //            // récup de la propriété
 //            List listElementpropertie = elementTachedefaultconf.getChildren("propertie");
 //            for (int j = 0; j < listElementpropertie.size(); j++) {
-//                System.out.println("----> Propertie");
 //                Element elementPropertie = (Element) listElementpropertie.get(j);
 //
 //
@@ -113,7 +113,6 @@ public class ServiceXMLTool {
             Attribute attributclass = elementService.getAttribute("class");
 
             // on instancie la class
-            System.out.println("Attribute value " + attributclass.getValue());
             Class cService = Class.forName(attributclass.getValue());
             Method serviceGetInstance = cService.getMethod("getInstance");
             AbstrService service = (AbstrService) serviceGetInstance.invoke(null, new Object[0]);
@@ -124,8 +123,7 @@ public class ServiceXMLTool {
             if (ElementPool != null) {
                 Attribute attNbThread = ElementPool.getAttribute("nbThread");
                 Integer nbThread = new Integer(attNbThread.getValue());
-                
-                System.out.println("------------> NB Thread " + nbThread);
+
 
                 Attribute attMethodeInstanciation = ElementPool.getAttribute("methodeInstanciation");
                 Method methodFactory = Executors.class.getMethod(attMethodeInstanciation.getValue(), int.class);
@@ -136,7 +134,7 @@ public class ServiceXMLTool {
             // On instancie chaque tache
             List listTache = elementService.getChildren("tache");
             for (int j = 0; j < listTache.size(); j++) {
-             
+
                 Element tacheElement = (Element) listTache.get(j);
                 // Récupération de la class
                 Attribute attClassTache = tacheElement.getAttribute("class");
@@ -189,7 +187,6 @@ public class ServiceXMLTool {
                     castTache.completerNextExecution();
                     service.getTacheProducteur().produire(castTache);
                 } else if (Elementtouslesjoura != null) {
-                    System.out.println("");
                     Attribute attHeure = Elementtouslesjoura.getAttribute("heure");
                     Attribute attMinute = Elementtouslesjoura.getAttribute("minute");
                     castTache.setHeureSchedule(new Integer(attHeure.getValue()));
@@ -198,6 +195,48 @@ public class ServiceXMLTool {
                     castTache.setTimeSchedule(null);
                     service.getTacheProducteur().produire(castTache);
                 }
+
+
+                //---------------------------------------------------
+                // Chargement des élément var
+                //---------------------------------------------------
+                /**
+                 * *
+                 * Il est possible de préciser dans le fichier la valeur d'une variable de la tache. C'est le role de ce
+                 * petit block. La variable pour être définit par ce biaix doit posséder un constructeur acceptant un
+                 * String pour argument. La variable doit posséder un getter et setter dans l'objet
+                 */
+                // On récupère les élément var qui permettent de préciser des variable dans les taches depuis servicedef.xml. Surclass ce qui est définit dans la factory
+                List listElVar = tacheElement.getChildren("var");
+                for (int k = 0; k < listElVar.size(); k++) {
+                    Element elVar = (Element) listElVar.get(k);
+
+                    // On récupère l'attribut class
+                    Attribute attClass = elVar.getAttribute("class");
+                    String valClass = attClass.getValue();
+                    Class c = Class.forName(valClass);
+
+
+                    Attribute attVal = elVar.getAttribute("value");
+                    String val = attVal.getValue();
+
+                    Attribute attname = elVar.getAttribute("name");
+                    String name = attname.getValue();
+
+
+                    // iNSTANCIATION de la propriétée
+                    Constructor ctr = c.getConstructor(String.class);
+                    Object obj = ctr.newInstance(val);
+
+
+                    // Injection de la propriété dans l'objet
+                    PropertyUtils.setProperty(castTache, name, obj);
+
+                }
+
+
+
+
             }
             // On récupère la class
         }

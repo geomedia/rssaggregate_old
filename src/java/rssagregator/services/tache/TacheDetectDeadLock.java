@@ -8,6 +8,7 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 
 /**
+ * 
  * Cette méthode a pour objectif de détecter des DeadLock. Elle écrit un log d'erreur si c'est le cas. Lo4g se charge de
  * transmettre. Il s'agit plus d'une tache de débug le but n'est pas de clore les taches..
  *

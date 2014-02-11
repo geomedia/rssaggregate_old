@@ -94,12 +94,10 @@ public class UserSrlvt extends HttpServlet {
 //                if (u != null) {
 //                    try {
 //                        if (u.authWithThisPass(p)) {
-//                            System.out.println("PASS OK");
 //                            session.setAttribute("authuser", u);
 //                            ServletTool.redir(request, "index", "Identification réussie", Boolean.FALSE);
 //                        } else {
 //                            request.setAttribute("err", "Echec de l'identification");
-//                            System.out.println("BAB PASS");
 //                        }
 //                    } catch (NoSuchAlgorithmException ex) {
 //                        Logger.getLogger(UserSrlvt.class.getName()).log(Level.SEVERE, null, ex);

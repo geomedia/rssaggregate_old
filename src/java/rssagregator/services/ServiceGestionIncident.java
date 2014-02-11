@@ -53,17 +53,14 @@ public class ServiceGestionIncident {
      */
     public static void fermerLesIncidentsDuFlux(Flux flux) {
         int i;
-        System.out.println("CLOTURE");
         List<CollecteIncident> incidentOuvert = flux.getIncidentEnCours();
 
         for (i = 0; i < incidentOuvert.size(); i++) {
-            System.out.println("OO");
             // On vérifi quand même que la date de fin est bien null
             if (incidentOuvert.get(i).getDateFin() == null) {
                 try {
                     Date datefin = new Date();
                     incidentOuvert.get(i).setDateFin(datefin);
-                    System.out.println("DATE DE FIN : " + datefin);
                     DAOIncident dao = DAOFactory.getInstance().getDAOIncident();
                     dao.beginTransaction();
                     dao.modifier(incidentOuvert.get(i));
@@ -107,7 +104,6 @@ public class ServiceGestionIncident {
             incident.setNombreTentativeEnEchec(1);
 
 
-                               System.out.println("On y arrive");
             incident.setLogErreur(ex.getClass().getSimpleName() + " : " + ex.getLocalizedMessage());
 
 //            flux.getIncidentsLie().add(incident);
@@ -265,7 +261,6 @@ public class ServiceGestionIncident {
             else if (exception instanceof RollbackException) {
                 creeIncidentServer("Erreur RollbackException : ", objEnErreur, exception);
             } else if (exception instanceof Exception) {
-                   System.out.println("LALA - 5 " + exception.getClass());
                 return creeIncidentFLux("ERREUR inconnue : " + flux, flux, exception);
              
             }

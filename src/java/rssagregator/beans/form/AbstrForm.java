@@ -407,7 +407,6 @@ public abstract class AbstrForm {
 
     protected void recupSpeFilters(HttpServletRequest request, AbstrDao dao, SearchFiltersList filters) {
 
-        System.out.println("--> recup spe");
         if (action.equals("list")) {
 
             if (request.getParameter("filters") != null && !request.getParameter("filters").isEmpty()) {
@@ -440,7 +439,6 @@ public abstract class AbstrForm {
                                 Field stringListField = Item.class.getDeclaredField(field);
                                 ParameterizedType stringListType = (ParameterizedType) stringListField.getGenericType();
                                 Class<?> classDeLalist = (Class<?>) stringListType.getActualTypeArguments()[0];
-                                System.out.println(classDeLalist); // class java.lang.String.
 
                                 String ids = "";
                                 if (obj.get("data").getClass().equals(JSONArray.class)) { // Si c'est un tableau json on le met en string
@@ -539,7 +537,6 @@ public abstract class AbstrForm {
                                 }
 
                                 filters.getFilters().add(newfilter);
-                                System.out.println("-- FIN GT");
                             } catch (Exception e) {
                                 logger.debug("err", e);
                             }

@@ -198,7 +198,6 @@ public class ServiceCollecteur extends ServiceImpl {
 
 
             this.tacheProducteur.produire(tache);
-            System.out.println("====================");
         }
     }
 
@@ -319,7 +318,6 @@ public class ServiceCollecteur extends ServiceImpl {
 //            if (abstrTacheSchedule.getClass().equals(TacheRecupCallable.class)) {
 //                TacheRecupCallable tacherecup = (TacheRecupCallable) abstrTacheSchedule;
 //                if (tacherecup.getFlux().getID().equals(f.getID())) {
-//                    System.out.println("FIND FLUX");
 //                    return entry;
 //                }
 //            }
@@ -378,7 +376,6 @@ public class ServiceCollecteur extends ServiceImpl {
      */
     @Deprecated
     public void majManuelle(Flux flux) throws Exception {
-        System.out.println("");
 
 
         TacheRecupCallable task = (TacheRecupCallable) TacheFactory.getInstance().getNewTask(TacheRecupCallable.class, false);
@@ -887,10 +884,8 @@ public class ServiceCollecteur extends ServiceImpl {
 
         // Tous le monde est OK, Alors on commit
         if (!err) {
-            System.out.println("COMMIT");
             try {
                 daoItem.commit();
-                System.out.println("1");
             } catch (Exception e) {
                 logger.debug("Erreur lors du comit de l'item", e);
             }
@@ -898,7 +893,6 @@ public class ServiceCollecteur extends ServiceImpl {
             try {
                 daoFlux.commit();
                 cacheHashFlux.removeFlux(flux);
-                System.out.println("2");
             } catch (Exception e) {
                 logger.debug("erreur", e);
             }
@@ -950,9 +944,7 @@ public class ServiceCollecteur extends ServiceImpl {
   
         synchronized(tache){
             try {
-                System.out.println("WAIT");
                 tache.wait();
-                System.out.println("FIN WAIT");
             } catch (InterruptedException ex) {
                 Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
             }

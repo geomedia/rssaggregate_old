@@ -135,10 +135,8 @@ public class ServiceCRUDFlux extends ServiceCRUDBeansSynchro {
 //
 //        // Tous le monde est OK, Alors on commit
 //        if (!err) {
-//            System.out.println("COMMIT");
 //            try {
 //                daoItem.commit();
-//                System.out.println("1");
 //            } catch (Exception e) {
 //                logger.debug("Erreur lors du comit de l'item", e);
 //            }
@@ -147,7 +145,6 @@ public class ServiceCRUDFlux extends ServiceCRUDBeansSynchro {
 //            try {
 //                daoFlux.commit();
 //                ServiceCollecteur.getInstance().getCacheHashFlux().removeFlux(flux);
-//                System.out.println("2");
 //                // Le flux doit se notifier auprès du service de collecte
 //                ServiceCollecteur collecteur = ServiceCollecteur.getInstance();
 //                collecteur.retirerFluxDuService(flux);

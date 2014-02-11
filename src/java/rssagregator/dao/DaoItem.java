@@ -100,9 +100,7 @@ public class DaoItem extends AbstrDao {
     @Override
     public void criteriaTraitementDeschampsSpecifique(CriteriaQuery cq, CriteriaBuilder cb, Root root, List listWhere) {
         //--> C'est maintenant pris en charge dans le champs commum a toute les DAO grace a l'opérateur in et une jointure
-//        System.out.println("----Traitement Spe ITEM");
 //        if (where_clause_Flux != null && where_clause_Flux.size() > 0) {
-//            System.out.println("WHERE ITEMMM");
 //            Join joinFlux = root.join("listFlux");
 //            listWhere.add(joinFlux.in(where_clause_Flux));
 //        }
@@ -148,10 +146,8 @@ public class DaoItem extends AbstrDao {
         // -----------------------Le ORDER BY---------------------------------
         if (order_by != null) {
             if (order_desc != null && order_desc) {
-                System.out.println("DESC");
                 cq.orderBy(cb.desc(root.get(order_by)));
             } else {
-                System.out.println("ASC");
                 cq.orderBy(cb.asc(root.get(order_by)));
             }
         }
@@ -269,7 +265,6 @@ public class DaoItem extends AbstrDao {
             Integer retour = new Integer(resu.get(0).toString());
             return retour;
         } catch (Exception e) {
-            System.out.println("ERRRRR");
             return null;
         }
     }
@@ -304,7 +299,6 @@ public class DaoItem extends AbstrDao {
 
 // TODO : C'est laid de faire des requete mon préparée en plein milieu du code. Mais on n'arive pas a préparer une requete basée su une liste de string
 //        Query query = em.createQuery("SELECT item FROM Item item JOIN item.listFlux flux where item.hashContenu IN ("+hashParamSQL+") AND flux.ID=:fluxid");
-//        System.out.println(hashParamSQL);
         Query query = em.createQuery("SELECT item FROM Item item LEFT JOIN fetch item.listFlux WHERE item.hashContenu IN (" + hashParamSQL + ")");
 //        Query query = em.createQuery("SELECT i FROM Item i WHERE i.hashContenu IN (" + hashParamSQL + ")");
         //LEFT JOIN FETCH item.listFlux
@@ -538,7 +532,6 @@ public class DaoItem extends AbstrDao {
 //            } catch (RollbackException e) {
 //                err = true;
 //            } catch (Exception e) {
-//                System.out.println("ERR");
 //            }
 //        }
 //
@@ -611,9 +604,7 @@ public class DaoItem extends AbstrDao {
      * @return
      */
     public List<Item> itemLieAuFlux(Flux f) {
-        System.out.println("DEBUT REQ");
         Query query = em.createQuery("SELECT i FROM Item i JOIN i.listFlux fl WHERE fl.ID=:idfl");
-        System.out.println("FIN REQ");
         query.setParameter("idfl", f.getID());
         List<Item> resu = query.getResultList();
         return resu;
@@ -665,8 +656,6 @@ public class DaoItem extends AbstrDao {
 
         Query query = null;
         if (journal == null) {
-            System.out.println("=======================");
-            System.out.println("JOURNAL LIE");
             query = em.createQuery("SELECT i From Item i JOIN i.listFlux f WHERE f.journalLie IS NULL AND i.titre LIKE(:titre) OR i.link = :link ");
            
         } else {
@@ -680,7 +669,6 @@ public class DaoItem extends AbstrDao {
         query.setParameter("link", link);
 
         List resultat = query.getResultList();
-        System.out.println("List Size " + resultat.size());
         return resultat;
     }
 }

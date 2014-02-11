@@ -51,7 +51,6 @@ public class TemplateRecapFluxEchec {
             corps += "<p>"+fluxIncident.getFluxLie()+". ";
             try {
                 corps+= "<a href=\""+fluxIncident.getUrlAdmin()+"\">voir détail de l'erreur</a>";
-                System.out.println("URL : " + fluxIncident.getUrlAdmin());
             } catch (IOException ex) {
                 Logger.getLogger(TemplateRecapFluxEchec.class.getName()).log(Level.SEVERE, null, ex);
             }

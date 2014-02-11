@@ -63,7 +63,6 @@ public class DAOFactory<T extends AbstrDao> {
 
     public static DAOFactory getInstanceWithSpecificPU(String pu) {
         PERSISTENCE_UNIT_NAME = pu;
-        System.out.println("1 PU " + PERSISTENCE_UNIT_NAME);
         if (instance == null) {
             instance = new DAOFactory(pu);
         }
@@ -93,7 +92,6 @@ public class DAOFactory<T extends AbstrDao> {
         em = emf.createEntityManager();
         daoConf = new DAOConf(this);
         
-        System.out.println("2PU " + PERSISTENCE_UNIT_NAME);
     }
 
     public DaoFlux getDAOFlux() {
@@ -214,7 +212,6 @@ public class DAOFactory<T extends AbstrDao> {
             dao = (T) new DAOIncident<AliveIncident>(this);
             dao.setClassAssocie(beansClass);
         } else if (beansClass.equals(ServerIncident.class)) {
-            System.out.println("---> Instanciation DAOOO.");
             dao = (T) new DAOIncident<ServerIncident>(this);
             dao.setClassAssocie(beansClass);
         } else if (beansClass.equals(ServeurSlave.class)) {

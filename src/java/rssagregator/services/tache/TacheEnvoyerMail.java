@@ -5,15 +5,14 @@
 package rssagregator.services.tache;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
-import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
@@ -22,18 +21,10 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import rssagregator.beans.exception.AucunMailAdministateur;
-import rssagregator.beans.incident.Incidable;
-import rssagregator.beans.incident.IncidentFactory;
-import rssagregator.beans.incident.MailIncident;
-import rssagregator.beans.incident.ServerIncident;
-import rssagregator.dao.DAOFactory;
-import rssagregator.dao.DAOIncident;
-import rssagregator.services.ServiceMailNotifier;
-import rssagregator.services.crud.AbstrServiceCRUD;
-import rssagregator.services.crud.ServiceCRUDFactory;
 import rssagregator.utils.ExceptionTool;
 
 /**
@@ -42,7 +33,7 @@ import rssagregator.utils.ExceptionTool;
  *
  * @author clem
  */
-public class TacheEnvoyerMail extends TacheImpl<TacheEnvoyerMail> implements Incidable {
+public class TacheEnvoyerMail extends TacheImpl<TacheEnvoyerMail> {
 
     private final static String MAILER_VERSION = "Java";
     private Properties propertiesMail;
@@ -52,6 +43,11 @@ public class TacheEnvoyerMail extends TacheImpl<TacheEnvoyerMail> implements Inc
     Message message = null;
 //    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheEnvoyerMail.class);
     protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
+    /**
+     * *
+     * Il est possible d'envoyer un mail depuis un fichier
+     */
+    File fichier;
 
     /**
      * *
@@ -89,91 +85,6 @@ public class TacheEnvoyerMail extends TacheImpl<TacheEnvoyerMail> implements Inc
         this.content = content;
     }
 
-    @Override
-    public Class getTypeIncident() {
-        return MailIncident.class;
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    /**
-     * *
-     * Génère un mail incident et l'enregistre dans la base de donnée
-     */
-    @Override
-    public void gererIncident() throws Exception {
-        // Si l'erreur vient du fait qu'il n'y a pas de mail d'admin dans la conf
-//        try {
-        if (this.exeption != null) {
-
-//                initialiserTransaction();
-//                AbstrServiceCRUD serviceCRUD = ServiceCRUDFactory.getInstance().getServiceFor(MailIncident.class);
-
-
-            if (this.exeption.getClass().equals(AucunMailAdministateur.class)) { // C'est l'erreur est du au fait qu'il n'y a pas d'email dans la conf
-
-                logger.error("Il semble qu'aucun mail d'administrateur n'a été définit. ");
-//                    DAOIncident<ServerIncident> dao = (DAOIncident<ServerIncident>) DAOFactory.getInstance().getDaoFromType(ServerIncident.class);
-//
-//                    dao.setClos(false);
-//                    ServerIncident incid = null;
-//
-//                    List<ServerIncident> list = dao.findIncidentNonClos(ServerIncident.class);
-//                    if (!list.isEmpty()) {
-//                        for (int i = 0; i < list.size(); i++) {
-//                            ServerIncident serverIncident = list.get(i);
-//                            if (serverIncident.getMessageEreur().equals("pas de mail admin dans la conf")) {
-//                                incid = serverIncident;
-//                                incid.setNombreTentativeEnEchec(incid.getNombreTentativeEnEchec() + 1);
-//                            }
-//                        }
-//                    }
-//                    if (incid == null) {
-//                        IncidentFactory<ServerIncident> facto = new IncidentFactory<ServerIncident>();
-//                        incid = facto.getIncident(ServerIncident.class, "pas de mail admin dans la conf", this.exeption);
-//                        serviceCRUD.ajouter(incid);
-//                    } else {
-//                        serviceCRUD.modifier(incid);
-//                    }
-
-
-            } else { // Pour tout autre erreur
-//                    IncidentFactory<MailIncident> factory = new IncidentFactory<MailIncident>();
-//                    MailIncident incident = factory.createIncidentFromTask(this, "Le mail n'a pu être envoyé");
-//                    incident.setMessage(this.getContent());
-//                    incident.setObjet(this.getSubject());
-//                    incident.setLogErreur(this.getExeption().toString());
-//                    serviceCRUD.ajouter(incident, em);
-
-
-                logger.error("Impossible d'envoyer un mail d'alerte");
-
-                String varpath = "/home/clem/testmail";
-//                varpath += "/mail/";
-                FileOutputStream fileOutputStream = null;
-                try {
-                    fileOutputStream = new FileOutputStream(varpath);
-                } catch (FileNotFoundException ex) {
-                    logger.error("Erreur lors de la création de outputstream", ex);
-                }
-
-                if (message != null) {
-
-                    message.writeTo(fileOutputStream);
-                } else {
-                    logger.error("Message null ");
-                }
-            }
-        }
-//        } catch (Exception e) {
-
-//            commitTransaction(false);           
-//        } 
-
-//        finally {
-//            commitTransaction(true);
-//        }
-    }
-
     /**
      * *
      * Enregistre un message dans un fichier. Si le mail n'est pas correct, aucun fichier ne doit être enregistré.
@@ -185,6 +96,7 @@ public class TacheEnvoyerMail extends TacheImpl<TacheEnvoyerMail> implements Inc
      */
     public boolean saveMessageToFile(Message message) throws FileNotFoundException, IOException, MessagingException {
 
+        logger.debug("Sauvegarde du mail dans un fichier");
         ExceptionTool.argumentNonNull(message);
 
         String varpath = System.getProperty("confpath");
@@ -196,6 +108,7 @@ public class TacheEnvoyerMail extends TacheImpl<TacheEnvoyerMail> implements Inc
             fileOutputStream = null;
             fileOutputStream = new FileOutputStream(f);
             message.writeTo(fileOutputStream);
+
             return true;
 
         } catch (Exception e) {
@@ -227,10 +140,10 @@ public class TacheEnvoyerMail extends TacheImpl<TacheEnvoyerMail> implements Inc
      * @param msg
      * @return
      */
-           //TODO : on peut factoriser comme une méthode static
+    //TODO : on peut factoriser comme une méthode static
     public String contructMailFileName() {
 
- 
+
         // On construit le datega
         DateTime dt = new DateTime();
         DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd--kk-mm-s-S");
@@ -241,41 +154,104 @@ public class TacheEnvoyerMail extends TacheImpl<TacheEnvoyerMail> implements Inc
     }
 
     @Override
-    public void fermetureIncident() throws Exception {
-//        throw new UnsupportedOperationException("Not supported yet. La tache n'a pas a fermer automatiquement ses incident."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
     protected void callCorps() throws Exception {
 
-        if (toMailAdresses == null || (toMailAdresses != null && toMailAdresses.length < 1)) {
-            throw new AucunMailAdministateur("Aucun mail d'administrateur dans la conf");
-        }
-
-        final String username = propertiesMail.getProperty("smtpuser");
-        final String password = propertiesMail.getProperty("smtppass");
-        Session session = Session.getInstance(propertiesMail,
-                new javax.mail.Authenticator() {
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(username, password);
+        try {
+            if (toMailAdresses == null || (toMailAdresses != null && toMailAdresses.length < 1)) {
+                throw new AucunMailAdministateur("Aucun mail d'administrateur dans la conf");
             }
-        });
 
-        message = new MimeMessage(session);
-        message.setFrom(new InternetAddress("clement.rillon@gmail.com"));
-        message.setRecipients(Message.RecipientType.TO, toMailAdresses);
+            final String username = propertiesMail.getProperty("smtpuser");
+            final String password = propertiesMail.getProperty("smtppass");
+            Session session = Session.getInstance(propertiesMail,
+                    new javax.mail.Authenticator() {
+                @Override
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(username, password);
+                }
+            });
+            //-------------------- ENVOIE DU MAIL DEPUIS UN FICHIER SI IL EST PR2CISE
+            if (fichier != null) {
+                InputStream is = new FileInputStream(fichier);
+                message = new MimeMessage(session, is);
 
-        message.setSubject(subject);
-        message.setContent(content, "text/html; charset=utf-8");
+            } else { //------------ Sinon on crée le message en y entrant les variables 
+                message = new MimeMessage(session);
 
-        message.setHeader("X-Mailer", MAILER_VERSION);
-        message.setSentDate(new Date());
+                message.setFrom(new InternetAddress("clement.rillon@gmail.com"));
+                message.setRecipients(Message.RecipientType.TO, toMailAdresses);
 
-        message.setSentDate(new Date());
+                message.setSubject(subject);
+                message.setContent(content, "text/html; charset=utf-8");
+
+                message.setHeader("X-Mailer", MAILER_VERSION);
+                message.setSentDate(new Date());
+
+                message.setSentDate(new Date());
+            }
+
+            Transport.send(message);
+
+            // Si c'est un mail provenant d'un fichier, on supprime ce fichier car le mail est bien parti.
+            if (fichier != null) {
+                fichier.delete();
+            }
 
 
-//        session.setDebug(true);
-        Transport.send(message);
+        } //---------------------------------------------------
+        //              Capture des Exception
+        //---------------------------------------------------
+        /**
+         * *
+         * Ce block catch permet de gérer les exeption en enregistrant le mail dans un fichier si il n'a pas pu partir.
+         */
+        catch (Exception e) {
+            
+            //---------> Enregistrement du mail dans un fichier
+            if (e.getClass().equals(AucunMailAdministateur.class)) { // On exclu les mail si pas de destinataire
+                logger.error("Aucun Mail d'admin n'est configuré !");
+            } else {
+                if (message != null) { // Si c'est un message nouveau ne possédant pas son fichier
+                    if (fichier == null) { // Si ce n'est pas un mail provenant déjà d'un fichier (si c'est un nouveau message et pas un resend )
+                        saveMessageToFile(message); // Enregistret le message sur le disque
+                    }
+                }
+            }
+            //------> Deplacement des mail innenvoyable
+            /**
+             * *
+             * Si on n'a pas pu envoyer un mail pendant 3 jour, celui ci est déplacé dans le répertoire unsend. Il ne
+             * sera plus réenvoyé
+             */
+//            if (fichier != null) { // La procédure ne s'applique qu'au mail ayant pour source un fichier (les resend) 
+//
+//                DateTime dateMessage = new DateTime(new Date(fichier.lastModified()));
+//                Duration dur = new Duration(dateMessage, new DateTime());
+//                if (dur.getStandardDays() > 3) { // Si le ficheir a plus de trois jour
+//                    try {
+//                        String path = System.getProperty("confpath");
+//                        path += "unsend/";
+//                        path += fichier.getName();
+//                        fichier.renameTo(new File(path)); // On déplace le fichier vers un répertoire d'archive
+//                 
+//
+//                    } catch (Exception ex) {
+//                        logger.error("Erreur lors du déplacement d'un mail vers le répertoire unsend ", ex);
+//                    }
+//                }
+//            }
+        }
     }
+
+    public File getFichier() {
+        return fichier;
+    }
+
+    public void setFichier(File fichier) {
+        this.fichier = fichier;
+    }
+    
+    
+
+    
 }

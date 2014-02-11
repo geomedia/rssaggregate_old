@@ -4,7 +4,6 @@
  */
 package rssagregator.dao;
 
-import java.util.List;
 import rssagregator.beans.form.AbstrForm;
 
 /**
@@ -145,7 +144,6 @@ public class SearchFilter {
             return false;
         }
         if (this.data != other.data && (this.data == null || !this.data.equals(other.data))) {
-            System.out.println("---> FALSE pour : " + this.data.getClass());
             return false;
         }
         if (this.type != other.type && (this.type == null || !this.type.equals(other.type))) {

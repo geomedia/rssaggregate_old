@@ -52,7 +52,6 @@ public class FilterUserBean implements Filter {
 
         // Pour action read et mod
         if (action.equals("read") || action.equals("mod")) {
-            System.out.println("--------");
             //Si l'utilisateur n'est pas admin
             if (!u.getAdminstatut()) {
                 // récup de l'id demandé

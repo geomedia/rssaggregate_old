@@ -72,17 +72,4 @@ public class CodePays {
 
         return sortByComparator(country);
     }
-
-    public static void main(String[] args) {
-        
-        
-        String[] tab =  TimeZone.getAvailableIDs();
-        
-        int i;
-         for(i=0; i<tab.length; i++){
-             System.out.println(""+ tab[i]);
-         }
-        
-        
-    }
 }

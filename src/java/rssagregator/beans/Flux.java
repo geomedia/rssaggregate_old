@@ -686,7 +686,6 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
 
     @Override
     public Object clone() throws CloneNotSupportedException {
-        System.out.println("-->> CLONE USE");
         Flux clone = (Flux) super.clone();
 
         return clone;
@@ -802,14 +801,12 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
         public void postClone(DescriptorEvent event) {
 //            super.postClone(event); //To change body of generated methods, choose Tools | Templates.
             Object source = event.getSource();
-            System.out.println("POSTCLONE SOURCE : " + source);
         }
 
         @Override
         public void postMerge(DescriptorEvent event) {
 //            super.postMerge(event); //To change body of generated methods, choose Tools | Templates.
             Object source = event.getSource();
-            System.out.println("--> POST MERGE SOURCE : " + source);
 
         }
     }

@@ -313,6 +313,20 @@ public class POJOCompteItemTest {
         }
     }
 
+    /**
+     * *
+     * Génère des item pour les date : <ul>
+     *
+     * <li>01/01/2013 : nbr it 3</li>
+     * <li>02/01/2013 : nbr 2</li>
+     * <li>03/01/2013 : nbr1</li>
+     * <li>04/01/2013 : nbr 7</li>
+     * <li>05/01/2013 : 0 ------------ </li>
+     * <li>06/01/2013 : nbr 1</li>
+     * </ul>
+     *
+     * @return
+     */
     public static POJOCompteItem genererInstanceTest() {
         POJOCompteItem instance = new POJOCompteItem();
 
@@ -397,26 +411,12 @@ public class POJOCompteItemTest {
     @Test
     public void testDetecterAnomalieNbrMinimalItem() {
 
-        List<Item> listItem = new ArrayList<Item>();
-        Item it1 = new Item();
-        it1.setDateRecup(new DateTime(2013, 1, 1, 0, 1).toDate());
-
-        Item it11 = new Item();
-        it11.setDateRecup(new DateTime(2013, 1, 1, 0, 1).toDate());
-
-        Item it2 = new Item();
-        it2.setDateRecup(new DateTime(2013, 1, 6, 0, 1).toDate());
-        listItem.add(it1);
-        listItem.add(it2);
-        listItem.add(it11);
         POJOCompteItem instance = genererInstanceTest();
-        instance.setItems(listItem);
         instance.setDate1(new DateTime(2013, 1, 1, 0, 1).toDate());
         instance.setDate2(new DateTime(2013, 1, 6, 0, 1).toDate());
 
+
         System.out.println("detecterAnomalieNbrMinimalItem-----");
-        Integer nbrItem = 0;
-        Integer jour = 50;
 
         try {
             instance.compte();
@@ -425,28 +425,43 @@ public class POJOCompteItemTest {
         }
 
         Map<Date, Integer> result = instance.detecterAnomalieNbrMinimalItem(0, 50);
-        if(!result.isEmpty()){
+        if (!result.isEmpty()) {
             fail("On ne devait pas avoir de résultats");
         }
-        result = instance.detecterAnomalieNbrMinimalItem(3, 2);
-        if(!result.isEmpty()){
-            fail("On ne devait pas avoir de résultat il y en a "+ result.size());
-        }
-        
-        result = instance.detecterAnomalieNbrMinimalItem(0, 3);
-        if(result.isEmpty()){
-            fail("il devait y avoir des résultats");
-        }
-        
-        
-        
 
-        System.out.println("NBR de jour en exeption " + result.size());
 
-        for (Map.Entry<Date, Integer> entry : result.entrySet()) {
-            Date date = entry.getKey();
-            Integer integer = entry.getValue();
-            System.out.println("Date : " + date + "avec " + integer);
+        result = instance.detecterAnomalieNbrMinimalItem(1, 3);
+        if (!result.isEmpty()) {
+            fail("On ne devait pas avoir de résultat il y en a " + result.size());
+        }
+
+
+        result = instance.detecterAnomalieNbrMinimalItem(1, 1);
+        if (result.isEmpty()) {
+            for (Map.Entry<Date, Integer> entry : result.entrySet()) {
+                Date date = entry.getKey();
+                Integer integer = entry.getValue();
+                System.out.println("Date " + date + " nbr : " + integer);
+
+            }
+            fail("il devait y avoir des résultats. On en a " + result.size());
+        }
+
+        Item it2 = new Item();
+        it2.setDateRecup(new DateTime(2013, 1, 16, 0, 1).toDate());
+
+        instance.getItems().add(it2);
+        instance.setDate2(new DateTime(2013, 1, 16, 0, 1).toDate());
+        try {
+            instance.compte();
+        } catch (Exception ex) {
+            Logger.getLogger(POJOCompteItemTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        result = instance.detecterAnomalieNbrMinimalItem(1, 4);
+        
+        System.out.println("NBR : " + result.size());
+        if(result.size() != 9){
+            fail("On revait avoir 12 résultats. on en a " + result.size());
         }
 
     }

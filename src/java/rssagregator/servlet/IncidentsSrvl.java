@@ -60,7 +60,6 @@ public class IncidentsSrvl extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        System.out.println("----------> SRLVT Incid");
 
         response.setContentType("text/html;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
@@ -164,17 +163,13 @@ public class IncidentsSrvl extends HttpServlet {
 //            Class c = null;
 //            DAOIncident dao = null;
 //            try {
-//                System.out.println("AAA");
 //                c = Class.forName("rssagregator.beans.incident." + request.getParameter("type"));
-//                System.out.println("CLASS : " + c);
 //                dao = (DAOIncident) DAOFactory.getInstance().getDaoFromType(c);
 //                if (!AbstrIncident.class.isAssignableFrom(c)) {
-//                    System.out.println("PAS ASSIGNABLE");
 //                    throw new Exception("non");
 //                }
 //            } catch (Exception e) {
 //
-//                System.out.println("ERR" + e);
 //            }
 //
 //            try {
@@ -207,15 +202,12 @@ public class IncidentsSrvl extends HttpServlet {
 //            //Criteria Flux lie. N'est valable que pour les incidents de collecte.
 //            if (c != null && c.equals(CollecteIncident.class)) {
 //                String[] fluxLie = request.getParameterValues("fluxSelection2");
-//                System.out.println("###" + fluxLie);
-//                System.out.println("---> RESTRICTION FLUX");
 //                DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
 //                List<Flux> listFluxLie = new ArrayList<Flux>();
 //                if (fluxLie != null && fluxLie.length > 0) {
 //                    for (int i = 0; i < fluxLie.length; i++) {
 //
 //                        String strIdFlux = fluxLie[i];
-//                        System.out.println("############FLUX : " + strIdFlux);
 //                        Flux f = (Flux) daoFlux.find(new Long(strIdFlux));
 //                        listFluxLie.add(f);
 //                    }
@@ -233,33 +225,24 @@ public class IncidentsSrvl extends HttpServlet {
 //            //recup de la list des incidents
 //            List<Object> listAll = dao.findCriteria(c);
 //
-//            System.out.println("°°°° LIST : " + listAll);
-//            System.out.println("°°°° LIST : " + listAll.size());
-//            System.out.println("TAILLE LISTE : " + listAll.size());
 //            request.setAttribute(ATT_LIST, listAll);
 //            //--------------------------------------------ACTION : MOD-------------------------------------
 //        } 
 
 
         if (action.equals("list")) {
-            System.out.println("----> LIST INCID");
 
             try {
                 Class c = null; 
                 DAOIncident dao = null;
                 try {
-                    System.out.println("AAA");
                     c = Class.forName("rssagregator.beans.incident." + request.getParameter("type"));
-                    System.out.println("CLASS : " + c);
                     dao = (DAOIncident) DAOFactory.getInstance().getDaoFromType(c);
-                    System.out.println("LE type : " + c);
                     if (!AbstrIncident.class.isAssignableFrom(c)) {
-                        System.out.println("PAS ASSIGNABLE");
                         throw new Exception("non");
                     }
                 } catch (Exception e) {
-
-                    System.out.println("ERR" + e);
+                    logger.debug("Exeption ", e);
                 }
 
 
@@ -274,7 +257,6 @@ public class IncidentsSrvl extends HttpServlet {
             }
 
         } else if (action.equals("mod")) {
-            System.out.println("");
             try {
                 Class c = Class.forName("rssagregator.beans.incident." + request.getParameter("type"));
                 ServletTool.actionMOD(request, ATT_OBJ, ATT_FORM, c, false);
@@ -298,15 +280,13 @@ public class IncidentsSrvl extends HttpServlet {
             try {
                 Class c = Class.forName("rssagregator.beans.incident." + request.getParameter("type"));
                 if (!AbstrIncident.class.isAssignableFrom(c)) {
-                    System.out.println("ERREUR CLASS");
                     throw new Exception("non");
                 }
-                System.out.println("CLASS : " + c);
                 ServletTool.actionREAD(request, c, ATT_OBJ);
 
             } //               Class c = Class.forName("rssagregator.beans.incident.CollecteIncident");
             catch (ClassNotFoundException ex) {
-                System.out.println("CLASS not foun");
+                logger.debug("Exeption ", ex);
                 redir(request, ATT_SERV_NAME + "/read?id=" + request.getParameter("id"), "L'entité demandée n'existe pas !", Boolean.TRUE);
             } catch (Exception ex) {
                 logger.debug("EXX", ex);
@@ -321,18 +301,14 @@ public class IncidentsSrvl extends HttpServlet {
             //On récupère les incident
             List<AbstrIncident> listIncid = new ArrayList<AbstrIncident>();
             List<Long> listId = ServletTool.parseidFromRequest(request, null);
-            System.out.println("ID : " + listId.size());
 
             DAOIncident dao = DAOFactory.getInstance().getDAOIncident();
             dao.setClassAssocie(AbstrIncident.class);
             for (int i = 0; i < listId.size(); i++) {
                 Long long1 = listId.get(i);
-                System.out.println("ID ds servlet " + long1);
                 AbstrIncident incident = (AbstrIncident) dao.find(long1);
-                System.out.println("INCID " + incident);
                 if (incident != null) {
                     listIncid.add(incident);
-                    System.out.println("INCID DS SERVLET : " + incident.getID());
                 }
 
             }
@@ -397,7 +373,6 @@ public class IncidentsSrvl extends HttpServlet {
 
 //    public static void main(String[] args) throws ClassNotFoundException {
 //        Class c = Class.forName("rssagregator.beans.incident.FluxIncident");
-//        System.out.println("Class" + c.toString());
 //    }
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**

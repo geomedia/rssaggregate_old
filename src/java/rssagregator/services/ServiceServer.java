@@ -195,9 +195,6 @@ public class ServiceServer extends ServiceImpl {
 //        }
 //        
 //        Conf c = DAOFactory.getInstance().getDAOConf().getConfCourante();
-//        System.out.println("=======================================");
-//        System.out.println("VAR PATH : " + c.getVarpath());
-//        System.out.println("=======================================");
 //        TacheStillAlive stillAlive = new TacheStillAlive(this);
 //        stillAlive.setSchedule(true);
 //        executorService.submit(stillAlive);

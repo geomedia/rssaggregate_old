@@ -128,6 +128,7 @@ public class Item extends Bean implements Serializable, Comparable<Item>, Conten
      */
     @ManyToMany(fetch = FetchType.EAGER, targetEntity = Flux.class)
     private List<Flux> listFlux = new LinkedList<Flux>();
+    
     @ManyToOne
     private ItemRaffinee itemRaffinee;
     
@@ -518,11 +519,8 @@ public class Item extends Bean implements Serializable, Comparable<Item>, Conten
 ////            if (!trouve) {
 ////                this.donneeBrutes.add(donneeBruteAutre);
 ////                versement = true;
-//////                System.out.println("===========VERSEMENT==============");
-//////                System.out.println("NOMBRE DONNEE BRUT POUR ITEM : " + this.donneeBrutes.size());
 //////                for (int k = 0; k < this.donneeBrutes.size(); k++) {
 //////                    DonneeBrute donneeBrute = this.donneeBrutes.get(k);
-////////                    System.out.println("DESC : " + donneeBrute.getDescription());
 //////                    
 //////                }
 ////

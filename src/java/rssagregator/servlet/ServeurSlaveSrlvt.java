@@ -103,9 +103,7 @@ public class ServeurSlaveSrlvt extends HttpServlet {
 //            try {
 //                obj = (ServeurSlave) dao.find(new Long(request.getParameter("id")));
 //                request.setAttribute(ATT_BEAN, obj);
-//                System.out.println("ICI");
 //            } catch (Exception e) {
-//                System.out.println("EXEPTION" + e);
 //            }
 //        }
 
@@ -117,7 +115,6 @@ public class ServeurSlaveSrlvt extends HttpServlet {
 //        if (action.equals("list")) {
 //            List<Object> list = dao.findall();
 //            request.setAttribute(ATT_LIST_OBJ, list);
-//            System.out.println("NBR : " + list.size());
 //        }
 
 //        if (form.getValide()) {
@@ -153,8 +150,7 @@ public class ServeurSlaveSrlvt extends HttpServlet {
 //                redirmap.put("url", "slave");
 //                redirmap.put("msg", "Suppression effectuées");
 //                request.setAttribute("redirmap", redirmap);
-//                System.out.println("SUPPPRESSION");
-//            } catch (Exception ex) {
+        //            } catch (Exception ex) {
 //                Logger.getLogger(ServeurSlaveSrlvt.class.getName()).log(Level.SEVERE, null, ex);
 //            }
 //        }
