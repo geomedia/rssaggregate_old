@@ -59,11 +59,7 @@ import rssagregator.dao.DaoFlux;
  * </ul>
  */
 @Entity()
-//@EntityListeners( value = {Test.class})
-//@CloneCopyPolicy(workingCopyMethod = "clone", method = "clone")
 @Table(name = "flux")
-//@Cacheable(value = true)
-//@Cache(type = CacheType.FULL, coordinationType = CacheCoordinationType.SEND_NEW_OBJECTS_WITH_CHANGES, isolation = CacheIsolationType.SHARED )
 @XmlRootElement
 public class Flux extends Bean implements Observer, Serializable, BeanSynchronise, Cloneable {
 
@@ -71,17 +67,14 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long ID;
 
-//    @OneToMany(mappedBy = "flux", cascade = CascadeType.ALL)
-//    private List<DonneeBrute> donneeBrutes;
-
     public Flux() {
         propertyChangeSupport = new PropertyChangeSupport(this);
         FluxChangeLisner changeLisner = new FluxChangeLisner();
         propertyChangeSupport.addPropertyChangeListener(changeLisner);
         incidentsLie = new ArrayList<CollecteIncident>();
 
-//        this.setChanged();
     }
+    
     /**
      * *
      * Le beans flux possède un ChangeLisner {@link FluxChangeLisner} chargé d'effectuer des modification dans le beans
@@ -144,32 +137,8 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
      */
     @Column(name = "htmlUrl", length = 2000, nullable = true)
     private String htmlUrl;
-    /**
-     * Les dernières empruntes md5 des items du flux. On les garde en mémoire pour faire du dédoublonage sans effectuer
-     * de requetes dans la base de données. On ne persiste pas dans la base de donnée (TRANSISIENT NORMAL)
-     */
-//    @Transient
-//    private Set<String> lastEmpruntes  = new LinkedHashSet<String>();
-    /**
-     * L'objet Callable qui permet d'être lancé pour effectuer la récupération du flux. Cet objet doit être ajouté dans
-     * le pool de thread du service de récupération. Il n'est pas persisté
-     */
-//    @Transient
-//    private TacheRecupCallable tacheRechup;
-    /**
-     * *
-     * Cette tâche de récupération est utilisée lorsque l'utilisateur demande manuellement la mise à jour du flux
-     */
-//    @Transient
-//    private TacheRecupCallable tacheRechupManuelle;
-    /**
-     * Lors du lancement d'une collecte par la tache de récupération, cette liste est mise à jour lorsque à la fin de la
-     * collecte, la tache notifie au flux ses résultats. On trouve dans ces résultats des items déja collecte, ils sont
-     * marqué du bool item.isNew.
-     */
-//    @Deprecated
-//    @Transient
-//    private List<Item> listDernierItemCollecte;
+    
+    
     /**
      *
      * Liste des Item du flux. La relation est possédée par l'item !! Il faut passer par la DAO pour obtenir la liste
@@ -177,60 +146,43 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
      */
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, mappedBy = "listFlux")
     private List<Item> item = new ArrayList<Item>();
+    
     /**
      * Un objet flux peut posséder différents incidents. Un incident ne possède qu'un flux.
      *
      * @element-type CollecteIncident
      */
-//    @OneToMany(mappedBy = "flux", cascade = CascadeType.ALL)
-//    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true,fetch = FetchType.LAZY)
     @OneToMany(mappedBy = "fluxLie", cascade = {CascadeType.ALL}, orphanRemoval = true, fetch = FetchType.LAZY)
     protected List<CollecteIncident> incidentsLie;
-    /**
-     *
-     * @element-type InfoCollecte
-     */
-//Cascade remove : On va utiliser la dao flux pour sauvegarder les infos collecte. 
-//    @OneToMany(mappedBy = "flux", cascade = {CascadeType.ALL})
-//    @Deprecated // Idée abandonnée. Il est déjà possible de commenter les incident qui sont daté; Le commentaire sur le flux sera finalement un simple champ texte
-//    @Transient
-//    private List<InfoCollecte> infoCollecteFlux;
+
     /**
      * *
      * Un champs informatif dans lequel les administrateurs peuvent saisir des commentaires sur le flux.
      */
     @Column(name = "infoCollecte", columnDefinition = "text")
     private String infoCollecte;
+    
     /**
      * Le type du flux (international, a la une etc...). Les types de flux sont des beans. ils sont persisté dans la
      * base de données
      */
-//    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.DETACH})
     @OneToOne(fetch = FetchType.EAGER)
     private FluxType typeFlux;
     /**
      * Un flux peut appratenir à un journal. Un journal peut contenir plusieurs flux
      */
-// On veut que le flux ne puisse pas créer de journaux mais simplment se lier. Ce n'est pas à la dao du flux de de créer des journaux.
     @ManyToOne(fetch = FetchType.LAZY)
     private Journal journalLie;
+    
     /**
      * Le mediator flux permet d'assigner un flux un comportement de collecte. Un médiator est une configuration de
      * parseur Raffineur etc. IL s4AGIT DU COMPTEMENT DE COLLECTE ACTUELLE. Si auparavant d'autres comportement ont été
      * utilisé, il sont visibles dans les période de captations.
      */
-//    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
-//    private ComportementCollecte mediatorFlux;
-    /**
-     * Le mediator flux permet d'assigner un flux un comportement de collecte. Un médiator est une configuration de
-     * parseur Raffineur etc. IL s4AGIT DU COMPTEMENT DE COLLECTE ACTUELLE. Si auparavant d'autres comportement ont été
-     * utilisé, il sont visibles dans les période de captations.
-     */
-//    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
-//    @ManyToOne
-//    @ManyToOne(cascade = {CascadeType.MERGE})
     @ManyToOne()
     private ComportementCollecte mediatorFlux;
+    
+    
     public static final String PROP_MEDIATORFLUX = "mediatorFlux";
 
     /**
@@ -241,9 +193,6 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
     public ComportementCollecte getMediatorFlux() {
         return mediatorFlux;
     }
-    
-    
-    
     
 
     /**
@@ -256,17 +205,20 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
         this.mediatorFlux = mediatorFlux;
         propertyChangeSupport.firePropertyChange(PROP_MEDIATORFLUX, oldMediatorFlux, mediatorFlux);
     }
+    
     /**
      * *
      * Date de création du flux
      */
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     Date created;
-//    @Version
-//    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
-    
+
+    /***
+     * Date de dernière modification de l'entitée. Permet de faire fonctionner l'optimitic looking de JPA
+     */
     @Version
     Timestamp modified;
+    
     /**
      * *
      * Un flux peut être le sous flux d'un autre, exemple Europe est un sous flux de international. Si null, il s'agit
@@ -275,6 +227,8 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
     @OneToOne
     @Beta
     Flux parentFlux;
+    
+    
     /**
      * *
      * Un nom pour le flux. Ce champ est utilisé par la méthode toString. Si ce champ est vide tostring va chercher le
@@ -282,43 +236,8 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
      */
     @Column(name = "nom")
     private String nom;
-    /**
-     * // * * // * Un indice de 0.0 à 100.0 permettant de mesurer la disponibilité du flux durant la captation. Cet
-     * indice est // * calculé par la tâche {@link TacheCalculQualiteFlux} qui observe la durée de la période de
-     * calpation et le cumul // * de la durée des incidents. //
-     */
-//    @Column(name = "indiceQualiteCaptation")
-//    protected Float indiceQualiteCaptation;
-//    /**
-//     * *
-//     * Médiane du nombre d'item jour capturé pour le flux. Cet indice est calculé par la tâche
-//     * {@link TacheCalculQualiteFlux}
-//     */
-//    protected Integer indiceMedianeNbrItemJour;
-//    /**
-//     * *
-//     * Décile du nombre d'item jour capturé pour le flux. Cet indice est calculé par la tâche
-//     * {@link TacheCalculQualiteFlux}
-//     */
-//    protected Integer indiceDecileNbrItemJour;
-//    /**
-//     * *
-//     * Quartile du nombre d'item jour capturé pour le flux. Cet indice est calculé par la tâche
-//     * {@link TacheCalculQualiteFlux}
-//     */
-//    protected Integer indiceQuartileNbrItemJour;
-//    /**
-//     * *
-//     * Maximum du nombre d'item jour capturé pour le flux. Cet indice est calculé par la tâche
-//     * {@link TacheCalculQualiteFlux}
-//     */
-//    protected Integer indiceMaximumNbrItemJour;
-//    /**
-//     * *
-//     * Minimum du nombre d'item jour capturé pour le flux. Cet indice est calculé par la tâche
-//     * {@link TacheCalculQualiteFlux}
-//     */
-//    protected Integer indiceMinimumNbrItemJour;
+ 
+    
     /**
      * *
      * Liste des périodes durant lesquel un flux à été capturé (boolean active à true). Les période de captation sont
@@ -327,6 +246,8 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
      */
     @OneToMany(mappedBy = "flux", cascade = CascadeType.ALL, orphanRemoval = true)
     protected List<FluxPeriodeCaptation> periodeCaptations = new ArrayList<FluxPeriodeCaptation>();
+    
+    
     /**
      * *
      * Variable qui permet à l'utilisateur de qualifié le flux de stable. On considère qu'il est stable si le flux ne
@@ -442,7 +363,6 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
     }
 
 
-
     public String getHtmlUrl() {
         return htmlUrl;
     }
@@ -475,13 +395,6 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
         this.estStable = estStable;
     }
 
-//    public List<DonneeBrute> getDonneeBrutes() {
-//        return donneeBrutes;
-//    }
-//
-//    public void setDonneeBrutes(List<DonneeBrute> donneeBrutes) {
-//        this.donneeBrutes = donneeBrutes;
-//    }
 
     /**
      * *
@@ -511,19 +424,15 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
      * @return L'incident ouvert du même type que Classc ou null si rien n'a été trouvé
      */
     public CollecteIncident getIncidentOuverType(Class c) {
-//        List<AbstrFluxIncident> listRetour = new ArrayList<AbstrFluxIncident>();
-
         List<CollecteIncident> list = this.getIncidentEnCours();
         int i;
         for (i = 0; i < list.size(); i++) {
             if (list.get(i).getClass().equals(c)) {
                 return list.get(i);
-//                listRetour.add(list.get(i));
             }
         }
         return null;
     }
-
     
     
     @Override
@@ -549,7 +458,6 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
 
     @Override
     public String getReadURL() {
-
         Conf c = DAOFactory.getInstance().getDAOConf().getConfCourante();
         String url = c.getServurl();
         //On rajoute un / a la fin de l'url si besoin est
@@ -568,9 +476,7 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
     }
 
     /**
-     * *
      * Retourne un Opml du flux contenant ses sous flux
-     *
      * @return
      */
     @Beta
@@ -681,7 +587,6 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
             }
         }
         if (nbrPeriodeouverte > 1) {
-//            logger.error("Il y a deux période de captation ouverte pour le flux");
             throw new DonneeInterneCoherente("Il y a deux période de captation ouverte pour le flux");
         } else {
             return duration;
@@ -803,13 +708,11 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
 
         @Override
         public void postClone(DescriptorEvent event) {
-//            super.postClone(event); //To change body of generated methods, choose Tools | Templates.
             Object source = event.getSource();
         }
 
         @Override
         public void postMerge(DescriptorEvent event) {
-//            super.postMerge(event); //To change body of generated methods, choose Tools | Templates.
             Object source = event.getSource();
 
         }
@@ -830,23 +733,16 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
         
         Interval intev = new Interval(dt1, dt2);
 
-//        List<CollecteIncident> indidentFlux = this.incidentsLie;
         for (Iterator<CollecteIncident> it = incidentsLie.iterator(); it.hasNext();) {
             CollecteIncident collecteIncident = it.next();
 //            
-//        }
-//        
-//        for (int i = 0; i < flux.getIncidentsLie().size(); i++) {
-//            CollecteIncident collecteIncident = flux.getIncidentsLie().get(i);
            DateTime dtIncid = new DateTime(collecteIncident.getDateDebut());
   
            if(intev.contains(dtIncid)){
                returnList.add(collecteIncident);
            }
         }
-        
         return returnList;
-        
     }
     
      public long returnIncidentDurationDurantLaPeride(FluxPeriodeCaptation period){
@@ -861,12 +757,8 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
              Duration dur = new Duration(dtdebut, dtFin);
              time = time + dur.getStandardSeconds();
          }
-         
          return time;
-         
      }
-    
-    
 
     public class CutoClem extends ClassDescriptor {
     }
@@ -880,6 +772,4 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
         public void accept(ComportementVisitor visitor) throws Exception{
         visitor.visit(this);
     }
-    
-    
 }
