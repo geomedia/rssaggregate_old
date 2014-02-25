@@ -6,24 +6,23 @@ package rssagregator.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.List;
+import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import rssagregator.beans.Item;
 import rssagregator.dao.DAOFactory;
-import rssagregator.dao.DaoItem;
-import rssagregator.services.tache.TacheRaffiner;
 
 /**
  *
  * @author clem
  */
-@WebServlet(name = "TestTacheRaf", urlPatterns = {"/TestTacheRaf"})
-public class TestTacheRaf extends HttpServlet {
+@WebServlet(name = "TestSQL", urlPatterns = {"/TestSQL"})
+public class TestSQL extends HttpServlet {
 
     /**
      * Processes requests for both HTTP
@@ -39,33 +38,45 @@ public class TestTacheRaf extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
-        
-        TacheRaffiner tacheRaffiner = new TacheRaffiner();
-        DaoItem dao = DAOFactory.getInstance().getDaoItem();
-        Item it = (Item) dao.find(new Long(32));
-        
-        tacheRaffiner.setItem(it);
-        
-        try {
-            tacheRaffiner.call();
-        } catch (Exception ex) {
-            Logger.getLogger(TestTacheRaf.class.getName()).log(Level.SEVERE, null, ex);
+
+        EntityManager em = DAOFactory.getInstance().getEntityManager();
+
+//               Query q = em.createQuery("SELECT i FROM Item i LEFT JOIN i.doublon d WHERE d.ID IS NULL");
+//               
+//               List list = q.getResultList();
+//               for (int i = 0; i < list.size(); i++) {
+//            Object object = list.get(i);
+//                   System.out.println(""+object);
+//        }
+
+        Query query = em.createQuery("SELECT item.hashContenu FROM Item item JOIN item.listFlux fl WHERE fl.ID=:idfl ORDER BY item.ID DESC");
+        query.setParameter("idfl", new Long(1537));
+        query.setFirstResult(0);
+        query.setMaxResults(500);
+
+        List resu = query.getResultList();
+        for (int i = 0; i < resu.size(); i++) {
+            Object object = resu.get(i);
+            System.out.println(object);
+            System.out.println("TYPE" + object.getClass());
+
         }
-        
-        
-        
+
+
+
+
         try {
             /* TODO output your page here. You may use following sample code. */
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet TestTacheRaf</title>");            
+            out.println("<title>Servlet TestSQL</title>");
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet TestTacheRaf at " + request.getContextPath() + "</h1>");
+            out.println("<h1>Servlet TestSQL at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
-        } finally {            
+        } finally {
             out.close();
         }
     }

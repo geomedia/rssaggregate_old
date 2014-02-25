@@ -417,7 +417,7 @@ public class POJOCompteItemTest {
 
 
         System.out.println("detecterAnomalieNbrMinimalItem-----");
-
+ 
         try {
             instance.compte();
         } catch (Exception ex) {

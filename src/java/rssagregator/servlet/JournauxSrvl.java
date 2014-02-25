@@ -63,7 +63,7 @@ public class JournauxSrvl extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
 
         request.setAttribute("listLocal", CodePays.getLanMap().entrySet().iterator());
-        request.setAttribute("listCountry", CodePays.getCountryMap().entrySet().iterator());
+        request.setAttribute("listCountry", CodePays.getCountryMap3().entrySet().iterator());
 
         String[] timeZonetab = TimeZone.getAvailableIDs();
         Arrays.sort(timeZonetab);

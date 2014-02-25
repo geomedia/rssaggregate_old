@@ -137,6 +137,18 @@ public class TacheImpl<T> extends AbstrTache<T> {
                 logger.debug("Erreur lors du commit dans callfinalyse tache : " + this, ex);
             }
         }
+        
+        // On ferme l'em 
+        if(em != null && em.isOpen()){
+            try {
+            em.close();
+            em = null;
+            } catch (Exception e) {
+                logger.debug("Erreur lros dela fermeture de l'em");
+            }
+
+        }
+        
 
         return (T) this;
     }

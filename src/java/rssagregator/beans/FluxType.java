@@ -39,7 +39,7 @@ public class FluxType implements Serializable, BeanSynchronise {
      * *
      * Le nom du type de flux. Exemple international, à la une...
      */
-    @Column(name = "denomination")
+    @Column(name = "denomination", unique = true)
     private String denomination;
     /**
      * *
@@ -49,6 +49,12 @@ public class FluxType implements Serializable, BeanSynchronise {
      */
     @Column(name = "description")
     private String description;
+    
+    /***
+     * Abreviation du type se retrouve dans les documents geomedia.
+     */
+    @Column(name = "codeType", length = 3)
+    private String codeType;
     
     
       /**
@@ -143,6 +149,16 @@ public class FluxType implements Serializable, BeanSynchronise {
         return description;
       
     }
+
+    public String getCodeType() {
+        return codeType;
+    }
+
+    public void setCodeType(String codeType) {
+        this.codeType = codeType;
+    }
+    
+    
 
 /***
  * @see #denomination

@@ -141,8 +141,8 @@ public abstract class AbstrDao<T> {
                             if (List.class.isAssignableFrom(c)) {
                                 Join joinFlux = root.join(searchFilter.getField());
 //                                root.fetch(searchFilter.getField());
-                            
-                                
+
+
                                 List lf = (List) searchFilter.getData();
                                 listWhere.add(joinFlux.in(lf));
                             }
@@ -213,7 +213,7 @@ public abstract class AbstrDao<T> {
         if (count) {
 //              cq.distinct(true);
             cq.select(cb.count(root));
-          
+
             TypedQuery tq = em.createQuery(cq);
             return tq;
         } else {
@@ -246,14 +246,14 @@ public abstract class AbstrDao<T> {
      */
     public List<T> findCriteria() {
         TypedQuery<T> tq = gestionCriteria(false);
-       
+
 
         if (criteriaSearchFilters.criteriaStartRow != null && criteriaSearchFilters.criteriaRow != null) {
             tq.setMaxResults(criteriaSearchFilters.criteriaRow);
             tq.setFirstResult(criteriaSearchFilters.criteriaStartRow);
         } else {
         }
-        
+
         List<T> listResu = tq.getResultList();
 
         return listResu;
@@ -378,8 +378,6 @@ public abstract class AbstrDao<T> {
         return null;
     }
 
-
-
     public AbstrDao() {
     }
 
@@ -486,11 +484,54 @@ public abstract class AbstrDao<T> {
             em.getTransaction().rollback();
         }
     }
-//    public EntityTransaction getTr() {
-//        return tr;
-//    }
+
+    //    public EntityTransaction getTr() {
+    //        return tr;
+    //    }
+    //
+    //    public void setTr(EntityTransaction tr) {
+    //    }
+    //    }
+    /**
+     * *
+     * On préfère s'assurer que toutes dao
+     *
+     * @throws Throwable
+     */
+//    @Override
+//    protected void finalize() throws Throwable {
 //
-//    public void setTr(EntityTransaction tr) {
-//        this.tr = tr;
+//        logger.debug("Finalyse de " + this);
+//        
+//        if (em != null) {
+//
+//            if (em.isOpen()) {
+//                try {
+//                    em.close();
+//                    logger.debug("fermeture d'un em par finalyse");
+//                } catch (Exception e) {
+//                }
+//
+//            }
+//
+//        }
+//
+//        super.finalize(); //To change body of generated methods, choose Tools | Templates.
 //    }
+    /**
+     * *
+     * Provoque la fermeture de l'Em de la dao
+     */
+    public void closeEm() {
+        if (em != null) {
+
+            if (em.isOpen()) {
+                try {
+                    em.close();
+                    logger.debug("fermeture d'un em par finalyse");
+                } catch (Exception e) {
+                }
+            }
+        }
+    }
 }

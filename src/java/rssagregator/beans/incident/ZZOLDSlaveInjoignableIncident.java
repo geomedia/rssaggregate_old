@@ -4,8 +4,8 @@
  */
 package rssagregator.beans.incident;
 
-import javax.persistence.Entity;
-import rssagregator.beans.ServeurSlave;
+//import javax.persistence.Entity;
+//import rssagregator.beans.ServeurSlave;
 
 /**
  * <strong>/!\ N'est plus utilisé. La synchronisation est retirée des objectifs du projet</strong>
@@ -13,11 +13,11 @@ import rssagregator.beans.ServeurSlave;
  * @author clem
  * @deprecated 
  */
-@Entity(name = "i_slaveinjoignableincident")
-public class SlaveInjoignableIncident extends SynchroIncident{
+//@Entity(name = "i_slaveinjoignableincident")
+public class ZZOLDSlaveInjoignableIncident extends SynchroIncident{
     
     /***
      * Le serveur esclave pour lequel, l'incident s'est produit. rappel, les serveur slave ne sont pas sérialisé dans la base de données. Il sont récupéré dans les fichiers de conf.
      */
-    protected ServeurSlave serveurSlave;
+//    protected ServeurSlave serveurSlave;
 }

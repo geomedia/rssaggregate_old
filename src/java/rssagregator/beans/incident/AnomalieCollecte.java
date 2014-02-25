@@ -5,16 +5,11 @@
 package rssagregator.beans.incident;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import org.joda.time.DateTime;
 import rssagregator.beans.exception.IncompleteBeanExeption;

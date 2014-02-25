@@ -4,10 +4,21 @@
  */
 package rssagregator.beans.form;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
+import org.reflections.Reflections;
+import rssagregator.beans.traitement.AbstrDedoublonneur;
+import rssagregator.beans.traitement.AbstrRaffineur;
 import rssagregator.beans.traitement.Dedoubloneur;
 import rssagregator.beans.traitement.ComportementCollecte;
 import rssagregator.beans.traitement.Requester;
@@ -32,6 +43,7 @@ public class ComportementCollecteForm extends AbstrForm {
     private String comportement_nom;
     private String comportement_desc;
     private Boolean defaut;
+    private List<Class> raffClass = new ArrayList<Class>();
 
     protected ComportementCollecteForm() {
     }
@@ -40,17 +52,35 @@ public class ComportementCollecteForm extends AbstrForm {
     public Object bind(HttpServletRequest request, Object objEntre, Class type) {
         ComportementCollecte collecte = (ComportementCollecte) objEntre;
         if (collecte == null) {
-            collecte = new ComportementCollecte();
-            if (collecte.getRequesteur() == null) {
-                collecte.setRequesteur(new Requester());
-            }
-            if (collecte.getDedoubloneur() == null) {
-                collecte.setDedoubloneur(new Dedoubloneur());
-            }
-            if (collecte.getParseur() == null) {
-                collecte.setParseur(new RomeParse());
-            }
+            
+            collecte = ComportementCollecte.getDefaultInstance();
         }
+        
+        
+            //---> On ajoute tous les raffineurs possible au nouveau comportement
+//            if (collecte.getRaffineur().isEmpty()) {
+            Reflections reflections = new Reflections("rssagregator.beans.traitement");
+            Set<Class<? extends AbstrRaffineur>> imp = reflections.getSubTypesOf(AbstrRaffineur.class);
+            for (Iterator<Class<? extends AbstrRaffineur>> it = ComportementCollecte.getRequesteurClass().iterator(); it.hasNext();) {
+                Class<? extends AbstrRaffineur> class1 = it.next();
+
+                if (!collecte.possedeUnRaffineurDeType(class1)) { // <Si le comportement ne coppede pas le comportement. On le cree
+                    System.out.println("JAI pas");
+                    try {
+                        AbstrRaffineur r = class1.newInstance();
+                        r.setActif(true);
+                        collecte.getRaffineur().add(r);
+                    } catch (InstantiationException ex) {
+                        Logger.getLogger(ComportementCollecteForm.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (IllegalAccessException ex) {
+                        Logger.getLogger(ComportementCollecteForm.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                else{
+                    System.out.println("--> J'AI:");
+                }
+            }
+        
 
         if (valide) {
             collecte.getRequesteur().setTimeOut(requester_time_out);
@@ -72,6 +102,52 @@ public class ComportementCollecteForm extends AbstrForm {
             collecte.setNom(comportement_nom);
             collecte.setDescription(comportement_desc);
             collecte.setDefaut(defaut);
+
+
+//            Fixation de la valeur actif innactif des raffineur en conction de la selection utilisateur.
+            for (Iterator<AbstrRaffineur> it = collecte.getRaffineur().iterator(); it.hasNext();) {
+                AbstrRaffineur abstrRaffineur = it.next();
+                abstrRaffineur.setActif(false);
+                for (int k = 0; k < raffClass.size(); k++) {
+                    Class class2 = raffClass.get(k);
+                    if (class2.equals(abstrRaffineur.getClass())) {
+                        abstrRaffineur.setActif(true);
+                        break;
+                    }
+                }
+            }
+
+
+//            for (int i = 0; i < raffClass.size(); i++) {
+//
+//                Class class1 = raffClass.get(i);
+//                for (Iterator<AbstrRaffineur> it = collecte.getRaffineur().iterator(); it.hasNext();) {
+//                    AbstrRaffineur abstrRaffineur = it.next();
+//                    boolean trouve = false;
+////                }
+////                for (int j = 0; j < collecte.getRaffineur().size(); j++) {
+////                    AbstrRaffineur abstrRaffineur = collecte.getRaffineur().get(j);
+//                    for (int k = 0; k < raffClass.size(); k++) {
+//                        Class class2 = raffClass.get(k);
+//                        if (class2.equals(class1)) {
+//                            trouve = true;
+//                        }
+//                    }
+//
+//                    if (!trouve) {
+//                        it.remove();
+//
+//                    }
+//
+//
+//                }
+//
+//
+//
+//            }
+
+
+
         }
         return collecte;
     }
@@ -184,7 +260,7 @@ public class ComportementCollecteForm extends AbstrForm {
         s = request.getParameter("comportement_desc");
         if (s != null) {
             comportement_desc = s;
-        } 
+        }
 
         //----------> COMPORTEMNENT PAR DEFAUT
         s = request.getParameter("defaut");
@@ -193,6 +269,38 @@ public class ComportementCollecteForm extends AbstrForm {
         } else {
             defaut = true;
         }
+
+        //----> Raffineur
+        System.out.println("=================");
+        String raffString[] = request.getParameterValues("raffineur");
+
+        if (raffString != null && raffString.length > 0) {
+            for (int j = 0; j < raffString.length; j++) {
+                String string = raffString[j];
+                System.out.println("COCHE " + string);
+                try {
+//                                  File root = new File(".");
+//                    URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{root.toURI().toURL()});
+
+                    Class cc = Class.forName(string);
+                    this.raffClass.add(cc);
+
+                    System.out.println("---> on a la class : " + cc);
+
+                } catch (ClassNotFoundException ex) {
+                    Logger.getLogger(ComportementCollecteForm.class.getName()).log(Level.SEVERE, null, ex);
+                }
+//                catch (MalformedURLException ex) {
+//                    Logger.getLogger(ComportementCollecteForm.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+
+
+            }
+        }
+        System.out.println("=================");
+
+
+
 
 //        s = request.getParameter("secondDedoub");
 //        if (s == null || s.isEmpty()) {
@@ -209,5 +317,15 @@ public class ComportementCollecteForm extends AbstrForm {
             this.setValide(false);
         }
         return valide;
+    }
+
+    public static void main(String[] args) {
+        try {
+            Class c = Class.forName("rssagregator.beans.traitement.RaffineurSimpleImplementation");
+            System.out.println("Class " + c);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(ComportementCollecteForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 }

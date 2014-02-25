@@ -199,7 +199,7 @@ $(document).ready(function() {
                 buttonicon: "ui-icon-add",
                 onClickButton: function() {
                     
-                    rafine= confirm("Item Rafinée ?");
+//                    rafine= confirm("Item Rafinée ?");
                     
                     
                     html = confirm('Voulez-vous supprimer le code HTML des items lors de l\'export');
@@ -212,9 +212,9 @@ $(document).ready(function() {
                     if(html){
                         urlReq += '&html=true';
                     }
-                    if(rafine){
-                        urlReq+="&rafine=true";
-                    }
+//                    if(rafine){
+//                        urlReq+="&rafine=true";
+//                    }
                     
                       $("#list").jqGrid('excelExport', {tag: 'csv', url: urlReq});
 

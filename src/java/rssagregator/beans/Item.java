@@ -2,10 +2,12 @@ package rssagregator.beans;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -14,6 +16,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.Version;
@@ -22,6 +25,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import org.apache.poi.util.Beta;
 import org.eclipse.persistence.annotations.Index;
 import rssagregator.beans.exception.IncompleteBeanExeption;
+import rssagregator.beans.traitement.AbstrRaffineur;
 import rssagregator.services.ServiceSynchro;
 import rssagregator.utils.ExceptionTool;
 
@@ -37,6 +41,7 @@ import rssagregator.utils.ExceptionTool;
  */
 @Entity
 @Table(name = "item")
+//@Index(name = "index_dedoub_titre_link_guid", columnNames = {"titre", "link", "guid"})
 //@Cacheable(value = true)
 //@Cache(type = CacheType.CACHE, coordinationType = CacheCoordinationType.SEND_NEW_OBJECTS_WITH_CHANGES, isolation = CacheIsolationType.SHARED, shared = true)
 @XmlRootElement
@@ -86,6 +91,7 @@ public class Item extends Bean implements Serializable, Comparable<Item>, Conten
      * *
      * Stockage de l'élément guid de l'item
      */
+    @Index
     @Column(name = "guid", length = 1000)
     private String guid;
     /**
@@ -106,33 +112,35 @@ public class Item extends Bean implements Serializable, Comparable<Item>, Conten
     /**
      * Correspond à l'élément link d'un flux RSS.
      */
+    @Index
     @Column(name = "link", length = 2000)
     private String link;
-    /**
-     * Cette variable n'est pas encore implémenté.
-     * <ul>
-     * <li>0 = nouveau pas encore de sync</li>
-     * <li>1 = synch effectué </li>
-     * <li>2 = item sur le maitre récupéré du serv esclave</li>
-     * <li>3 : L'item ne doit pas être synchronisée sur le serveur maitre. Ce cas provient lors de la synchrnonisation
-     * de la modification d'un comportement. Le service {@link ServiceSynchro} désactive alors les items qu'il aurait pu
-     * récolter durant le laps de temps entre l'émission de la modification du comportement et la répercution de ce
-     * comportement sur l'esclave.</li>
-     * </ul>
-     */
-    @Beta
-    private Byte syncStatut;
+//    /**
+//     * Cette variable n'est pas encore implémenté.
+//     * <ul>
+//     * <li>0 = nouveau pas encore de sync</li>
+//     * <li>1 = synch effectué </li>
+//     * <li>2 = item sur le maitre récupéré du serv esclave</li>
+//     * <li>3 : L'item ne doit pas être synchronisée sur le serveur maitre. Ce cas provient lors de la synchrnonisation
+//     * de la modification d'un comportement. Le service {@link ServiceSynchro} désactive alors les items qu'il aurait pu
+//     * récolter durant le laps de temps entre l'émission de la modification du comportement et la répercution de ce
+//     * comportement sur l'esclave.</li>
+//     * </ul>
+//     */
+//    @Beta
+//    private Byte syncStatut;
     /**
      * *
      * Les flux auxquelles appartiennent l'item.
      */
     @ManyToMany(fetch = FetchType.EAGER, targetEntity = Flux.class)
+//    @Index
     private List<Flux> listFlux = new LinkedList<Flux>();
     
-    @ManyToOne
-    private ItemRaffinee itemRaffinee;
     
-    
+//    @ManyToOne
+//    private ItemRaffinee itemRaffinee;
+
 //    @OneToMany(cascade = CascadeType.ALL, mappedBy = "")
 //    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL)
 //    private List<DonneeBrute> donneeBrutes = new ArrayList<DonneeBrute>();
@@ -145,7 +153,6 @@ public class Item extends Bean implements Serializable, Comparable<Item>, Conten
 //    public void setDonneeBrutes(List<DonneeBrute> donneeBrutes) {
 //        this.donneeBrutes = donneeBrutes;
 //    }
-
     /**
      * *
      * Constructeur vide. Initialise la liste des flux avec une {@link LinkedList}
@@ -295,18 +302,18 @@ public class Item extends Bean implements Serializable, Comparable<Item>, Conten
      * @see syncStatut
      * @return
      */
-    public Byte getSyncStatut() {
-        return syncStatut;
-    }
-
-    /**
-     * *
-     * @see syncStatut
-     * @return
-     */
-    public void setSyncStatut(Byte syncStatut) {
-        this.syncStatut = syncStatut;
-    }
+//    public Byte getSyncStatut() {
+//        return syncStatut;
+//    }
+//
+//    /**
+//     * *
+//     * @see syncStatut
+//     * @return
+//     */
+//    public void setSyncStatut(Byte syncStatut) {
+//        this.syncStatut = syncStatut;
+//    }
 
     /**
      * *
@@ -365,47 +372,57 @@ public class Item extends Bean implements Serializable, Comparable<Item>, Conten
         this.contenu = contenu;
     }
 
-    /***
+    /**
+     * *
      * @see #ID
-     * @return 
+     * @return
      */
     @Override
     public Long getID() {
         return ID;
     }
 
-    /***
+    /**
+     * *
      * @see #ID
-     * @return 
+     * @return
      */
     @Override
     public void setID(Long ID) {
         this.ID = ID;
     }
-    
-        /***
+
+    public List<DoublonDe> getDoublon() {
+        return doublon;
+    }
+
+    public void setDoublon(List<DoublonDe> doublon) {
+        this.doublon = doublon;
+    }
+    /**
+     * *
      * Dernière modification de l'entite. Permet l'Optimitic Lock
      */
-        @Version
+    @Version
     Timestamp modified;
 
-        /***
-         * @see #modified
-         * @return 
-         */
+    /**
+     * *
+     * @see #modified
+     * @return
+     */
     public Timestamp getModified() {
         return modified;
     }
 
-    /***
+    /**
+     * *
      * @see #modified
-     * @param modified 
+     * @param modified
      */
     public void setModified(Timestamp modified) {
         this.modified = modified;
     }
-    
-    
 
     /**
      * *
@@ -427,11 +444,14 @@ public class Item extends Bean implements Serializable, Comparable<Item>, Conten
         }
     }
 
-    /***
-     * Copi les données de l'item dans une Entitée de type @{@link  DonneeBrute}. Cette nouvelle donnée brute est ensuite ajouté à l'item
-     * 
+    /**
+     * *
+     * Copi les données de l'item dans une Entitée de type
+     *
+     * @{@link  DonneeBrute}. Cette nouvelle donnée brute est ensuite ajouté à l'item
+     *
      * @param f
-     * @throws IncompleteBeanExeption 
+     * @throws IncompleteBeanExeption
      */
 //    public void genererDonneesBrutes(Flux f) throws IncompleteBeanExeption {
 //
@@ -474,10 +494,10 @@ public class Item extends Bean implements Serializable, Comparable<Item>, Conten
 //            this.donneeBrutes.add(newDonneeBrute);
 //        }
 //    }
-
     /**
      * *
-     * Les donnée brutes de l'item envoyée en argument sont ajouté si nécessaire (comparaison des hash) aux données brutes de l'item courante
+     * Les donnée brutes de l'item envoyée en argument sont ajouté si nécessaire (comparaison des hash) aux données
+     * brutes de l'item courante
      *
      * @param i l'item pour laquelle on doit récupérer les données brutes
      * @return true si un versement qqchose a pu être versé. sinon false.
@@ -535,7 +555,6 @@ public class Item extends Bean implements Serializable, Comparable<Item>, Conten
 //        }
 //
 //    }
-
     /**
      * *
      * Ajoute un flux si nécessaire à la liste de l'item
@@ -564,40 +583,129 @@ public class Item extends Bean implements Serializable, Comparable<Item>, Conten
         }
 
     }
-    
-    /***
+
+    /**
+     * *
      * Détermine si l'item appartien au flux envoyé en argument par comparaison des ID FLUX
+     *
      * @param f
-     * @return 
+     * @return
      */
-    public boolean appartientAuFlux(Flux f) throws NullPointerException, IllegalAccessException{
+    public boolean appartientAuFlux(Flux f) throws NullPointerException, IllegalAccessException {
         ExceptionTool.argumentNonNull(f);
         ExceptionTool.checkNonNullField(f, "ID");
-        
+
         for (int i = 0; i < listFlux.size(); i++) {
             Flux flux = listFlux.get(i);
-            if(f.getID().equals(flux.getID())){
+            if (f.getID().equals(flux.getID())) {
                 return true;
             }
-            
+
         }
         return false;
     }
 
-    public ItemRaffinee getItemRaffinee() {
-        return itemRaffinee;
-    }
-
-    public void setItemRaffinee(ItemRaffinee itemRaffinee) {
-        this.itemRaffinee = itemRaffinee;
-    }
 
     @Override
     public String getReadURL() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
-    
-    
-    
+    /**
+     * *
+     * Relation reflexive entre les item. La relation est caractérisé avec un champs faisant référence au raffineur
+     * employé
+     */
+//    @OneToMany()
+//    @OneToMany
+//            @Column(name = "doublon")
+    @OneToMany(mappedBy = "itemDoublon", cascade = CascadeType.REMOVE)
+    List<DoublonDe> doublon = new ArrayList<DoublonDe>();
+
+    /**
+     * *
+     * Parcour les entité de transition Doublonde. Retourne si un en trouve une pour l'entité doublonde
+     *
+     * @param refRaffi
+     * @return L'entite de type {@link DoublonDe} trouve pour le raffineur envoyé en argument ou null si rien n'est trouvé
+     */
+    public DoublonDe returnDoublonforRaffineur(AbstrRaffineur refRaffi) {
+
+        for (int i = 0; i < doublon.size(); i++) {
+            DoublonDe doublonDe = doublon.get(i);
+            if (doublonDe.getRaffineurEmploye().equals(refRaffi)) {
+                return doublonDe;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * *
+     * Parcours les doublons de l'élément courants pour le raffineur envoyé en argument. Si l'item est un doublon
+     * parcours recusrsif de celui ci.
+     *
+     * @param i
+     * @param r
+     * @return
+     */
+    public Item remonterRecursivementDoublon(AbstrRaffineur r) {
+
+        DoublonDe doublonde = this.returnDoublonforRaffineur(r);
+        if (doublonde == null) {
+            return this; // Si de doublon c'est l'item courante qui est originale
+        } else if (doublonde.getItemDoublon().equals(doublonde.getItemRef())) {
+            return this; // 
+        } else {
+            System.out.println("RECURSE ");
+            System.out.println(" THIS ID " + this.getID());
+            System.out.println(" REF MASTER ID  " + doublonde.getItemRef().getID());
+            return doublonde.getItemRef().remonterRecursivementDoublon( r);
+        }
+//        /
+//        DoublonDe master = returnDoublonforRaffineur(r);
+//        return null;
+    }
+
+    /**
+     * *
+     * Ajoute un doublon en fonction de l'item envoyé en argument et du rafineur. Si l'item envoyé en argument posssède
+     * elle même des doublon on recmonte vers celui ci
+     *
+     * @param item
+     * @param raf
+     * @return true si une modification a été effectué sinon false
+     */
+    public boolean addDoublon(Item item, AbstrRaffineur raf) {
+
+        ExceptionTool.argumentNonNull(item);
+        ExceptionTool.argumentNonNull(raf);
+        
+  // --> On remonte récusrsiveetn l'item envoyé
+        Item itemVersLaquelleIlfautPointer = item.remonterRecursivementDoublon(raf);
+  
+        DoublonDe doublonPresent = this.returnDoublonforRaffineur(raf);
+        
+        
+        if(doublonPresent!= null){ // Si on a déjà un doublon pour ce raffineur
+            if(doublonPresent.getItemRef().equals(itemVersLaquelleIlfautPointer)){
+                return false;
+            }
+            else{
+                doublonPresent.setItemRef(itemVersLaquelleIlfautPointer);
+                doublonPresent.setItemDoublon(this);
+                return true;
+            }
+        }
+        else{ // Sinon on crée un nouveau doublon
+              DoublonDe doublonDeaCree = new DoublonDe();
+            doublonDeaCree.setItemRef(itemVersLaquelleIlfautPointer);
+            doublonDeaCree.setItemDoublon(this);
+            doublonDeaCree.setRaffineurEmploye(raf);
+            if(!this.doublon.contains(doublonDeaCree)){
+                this.doublon.add(doublonDeaCree);
+                return true;
+            }
+            return false;
+        }
+    }
 }

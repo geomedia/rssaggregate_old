@@ -23,6 +23,7 @@ import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.beans.incident.Incidable;
 import rssagregator.beans.incident.IncidentFactory;
+import rssagregator.beans.incident.RecupIncident;
 import rssagregator.utils.comparator.ComparatorBean;
 import rssagregator.beans.traitement.VisitorHTTP;
 import rssagregator.dao.DAOFactory;
@@ -78,15 +79,17 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
     @Override
     public synchronized void gererIncident() throws InstantiationException, IllegalAccessException, UnIncidableException, Exception {
         try {
+            
+//            System.out.println("type " + incident.getClass());
             if (this.exeption != null) { // Avant toute chose on s'assure qu'il y a bien eu une Exception pour la tâche
-                CollecteIncident collecteIncident = (CollecteIncident) incident; // Un simple cast
+                RecupIncident collecteIncident = (RecupIncident) incident; // Un simple cast
 
                 initialiserTransaction();
 
                 // On cherche si le flux avait déjà des incidents ouvert
-                DAOIncident daoIncident = (DAOIncident) DAOFactory.getInstance().getDaoFromType(CollecteIncident.class);
+                DAOIncident daoIncident = (DAOIncident) DAOFactory.getInstance().getDaoFromType(RecupIncident.class);
                 daoIncident.setEm(em);
-                List<CollecteIncident> listIncidentOuvert = daoIncident.findIncidentOuvert(flux.getID());
+                List<RecupIncident> listIncidentOuvert = daoIncident.findIncidentOuvert(flux.getID());
 
                 // Si On observe déjà un incident 
 
@@ -115,7 +118,7 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
                         msg = constructionMessageErreurDepuisExc(exeption);
                     }
 
-                    collecteIncident = (CollecteIncident) factory.createIncidentFromTask(this, msg);
+                    collecteIncident = (RecupIncident) factory.createIncidentFromTask(this, msg);
                     collecteIncident.setNombreTentativeEnEchec(0);
                 }
 
@@ -130,7 +133,7 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
                     //-------ENREGISTREMENT ou modification de l'incident-----------
 
                     ServiceCRUDFactory cRUDFactory = ServiceCRUDFactory.getInstance();
-                    AbstrServiceCRUD service = cRUDFactory.getServiceFor(CollecteIncident.class);
+                    AbstrServiceCRUD service = cRUDFactory.getServiceFor(RecupIncident.class);
 
                     if (collecteIncident.getID() == null) {
                         service.ajouter(incident, em);
@@ -157,17 +160,17 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
                 initialiserTransaction();
 
 //                em = DAOFactory.getInstance().getEntityManager();
-                DAOIncident dao = (DAOIncident) DAOFactory.getInstance().getDaoFromType(CollecteIncident.class);
+                DAOIncident dao = (DAOIncident) DAOFactory.getInstance().getDaoFromType(RecupIncident.class);
                 dao.setEm(em);
-                List<CollecteIncident> listIncid = dao.findIncidentOuvert(flux.getID());
+                List<RecupIncident> listIncid = dao.findIncidentOuvert(flux.getID());
 
 
                 ServiceCRUDFactory cRUDFactory = ServiceCRUDFactory.getInstance();
-                AbstrServiceCRUD serviceCrud = cRUDFactory.getServiceFor(CollecteIncident.class);
+                AbstrServiceCRUD serviceCrud = cRUDFactory.getServiceFor(RecupIncident.class);
 
 
                 for (int i = 0; i < listIncid.size(); i++) {
-                    CollecteIncident abstrIncident = listIncid.get(i);
+                    RecupIncident abstrIncident = listIncid.get(i);
                     // On doit le vérouiller
                     em.lock(abstrIncident, LockModeType.PESSIMISTIC_WRITE);
                     abstrIncident.setDateFin(new Date());
@@ -193,7 +196,7 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
      */
     @Override
     public Class getTypeIncident() {
-        return CollecteIncident.class;
+        return RecupIncident.class;
     }
 
     @Override
@@ -239,6 +242,7 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
             logger.error("Erreur sur le flux " + flux, e); // Cette erreur ne devrait pas survenir. On recevra un mail si c'est le cas grace a l'appender de Log4J
         } finally {
         }
+//        flux = null;
         return (TacheRecupCallable) super.callFinalyse();
     }
 
@@ -276,6 +280,7 @@ public class TacheRecupCallable extends TacheImpl<TacheRecupCallable> implements
             Item item = nouvellesItems.get(i);
             collecteur.ajouterItemAuFlux(flux, item, em, false, visitorHTTP); // Il faut préciser au collecteur l'em qu'il doit utiliser, on lui donne celui qui block actuellement le flux. Les enregistrements ne sont alors pas encore commités
         }
+        
     }
 
     /**

@@ -324,7 +324,7 @@ public abstract class AbstrDedoublonneur implements Serializable, Cloneable {
      *
      * @param listItem La liste d'item à vérifier
      */
-    protected void dedoublonnageInterneduneListDItem(List<Item> listItem, boolean suppItemMMHash, boolean suppItContenuSemblable, boolean suppItemMMID) {
+    protected void dedoublonnageInterneduneListDItem(List<Item> listItem, boolean suppItemMMHash, /*boolean suppItContenuSemblable,*/ boolean suppItemMMID) {
 
         if (listItem != null) {
             // suppression des items possédant le même hash
@@ -349,27 +349,26 @@ public abstract class AbstrDedoublonneur implements Serializable, Cloneable {
 
             // Comparaison de contenu On trouve parfois deux item de contenu semblable avec une différence minime.
 
-            if (suppItContenuSemblable) {
-                ItemComparator comparator = new ItemComparator();
-                for (Iterator<Item> it = listItem.iterator(); it.hasNext();) {
-                    Item item = it.next();
-                    int cpt = 0;
-                    for (int i = 0; i < listItem.size(); i++) {
-                        Item item1 = listItem.get(i);
-                        int retour = comparator.compare(item1, item);
-
-                        if (retour >= 0) {
-                            cpt++;
-                        }
-                    }
-                    if (cpt > 1) {
-                        it.remove();
-                        visitor.nbDoublonInterneAuflux++;
-//                        mediatorAReferer.nbDoublonInterneAuflux++;
-                    }
-
-                }
-            }
+//            if (suppItContenuSemblable) {
+//                ItemComparator comparator = new ItemComparator();
+//                for (Iterator<Item> it = listItem.iterator(); it.hasNext();) {
+//                    Item item = it.next();
+//                    int cpt = 0;
+//                    for (int i = 0; i < listItem.size(); i++) {
+//                        Item item1 = listItem.get(i);
+//                        int retour = comparator.compare(item1, item);
+//
+//                        if (retour >= 0) {
+//                            cpt++;
+//                        }
+//                    }
+//                    if (cpt > 1) {
+//                        it.remove();
+//                        visitor.nbDoublonInterneAuflux++;
+////                        mediatorAReferer.nbDoublonInterneAuflux++;
+//                    }
+//                }
+//            }
 
             //Vérification si on n'a pas deux foix un même ID pour une Item
             if (suppItemMMID) {

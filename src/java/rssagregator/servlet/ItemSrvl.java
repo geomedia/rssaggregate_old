@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.simple.JSONArray;
 //import rssagregator.beans.DonneeBrute;
 import rssagregator.beans.Flux;
+import rssagregator.beans.FluxType;
 import rssagregator.beans.Item;
 //import rssagregator.beans.POJOCompteItem;
 import rssagregator.beans.POJOCompteurFluxItem;
@@ -32,6 +33,7 @@ import rssagregator.beans.form.AbstrForm;
 import rssagregator.beans.form.FORMFactory;
 import rssagregator.beans.form.ItemForm;
 import rssagregator.dao.DAOFactory;
+import rssagregator.dao.DAOGenerique;
 import rssagregator.dao.DaoFlux;
 import rssagregator.dao.DaoItem;
 import rssagregator.dao.SearchFilter;
@@ -312,6 +314,13 @@ public class ItemSrvl extends HttpServlet {
             //List des journaux
 //            request.setAttribute("listJournaux", DAOFactory.getInstance().getDaoJournal().findall());
             request.setAttribute("listJournaux", DAOFactory.getInstance().getDaoJournal().findallOrederByTitre(false));
+            
+            DAOGenerique daoG = DAOFactory.getInstance().getDAOGenerique();
+            daoG.setClassAssocie(FluxType.class);
+            List<FluxType> list = daoG.findall();
+            request.setAttribute("listType", list);
+            System.out.println("Nombre de type = " + list.size());
+            
 
 
         }

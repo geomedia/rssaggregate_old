@@ -38,6 +38,8 @@ public class JournalForm extends AbstrForm {
     private Boolean autoUpdateFlux;
     private Boolean activerFluxDecouvert;
     private Integer periodiciteDecouverte;
+    private String codeVille;
+    private String codeJournal;
     //--------------------------------------
 
     protected JournalForm() {
@@ -76,6 +78,8 @@ public class JournalForm extends AbstrForm {
         journal.setAutoUpdateFlux(autoUpdateFlux);
         journal.setPeriodiciteDecouverte(periodiciteDecouverte);
         journal.setActiverFluxDecouvert(activerFluxDecouvert);
+        journal.setCodeVille(codeVille);
+        journal.setCodeJournal(codeJournal);
         //---------------------------------------------------
         return journal;
     }
@@ -209,6 +213,31 @@ public class JournalForm extends AbstrForm {
             }
 
         }
+        
+        s = request.getParameter("codeVille");
+        if(s != null && !s.isEmpty()){
+            codeVille = s;
+            if(s.length()!=3){
+                erreurs.put("codeVille", new String[]{"ce champs doit comprendre 6 charactères", "ce champs doit comprendre 6 charactères"});
+            }
+        }
+        else{
+            codeVille ="XXX";
+//            erreurs.put("codeVille", new String[]{ERR_NE_PEUT_ETRE_NULL, ERR_NE_PEUT_ETRE_NULL});
+        }
+        
+        
+        s = request.getParameter("codeJournal");
+        if(s != null && !s.isEmpty()){
+            codeJournal = s;
+            if(s.length()!=6){
+                erreurs.put("codeJournal", new String[]{"longueur doit être 6"});
+            }
+        }
+        else{
+                        erreurs.put("codeJournal", new String[]{ERR_NE_PEUT_ETRE_NULL, ERR_NE_PEUT_ETRE_NULL});
+        }
+        
         
         
         valide = erreurs.isEmpty();

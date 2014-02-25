@@ -23,10 +23,11 @@ import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.beans.incident.Incidable;
 import rssagregator.beans.incident.IncidentDecouverteRSS;
 import rssagregator.beans.incident.IncidentFactory;
-import rssagregator.beans.incident.JMSDiffusionIncident;
-import rssagregator.beans.incident.JMSPerteConnectionIncident;
-import rssagregator.beans.incident.MailIncident;
+import rssagregator.beans.incident.ZZOLDJMSDiffusionIncident;
+import rssagregator.beans.incident.ZZOLDJMSPerteConnectionIncident;
+//import rssagregator.beans.incident.MailIncident;
 import rssagregator.beans.incident.NotificationAjoutFlux;
+import rssagregator.beans.incident.RecupIncident;
 import rssagregator.beans.incident.ServerIncident;
 import rssagregator.beans.incident.SynchroIncident;
 import rssagregator.beans.traitement.ComportementCollecte;
@@ -39,13 +40,11 @@ import rssagregator.services.tache.AbstrTache;
 public class DAOFactory<T extends AbstrDao> {
 
     protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DAOFactory.class);
-    
-    /***
+    /**
+     * *
      * Le nom de la persistence unit voir dans persistance.xml
      */
     public static String PERSISTENCE_UNIT_NAME = "RSSAgregatePU2";
-    
-    
 //    private static DAOFactory instance = new DAOFactory();
     private static DAOFactory instance;
     public List<EntityManager> listEm = new ArrayList<EntityManager>();
@@ -91,19 +90,32 @@ public class DAOFactory<T extends AbstrDao> {
 
         em = emf.createEntityManager();
         daoConf = new DAOConf(this);
-        
+
     }
 
+    /***
+     * Renvoie une nouvelle daoflux avec un em instanciée.
+     * @return 
+     */
     public DaoFlux getDAOFlux() {
 
-//         La daoflux est une instance unique
-//        if (daoflux == null) {
-//            daoflux = new DaoFlux(this);
+        DaoFlux daof = new DaoFlux(this, true);
+        daof.setClassAssocie(Flux.class);
+        return daof;
+//        return daoFlux;
+    }
+
+    
+    /***
+     * Charger renvoi une dao flux avec ou non un em préchargé
+     * @param withEm true si on en veut un em. Sinon false
+     * @return 
+     */
+    public DaoFlux getDAOFlux(boolean withEm) {
+        DaoFlux daof;
+            daof = new DaoFlux(this, withEm);
 //        }
-////
-//        return daoflux;
-        //        DaoFlux daoFlux = new DaoFlux(this);
-        DaoFlux daof = new DaoFlux(this);
+//        DaoFlux daof = new DaoFlux(this);
         daof.setClassAssocie(Flux.class);
         return daof;
 //        return daoFlux;
@@ -134,6 +146,16 @@ public class DAOFactory<T extends AbstrDao> {
         dao.setClassAssocie(Item.class);
         return dao;
     }
+    
+        public DaoItem getDaoItem(boolean withEm) {
+
+        DaoItem dao = new DaoItem(this, withEm);
+        dao.setClassAssocie(Item.class);
+        return dao;
+    }
+        
+    
+    
 
     public DAOServeurSlave getDAOServeurSlave() {
         return new DAOServeurSlave(this);
@@ -183,6 +205,9 @@ public class DAOFactory<T extends AbstrDao> {
             dao = (T) new DAOIncident<CollecteIncident>(this);
             dao.setClassAssocie(CollecteIncident.class);
 //            dao = (T) getDAOIncident();
+        } else if (beansClass.equals(RecupIncident.class)) {
+            dao = (T) new DAOIncident<RecupIncident>(this);
+            dao.setClassAssocie(RecupIncident.class);
         } else if (beansClass.equals(Journal.class)) {
             dao = (T) getDaoJournal();
         } else if (beansClass.equals(ComportementCollecte.class)) {
@@ -193,14 +218,15 @@ public class DAOFactory<T extends AbstrDao> {
             dao = (T) d;
         } else if (beansClass.equals(UserAccount.class)) {
             dao = (T) getDAOUser();
-        } else if (beansClass.equals(MailIncident.class)) {
-            dao = (T) new DAOIncident<MailIncident>(this);
-            dao.setClassAssocie(beansClass);
-        } else if (beansClass.equals(SynchroIncident.class)) {
+        } //        else if (beansClass.equals(MailIncident.class)) {
+        //            dao = (T) new DAOIncident<MailIncident>(this);
+        //            dao.setClassAssocie(beansClass);
+        //        } 
+        else if (beansClass.equals(SynchroIncident.class)) {
             dao = (T) new DAOIncident<SynchroIncident>(this);
             dao.setClassAssocie(beansClass);
-        } else if (beansClass.equals(JMSPerteConnectionIncident.class)) {
-            dao = (T) new DAOIncident<JMSPerteConnectionIncident>(this);
+        } else if (beansClass.equals(ZZOLDJMSPerteConnectionIncident.class)) {
+            dao = (T) new DAOIncident<ZZOLDJMSPerteConnectionIncident>(this);
             dao.setClassAssocie(beansClass);
         } else if (beansClass.equals(AbstrIncident.class)) {
             dao = (T) new DAOIncident<AbstrIncident>(this);
@@ -217,8 +243,8 @@ public class DAOFactory<T extends AbstrDao> {
         } else if (beansClass.equals(ServeurSlave.class)) {
             dao = (T) new DAOServeurSlave(this);
             dao.setClassAssocie(beansClass);
-        } else if (beansClass.equals(JMSDiffusionIncident.class)) {
-            dao = (T) new DAOIncident<JMSDiffusionIncident>(this);
+        } else if (beansClass.equals(ZZOLDJMSDiffusionIncident.class)) {
+            dao = (T) new DAOIncident<ZZOLDJMSDiffusionIncident>(this);
             dao.setClassAssocie(beansClass);
         } else if (beansClass.equals(Conf.class)) {
             dao = (T) daoConf;
@@ -273,7 +299,7 @@ public class DAOFactory<T extends AbstrDao> {
 
 //        if (tache.getClass().equals(TacheLancerConnectionJMS.class)) {
 //            DAOIncident<JMSPerteConnectionIncident> dao = new DAOIncident<JMSPerteConnectionIncident>(this);
-//            dao.setClassAssocie(JMSPerteConnectionIncident.class);
+//            dao.setClassAssocie(ZZOLDJMSPerteConnectionIncident.class);
 //            return (T) dao;
 //        } else if (tache.getClass().equals(TacheSynchroRecupItem.class)) {
 //            DAOIncident<SynchroIncident> dao = new DAOIncident<SynchroIncident>(this);

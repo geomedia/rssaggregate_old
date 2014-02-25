@@ -53,11 +53,17 @@
                             <input name="denomination" id="denomination" value="${bean.denomination}"/>
                             <span id="errdenomination" class="erreur"></span>
                             <br />
+                            
+                            <label>Code : </label>
+                            <input type="text" name="codeType" value="${bean.codeType}"/><span class="erreur" id="errcodeType"></span>
+                            <br />
 
                             <label for="description">Description :</label><br>
 
                             <textarea name="description" id="description" cols="60" rows="15">${bean.description}</textarea>
                             <br />
+                            
+                            
                             <input type="hidden" name="vue" value="jsonform"/>
 
                             <input type="submit"/>

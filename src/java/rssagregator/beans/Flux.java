@@ -241,6 +241,10 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
     public ComportementCollecte getMediatorFlux() {
         return mediatorFlux;
     }
+    
+    
+    
+    
 
     /**
      * Set the value of mediatorFlux

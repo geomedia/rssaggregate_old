@@ -21,9 +21,20 @@ import java.util.TimeZone;
  */
 public class CodePays {
 
+    /**
+     * *
+     * Une map avec en clé les code iso3 en value les pays.
+     */
+    private static Map<String, String> iso3mapCountry;
+    /**
+     * *
+     * Une map avec les code iso 2 et en valeue les pays
+     */
+    private static Map<String, String> iso2MapCountry;
+
     public static Map<String, String> getLanMap() {
         Locale.getISOCountries();
-        
+
         String[] IsoLang = Locale.getISOLanguages();
         Map<String, String> lang = new HashMap<String, String>();
 
@@ -60,16 +71,57 @@ public class CodePays {
 
     public static Map<String, String> getCountryMap() {
 
-        String[] IsoCountry = Locale.getISOCountries();
-        Map<String, String> country = new HashMap<String, String>();
+        if (iso2MapCountry == null) {
+            String[] IsoCountry = Locale.getISOCountries();
+            Map<String, String> country = new HashMap<String, String>();
+            int i;
+            for (i = 0; i < IsoCountry.length; i++) {
+                Locale l = new Locale("", IsoCountry[i]);
+                country.put(l.getCountry(), l.getDisplayCountry());
+            }
+
+            iso2MapCountry = sortByComparator(country);
+        }
+        return iso2MapCountry;
+    }
+
+    /**
+     * *
+     * Retourne une map de correspondance iso 3 et display
+     *
+     * @return
+     */
+    public static Map<String, String> getCountryMap3() {
+
+        if (iso3mapCountry == null) { // Si la map n'est pas déjà générée. 
+            Locale loc = Locale.getDefault();
+            String[] IsoCountry = loc.getISOCountries();
+
+            Map<String, String> country = new HashMap<String, String>();
+
+            int i;
+            for (i = 0; i < IsoCountry.length; i++) {
+                Locale l = new Locale("", IsoCountry[i]);
+                country.put(l.getISO3Country(), l.getDisplayCountry());
+            }
+            iso3mapCountry = sortByComparator(country);
+        }
+        return iso3mapCountry;
+    }
+    private static Map<String, Locale> localeMap;
 
 
-        int i;
-        for (i = 0; i < IsoCountry.length; i++) {
-            Locale l = new Locale("", IsoCountry[i]);
-            country.put(l.getCountry(), l.getDisplayCountry());
+    public static void main(String[] args) {
+
+
+
+        Map<String, String> map = getCountryMap3();
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            String string = entry.getKey();
+            String string1 = entry.getValue();
+            System.out.println(string + "  -  " + string1);
+
         }
 
-        return sortByComparator(country);
     }
 }

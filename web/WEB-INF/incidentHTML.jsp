@@ -50,9 +50,10 @@
 
 
                                 <label>Type D'incident :</label>
-                                <label>Tous : </label><input type="radio" name="type" value="AbstrIncident" /><br />
-                                <label>Collecte </label>:<input type="radio" name="type" value="CollecteIncident" checked="checked" id="type" /><br />
-                                <label>Anomalie de Collecte </label>:<input type="radio" name="type" value="AnomalieCollecte" checked="checked" id="type" /><br />
+                                <label>Tous type : </label><input type="radio" name="type" value="AbstrIncident" /><br />
+                                <label title="tous ce qui est relatif a la collecte">Tous type relatif a la collecte </label>:<input type="radio" name="type" value="CollecteIncident" checked="checked" id="type" /><br />
+                                <label title="Incident généré lorsque le flux est indisponible">Incident de récupération </label>:<input type="radio" name="type" value="RecupIncident" checked="checked" id="type" /><br />
+                                <label title="Anomalie générée lorsqu'on constate une absence d'item anormale">Anomalie de Collecte </label>:<input type="radio" name="type" value="AnomalieCollecte" checked="checked" id="type" /><br />
                                 <!--<label>Synchronisation </label>: <input type="radio" name="type" value="SynchroIncident"><br />-->
                                 <label>Serveur :</label> <input type="radio" name="type" value="ServerIncident"><br />
                                 <!--<label>Mail :</label> <input type="radio" name="type" value="MailIncident"/>-->

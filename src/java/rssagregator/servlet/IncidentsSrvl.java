@@ -4,7 +4,10 @@
  */
 package rssagregator.servlet;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +59,7 @@ public class IncidentsSrvl extends HttpServlet {
      * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs 
+     * @throws IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -83,27 +86,6 @@ public class IncidentsSrvl extends HttpServlet {
         String action = ServletTool.configAction(request, "recherche");
         request.setAttribute("srlvtname", ATT_SERV_NAME);
 
-
-//        DAOIncident dao = DAOFactory.getInstance().getDAOIncident();
-//        IncidentForm form = FORMFactory.getInstance().getForm(null, action)
-////                new IncidentForm();
-//        request.setAttribute("form", form);
-
-
-//        CollecteIncident incident = null;
-//        String idString = request.getParameter("id");
-//        if (idString != null && !idString.equals("")) {
-//            Long id = new Long(request.getParameter("id"));
-//            request.setAttribute("id", id);
-//            incident = (CollecteIncident) dao.find(id);
-//
-////            flux = (Flux) daoFlux.find(id);
-//        }
-
-
-//        if (request.getMethod().equals("POST") && action.equals("mod")) {
-//            form.bind(request, incident, CollecteIncident.class);
-//        }
 
         //============================================================================================
         //                              GESTION RECHERCHE
@@ -136,106 +118,36 @@ public class IncidentsSrvl extends HttpServlet {
         //==========================================================================================
         //                              ACTION RSS
         //==========================================================================================
-        /***
-         * Permet d'afficher les incidents sous forme d'un flux RSS afin d'aider les administrateur a suivre. 
+        /**
+         * *
+         * Permet d'afficher les incidents sous forme d'un flux RSS afin d'aider les administrateur a suivre.
          */
-        if(action.equals("rssBakend")){
-           
-            DAOIncident dao = DAOFactory.getInstance().getDAOIncident();
-               List<AbstrIncident> listIncidNonClos = dao.findIncidentNonClos(AbstrIncident.class);
-               
+        if (action.equals("rssBakend")) {
 
-               request.setAttribute("incids", listIncidNonClos);
-               vue = "rss";
-            
-            
-            
+            DAOIncident dao = DAOFactory.getInstance().getDAOIncident();
+            List<AbstrIncident> listIncidNonClos = dao.findIncidentNonClos(AbstrIncident.class);
+
+
+            request.setAttribute("incids", listIncidNonClos);
+            vue = "rss";
+
+
+
         }
 
         //============================================================================================
         //                              GESTION DES ACTIONS
         //============================================================================================
+
         //----------------------------------ACTION : LIST
-        //List permet de sélectionner une liste d'incident. Leur affichage est géré par En jSON. Voir la config des vues.
-//        if (action.equals("list")) {
-//
-//            //Récupération du type 
-//            Class c = null;
-//            DAOIncident dao = null;
-//            try {
-//                c = Class.forName("rssagregator.beans.incident." + request.getParameter("type"));
-//                dao = (DAOIncident) DAOFactory.getInstance().getDaoFromType(c);
-//                if (!AbstrIncident.class.isAssignableFrom(c)) {
-//                    throw new Exception("non");
-//                }
-//            } catch (Exception e) {
-//
-//            }
-//
-//            try {
-//                firstResult = new Integer(request.getParameter("firstResult"));
-//            } catch (Exception e) {
-//                firstResult = 0;
-//            }
-//            dao.setFistResult(firstResult);
-//            request.setAttribute("firstResult", firstResult);
-//
-//            try {
-//                itPrPage = new Integer(request.getParameter("itPrPage"));
-//            } catch (Exception e) {
-//                itPrPage = 25;
-//            }
-//            dao.setMaxResult(itPrPage);
-//            request.setAttribute("itPrPage", itPrPage);
-//
-//            try {
-//                clos = Boolean.valueOf(request.getParameter("clos"));
-//
-//            } catch (Exception e) {
-//                clos = false;
-//            }
-//            dao.setClos(clos);
-//            request.setAttribute("clos", clos);
-//
-//
-//
-//            //Criteria Flux lie. N'est valable que pour les incidents de collecte.
-//            if (c != null && c.equals(CollecteIncident.class)) {
-//                String[] fluxLie = request.getParameterValues("fluxSelection2");
-//                DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
-//                List<Flux> listFluxLie = new ArrayList<Flux>();
-//                if (fluxLie != null && fluxLie.length > 0) {
-//                    for (int i = 0; i < fluxLie.length; i++) {
-//
-//                        String strIdFlux = fluxLie[i];
-//                        Flux f = (Flux) daoFlux.find(new Long(strIdFlux));
-//                        listFluxLie.add(f);
-//                    }
-//
-//                    if (!listFluxLie.isEmpty()) {
-//                        dao.setCriteriaFluxLie(listFluxLie);
-//                    }
-//                }
-//            }
-//
-//
-//            Integer nbItem = dao.findnbMax(c);
-//            request.setAttribute("nbitem", nbItem);
-//
-//            //recup de la list des incidents
-//            List<Object> listAll = dao.findCriteria(c);
-//
-//            request.setAttribute(ATT_LIST, listAll);
-//            //--------------------------------------------ACTION : MOD-------------------------------------
-//        } 
-
-
         if (action.equals("list")) {
 
             try {
-                Class c = null; 
+                Class c = null;
                 DAOIncident dao = null;
                 try {
+      
+                    
                     c = Class.forName("rssagregator.beans.incident." + request.getParameter("type"));
                     dao = (DAOIncident) DAOFactory.getInstance().getDaoFromType(c);
                     if (!AbstrIncident.class.isAssignableFrom(c)) {
@@ -255,7 +167,7 @@ public class IncidentsSrvl extends HttpServlet {
             } catch (Exception ex) {
                 Logger.getLogger(IncidentsSrvl.class.getName()).log(Level.SEVERE, null, ex);
             }
-
+//            //--------------------------------------------ACTION : MOD-------------------------------------
         } else if (action.equals("mod")) {
             try {
                 Class c = Class.forName("rssagregator.beans.incident." + request.getParameter("type"));
@@ -357,8 +269,7 @@ public class IncidentsSrvl extends HttpServlet {
 // gestion de la vue et de l'envoie vers la JSP
         if (vue.equals("jsondesc")) {
             VUE = "/WEB-INF/incidentJSONDesc.jsp";
-        }
-        else if(vue.equals("rss")){
+        } else if (vue.equals("rss")) {
             VUE = "/WEB-INF/incidentRSS.jsp";
         }
 

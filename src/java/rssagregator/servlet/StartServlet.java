@@ -90,9 +90,6 @@ public class StartServlet implements ServletContextListener {
 //        conf.enregistrerAupresdesService();
 
         // -----------------Chargement des flux
-        DaoFlux daoflux = DAOFactory.getInstance().getDAOFlux();
-//        daoflux.chargerDepuisBd();
-
 
         try {
             daoconf.verifRootAccount();

@@ -7,7 +7,6 @@ package rssagregator.beans.form;
 import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import rssagregator.beans.incident.AbstrIncident;
-import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.dao.AbstrDao;
 
 /**

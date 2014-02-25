@@ -364,7 +364,7 @@ public class ServiceSynchro extends ServiceImpl implements MessageListener, Obse
                                 for (int i = 0; i < items.size(); i++) {
                                     Item item = items.get(i);
                                     Byte b = 3;
-                                    item.setSyncStatut(b);
+//                                    item.setSyncStatut(b);
                                     try {
                                         daoItem.beginTransaction();
                                         daoItem.modifier(item);
@@ -607,9 +607,9 @@ public class ServiceSynchro extends ServiceImpl implements MessageListener, Obse
 //            //Pour les incident de connection JMS il faut soit créer soit récupérer et incrémenter le compteur
 //            if (tache.getClass().equals(TacheLancerConnectionJMS.class)) {
 //                //On remarde si on a déjà un incident 
-////                DAOIncident<JMSPerteConnectionIncident> dao = (DAOIncident<JMSPerteConnectionIncident>) DAOFactory.getInstance().getDaoFromType(JMSPerteConnectionIncident.class);
+////                DAOIncident<JMSPerteConnectionIncident> dao = (DAOIncident<JMSPerteConnectionIncident>) DAOFactory.getInstance().getDaoFromType(ZZOLDJMSPerteConnectionIncident.class);
 //                dao.setClos(false);
-//                List<JMSPerteConnectionIncident> list = dao.findCriteria(JMSPerteConnectionIncident.class);
+//                List<JMSPerteConnectionIncident> list = dao.findCriteria(ZZOLDJMSPerteConnectionIncident.class);
 //                if (list.size() > 0) {
 //                    si = list.get(0);
 //                    Integer nb = si.getNombreTentativeEnEchec();
@@ -618,7 +618,7 @@ public class ServiceSynchro extends ServiceImpl implements MessageListener, Obse
 //                    logger.debug("incrementation de l'incident JMS");
 //                } else {
 //                    IncidentFactory<JMSPerteConnectionIncident> factory = new IncidentFactory<JMSPerteConnectionIncident>();
-//                    si = factory.getIncident(JMSPerteConnectionIncident.class, null, tache.getExeption());
+//                    si = factory.getIncident(ZZOLDJMSPerteConnectionIncident.class, null, tache.getExeption());
 //                    logger.debug("nouvel incident JMS");
 //                }
 //            }
@@ -652,7 +652,7 @@ public class ServiceSynchro extends ServiceImpl implements MessageListener, Obse
 //                si.setMessageEreur("Erreur de connection au serveur JMS");
 //            } //-----------> ERREUR DE DIFFUSION DE MESSAGE JMS
 //            else if (tache.getClass().equals(TacheDiffuserMessageJMS.class)) {
-//                JMSDiffusionIncident cast = (JMSDiffusionIncident) si;
+//                ZZOLDJMSDiffusionIncident cast = (ZZOLDJMSDiffusionIncident) si;
 //                TacheDiffuserMessageJMS castTache = (TacheDiffuserMessageJMS) tache;
 //
 //                si.setMessageEreur("Erreur lors de l'envoie du message JMS");
@@ -682,11 +682,11 @@ public class ServiceSynchro extends ServiceImpl implements MessageListener, Obse
 //        else {
 //            //------------Fermeture des incident de connection JMS si la connection a été retrouvée
 //            if (tache.getClass().equals(TacheLancerConnectionJMS.class)) {
-////                DAOIncident<JMSPerteConnectionIncident> dao = (DAOIncident<JMSPerteConnectionIncident>) DAOFactory.getInstance().getDaoFromType(JMSPerteConnectionIncident.class);
+////                DAOIncident<JMSPerteConnectionIncident> dao = (DAOIncident<JMSPerteConnectionIncident>) DAOFactory.getInstance().getDaoFromType(ZZOLDJMSPerteConnectionIncident.class);
 //                dao.setClos(false);
-//                List<JMSPerteConnectionIncident> l = dao.findCriteria(JMSPerteConnectionIncident.class);
+//                List<JMSPerteConnectionIncident> l = dao.findCriteria(ZZOLDJMSPerteConnectionIncident.class);
 //                for (int i = 0; i < l.size(); i++) {
-//                    JMSPerteConnectionIncident jMSPerteConnectionIncident = l.get(i);
+//                    ZZOLDJMSPerteConnectionIncident jMSPerteConnectionIncident = l.get(i);
 //                    jMSPerteConnectionIncident.setDateFin(new Date());
 //                    try {
 //                        logger.debug("fermeture de l'incident");

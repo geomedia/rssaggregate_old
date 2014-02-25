@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
 import javax.persistence.Entity;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.dao.DAOFactory;
@@ -32,6 +34,7 @@ import rssagregator.services.ServiceCollecteur;
  * @author clem
  */
 @Entity(name = "Dedoubloneur")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public class Dedoubloneur extends AbstrDedoublonneur {
     
     private static String description = "le dédoublonneur permet .....";
@@ -102,7 +105,7 @@ public class Dedoubloneur extends AbstrDedoublonneur {
 //            }
 //
 //        }
-        this.dedoublonnageInterneduneListDItem(listItemCapture, true, false, false);
+        this.dedoublonnageInterneduneListDItem(listItemCapture, true, false);
 
 
         //---------------------------------------------------------------------------------------------------------------------

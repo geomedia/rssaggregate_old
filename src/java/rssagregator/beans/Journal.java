@@ -60,9 +60,9 @@ public class Journal extends Bean implements Serializable, BeanSynchronise {
     private String langue;
     /**
      * *
-     * Le pays du journal. Ici aussi, on utilise le code iso
+     * Le pays du journal. Ici aussi, on utilise le code iso2
      */
-    @Column(name = "pays", length = 60)
+    @Column(name = "pays", length = 3)
     private String pays;
     /**
      * Un journal possède plusieurs flux. La suppression du journal entraine la suppression des flux par cascade.
@@ -93,7 +93,23 @@ public class Journal extends Bean implements Serializable, BeanSynchronise {
      */
     @Column(name = "activerFluxDecouvert")
     private Boolean activerFluxDecouvert = false;
+    
     private Integer periodiciteDecouverte;
+    
+    /***
+     * Code permettant de caractériser la ville d'édition du journal . Voir Timothée
+     */
+    @Column(name = "codeVille", length = 3 , nullable = false)
+    private String codeVille;
+    
+    
+    /***
+     * Code renseigner par les chercheur permettant d'abréger le journal dans la base de données géomedia.
+     */
+    @Column(name = "codeJournal", length = 6, nullable = false)
+    private String codeJournal; 
+    
+    
     /**
      * *
      * Un champs texte permettant aux administrateurs de saisir des informations sur le journal. Ce champs texte permet
@@ -332,6 +348,27 @@ public class Journal extends Bean implements Serializable, BeanSynchronise {
     public void setPeriodiciteDecouverte(Integer periodiciteDecouverte) {
         this.periodiciteDecouverte = periodiciteDecouverte;
     }
+
+    public String getCodeVille() {
+        return codeVille;
+    }
+
+    public void setCodeVille(String codeVille) {
+        this.codeVille = codeVille;
+    }
+
+    public String getCodeJournal() {
+        return codeJournal;
+    }
+
+    public void setCodeJournal(String codeJournal) {
+        this.codeJournal = codeJournal;
+    }
+    
+    
+    
+    
+    
 
 
     /**

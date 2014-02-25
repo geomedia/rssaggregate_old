@@ -167,10 +167,16 @@
                         <form method="POST" action="${rootpath}journaux/${action}" id="beanForm">
                             <fieldset>
                                 <legend>journal</legend>
-                                <label for="url">Nom du journal<span class="requis">*</span></label>
+                                <label for="url" title="Nom du journal ou toute lettre">Nom du journal<span class="requis">*</span></label>
                                 <input type="text" id="nom" name="nom" value="<c:out value="${bean.nom}" />" size="20" maxlength="60" />
                                 <span class="erreur" id="errnom"></span>
                                 <br />
+                                
+                                <label title="Code d'abreviation du journal au sein de GEOMEDIA" >Code Journal<span class="requis">*</span></label>
+                                <input type="text" id="codeJournal" name="codeJournal" value="${bean.codeJournal}" /><span class="erreur" id="errcodeJournal"></span>
+                                
+                                <br />
+                                
 
 
                                 <label>Page Accueil du journal <span class="requis">*</span>: </label>
@@ -207,13 +213,18 @@
                                     <label for="pays">Pays : <span class="requis">*</span></label>
                                     <select name="pays" id="pays">
                                         <option></option>
+                                        <option value="XX">Aucun</option>
                                     <c:forEach items="${listCountry}" var="country">
                                         <option value="${country.key}" <c:if test="${country.key==bean.pays}"> selected="true"</c:if>>${country.value}</option>
                                     </c:forEach>
                                 </select>  <span class="erreur" id="errpays"></span>
 
                                 <br />
-
+                                
+                                
+                                <label>Code Ville</label>
+                                <input type="text" name="codeVille" id="codeVille" value="${bean.codeVille}"/><span class="erreur" id="errcodeVille"></span>
+                                <br />
 
 
 
@@ -265,11 +276,13 @@
                          
                         
                         <p><strong>Titre :</strong> ${bean.nom}</p>
+                        <p><strong>Code Journal</strong> ${bean.codeJournal}</p>
                         <p><strong>Page accueil : </strong>${bean.urlAccueil}</p>
                         <p><strong>Page HTML recaptulatif des flux : </strong>${bean.urlHtmlRecapFlux}</p>
                         <p><strong>Type de journal : </strong> ${bean.typeJournal}</p>
                         <p><strong>Langue : </strong>${bean.langue}</p>
                         <p><strong>Pays : </strong>${bean.pays}</p>
+                        <p><strong>Code Ville : ${bean.codeVille}</strong></p>
                         <p><strong>Fuseau Horraire : </strong>${bean.fuseauHorraire}</p>
                         <p><strong>Information : </strong>${bean.information}</p>
                         <p><strong>Flux liés : </strong></p>

@@ -56,10 +56,10 @@
                                 <legend>Information propre au comportement</legend>
                                 <label>Comportement utilisé par défaut :</label>
                                 <input type="checkbox" name="defaut" <c:if test="${bean.defaut}"> checked="true"</c:if> /><br />
-                                
+
                                     <label> Nom du comportement<span class="requis">*</span> : </label>
                                     <input type="text" name="comportement_nom" value="${bean.nom}"/><span class="erreur" id="errcomportement_nom"></span><br/>
-                                
+
                                 <label>Description du comportement : </label><br />
                                 <textarea name="comportement_desc" rows="10" cols="60">${bean.description}</textarea><br />
 
@@ -117,15 +117,35 @@
                                     <input type="checkbox" name="dedoubCategory" <c:if test="${bean.dedoubloneur.dedoubCategory}"> checked="true"</c:if>/>
 
                                 </fieldset>
-                                
-                                
-                   
 
-                                <br />
-                                <input type="hidden" name="vue" value="jsonform" />
-                                <input type="submit">
-                            </form>
-                            <script src="${rootpath}AjaxAddModBean.js"></script>
+
+                                <fieldset>
+                                    <legend>Raffineur</legend>
+                                <c:forEach items="${raffSet}" var="raf">
+
+                                    <c:set var="use" value="false"></c:set>
+                                    <c:forEach items="${bean.raffineur}" var="refUtilise">
+                                        <c:if test="${refUtilise['class'].getName() == raf['name']}">
+                                            <c:if test="${refUtilise.actif=='true'}"><c:set var="use" value="true"></c:set></c:if>
+                                        </c:if>
+                                    </c:forEach>
+
+
+                                    <label>${raf.getSimpleName()}</label>  <input type="checkbox" name="raffineur" value="${raf.getName()}" <c:if test="${use=='true'}"> checked="true"</c:if> /><br />
+                
+                                
+                                </c:forEach>
+
+                            </fieldset>
+
+
+
+
+                            <br />
+                            <input type="hidden" name="vue" value="jsonform" />
+                            <input type="submit">
+                        </form>
+                        <script src="${rootpath}AjaxAddModBean.js"></script>
                     </c:when>
                     <c:when test="${action=='recherche'}">
 

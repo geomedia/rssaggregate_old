@@ -21,6 +21,7 @@ public class FluxTypeForm extends AbstrForm {
     //Les variables devant être récupérée dans la requête
     private String denomination;
     private String description;
+    private String codeType;
 
     //---------------------------------------
     protected FluxTypeForm() {
@@ -47,6 +48,19 @@ public class FluxTypeForm extends AbstrForm {
         if (s != null) {
             description = s;
         }
+        
+        s= request.getParameter("codeType");
+        if(s!=null){
+            if(s.length()!=3){
+                erreurs.put("codeType", new String[]{"le code doit faire 3 char"});
+            }
+            codeType =s;
+        }
+        else{
+            erreurs.put("codeType", new String[]{ERR_NE_PEUT_ETRE_NULL});
+        }
+        
+        
 
         //-----------------------------------------------------------
         if (erreurs.isEmpty()) {
@@ -75,6 +89,7 @@ public class FluxTypeForm extends AbstrForm {
             // Bind des valeurs
             fluxType.setDenomination(denomination);
             fluxType.setDescription(description);
+            fluxType.setCodeType(codeType);
             return fluxType;
         } else {
             return null;

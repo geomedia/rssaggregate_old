@@ -14,7 +14,7 @@ import javax.jms.Topic;
 import javax.jms.TopicConnection;
 import rssagregator.beans.Conf;
 import rssagregator.beans.incident.Incidable;
-import rssagregator.beans.incident.JMSDiffusionIncident;
+import rssagregator.beans.incident.ZZOLDJMSDiffusionIncident;
 import rssagregator.dao.DAOFactory;
 import rssagregator.utils.XMLTool;
 
@@ -23,7 +23,7 @@ import rssagregator.utils.XMLTool;
  * Cette tâche est gérée par le service {@link ServiceSynchro}. Elle permet de diffuser un message JMS utilisé pour
  * répercuter les modifications des beans synchronisable sur les serveurs esclaves. Cette tache est incidable
  * (implémentation de {@link Incidable}). En effet en cas d'erreur de diffusion, le service doit générer et persister un
- * incident {@link JMSDiffusionIncident}
+ * incident {@link ZZOLDJMSDiffusionIncident}
  *
  * @author clem
  */
@@ -97,12 +97,12 @@ public class TacheDiffuserMessageJMS extends TacheImpl<TacheDiffuserMessageJMS> 
      * *
      * Retourne la classe {
      *
-     * @JMSDiffusionIncident}
+     * @ZZOLDJMSDiffusionIncident}
      * @return
      */
     @Override
     public Class getTypeIncident() {
-        return JMSDiffusionIncident.class;
+        return ZZOLDJMSDiffusionIncident.class;
     }
 
     public TopicConnection getConnection() {

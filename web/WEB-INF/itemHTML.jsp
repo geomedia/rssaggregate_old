@@ -122,6 +122,19 @@
                                                 <option value="${j.ID}">${j}</option>
                                             </c:forEach>
                                         </select>
+                                        
+                                        <label>Type : </label>
+                                        
+                                        
+                                        <select id="typeSelection">
+                                            <option value="null"></option>
+                                            <c:forEach items="${listType}" var="ty">
+                                                <option value="${ty.ID}">${ty}</option>
+                                            </c:forEach>
+                                            
+                                        </select>
+                                        
+                                        
                                     </td>
                                     <td>
 

@@ -8,9 +8,10 @@ import java.util.Comparator;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import rssagregator.beans.ContentRSS;
-import rssagregator.services.tache.TacheRaffiner;
+//import rssagregator.services.tache.TacheRaffiner;
 
 /**
+ * <strong> N'est plus utilisé</strong>
  * Comparator utilisé pour déteminer si deux contenuRSS (Item Brute ou Raffinné) correspondent un un même article. Ce
  * comparator est utilisé dans le processus de Raffinage des item par la tache {@link TacheRaffiner} Le comparator
  * permet de déterminer si deux item sont strictement itentique; ont un contenu différent mais proviennent d'un même
@@ -18,22 +19,22 @@ import rssagregator.services.tache.TacheRaffiner;
  *
  * @author clem
  */
+@Deprecated
 public class ItemComparator implements Comparator<ContentRSS> {
 
     /**
      * *
      *
-     * @param o1
+     * @param o1 
      * @param o2
-     * @return -1 item provenant d'article différent 0 titem strictement equal ; 1 item prevenant du mm article
+     * @return <ul>
+     * <li>-1 item provenant d'article différent</li>
+     * <li>0 titem strictement equal ; </li>
+     * <li>1 item prevenant du mm article</li>
+     * </ul>
      */
     @Override
     public int compare(ContentRSS o1, ContentRSS o2) {
-
-
-
-
-
         /**
          * *
          * Les statut

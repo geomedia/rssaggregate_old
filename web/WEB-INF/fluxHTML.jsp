@@ -19,7 +19,7 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
 <c:import url="/WEB-INF/headerjsp.jsp" />
 
 
-<script src="${rootpath}AjaxFluxDyn.js" />
+<script src="${rootpath}AjaxFluxDyn.js" ></script>
 
 
 <div id="header-wrapper">
@@ -63,6 +63,7 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
 
 
                     <c:when test="${action=='recherche'}">
+                        
                         <!--                        <form method="POST" id="pagina">
                                                     <input type="hidden" id="firstResult" value="0"/>
                         

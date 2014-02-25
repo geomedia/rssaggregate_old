@@ -263,72 +263,72 @@ public class DAOIncident<T> extends AbstrDao {
 //    
 //    
 //    
-    public Integer findnbMax(Class<T> T) {
-
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-
-        CriteriaQuery cq = cb.createQuery(T);
-        Root<CollecteIncident> root = cq.from(T);
-        List<Predicate> listWhere = new ArrayList<Predicate>();
-
-
-        if (clos != null) {
-            if (clos) {
-                listWhere.add(cb.isNotNull(root.get("dateFin")));
-            } else {
-                listWhere.add(cb.isNull(root.get("dateFin")));
-            }
-        }
-
-
-
-        // On applique les wheres
-        int i;
-        if (listWhere.size() == 1) {
-            cq.where(listWhere.get(0));
-        } else if (listWhere.size() > 1) {
-            Predicate pr = cb.and(listWhere.get(0));
-            for (i = 1; i < listWhere.size(); i++) {
-                pr = cb.and(pr, listWhere.get(i));
-            }
-            cq.where(pr);
-        }
-
-
-
-
-
-//        return tq.getResultList();
-
-
-
-
-
-//        
+//    public Integer findnbMax(Class<T> T) {
+//
 //        CriteriaBuilder cb = em.getCriteriaBuilder();
 //
-//        CriteriaQuery cq = cb.createQuery(CollecteIncident.class);
-//        Root root = cq.from(CollecteIncident.class);
-
-        //La jointure avec whereclause
-//        if (j != null) {
-//            Join join = root.join("journalLie");
-//            cq.where(cb.equal(join.get("ID"), j.getID()));
+//        CriteriaQuery cq = cb.createQuery(T);
+//        Root<CollecteIncident> root = cq.from(T);
+//        List<Predicate> listWhere = new ArrayList<Predicate>();
+//
+//
+//        if (clos != null) {
+//            if (clos) {
+//                listWhere.add(cb.isNotNull(root.get("dateFin")));
+//            } else {
+//                listWhere.add(cb.isNull(root.get("dateFin")));
+//            }
 //        }
-
-
-        cq.select(cb.count(root));
-
-        Query query = em.createQuery(cq);
-        List resu = query.getResultList();
-
-        try {
-            Integer retour = new Integer(resu.get(0).toString());
-            return retour;
-        } catch (Exception e) {
-            return null;
-        }
-    }
+//
+//
+//
+//        // On applique les wheres
+//        int i;
+//        if (listWhere.size() == 1) {
+//            cq.where(listWhere.get(0));
+//        } else if (listWhere.size() > 1) {
+//            Predicate pr = cb.and(listWhere.get(0));
+//            for (i = 1; i < listWhere.size(); i++) {
+//                pr = cb.and(pr, listWhere.get(i));
+//            }
+//            cq.where(pr);
+//        }
+//
+//
+//
+//
+//
+////        return tq.getResultList();
+//
+//
+//
+//
+//
+////        
+////        CriteriaBuilder cb = em.getCriteriaBuilder();
+////
+////        CriteriaQuery cq = cb.createQuery(CollecteIncident.class);
+////        Root root = cq.from(CollecteIncident.class);
+//
+//        //La jointure avec whereclause
+////        if (j != null) {
+////            Join join = root.join("journalLie");
+////            cq.where(cb.equal(join.get("ID"), j.getID()));
+////        }
+//
+//
+//        cq.select(cb.count(root));
+//
+//        Query query = em.createQuery(cq);
+//        List resu = query.getResultList();
+//
+//        try {
+//            Integer retour = new Integer(resu.get(0).toString());
+//            return retour;
+//        } catch (Exception e) {
+//            return null;
+//        }
+//    }
 
     public Boolean getClos() {
         return clos;

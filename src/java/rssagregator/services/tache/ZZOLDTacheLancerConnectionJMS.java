@@ -11,7 +11,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
 import rssagregator.beans.incident.Incidable;
 import rssagregator.beans.incident.IncidentFactory;
-import rssagregator.beans.incident.JMSPerteConnectionIncident;
+import rssagregator.beans.incident.ZZOLDJMSPerteConnectionIncident;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DAOIncident;
 import rssagregator.services.ServiceSynchro;
@@ -20,14 +20,14 @@ import rssagregator.services.crud.ServiceCRUDFactory;
 
 /**
  * Tâche lancée périodiquement chargé de vérifier l'état de la connection JMS et de relancer celle ci en ca s de besoin.
- * Cette tâche est a l'origine des incident de type {@link JMSPerteConnectionIncident}. La tâche est gérée par le
+ * Cette tâche est a l'origine des incident de type {@link ZZOLDJMSPerteConnectionIncident}. La tâche est gérée par le
  * service {@link ServiceSynchro}
  *
  * @author clem
  */
-public class TacheLancerConnectionJMS extends TacheImpl<TacheLancerConnectionJMS> implements Incidable {
+public class ZZOLDTacheLancerConnectionJMS extends TacheImpl<ZZOLDTacheLancerConnectionJMS> implements Incidable {
 
-//    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheLancerConnectionJMS.class);
+//    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(ZZOLDTacheLancerConnectionJMS.class);
 
 //    /**
 //     * *
@@ -35,11 +35,11 @@ public class TacheLancerConnectionJMS extends TacheImpl<TacheLancerConnectionJMS
 //     *
 //     * @param s le service devant gérer le retour de la tâche
 //     */
-//    public TacheLancerConnectionJMS(Observer s) {
+//    public ZZOLDTacheLancerConnectionJMS(Observer s) {
 //        super(s);
 //    }
 
-    public TacheLancerConnectionJMS() {
+    public ZZOLDTacheLancerConnectionJMS() {
         super();
     }
 
@@ -57,7 +57,7 @@ public class TacheLancerConnectionJMS extends TacheImpl<TacheLancerConnectionJMS
 
     @Override
     public Class getTypeIncident() {
-        return JMSPerteConnectionIncident.class;
+        return ZZOLDJMSPerteConnectionIncident.class;
     }
 
     /**
@@ -76,19 +76,19 @@ public class TacheLancerConnectionJMS extends TacheImpl<TacheLancerConnectionJMS
             initialiserTransaction();
 
             // On cherche si il y avait des incidents ouverts de ce type
-            DAOIncident<JMSPerteConnectionIncident> dao = (DAOIncident<JMSPerteConnectionIncident>) DAOFactory.getInstance().getDAOFromTask(this);
+            DAOIncident<ZZOLDJMSPerteConnectionIncident> dao = (DAOIncident<ZZOLDJMSPerteConnectionIncident>) DAOFactory.getInstance().getDAOFromTask(this);
             dao.setEm(em);
 
-            List<JMSPerteConnectionIncident> listIncid = dao.findIncidentNonClos(JMSPerteConnectionIncident.class);
+            List<ZZOLDJMSPerteConnectionIncident> listIncid = dao.findIncidentNonClos(ZZOLDJMSPerteConnectionIncident.class);
 
-            JMSPerteConnectionIncident incid = null;
+            ZZOLDJMSPerteConnectionIncident incid = null;
             if (!listIncid.isEmpty()) {
                 incid = listIncid.get(0);
                 verrouillerObjectDansLEM(incid, LockModeType.PESSIMISTIC_WRITE);
             }
 
             if (incid == null) {
-                IncidentFactory<JMSPerteConnectionIncident> factory = new IncidentFactory<JMSPerteConnectionIncident>();
+                IncidentFactory<ZZOLDJMSPerteConnectionIncident> factory = new IncidentFactory<ZZOLDJMSPerteConnectionIncident>();
                 incid = factory.createIncidentFromTask(this, "Perte de connection JMS");
 
             } else {
@@ -99,7 +99,7 @@ public class TacheLancerConnectionJMS extends TacheImpl<TacheLancerConnectionJMS
 
             // On retrouve le serviceCRUD
             ServiceCRUDFactory factory = ServiceCRUDFactory.getInstance();
-            AbstrServiceCRUD serviceCRUD = factory.getServiceFor(JMSPerteConnectionIncident.class);
+            AbstrServiceCRUD serviceCRUD = factory.getServiceFor(ZZOLDJMSPerteConnectionIncident.class);
 
 
             // Enregistrement
@@ -134,16 +134,16 @@ public class TacheLancerConnectionJMS extends TacheImpl<TacheLancerConnectionJMS
             em.getTransaction().begin();
 
             // On cherche si il y avait des incidents ouverts de ce type
-            DAOIncident<JMSPerteConnectionIncident> dao = (DAOIncident<JMSPerteConnectionIncident>) DAOFactory.getInstance().getDAOFromTask(this);
+            DAOIncident<ZZOLDJMSPerteConnectionIncident> dao = (DAOIncident<ZZOLDJMSPerteConnectionIncident>) DAOFactory.getInstance().getDAOFromTask(this);
             dao.setEm(em);
 
-            List<JMSPerteConnectionIncident> listIncid = dao.findIncidentNonClos(JMSPerteConnectionIncident.class);
+            List<ZZOLDJMSPerteConnectionIncident> listIncid = dao.findIncidentNonClos(ZZOLDJMSPerteConnectionIncident.class);
 
-            JMSPerteConnectionIncident incid = null;
+            ZZOLDJMSPerteConnectionIncident incid = null;
 
             if (!listIncid.isEmpty()) {
                 for (int i = 0; i < listIncid.size(); i++) {
-                    JMSPerteConnectionIncident jMSPerteConnectionIncident = listIncid.get(i);
+                    ZZOLDJMSPerteConnectionIncident jMSPerteConnectionIncident = listIncid.get(i);
                     em.lock(jMSPerteConnectionIncident, LockModeType.PESSIMISTIC_WRITE);
                     jMSPerteConnectionIncident.setDateFin(new Date());
                 }
@@ -152,11 +152,11 @@ public class TacheLancerConnectionJMS extends TacheImpl<TacheLancerConnectionJMS
             // Enregistrement
             // On retrouve le serviceCRUD
             ServiceCRUDFactory facto = ServiceCRUDFactory.getInstance();
-            AbstrServiceCRUD service = facto.getServiceFor(JMSPerteConnectionIncident.class);
+            AbstrServiceCRUD service = facto.getServiceFor(ZZOLDJMSPerteConnectionIncident.class);
 
 
             for (int i = 0; i < listIncid.size(); i++) {
-                JMSPerteConnectionIncident jMSPerteConnectionIncident = listIncid.get(i);
+                ZZOLDJMSPerteConnectionIncident jMSPerteConnectionIncident = listIncid.get(i);
 //            em.merge(jMSPerteConnectionIncident);
                 service.modifier(jMSPerteConnectionIncident, em);
             }

@@ -64,6 +64,20 @@ public class DaoItem extends AbstrDao {
         where_clause_Flux = new ArrayList<Flux>();
         order_desc = false;
     }
+
+    protected DaoItem(DAOFactory daof, boolean withEm) {
+
+        if (withEm) {
+            em = daof.getEntityManager();
+        }
+
+        this.dAOFactory = daof;
+        this.classAssocie = Item.class;
+        where_clause_Flux = new ArrayList<Flux>();
+        order_desc = false;
+    }
+    
+    
     private static final String REQ_FIND_BY_HASH = "SELECT i FROM Item i where i.hashContenu=:hash";
     private static final String REQ_FIND_BY_HASH_AND_FLUX = "SELECT item FROM Item item JOIN item.listFlux flux where item.hashContenu IN (:hash) AND flux.ID=:fluxid";
 //    private static final String REQ_FIND_ALL_AC_LIMIT = "SELECT item FROM Item LIMIT :prem, :nbr";
@@ -342,22 +356,19 @@ public class DaoItem extends AbstrDao {
         // On ote ici l'emploi du distinct. Théoriquement il ne devrait pas être necessaire avec le join fetch, mais si on ne le fait pas, retour de plusieur résultat, l'orm oubli de fetcher et fait renvoie plusieurs même item pour chaque jointure
         //cf https://www.java.net//node/663109
         //http://www.coderanch.com/t/163772/OCEJPA/certification/JPA-getSingleResult-Error
-        
+
         query.setParameter("hash", hash);
 
 
         Item resu = null;
         try {
             resu = (Item) query.getSingleResult();
-        }
-        catch (NoResultException e){
+        } catch (NoResultException e) {
 //            logger.debug("Noresult en soit pas une erreur" , e);
-        }
-        catch (NonUniqueResultException e){
-            
-            logger.debug("Non unique pourtant le requete porte sur un hash unique ??!! :  "+ hash, e);
-        }
-        catch (Exception e) {
+        } catch (NonUniqueResultException e) {
+
+            logger.debug("Non unique pourtant le requete porte sur un hash unique ??!! :  " + hash, e);
+        } catch (Exception e) {
             logger.error("Erreur", e);
         }
 
@@ -384,37 +395,31 @@ public class DaoItem extends AbstrDao {
         return item;
     }
 
-    /**
-     * *
-     * Retourne les i dernier hash pour le flux envoyé en argument.
-     *
-     * @param fl le flux pour lequel il faut renvoyer les hash
-     * @param i le nombre de hash a renvoyer
-     */
-    public Set<String> findLastHash(Flux fl, int i/*, Boolean onCache*/) {
-        Query query = em.createQuery("SELECT item FROM Item item JOIN item.listFlux fl WHERE fl.ID=:idfl ORDER BY item.ID DESC");
-
-//        if (onCache) {
-////            query.setHint("eclipselink.cache-usage", "CheckCacheOnly");
-//            query.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheOnly);
-////            query.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheOnly); - See more at: http://eclipse.org/eclipselink/documentation/2.4/jpa/extensions/q_cacheusage.htm#sthash.BI9rLocd.dpuf
+//    /**
+//     * *
+//     * Retourne les i dernier hash pour le flux envoyé en argument.
+//     *
+//     * @param fl le flux pour lequel il faut renvoyer les hash
+//     * @param i le nombre de hash a renvoyer
+//     */
+//    public Set<String> findLastHash(Flux fl, int i/*, Boolean onCache*/) {
+//        Query query = em.createQuery("SELECT item FROM Item item JOIN item.listFlux fl WHERE fl.ID=:idfl ORDER BY item.ID DESC");
+//
+//        query.setParameter("idfl", fl.getID());
+//        query.setFirstResult(0);
+//        query.setMaxResults(i);
+//
+//        List<Item> resu = query.getResultList();
+//
+//        Set<String> setHash = new LinkedHashSet<String>();
+//
+//        for (int j = resu.size() - 1; j >= 0; j--) {
+//            Item item = resu.get(j);
+//            setHash.add(item.getHashContenu());
 //        }
-
-        query.setParameter("idfl", fl.getID());
-        query.setFirstResult(0);
-        query.setMaxResults(i);
-
-        List<Item> resu = query.getResultList();
-
-        Set<String> setHash = new LinkedHashSet<String>();
-
-        for (int j = resu.size() - 1; j >= 0; j--) {
-            Item item = resu.get(j);
-            setHash.add(item.getHashContenu());
-        }
-
-        return setHash;
-    }
+//
+//        return setHash;
+//    }
 
     public String getOrder_by() {
         return order_by;
@@ -657,14 +662,14 @@ public class DaoItem extends AbstrDao {
         Query query = null;
         if (journal == null) {
             query = em.createQuery("SELECT i From Item i JOIN i.listFlux f WHERE f.journalLie IS NULL AND i.titre LIKE(:titre) OR i.link = :link ");
-           
+
         } else {
             query = em.createQuery("SELECT i From Item i JOIN  i.listFlux f, f.journalLie j WHERE j.ID=:idJ AND i.titre LIKE(:titre) OR i.link = :link");
-                 query.setParameter("idJ", journal.getID());
+            query.setParameter("idJ", journal.getID());
         }
 
 
-    
+
         query.setParameter("titre", titre);
         query.setParameter("link", link);
 

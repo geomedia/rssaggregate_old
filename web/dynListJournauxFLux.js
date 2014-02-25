@@ -91,8 +91,8 @@ $(document).ready(function() {
 
 /***
  * Lorsqu'un élément est recut dans la liste 2 il faut vérifier qu'il n'est pas déjà présent. Cette fontion permet d'annuler le drop si l'élémetn est déjà présent
- * @param {type} event
- * @param {type} ui
+ * @param {typeStr} event
+ * @param {typeStr} ui
  * @returns {Boolean}
  */
 function uiRemove(event, ui) {
@@ -135,6 +135,62 @@ $(document).ready(function() {
             });
         }
     });
+    $('#typeSelection').on('change', function truc() {
+//          alert('chg');
+        // On récupère le type
+        type = $('#typeSelection').val();
+//          alert('type : ' + type);
+
+        journal = $('#journalSelection').val();
+        ajaxLunch(type, journal);
+
+
+
+    });
+
+    function isID(input) {
+        var RE = /^\d*$/;
+        return (RE.test(input));
+    }
+
+
+    function ajaxLunch(typeStr, journalStr) {
+
+        datareq = '&';
+
+        if (isID(typeStr)) {
+            datareq += 'typeid=' + typeStr + "&";
+        }
+
+        if (isID(journalStr)) {
+            datareq += 'journalid=' + journalStr;
+        }
+
+
+        $('#fluxSelection').empty(); // on vide la liste des départements
+        $.ajax({
+            url: '/RSSAgregate/flux/list?vue=json',
+            data: datareq, // on envoie $_GET['id_region']
+            dataType: 'json',
+            success: function(json) {
+
+                // On trie coté client les flux en fonction de leur type. Le but est de faire apparaitre international et a la une en tete
+
+
+
+                $.each(json, function(index, value) {
+
+
+
+                    $('#fluxSelection').append('<li class=\"boxelement\" value="' + value[0] + '">' + value[1] + '</li>');
+                });
+            }
+        });
+
+
+    }
+
+
 }
 );
 

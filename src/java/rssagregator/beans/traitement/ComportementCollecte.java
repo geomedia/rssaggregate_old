@@ -7,11 +7,15 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -28,9 +32,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.ws.http.HTTPException;
 import org.apache.poi.util.Beta;
+import org.reflections.Reflections;
 import rssagregator.beans.BeanSynchronise;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
+import rssagregator.beans.form.ComportementCollecteForm;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoItem;
 
@@ -97,6 +103,29 @@ public class ComportementCollecte implements Serializable, Cloneable, BeanSynchr
      */
     @OneToOne(cascade = CascadeType.ALL)
     private AbstrRequesteur requesteur;
+
+    
+        /**
+     * *
+     * Pour fonctionner, cette classe a besoin de découvrir par réflexivité l'ensemble des class de type raffineur.
+     * Cette découverte est oppérée dans la bloc static a la première instanciation de la classe. Ce bloc norrit le set
+     * ci dessous
+     */
+    @Transient
+    private static Set<Class<? extends AbstrRaffineur>> requesteurClass;
+    
+
+    /***
+     * Bloc static qui permet de découvir l'ensemble des class de type raffineur a l apremière instanciaiton. 
+     */
+    static {
+        
+        // Découverte par réflexivité de l'ensemble des class de type requesteur. 
+        Reflections reflections = new Reflections("rssagregator.beans.traitement");
+        requesteurClass = reflections.getSubTypesOf(AbstrRaffineur.class);
+    }
+    
+    
     /**
      * Le mediatorAReferer flux permet d'assigner un flux un comportement de collecte. Un médiator est une configuration
      * de parseur Raffineur etc.
@@ -115,10 +144,12 @@ public class ComportementCollecte implements Serializable, Cloneable, BeanSynchr
      */
 //    @Transient    LE RAFFINAGE NEST PLUS CONSIDÉRÉ COMME UN TRAITEMENT DE COLECTE; IL N'EST DESTINEE QUA FAIRE DES EXPORT EN CSV
 //    private List<MediatorTraitementRafinage> rafineurHTML;
-    
-    
-    
-    
+    /**
+     * *
+     * Pour chaque comportement, il est possible d'assovier des raffineurs.
+     */
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    protected List<AbstrRaffineur> raffineur = new ArrayList<AbstrRaffineur>();
     /**
      * *
      * Dédoublonneur du médiateur.
@@ -481,6 +512,36 @@ public class ComportementCollecte implements Serializable, Cloneable, BeanSynchr
         this.parseur = new RomeParse();
     }
 
+    public static ComportementCollecte getDefaultInstance() {
+
+        ComportementCollecte comportementCollecte = new ComportementCollecte();
+        comportementCollecte.setDedoubloneur(new Dedoubloneur());
+        comportementCollecte.setRequesteur(new Requester());
+        comportementCollecte.setParseur(new RomeParse());
+
+
+        // Instanciation de tous les raffineurs possible en découvrant les classe par reflexivité
+        for (Iterator<Class<? extends AbstrRaffineur>> it = ComportementCollecte.requesteurClass.iterator(); it.hasNext();) {
+            Class<? extends AbstrRaffineur> class1 = it.next();
+
+            if (!comportementCollecte.possedeUnRaffineurDeType(class1)) {
+                try {
+                    AbstrRaffineur r = class1.newInstance();
+                    r.setActif(true);
+                    comportementCollecte.getRaffineur().add(r);
+                } catch (InstantiationException ex) {
+                    Logger.getLogger(ComportementCollecteForm.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IllegalAccessException ex) {
+                    Logger.getLogger(ComportementCollecteForm.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } 
+        }
+        
+        return comportementCollecte;
+
+//        return null;
+    }
+
     public AbstrParseur getParseur() {
         return parseur;
     }
@@ -488,8 +549,6 @@ public class ComportementCollecte implements Serializable, Cloneable, BeanSynchr
     public void setParseur(AbstrParseur parseur) {
         this.parseur = parseur;
     }
-
-
 
     //    public AbstrDedoublonneur getDedoubloneur() {
     //        return dedoubloneur;
@@ -636,51 +695,89 @@ public class ComportementCollecte implements Serializable, Cloneable, BeanSynchr
         }
         return true;
     }
-//    public short getNbItTrouve() {
-//        return nbItTrouve;
-//    }
-//
-//    public void setNbItTrouve(short nbItTrouve) {
-//        this.nbItTrouve = nbItTrouve;
-//    }
-//
-//    public short getNbDedoubMemoire() {
-//        return nbDedoubMemoire;
-//    }
-//
-//    public void setNbDedoubMemoire(short nbDedoubMemoire) {
-//        this.nbDedoubMemoire = nbDedoubMemoire;
-//    }
-//
-//    public short getNbDedoubBdd() {
-//        return nbDedoubBdd;
-//    }
-//
-//    public void setNbDedoubBdd(short nbDedoubBdd) {
-//        this.nbDedoubBdd = nbDedoubBdd;
-//    }
-//
-//    public short getNbLiaisonCree() {
-//        return nbLiaisonCree;
-//    }
-//
-//    public void setNbLiaisonCree(short nbLiaisonCree) {
-//        this.nbLiaisonCree = nbLiaisonCree;
-//    }
-//
-//    public short getNbNouvelle() {
-//        return nbNouvelle;
-//    }
-//
-//    public void setNbNouvelle(short nbNouvelle) {
-//        this.nbNouvelle = nbNouvelle;
-//    }
-//
-//    public short getNbDoublonInterneAuflux() {
-//        return nbDoublonInterneAuflux;
-//    }
-//
-//    public void setNbDoublonInterneAuflux(short nbDoublonInterneAuflux) {
-//        this.nbDoublonInterneAuflux = nbDoublonInterneAuflux;
-//    }
+
+    //    public short getNbItTrouve() {
+    //        return nbItTrouve;
+    //    }
+    //
+    //    public void setNbItTrouve(short nbItTrouve) {
+    //        this.nbItTrouve = nbItTrouve;
+    //    }
+    //
+    //    public short getNbDedoubMemoire() {
+    //        return nbDedoubMemoire;
+    //    }
+    //
+    //    public void setNbDedoubMemoire(short nbDedoubMemoire) {
+    //        this.nbDedoubMemoire = nbDedoubMemoire;
+    //    }
+    //
+    //    public short getNbDedoubBdd() {
+    //        return nbDedoubBdd;
+    //    }
+    //
+    //    public void setNbDedoubBdd(short nbDedoubBdd) {
+    //        this.nbDedoubBdd = nbDedoubBdd;
+    //    }
+    //
+    //    public short getNbLiaisonCree() {
+    //        return nbLiaisonCree;
+    //    }
+    //
+    //    public void setNbLiaisonCree(short nbLiaisonCree) {
+    //        this.nbLiaisonCree = nbLiaisonCree;
+    //    }
+    //
+    //    public short getNbNouvelle() {
+    //        return nbNouvelle;
+    //    }
+    //
+    //    public void setNbNouvelle(short nbNouvelle) {
+    //        this.nbNouvelle = nbNouvelle;
+    //    }
+    //
+    //    public short getNbDoublonInterneAuflux() {
+    //        return nbDoublonInterneAuflux;
+    //    }
+    //
+    //    public void setNbDoublonInterneAuflux(short nbDoublonInterneAuflux) {
+    //    }
+    //    }
+    public List<AbstrRaffineur> getRaffineur() {
+        return raffineur;
+    }
+
+    public void setRaffineur(List<AbstrRaffineur> raffineur) {
+        this.raffineur = raffineur;
+    }
+
+    /**
+     * *
+     * Parcours les raffineurs du comportement et retourne true si on trouve bien un raffineur du type envoyé en
+     * argument
+     *
+     * @param c
+     * @return
+     */
+    public boolean possedeUnRaffineurDeType(Class c) {
+
+        for (int i = 0; i < raffineur.size(); i++) {
+            AbstrRaffineur abstrRaffineur = raffineur.get(i);
+            if (abstrRaffineur.getClass().equals(c)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static Set<Class<? extends AbstrRaffineur>> getRequesteurClass() {
+        return requesteurClass;
+    }
+
+    public static void setRequesteurClass(Set<Class<? extends AbstrRaffineur>> requesteurClass) {
+        ComportementCollecte.requesteurClass = requesteurClass;
+    }
+    
+    
+    
 }

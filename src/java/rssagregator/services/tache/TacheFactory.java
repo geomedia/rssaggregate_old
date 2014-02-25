@@ -130,8 +130,8 @@ public class TacheFactory {
             maxExecuteTime = TacheVerifFluxNotificationMail_maxExecuteTime;
             typeSchedule = TacheVerifFluxNotificationMail_typeSchedule;
             service = ServiceMailNotifier.getInstance();
-        } else if (c.equals(TacheLancerConnectionJMS.class)) {
-            newTache = new TacheLancerConnectionJMS();
+        } else if (c.equals(ZZOLDTacheLancerConnectionJMS.class)) {
+            newTache = new ZZOLDTacheLancerConnectionJMS();
             maxExecuteTime = TacheLancerConnectionJMS_maxExecuteTime;
             typeSchedule = TacheLancerConnectionJMS_typeSchedule;
             service = ServiceSynchro.getInstance();
@@ -158,10 +158,17 @@ public class TacheFactory {
             typeSchedule = TacheCalculQualiteFluxLancementTous_typeSchedule;
         }
         
-        else if (c.equals(TacheRaffiner.class)){
-            newTache = new TacheRaffiner();
+        else if (c.equals(ZZOLDTacheRaffiner.class)){
+            newTache = new ZZOLDTacheRaffiner();
             service = ServiceCollecteur.getInstance();
             maxExecuteTime = 200;
+        }
+        else if(c.equals(TacheRaffiner2.class)){
+            newTache = new TacheRaffiner2();
+            service = ServiceCollecteur.getInstance();
+            maxExecuteTime =200;
+            
+            
         }
         else if(c.equals(TacheRemoveOldFile.class)){
             newTache = new TacheRemoveOldFile();
@@ -180,6 +187,12 @@ public class TacheFactory {
             maxExecuteTime = 3600*3; // 3 heures max
             newTache.setSchedule(false);
 
+        }
+        else if(c.equals(TacheRaffinerPlusieurs.class)){
+            newTache = new TacheRaffinerPlusieurs();
+            scheduled = false;
+            service = ServiceCollecteur.getInstance();
+            maxExecuteTime = 10;
         }
         else if (c.equals(TacheReenvoiMail.class)){
             newTache = new TacheReenvoiMail();

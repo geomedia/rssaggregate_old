@@ -61,6 +61,7 @@ public class CollecteIncident extends AbstrIncident implements Serializable {
             DateTime dt = new DateTime(this.dateDebut);
             Duration dut = new Duration(dtNow, dt);
             if(dut.getStandardHours()>=3){
+                System.out.println("Je doit être notifie");
                 return true;
             }
             return false;

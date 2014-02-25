@@ -8,21 +8,23 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.reflections.Reflections;
 import rssagregator.beans.form.ComportementCollecteForm;
+import rssagregator.beans.traitement.AbstrRaffineur;
 import rssagregator.beans.traitement.ComportementCollecte;
 import rssagregator.dao.DAOComportementCollecte;
 import rssagregator.dao.DAOFactory;
 import rssagregator.utils.ServletTool;
 
 /**
- * Cette servlet permet de configurer des MediatorCollecte, elle configure
- * directement les objets de traitement associé. Contrairement aux autres
- * servlet, elle n'est ainsi pas dédié à la gestion d'un type d'entité unique
+ * Cette servlet permet de configurer des MediatorCollecte, elle configure directement les objets de traitement associé.
+ * Contrairement aux autres servlet, elle n'est ainsi pas dédié à la gestion d'un type d'entité unique
  *
  * @author clem
  */
@@ -82,8 +84,8 @@ public class ComportementCollecteSrvlt extends HttpServlet {
         request.setAttribute("redirmap", redirmap);
 
         /**
-         * *==============================================================================================
-         * . . . . . . . . . . . . . . . . . . . . .GESTION DES ACTION
+         * *============================================================================================== . . . . . .
+         * . . . . . . . . . . . . . . .GESTION DES ACTION
          *///==============================================================================================
 //        if (action.equals("mod") || action.equals("rem") || action.equals("read")) {
 //            try {
@@ -96,7 +98,6 @@ public class ComportementCollecteSrvlt extends HttpServlet {
 //        if (request.getMethod().equals("POST")) {
 //            obj = (ComportementCollecte) form.bind(request, obj, ComportementCollecte.class);
 //        }
-
         //----------------------------------------ACTION RECHERCHE ---------------------------------------------
         if (action.equals("recherche")) {
             //On récupère la liste des comportements
@@ -107,6 +108,11 @@ public class ComportementCollecteSrvlt extends HttpServlet {
 //        if (form.getValide()) {
         //-----------------------------------------ACTION ADD --------------------------------------------
         if (action.equals("add")) {
+
+            request.setAttribute("raffSet", chargerListeComportement());
+                    
+
+
             ServletTool.actionADD(request, ATT_BEAN_JSP, ATT_FORM_JSP, ComportementCollecte.class, Boolean.TRUE);
 //            if (form.getValide()) {
 //                try {
@@ -121,6 +127,7 @@ public class ComportementCollecteSrvlt extends HttpServlet {
 //            }
         } //--------------------------------------ACTION MODIF--------------------------------------------------------
         else if (action.equals("mod")) {
+             request.setAttribute("raffSet", chargerListeComportement());
             ServletTool.actionMOD(request, ATT_BEAN_JSP, ATT_FORM_JSP, ComportementCollecte.class, Boolean.TRUE);
 
         } //-----------------------------------ACTION REMOVE------------------------------------------------------------
@@ -142,20 +149,19 @@ public class ComportementCollecteSrvlt extends HttpServlet {
 
 
 //        request.setAttribute("bean", obj);
-        
+
         //============================================================================================================
         //.........................................GESTION DE LA VUE
         //============================================================================================================
-        String jsp =  "/WEB-INF/comportementcollecteHTML.jsp";
-        
-        if(vue==null){
+        String jsp = "/WEB-INF/comportementcollecteHTML.jsp";
+
+        if (vue == null) {
             jsp = "/WEB-INF/comportementcollecteHTML.jsp";
-        }
-        else if (vue.equals("jsonform")){
+        } else if (vue.equals("jsonform")) {
             jsp = "/WEB-INF/jsonform.jsp";
         }
-        
-        
+
+
 
         this.getServletContext().getRequestDispatcher(jsp).forward(request, response);
     }
@@ -165,6 +171,17 @@ public class ComportementCollecteSrvlt extends HttpServlet {
         redirmap.put("url", url);
         redirmap.put("msg", msg);
         request.setAttribute("redirmap", redirmap);
+    }
+
+    /***
+     * Permet de retrouver par reflexion la liste des raffinneurs
+     * @return 
+     */
+    private Set<Class<? extends  AbstrRaffineur>> chargerListeComportement() {
+        Reflections reflections = new Reflections("rssagregator.beans.traitement");
+        Set<Class<? extends AbstrRaffineur>> imp = reflections.getSubTypesOf(AbstrRaffineur.class);
+
+        return imp;
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

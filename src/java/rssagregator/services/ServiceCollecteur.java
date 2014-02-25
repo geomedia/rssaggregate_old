@@ -33,7 +33,7 @@ import rssagregator.services.tache.TacheDecouverteAjoutFlux;
 import rssagregator.services.tache.TacheFactory;
 import rssagregator.services.tache.TacheRecupCallable;
 import rssagregator.services.tache.AbstrTache;
-import rssagregator.services.tache.TacheRaffiner;
+import rssagregator.services.tache.TacheRaffiner2;
 
 /**
  * Cette classe permet d'instancier le service de collecte du projet. Elle est organisée autours de deux objets
@@ -44,7 +44,6 @@ import rssagregator.services.tache.TacheRaffiner;
  */
 public class ServiceCollecteur extends ServiceImpl {
 
-    org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(ServiceCollecteur.class);
 //    ListeFluxCollecte fluxCollecte; On le récupère maintenant directement depuis le singleton de collecte
     /**
      * *
@@ -562,17 +561,31 @@ public class ServiceCollecteur extends ServiceImpl {
             for (int i = 0; i < listItem.size(); i++) {
 
                 Item item = listItem.get(i);
+                
+                TacheRaffiner2 raffiner2 = (TacheRaffiner2) TacheFactory.getInstance().getNewTask(TacheRaffiner2.class, false);
+                raffiner2.setComportementCollecte(recupCallable.getFlux().getMediatorFlux());
+                raffiner2.setItem(item);
+                raffiner2.setSchedule(false);
+                tacheProducteur.produireMaintenant(raffiner2);
+                
+                
+                
                 // Si la nouvelle item ne possède pas d'item raffiné on lance une tache dédié a cela
-                if (item.getItemRaffinee() == null) {
-
-                    //TODO : Le rafinnage est pour l'instant désactivé
-                    TacheRaffiner raffiner = (TacheRaffiner) TacheFactory.getInstance().getNewTask(TacheRaffiner.class, false);
-                    raffiner.setItem(item);
-                    raffiner.setSchedule(false);
-
-                    tacheProducteur.produireMaintenant(raffiner);
-
-                }
+//                if (item.getItemRaffinee() == null) {
+//
+//                    
+//                    //TODO : Le rafinnage est pour l'instant désactivé
+//                    TacheRaffiner raffiner = (TacheRaffiner) TacheFactory.getInstance().getNewTask(TacheRaffiner.class, false);
+//                    raffiner.setItem(item);
+//                    raffiner.setComportementCollecte(recupCallable.getFlux().getMediatorFlux());
+//                    
+//                    raffiner.setSchedule(false);
+//
+//                    tacheProducteur.produireMaintenant(raffiner);
+//
+//                }
+                
+                
             }
         }
     }
@@ -623,8 +636,10 @@ public class ServiceCollecteur extends ServiceImpl {
         Runnable chargement = new Runnable() {
             @Override
             public void run() {
+                System.out.println("---> Debut de chargement des flux dans le cache des hash");
                 cacheHashFlux.ChargerLesHashdesFluxdepuisBDD(); // Au démarrage du service, il faut charger les hash pour tout les flux dans le cache
 //                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                System.out.println("---> FIN de chargement des flux dans le cache des hash");
             }
         };
 

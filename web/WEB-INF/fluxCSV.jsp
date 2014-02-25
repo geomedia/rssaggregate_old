@@ -17,7 +17,7 @@
     List<String[]> data = new ArrayList<String[]>();
     List<Flux> listItem = (List<Flux>) request.getAttribute("items");
 
-    data.add(new String[]{"ID", "NOM", "url", "type","journal"});
+    data.add(new String[]{"ID", "NOM", "url", "type","journal", "ISO pays"});
     for (int i = 0; i < listItem.size(); i++) {
         Flux j = listItem.get(i);
 
@@ -32,7 +32,15 @@
         if(j.getJournalLie()!=null){
             journal = j.getJournalLie().toString();
         }
-        data.add(new String[]{id, nom, url, type, journal});
+        
+        String isoJournal ="";
+        if(j.getJournalLie() != null && j.getJournalLie().getPays() != null){
+            isoJournal = j.getJournalLie().getPays();
+            out.println(isoJournal);
+        }
+        
+        
+        data.add(new String[]{id, nom, url, type, journal, isoJournal});
     }
         cSVWriter.writeAll(data);
     cSVWriter.close();

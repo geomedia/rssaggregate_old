@@ -20,7 +20,7 @@ import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.beans.ServeurSlave;
 import rssagregator.beans.incident.Incidable;
-import rssagregator.beans.incident.SynroRecupItemIncident;
+import rssagregator.beans.incident.ZZOLDSynroRecupItemIncident;
 import rssagregator.beans.traitement.ComportementCollecte;
 import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoItem;
@@ -34,9 +34,9 @@ import rssagregator.utils.XMLTool;
  *
  * @author clem
  */
-public class TacheSynchroRecupItem extends TacheImpl<TacheSynchroRecupItem> implements Incidable {
+public class ZZOLDTacheSynchroRecupItem extends TacheImpl<ZZOLDTacheSynchroRecupItem> implements Incidable {
 
-//    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TacheSynchroRecupItem.class);
+//    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(ZZOLDTacheSynchroRecupItem.class);
     private List<Item> itemTrouvees;
     private ServeurSlave serveurSlave;
     private DataOutputStream output = null;
@@ -51,10 +51,10 @@ public class TacheSynchroRecupItem extends TacheImpl<TacheSynchroRecupItem> impl
      * Un pointeur veur l'executor service permettant d'executer et controler la tâche
      */
     //    ScheduledExecutorService executorService;
-    //    public TacheSynchroRecupItem(ScheduledExecutorService executorService) {
+    //    public ZZOLDTacheSynchroRecupItem(ScheduledExecutorService executorService) {
     //        this.executorService = executorService;
     //    }
-//    public TacheSynchroRecupItem(AbstrService executorService) {
+//    public ZZOLDTacheSynchroRecupItem(AbstrService executorService) {
 //        super(executorService);
 //        this.itemTrouvees = new ArrayList<Item>();
 //    }
@@ -106,7 +106,7 @@ public class TacheSynchroRecupItem extends TacheImpl<TacheSynchroRecupItem> impl
                 post += "&hash=" + URLEncoder.encode(hashString, "UTF-8");
                 post += "&vue=" + URLEncoder.encode("xmlsync", "UTF-8");
             } catch (UnsupportedEncodingException ex) {
-                Logger.getLogger(TacheSynchroRecupItem.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ZZOLDTacheSynchroRecupItem.class.getName()).log(Level.SEVERE, null, ex);
             }
 
 
@@ -162,20 +162,20 @@ public class TacheSynchroRecupItem extends TacheImpl<TacheSynchroRecupItem> impl
     }
 
     @Override
-    protected TacheSynchroRecupItem callFinalyse() {
+    protected ZZOLDTacheSynchroRecupItem callFinalyse() {
         //Fermeture du input et du output
         if (output != null) {
             try {
                 output.close();
             } catch (IOException ex) {
-                Logger.getLogger(TacheSynchroRecupItem.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ZZOLDTacheSynchroRecupItem.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         if (input != null) {
             try {
                 input.close();
             } catch (IOException ex) {
-                Logger.getLogger(TacheSynchroRecupItem.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ZZOLDTacheSynchroRecupItem.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         return super.callFinalyse();
@@ -190,7 +190,7 @@ public class TacheSynchroRecupItem extends TacheImpl<TacheSynchroRecupItem> impl
      * @throws Exception
      */
 //    @Override
-//    public synchronized TacheSynchroRecupItem call() {
+//    public synchronized ZZOLDTacheSynchroRecupItem call() {
 //        try {
 //            this.exeption = null;
 //            //Récupération de la liste des flux. Le travail de synchronisation devra être effectué pour chaque flux...
@@ -238,7 +238,7 @@ public class TacheSynchroRecupItem extends TacheImpl<TacheSynchroRecupItem> impl
 //
 //
 //                } catch (UnsupportedEncodingException ex) {
-//                    Logger.getLogger(TacheSynchroRecupItem.class
+//                    Logger.getLogger(ZZOLDTacheSynchroRecupItem.class
 //                            .getName()).log(Level.SEVERE, null, ex);
 //                }
 //
@@ -303,7 +303,7 @@ public class TacheSynchroRecupItem extends TacheImpl<TacheSynchroRecupItem> impl
 //
 //
 //                } catch (IOException ex) {
-//                    Logger.getLogger(TacheSynchroRecupItem.class
+//                    Logger.getLogger(ZZOLDTacheSynchroRecupItem.class
 //                            .getName()).log(Level.SEVERE, null, ex);
 //                }
 //            }
@@ -313,7 +313,7 @@ public class TacheSynchroRecupItem extends TacheImpl<TacheSynchroRecupItem> impl
 //
 //
 //                } catch (IOException ex) {
-//                    Logger.getLogger(TacheSynchroRecupItem.class
+//                    Logger.getLogger(ZZOLDTacheSynchroRecupItem.class
 //                            .getName()).log(Level.SEVERE, null, ex);
 //                }
 //            }
@@ -342,7 +342,7 @@ public class TacheSynchroRecupItem extends TacheImpl<TacheSynchroRecupItem> impl
 
     @Override
     public Class getTypeIncident() {
-        return SynroRecupItemIncident.class;
+        return ZZOLDSynroRecupItemIncident.class;
     }
 
     @Override

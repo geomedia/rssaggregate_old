@@ -11,9 +11,12 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.services.ServiceCollecteur;
+import rssagregator.utils.ThreadUtils;
 
 /**
  * Un singleton permettant de concerver les hash des flux. Il est utilisé par le dédoublonneur
@@ -24,9 +27,8 @@ public class CacheHashFlux {
 
     static CacheHashFlux instance = new CacheHashFlux();
     Map<Flux, Set<String>> cacheHash = new HashMap<Flux, Set<String>>(); // Le type Lincked hash map permet de concerver l'ordre d'ajout. Utile quand on veut supprimer les x premier (mais peut être mauvais en terme de capacité
+    org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
 
-     org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
-    
     protected CacheHashFlux() {
     }
 
@@ -44,18 +46,42 @@ public class CacheHashFlux {
      */
     public synchronized void ChargerLesHashdesFluxdepuisBDD() {
         logger.debug("Chargement");
+        EntityManager em = DAOFactory.getInstance().getEntityManager();
+        try {
+            DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux(false);
+            daoFlux.setEm(em);
+            DaoItem daoItem = DAOFactory.getInstance().getDaoItem(false);
+            daoItem.setEm(em);
 
-        DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
-//        List<Flux> listflux = daoFlux.findAllFlux(Boolean.TRUE);
-        List<Flux> listflux = daoFlux.findall();
+            List<Flux> listflux = daoFlux.findall();
+            for (int i = 0; i < listflux.size(); i++) {
+                ThreadUtils.interruptCheck();
+                Flux flux = listflux.get(i);
+                // Construction de la requete
+                Query query = em.createQuery("SELECT item.hashContenu FROM Item item JOIN item.listFlux fl WHERE fl.ID=:idfl ORDER BY item.ID DESC");
+                query.setParameter("idfl", flux.getID());
+                query.setFirstResult(0);
+                query.setMaxResults(500);
 
-        DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
-        for (int i = 0; i < listflux.size(); i++) {
-            Flux flux = listflux.get(i);
-            Set<String> listHash = daoItem.findLastHash(flux, 500);
-            addAll(flux, listHash);
-        } 
+                List<String> listResu = query.getResultList();
 
+                Set<String> setHash = new LinkedHashSet<String>();
+                setHash.addAll(listResu);
+                addAll(flux, setHash);
+//                em.detach(flux);
+            }
+
+        } catch (Exception e) {
+            logger.error("Erreur lors du chargement des hash dans le cache", e);
+        } finally {
+            if (em != null && em.isOpen()) {
+                try {
+                    em.close();
+                } catch (Exception e) {
+                    logger.error("Erreur lors de la fermetuire de l'em", e);
+                }
+            }
+        }
         logger.debug("fin de chargement");
     }
 
@@ -229,7 +255,6 @@ public class CacheHashFlux {
 
             }
             if (cacheHash.containsKey(flux)) {
-
             }
         }
         return false;

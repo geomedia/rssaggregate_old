@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import javax.persistence.LockModeType;
+import javax.persistence.Query;
 import org.apache.velocity.VelocityContext;
 import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.dao.DAOFactory;
@@ -54,15 +55,20 @@ public class TacheAlerteMail extends TacheImpl<TacheAlerteMail> {
         DAOIncident<AbstrIncident> dao = (DAOIncident<AbstrIncident>) DAOFactory.getInstance().getDaoFromType(AbstrIncident.class);
         dao.setEm(em);
 
-        incidents = dao.findIncidentANotifier();
+//        incidents = dao.findIncidentANotifier();
+
+        // Doivent être notifie 
+        Query query = em.createQuery("SELECT i FROM i_superclass i WHERE i.lastNotification is null");
+        incidents = query.getResultList();
+
+
 
         //On supprimer de la liste les incident ne devant pas êter notifié (usage de la methode doitEtreNotifieParMail() des incidents.
         for (Iterator<AbstrIncident> it = incidents.iterator(); it.hasNext();) {
             AbstrIncident abstrIncident = it.next();
             if (!abstrIncident.doitEtreNotifieParMail()) {
                 it.remove();
-            }
-            else{ // Si la ressources doit être concervé. On la lock car elle va être modifiée dans le reste de la procédure
+            } else { // Si la ressources doit être concervé. On la lock car elle va être modifiée dans le reste de la procédure
                 verrouillerObjectDansLEM(abstrIncident, LockModeType.PESSIMISTIC_READ);
             }
         }
@@ -99,5 +105,4 @@ public class TacheAlerteMail extends TacheImpl<TacheAlerteMail> {
             }
         }
     }
-    
 }

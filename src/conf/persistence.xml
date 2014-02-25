@@ -27,7 +27,8 @@
     <class>rssagregator.beans.FluxPeriodeCaptation</class>
     <class>rssagregator.beans.ItemRaffinee</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
-    <shared-cache-mode>ALL</shared-cache-mode>
+    <!--<shared-cache-mode>ALL</shared-cache-mode>-->
+    <shared-cache-mode>NONE</shared-cache-mode>
     <!--=============================================================================================================-->
     <!--.................................PARAMETRES DE CONNECTION A POSTGRES SQL.....................................-->
     <!--=============================================================================================================-->

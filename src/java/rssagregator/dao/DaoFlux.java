@@ -8,18 +8,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.persistence.PostLoad;
 import javax.persistence.Query;
 import javax.persistence.TransactionRequiredException;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.Join;
 import rssagregator.beans.Flux;
 import rssagregator.beans.FluxType;
-import rssagregator.beans.Item;
 import rssagregator.beans.Journal;
 import rssagregator.beans.traitement.ComportementCollecte;
 import javax.persistence.criteria.CriteriaQuery;
@@ -45,6 +39,7 @@ public class DaoFlux extends AbstrDao {
     org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DaoFlux.class);
 //    private List<Journal> criteriaJournauxLie = new ArrayList<Journal>();
     Journal criteriaJournalLie;
+    FluxType criteriaFluxType;
 
     /**
      * *
@@ -52,13 +47,14 @@ public class DaoFlux extends AbstrDao {
      *
      * @param dAOFactory
      */
-    protected DaoFlux(DAOFactory dAOFactory) {
-        em = dAOFactory.getEntityManager();
+    protected DaoFlux(DAOFactory dAOFactory, boolean loadEm) {
+
+        if (loadEm) {
+            em = dAOFactory.getEntityManager();
+        }
         this.classAssocie = Flux.class;
         this.dAOFactory = dAOFactory;
-        em.setProperty("javax.persistence.cache.storeMode", "CheckCacheOnly");
-
-
+//        em.setProperty("javax.persistence.cache.storeMode", "CheckCacheOnly");
     }
 
 //    /**
@@ -157,6 +153,12 @@ public class DaoFlux extends AbstrDao {
             Join joinFlux = root.join("journalLie");
             listWhere.add(cb.and(cb.equal(joinFlux.get("ID"), criteriaJournalLie.getID())));
         }
+
+        if (criteriaFluxType != null) {
+            Join joinFlux = root.join("typeFlux");
+            listWhere.add(cb.and(cb.equal(joinFlux.get("ID"), criteriaFluxType.getID())));
+        }
+
     }
 //    @Override
 //        public void bbb(CriteriaQuery cq, CriteriaBuilder cb, Root root, List<Predicate> listWhere){
@@ -164,40 +166,40 @@ public class DaoFlux extends AbstrDao {
 //        };
 
     /**
-     * *
-     * Charger les flux depuis la base de données. Les dernier hash des items sont aussi chargé pour résidé en mémoire
-     */
-    @Deprecated
-    public void chargerDepuisBd() {
-        logger.info("Chargement des flux depuis la base de données");
-
-        //Chargement de la liste des flux depuis la BDD
-        DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
-        List<Flux> listflux = daoFlux.findAllFlux(Boolean.TRUE);
-
-        int i;
-
-        for (i = 0; i < listflux.size(); i++) {
-            Flux fl = (Flux) listflux.get(i);
-
-            // Pour chaque flux, on va charger les 100 dernier hash 
-            DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
-            Set<String> dernierHash = daoItem.findLastHash(fl, 100);
-//            fl.setLastEmpruntes(dernierHash);
-
-
-
-
-            //On enregistre le flux à ses services
-//            fl.enregistrerAupresdesService();
-
-            //Lors de l'attribution d'un id, on enregistre le flux aurpès du Server de Mbeans
-
-            //On doit également charger les incident en cours pour les flux
-//            DAOIncident dAOIncident = DAOFactory.getInstance().getDAOIncident();
-//            fl.setIncidentEnCours(dAOIncident.findIncidentOuvert(fl.getID()));
-        }
-    }
+//     * *
+//     * Charger les flux depuis la base de données. Les dernier hash des items sont aussi chargé pour résidé en mémoire
+//     */
+//    @Deprecated
+//    public void chargerDepuisBd() {
+//        logger.info("Chargement des flux depuis la base de données");
+//
+//        //Chargement de la liste des flux depuis la BDD
+//        DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
+//        List<Flux> listflux = daoFlux.findAllFlux(Boolean.TRUE);
+//
+//        int i;
+//
+//        for (i = 0; i < listflux.size(); i++) {
+//            Flux fl = (Flux) listflux.get(i);
+//
+//            // Pour chaque flux, on va charger les 100 dernier hash 
+//            DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
+//            Set<String> dernierHash = daoItem.findLastHash(fl, 100);
+////            fl.setLastEmpruntes(dernierHash);
+//
+//
+//
+//
+//            //On enregistre le flux à ses services
+////            fl.enregistrerAupresdesService();
+//
+//            //Lors de l'attribution d'un id, on enregistre le flux aurpès du Server de Mbeans
+//
+//            //On doit également charger les incident en cours pour les flux
+////            DAOIncident dAOIncident = DAOFactory.getInstance().getDAOIncident();
+////            fl.setIncidentEnCours(dAOIncident.findIncidentOuvert(fl.getID()));
+//        }
+//    }
 
     /**
      * *
@@ -558,7 +560,7 @@ public class DaoFlux extends AbstrDao {
      * @param f id du flux
      * @return
      */
-    public List<CollecteIncident> findPrincipauxIncident(Long f, int nbrrepetition, int nbhour) {
+    public List<CollecteIncident> findPrincipauxIncident(Long f, int nbrrepetition, int nbHour) {
 
         Query q = em.createQuery("SELECT i FROM i_collecteincident i JOIN i.fluxLie f WHERE f.ID = :fId and i.nombreTentativeEnEchec>:nbr");
 
@@ -573,17 +575,13 @@ public class DaoFlux extends AbstrDao {
                 DateTime dt1 = new DateTime(collecteIncident.getDateDebut());
                 DateTime dt2 = new DateTime(collecteIncident.getDateFin());
                 Duration dur = new Duration(dt1, dt2);
-                if (dur.getStandardHours() < nbhour) {
+                if (dur.getStandardHours() < nbHour) {
                     it.remove();
                 }
             }
         }
 
-        for (int i = 0; i < resu.size(); i++) {
-            CollecteIncident collecteIncident = resu.get(i);
-        }
         return resu;
-
     }
 
     /**
@@ -607,5 +605,13 @@ public class DaoFlux extends AbstrDao {
         return period;
 
 
+    }
+
+    public FluxType getCriteriaFluxType() {
+        return criteriaFluxType;
+    }
+
+    public void setCriteriaFluxType(FluxType criteriaFluxType) {
+        this.criteriaFluxType = criteriaFluxType;
     }
 }

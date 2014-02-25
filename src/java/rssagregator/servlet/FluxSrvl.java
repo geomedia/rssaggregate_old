@@ -81,7 +81,7 @@ public class FluxSrvl extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        
+  
         response.setCharacterEncoding("UTF-8");
         request.setCharacterEncoding("UTF-8");
 
@@ -200,6 +200,20 @@ public class FluxSrvl extends HttpServlet {
                 logger.debug(e);
             }
             
+            try {
+                Long idType = new Long(request.getParameter("typeid"));
+                request.setAttribute("typeid", idType);
+                DAOGenerique daoG = DAOFactory.getInstance().getDAOGenerique();
+                daoG.setClassAssocie(FluxType.class);
+                
+                FluxType fluxType= (FluxType) daoG.find(idType);
+                daoFlux.setCriteriaFluxType(fluxType);
+                
+                
+            } catch (Exception e) {
+            }
+            
+            
             ServletTool.actionLIST(request, Flux.class, null, daoFlux);
             //------------------------------------------------------------------------------------------------------------
             //-----------------------------------------------------ACTION REMOVE ---------------------------------------
@@ -242,10 +256,6 @@ public class FluxSrvl extends HttpServlet {
             } catch (Exception e) {
                 ServletTool.redir(request, "flux", "flux qui n'existent pas.", true);
             }
-            
-            
-            
-            
             
             
         } //------------------------------------------------------------------------------------------------------------
