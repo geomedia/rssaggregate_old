@@ -18,14 +18,8 @@
         <div id="banner">
             <a href ="/RSSAgregate/index">
                 <%
-//                    if (DAOFactory.getInstance().getDAOConf().getConfCourante().getMaster()) {
                         out.println("<img src=\"/RSSAgregate/ress/img/logo_mastervert.png\"/>");
                         request.setAttribute("master", true);
-//                    } else {
-//                        out.println("<img src=\"/RSSAgregate/ress/img/logo_masterrouge.png\"/>");
-//                        request.setAttribute("master", false);
-//                    }
-
                 %>
             </a>
         </div>
