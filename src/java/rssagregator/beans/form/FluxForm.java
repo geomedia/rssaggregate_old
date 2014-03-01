@@ -4,6 +4,7 @@
  */
 package rssagregator.beans.form;
 
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.logging.Level;
@@ -75,6 +76,8 @@ public class FluxForm extends AbstrForm {
             flux.setInfoCollecte(infoCollecte);
             flux.setEstStable(estStable);
             flux.setTypeFlux(typeFlux);
+//            flux.setModified(new Timestamp(600));
+
 
 
             //-------> Gestion de la date de création du flux

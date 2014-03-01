@@ -198,34 +198,43 @@ $(document).ready(function() {
                 caption: "'<strong style=\"font-weight: bolder;color: red;\">Export CSV</strong>",
                 buttonicon: "ui-icon-add",
                 onClickButton: function() {
-                    
-//                    rafine= confirm("Item Rafinée ?");
-                    
-                    
-                    html = confirm('Voulez-vous supprimer le code HTML des items lors de l\'export');
-                    escape = confirm('utiliser le \\ comme caractère d\'échapement');
-                    
-                    urlReq = rootpath + 'item/list?vue=csv';
-                    if(escape){
-                        urlReq+='&escape=true';
-                    }
-                    if(html){
-                        urlReq += '&html=true';
-                    }
-//                    if(rafine){
-//                        urlReq+="&rafine=true";
-//                    }
-                    
-                      $("#list").jqGrid('excelExport', {tag: 'csv', url: urlReq});
 
-//                    if(html===true){
-//                         $("#list").jqGrid('excelExport', {tag: 'csv', url: urlReq});
-//                    }
-//                    else{
-//                         $("#list").jqGrid('excelExport', {tag: 'csv', url: rootpath + 'item/list?vue=csv&html=false'});
-//                    }
+//                    rafine= confirm("Item Rafinée ?");
+
+                    $('#dia').remove();
+                    $('nav').append('<div id="dia" title="Information sur le traitement"><p><label>Supprimer HTML</label> <input type="checkbox" id="suppHtml"/><br />\n\
+<label>Utiliser le \ comme caractère d\'échapement</label><input type="checkbox" id="escape"/>\n\
+<p>L\'export des données peut prendre plusieurs minutes. Si cette export dure plus de 20 secondes vous serez automatiquement redigé vers le répertoire contenant vos fichiers résultats bien que la tache d\'export ne soit pas nécessairement terminée. Recharger cette page par la suite pour voir tous les fichiers</p>\n\
+</p></div>');
+                    $('#dia').dialog({minHeight: 300, minWidth: 400, closeText: "hide", show: "fade", dialogClass: "alert"});
+                    $('#dia').dialog({
+                        modal: true,
+                        buttons: {
+                            Ok: function() {
+
+                                urlReq = rootpath + 'item/list?vue=csv';
+                                if ($('#escape').is(':checked')) {
+                                    urlReq += '&escape=true';
+                                }
+                                if ($('#suppHtml').is(':checked')) {
+                                    urlReq += '&html=true';
+                                }
+
+                                $("#list").jqGrid('excelExport', {tag: 'csv', url: urlReq});
+
+                                $(this).dialog("close");
+                            },
+                            Cancel: function() {
+                                $(this).dialog("close");
+                            }
+
+                        }
+                    });
+
+
+
                     opt = {exptype: "jsonstring"};
-                   
+
                 },
                 position: "last"
             });

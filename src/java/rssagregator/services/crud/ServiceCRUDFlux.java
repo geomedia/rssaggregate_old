@@ -19,6 +19,8 @@ import rssagregator.dao.DAOIncident;
 import rssagregator.dao.DaoFlux;
 import rssagregator.dao.DaoItem;
 import rssagregator.services.ServiceCollecteur;
+import rssagregator.services.tache.TacheFactory;
+import rssagregator.services.tache.TacheRecupCallable;
 
 /**
  * Le service permettant de gérer les opération CRUD sur un flux. La suppression des flux demande une procédure
@@ -40,6 +42,14 @@ public class ServiceCRUDFlux extends ServiceCRUDBeansSynchro {
 
         ServiceCollecteur collecteur = ServiceCollecteur.getInstance();
         collecteur.enregistrerFluxAupresDuService(cast);
+        
+        // On lance une tache de collecte non schedulé mannuellement pour que l'utilisateur puisse dérectement vérifier des items
+        TacheRecupCallable recupCallable = (TacheRecupCallable) TacheFactory.getInstance().getNewTask(TacheRecupCallable.class, Boolean.FALSE);
+        recupCallable.setFlux(cast);
+        ServiceCollecteur.getInstance().getTacheProducteur().produireMaintenant(recupCallable);
+        
+        
+        
     }
     
     

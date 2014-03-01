@@ -65,10 +65,7 @@ Cette JSP permet de mettre en forme les données afficher par la grid de présen
         o1.put("cell", o1array);
         
     }
-
-
     out.clear();
-    System.out.println(export.toJSONString());
     out.print(export.toJSONString());
     out.flush();
 %>

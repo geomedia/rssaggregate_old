@@ -31,6 +31,5 @@
     
     out.clear();
     out.print(array.toJSONString());
-    System.out.println(array.toJSONString());
     out.flush();
 %>

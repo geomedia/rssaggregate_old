@@ -430,7 +430,7 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
                                     <legend>Paramètres :</legend>
 
                                     <label for="active" title="L'agrégateur doit t'il collecter ce flux ?">Actif : <span class="requis"></span></label>
-                                    <input type="checkbox" id="active" name="active" <c:if test="${bean.active=='true'}">checked="checked"</c:if>/>
+                                    <input type="checkbox" id="active" name="active" <c:if test="${action=='add'}">checked="checked"</c:if><c:if test="${bean.active=='true'}">checked="checked"</c:if>/>
 
                                     <br />
                                     <label for="url" title="Adresse a laquelle on trouve le XML du flux">URL du flux<span class="requis">*</span></label>

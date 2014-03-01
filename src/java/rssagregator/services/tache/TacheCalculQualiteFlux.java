@@ -124,7 +124,6 @@ public class TacheCalculQualiteFlux extends TacheImpl<TacheCalculQualiteFlux> im
 
         compteItem.calculterBoxPloat();
 
-
         period.setStatMax(compteItem.getMax());
         period.setStatMin(compteItem.getMin());
         period.setStatQuartilePremier(compteItem.getQuartilePremier());
@@ -176,15 +175,11 @@ public class TacheCalculQualiteFlux extends TacheImpl<TacheCalculQualiteFlux> im
         for (Map.Entry<Date, Integer> entry : anomalies.entrySet()) {
             Date date = entry.getKey();
             Integer nbtConstate = entry.getValue();
-            System.out.println("ADD");
             serviceCrud.ajouterAnomaliePourJour(flux, date, nbtConstate.shortValue(), em, false); // Le service ajoute si besoin est une anoamlie ou une période a une anomalie existante
-
         }
 
         //------------Enregistrement
         em.merge(period); // On modifi la période
-   
-
     }
 
     @Override

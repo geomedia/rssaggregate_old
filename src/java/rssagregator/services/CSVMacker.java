@@ -12,9 +12,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -159,11 +157,11 @@ public class CSVMacker implements Callable<Object> {
                     em.clear(); // Il va y avoir des millier//millions d'entité dans l'em pour eviter un prob on clear a chaque tout de boucle
                     Query query;
                     if (date1 != null && date2 != null) {
-                        query = em.createQuery("SELECT DISTINCT(i) FROM Item i JOIN FETCH i.listFlux As f LEFT JOIN FETCH f.typeFlux t, f.journalLie j WHERE f.ID = :idf AND i.dateRecup > :d1 AND i.dateRecup<:d2"); // On fetch toute les entité qui seront utilisée pendant le traitement
+                        query = em.createQuery("SELECT DISTINCT(i) FROM Item i LEFT OUTER JOIN FETCH i.doublon dl JOIN FETCH i.listFlux As f LEFT JOIN FETCH f.typeFlux t, f.journalLie j WHERE f.ID = :idf AND i.dateRecup > :d1 AND i.dateRecup<:d2"); // On fetch toute les entité qui seront utilisée pendant le traitement
                         query.setParameter("d1", date1);
                         query.setParameter("d2", date2);
                     } else {
-                        query = em.createQuery("SELECT DISTINCT(i) FROM Item i JOIN FETCH i.listFlux As f LEFT JOIN FETCH f.typeFlux t, f.journalLie j WHERE f.ID = :idf"); // On fetch toute les entité qui seront utilisée pendant le traitement
+                        query = em.createQuery("SELECT DISTINCT(i) FROM Item i LEFT OUTER JOIN FETCH i.doublon d JOIN FETCH i.listFlux As f LEFT JOIN FETCH f.typeFlux t, f.journalLie j WHERE f.ID = :idf"); // On fetch toute les entité qui seront utilisée pendant le traitement
 
                     }
 
@@ -334,7 +332,6 @@ public class CSVMacker implements Callable<Object> {
      */
     private void createUniqRep() {
         String repName = "EXPORT--" + rssagregator.utils.FileUtils.contructMailFileName() + "/";
-//        String path = System.getProperty("confpath");
         exportPath = webDir + "upload/" + repName;
         new File(exportPath).mkdir();
 
@@ -342,14 +339,6 @@ public class CSVMacker implements Callable<Object> {
         redirPath = c.getServurl() + "/upload/" + repName + "/";
     }
 
-    public static void main(String[] args) {
-
-        System.out.println(" test Ternaire");
-        String entre = "";
-        String resu = (!entre.isEmpty()) ? entre : "X";
-        System.out.println("Val " + resu);
-
-    }
 
     /**
      * *
@@ -462,7 +451,6 @@ public class CSVMacker implements Callable<Object> {
         File rep = new File(dir);
 
         final String fName = nomfichier;
-        System.out.println("fname " + fName);
         FilenameFilter filenameFilter = new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
@@ -472,10 +460,8 @@ public class CSVMacker implements Callable<Object> {
         };
 
 
-        System.out.println("rep " + dir);
         File[] fichiers = rep.listFiles(filenameFilter);
         Arrays.sort(fichiers, new FileNameComparator());
-        System.out.println("--> Size " + fichiers.length);
 
         for (int i = 0; i < fichiers.length; i++) {
             File file = fichiers[i];
@@ -498,9 +484,6 @@ public class CSVMacker implements Callable<Object> {
         //---> Il faut renommer le premier fichier
 
         fichiers[0].renameTo(new File(dir + nomfichier + ".csv"));
-        System.out.println("--> Nombre de fichier" + fichiers.length);
-
-
     }
 
 //    /**

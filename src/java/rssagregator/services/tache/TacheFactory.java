@@ -184,7 +184,7 @@ public class TacheFactory {
         else if(c.equals(TacheRaffinerPeriodique.class)){
             newTache = new TacheRaffinerPeriodique();
             service = ServiceCollecteur.getInstance();
-            maxExecuteTime = 3600*3; // 3 heures max
+            maxExecuteTime = 3600*9; // 3 heures max
             newTache.setSchedule(false);
 
         }
@@ -192,7 +192,7 @@ public class TacheFactory {
             newTache = new TacheRaffinerPlusieurs();
             scheduled = false;
             service = ServiceCollecteur.getInstance();
-            maxExecuteTime = 10;
+            maxExecuteTime = 30;
         }
         else if (c.equals(TacheReenvoiMail.class)){
             newTache = new TacheReenvoiMail();

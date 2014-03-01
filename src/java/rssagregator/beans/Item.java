@@ -656,9 +656,6 @@ public class Item extends Bean implements Serializable, Comparable<Item>, Conten
         } else if (doublonde.getItemDoublon().equals(doublonde.getItemRef())) {
             return this; // 
         } else {
-            System.out.println("RECURSE ");
-            System.out.println(" THIS ID " + this.getID());
-            System.out.println(" REF MASTER ID  " + doublonde.getItemRef().getID());
             return doublonde.getItemRef().remonterRecursivementDoublon( r);
         }
 //        /

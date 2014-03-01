@@ -6,14 +6,13 @@ package rssagregator.servlet;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletContext;
@@ -22,7 +21,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.json.simple.JSONArray;
 //import rssagregator.beans.DonneeBrute;
 import rssagregator.beans.Flux;
 import rssagregator.beans.FluxType;
@@ -282,13 +280,15 @@ public class ItemSrvl extends HttpServlet {
                 ExecutorService es = Executors.newCachedThreadPool();
                 try {
                     Future fut = es.submit(cSVMacker);
-                    fut.get(); // On attend la fin du travail 
-                    request.setAttribute("redir", cSVMacker.getRedirPath());
+                    fut.get(30000, TimeUnit.MILLISECONDS); // On attend la fin du travail 
+                    
+                  
                 } catch (Exception e) {
                     logger.debug("Erreur lors de la génération du CSV", e);
                 } finally {
                     es.shutdownNow();
                 }
+                  request.setAttribute("redir", cSVMacker.getRedirPath());
 
 
             } else {
@@ -319,9 +319,6 @@ public class ItemSrvl extends HttpServlet {
             daoG.setClassAssocie(FluxType.class);
             List<FluxType> list = daoG.findall();
             request.setAttribute("listType", list);
-            System.out.println("Nombre de type = " + list.size());
-            
-
 
         }
 

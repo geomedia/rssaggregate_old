@@ -362,6 +362,7 @@ public abstract class AbstrTache<T> extends Observable implements Callable<T> {
                 act = true;
 
             } else if (typeSchedule != null && typeSchedule == 3) {
+                System.out.println("=========== C'est le type 3");
                 DateTime next = new DateTime();
 
                 next = next.withHourOfDay(this.heureSchedule);

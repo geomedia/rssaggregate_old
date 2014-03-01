@@ -18,6 +18,11 @@ import org.joda.time.Duration;
  */
 public class TacheRemoveOldFile extends TacheImpl<Object> {
 
+    /***
+     * Nombre d'heure max de conservation des fichiers dans le répertoire 
+     */
+    private Integer nbHours;
+    
     @Override
     protected void callCorps() throws InterruptedException, Exception {
 
@@ -37,11 +42,22 @@ public class TacheRemoveOldFile extends TacheImpl<Object> {
                 DateTime dt = new DateTime(date);
 
                 Duration dur = new Duration(dt, dtCurrent);
-                if (dur.getStandardDays()> 2) {
+                if (dur.getStandardDays()> nbHours) {
                     logger.info("Suppression du répertoire " + file);
                     file.delete();
                 }
             }
         }
     }
+
+    public Integer getNbHours() {
+        return nbHours;
+    }
+
+    public void setNbHours(Integer nbHours) {
+        this.nbHours = nbHours;
+    }
+    
+    
+    
 }

@@ -50,9 +50,6 @@
    
     out.clear();
     out.print(export.toJSONString());
- 
-    System.out.println(array.toJSONString());
     out.flush();
-
 %>
 

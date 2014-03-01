@@ -553,7 +553,6 @@ public class ServiceCollecteur extends ServiceImpl {
         if (o.getClass().equals(TacheRecupCallable.class)) { // Cette partie est désactivé pour le moement
 
             TacheRecupCallable recupCallable = (TacheRecupCallable) o;
-            logger.debug("Update de " + o + "\n Annulé : " + recupCallable.getAnnuler());
             List<Item> listItem = recupCallable.getNouvellesItems();
 
 

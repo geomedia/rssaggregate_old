@@ -62,18 +62,14 @@ import rssagregator.dao.DaoFlux;
 @Table(name = "flux")
 @XmlRootElement
 public class Flux extends Bean implements Observer, Serializable, BeanSynchronise, Cloneable {
+    public static final String PROP_ACTIVE = "active";
+    
+    
+    public static final String PROP_MEDIATORFLUX = "mediatorFlux";
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long ID;
-
-    public Flux() {
-        propertyChangeSupport = new PropertyChangeSupport(this);
-        FluxChangeLisner changeLisner = new FluxChangeLisner();
-        propertyChangeSupport.addPropertyChangeListener(changeLisner);
-        incidentsLie = new ArrayList<CollecteIncident>();
-
-    }
     
     /**
      * *
@@ -81,24 +77,6 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
      * lors de l'activation ou de la désactivation. Ce changeLisner est enregistré auprès de ce PropertyChangeSupport
      */
     private transient PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
-
-    /**
-     * Add PropertyChangeListener.
-     *
-     * @param listener
-     */
-    public void addPropertyChangeListener(PropertyChangeListener listener) {
-        propertyChangeSupport.addPropertyChangeListener(listener);
-    }
-
-    /**
-     * Remove PropertyChangeListener.
-     *
-     * @param listener
-     */
-    public void removePropertyChangeListener(PropertyChangeListener listener) {
-        propertyChangeSupport.removePropertyChangeListener(listener);
-    }
     /**
      * URL du flux rss sous la forme http://url/rep.
      */
@@ -110,27 +88,6 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
 //    protected Boolean active;
     @Column(name = "active")
     private Boolean active;
-    public static final String PROP_ACTIVE = "active";
-
-    /**
-     * Get the value of active
-     *
-     * @return the value of active
-     */
-    public Boolean getActive() {
-        return active;
-    }
-
-    /**
-     * Set the value of active
-     *
-     * @param active new value of active
-     */
-    public void setActive(Boolean active) {
-        Boolean oldActive = this.active;
-        this.active = active;
-        propertyChangeSupport.firePropertyChange(PROP_ACTIVE, oldActive, active);
-    }
     /**
      * L'url de la rubrique du flux, il s'agit de la page HTML d'entrée de la rubrique. Cette adresse peut être utilisé
      * pour faire de l'auto discovery.
@@ -181,30 +138,6 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
      */
     @ManyToOne()
     private ComportementCollecte mediatorFlux;
-    
-    
-    public static final String PROP_MEDIATORFLUX = "mediatorFlux";
-
-    /**
-     * Get the value of mediatorFlux
-     *
-     * @return the value of mediatorFlux
-     */
-    public ComportementCollecte getMediatorFlux() {
-        return mediatorFlux;
-    }
-    
-
-    /**
-     * Set the value of mediatorFlux
-     *
-     * @param mediatorFlux new value of mediatorFlux
-     */
-    public void setMediatorFlux(ComportementCollecte mediatorFlux) {
-        ComportementCollecte oldMediatorFlux = this.mediatorFlux;
-        this.mediatorFlux = mediatorFlux;
-        propertyChangeSupport.firePropertyChange(PROP_MEDIATORFLUX, oldMediatorFlux, mediatorFlux);
-    }
     
     /**
      * *
@@ -259,6 +192,77 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
     protected Boolean estStable;
 
 
+    public Flux() {
+        propertyChangeSupport = new PropertyChangeSupport(this);
+        FluxChangeLisner changeLisner = new FluxChangeLisner();
+        propertyChangeSupport.addPropertyChangeListener(changeLisner);
+        incidentsLie = new ArrayList<CollecteIncident>();
+
+    }
+
+    public Flux(String url) {
+        this();
+        this.url = url;
+    }
+
+    /**
+     * Add PropertyChangeListener.
+     *
+     * @param listener
+     */
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        propertyChangeSupport.addPropertyChangeListener(listener);
+    }
+
+    /**
+     * Remove PropertyChangeListener.
+     *
+     * @param listener
+     */
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        propertyChangeSupport.removePropertyChangeListener(listener);
+    }
+
+    /**
+     * Get the value of active
+     *
+     * @return the value of active
+     */
+        public Boolean getActive() {
+        return active;
+    }
+
+    /**
+     * Set the value of active
+     *
+     * @param active new value of active
+     */
+    public void setActive(Boolean active) {
+        Boolean oldActive = this.active;
+        this.active = active;
+        propertyChangeSupport.firePropertyChange(PROP_ACTIVE, oldActive, active);
+    }
+
+    /**
+     * Get the value of mediatorFlux
+     *
+     * @return the value of mediatorFlux
+     */
+    public ComportementCollecte getMediatorFlux() {
+        return mediatorFlux;
+    }
+
+    /**
+     * Set the value of mediatorFlux
+     *
+     * @param mediatorFlux new value of mediatorFlux
+     */
+    public void setMediatorFlux(ComportementCollecte mediatorFlux) {
+        ComportementCollecte oldMediatorFlux = this.mediatorFlux;
+        this.mediatorFlux = mediatorFlux;
+        propertyChangeSupport.firePropertyChange(PROP_MEDIATORFLUX, oldMediatorFlux, mediatorFlux);
+    }
+
     public String getUrl() {
         return url;
     }
@@ -284,7 +288,7 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
         this.item = items;
     }
 
-    public FluxType getTypeFlux() {
+        public FluxType getTypeFlux() {
         return typeFlux;
     }
 
@@ -304,15 +308,15 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
         return parentFlux;
     }
 
-    public void setParentFlux(Flux parentFlux) {
+        public void setParentFlux(Flux parentFlux) {
         this.parentFlux = parentFlux;
     }
 
-    public String getNom() {
+        public String getNom() {
         return nom;
     }
 
-    public void setNom(String nom) {
+        public void setNom(String nom) {
         this.nom = nom;
     }
 
@@ -325,17 +329,13 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
         return infoCollecte;
     }
 
+
     public void setInfoCollecte(String infoCollecte) {
         this.infoCollecte = infoCollecte;
     }
 
     public void setPeriodeCaptations(List<FluxPeriodeCaptation> periodeCaptations) {
         this.periodeCaptations = periodeCaptations;
-    }
-
-    public Flux(String url) {
-        this();
-        this.url = url;
     }
 
     @Override
@@ -362,7 +362,6 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
         this.incidentsLie = incidentsLie;
     }
 
-
     public String getHtmlUrl() {
         return htmlUrl;
     }
@@ -373,13 +372,15 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
 
     public Date getCreated() {
         return created;
-    }
-
+    }    /**
+     * *
+     * Retourne le nom du journal ainsi que le type du flux. Si ces variables ne sont pas définient, on retourne l'url.
+     */
     public void setCreated(Date created) {
         this.created = created;
     }
 
-    public Timestamp getModified() {
+        public Timestamp getModified() {
         return modified;
     }
 
@@ -387,20 +388,20 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
         this.modified = modified;
     }
 
-    public Boolean getEstStable() {
+        public Boolean getEstStable() {
         return estStable;
     }
 
-    public void setEstStable(Boolean estStable) {
+        public void setEstStable(Boolean estStable) {
         this.estStable = estStable;
     }
-
 
     /**
      * *
      * Parcours les incidents et retourne ceux qui ne sont pas clos, cad ceux qui n'ont pas de date de fin
      *
-     * @return
+     * @return    /**
+     * renvoie toujours true
      */
     public List<CollecteIncident> getIncidentEnCours() {
         List<CollecteIncident> incid = getIncidentsLie();
@@ -433,13 +434,12 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
         }
         return null;
     }
-    
-    
-    @Override
+
     /**
      * *
      * Retourne le nom du journal ainsi que le type du flux. Si ces variables ne sont pas définient, on retourne l'url.
      */
+    @Override
     public String toString() {
 
         // Si on a un nom on le retourne en priorité
@@ -600,6 +600,58 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
         return clone;
 
     }
+    
+    
+    
+    public List<AbstrIncident> returnIncidentDurantLaPeride(FluxPeriodeCaptation period){
+                List<AbstrIncident> returnList = new ArrayList<AbstrIncident>();
+        DateTime dt1 = new DateTime(period.getDateDebut());
+        DateTime dt2;
+        if(period.getDatefin() == null){
+            dt2 = new DateTime(period.getDatefin());
+        }
+        else{
+            dt2 = new DateTime();
+        }
+        
+        Interval intev = new Interval(dt1, dt2);
+
+        for (Iterator<CollecteIncident> it = incidentsLie.iterator(); it.hasNext();) {
+            CollecteIncident collecteIncident = it.next();
+//            
+           DateTime dtIncid = new DateTime(collecteIncident.getDateDebut());
+  
+           if(intev.contains(dtIncid)){
+               returnList.add(collecteIncident);
+           }
+        }
+        return returnList;
+    }
+    
+     public long returnIncidentDurationDurantLaPeride(FluxPeriodeCaptation period){
+         
+         List<AbstrIncident> listIncid =returnIncidentDurantLaPeride(period);
+         long time =0;
+         
+         for (Iterator<AbstrIncident> it = listIncid.iterator(); it.hasNext();) {
+             AbstrIncident abstrIncident = it.next();
+             DateTime dtdebut = new DateTime(abstrIncident.getDateDebut());
+             DateTime dtFin = new DateTime(abstrIncident.getDateFin());
+             Duration dur = new Duration(dtdebut, dtFin);
+             time = time + dur.getStandardSeconds();
+         }
+         return time;
+     }
+    
+    
+    /***
+     * Permet au flux d'être exploité par un visiteurs.
+     * @param visitor
+     * @throws Exception 
+     */
+        public void accept(ComportementVisitor visitor) throws Exception{
+        visitor.visit(this);
+    }
 
     /**
      * Lors de l'activation désactivation ou du changement de comportement, ce lisner est chargé de modifier des
@@ -717,59 +769,7 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
 
         }
     }
-    
-    
-    
-    public List<AbstrIncident> returnIncidentDurantLaPeride(FluxPeriodeCaptation period){
-                List<AbstrIncident> returnList = new ArrayList<AbstrIncident>();
-        DateTime dt1 = new DateTime(period.getDateDebut());
-        DateTime dt2;
-        if(period.getDatefin() == null){
-            dt2 = new DateTime(period.getDatefin());
-        }
-        else{
-            dt2 = new DateTime();
-        }
-        
-        Interval intev = new Interval(dt1, dt2);
-
-        for (Iterator<CollecteIncident> it = incidentsLie.iterator(); it.hasNext();) {
-            CollecteIncident collecteIncident = it.next();
-//            
-           DateTime dtIncid = new DateTime(collecteIncident.getDateDebut());
-  
-           if(intev.contains(dtIncid)){
-               returnList.add(collecteIncident);
-           }
-        }
-        return returnList;
-    }
-    
-     public long returnIncidentDurationDurantLaPeride(FluxPeriodeCaptation period){
-         
-         List<AbstrIncident> listIncid =returnIncidentDurantLaPeride(period);
-         long time =0;
-         
-         for (Iterator<AbstrIncident> it = listIncid.iterator(); it.hasNext();) {
-             AbstrIncident abstrIncident = it.next();
-             DateTime dtdebut = new DateTime(abstrIncident.getDateDebut());
-             DateTime dtFin = new DateTime(abstrIncident.getDateFin());
-             Duration dur = new Duration(dtdebut, dtFin);
-             time = time + dur.getStandardSeconds();
-         }
-         return time;
-     }
 
     public class CutoClem extends ClassDescriptor {
-    }
-    
-    
-    /***
-     * Permet au flux d'être exploité par un visiteurs.
-     * @param visitor
-     * @throws Exception 
-     */
-        public void accept(ComportementVisitor visitor) throws Exception{
-        visitor.visit(this);
     }
 }

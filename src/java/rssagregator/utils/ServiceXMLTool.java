@@ -174,6 +174,9 @@ public class ServiceXMLTool {
                     castTache.setHeureSchedule(new Integer(attheure.getValue()));
                     castTache.setMinuteSchedule(new Integer(attminute.getValue()));
                     castTache.setTimeSchedule(null);
+                    byte b = 3;
+                    castTache.setTypeSchedule(b);
+                    
                     //On ajoute la tache au service. 
                     service.getTacheProducteur().produire(castTache);
 
@@ -193,6 +196,8 @@ public class ServiceXMLTool {
                     castTache.setMinuteSchedule(new Integer(attMinute.getValue()));
                     castTache.setJourSchedule(null);
                     castTache.setTimeSchedule(null);
+                    byte type = 2;
+                    castTache.setTypeSchedule(type);
                     service.getTacheProducteur().produire(castTache);
                 }
 
