@@ -14,7 +14,6 @@ import rssagregator.beans.Flux;
 import rssagregator.beans.FluxType;
 import rssagregator.beans.Item;
 import rssagregator.beans.Journal;
-import rssagregator.beans.ServeurSlave;
 import rssagregator.beans.UserAccount;
 import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.AliveIncident;
@@ -23,13 +22,10 @@ import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.beans.incident.Incidable;
 import rssagregator.beans.incident.IncidentDecouverteRSS;
 import rssagregator.beans.incident.IncidentFactory;
-import rssagregator.beans.incident.ZZOLDJMSDiffusionIncident;
-import rssagregator.beans.incident.ZZOLDJMSPerteConnectionIncident;
 //import rssagregator.beans.incident.MailIncident;
 import rssagregator.beans.incident.NotificationAjoutFlux;
 import rssagregator.beans.incident.RecupIncident;
 import rssagregator.beans.incident.ServerIncident;
-import rssagregator.beans.incident.SynchroIncident;
 import rssagregator.beans.traitement.ComportementCollecte;
 import rssagregator.services.tache.AbstrTache;
 
@@ -157,10 +153,6 @@ public class DAOFactory<T extends AbstrDao> {
     
     
 
-    public DAOServeurSlave getDAOServeurSlave() {
-        return new DAOServeurSlave(this);
-    }
-
     public DAOGenerique getDAOGenerique() {
         return new DAOGenerique(this);
     }
@@ -222,13 +214,9 @@ public class DAOFactory<T extends AbstrDao> {
         //            dao = (T) new DAOIncident<MailIncident>(this);
         //            dao.setClassAssocie(beansClass);
         //        } 
-        else if (beansClass.equals(SynchroIncident.class)) {
-            dao = (T) new DAOIncident<SynchroIncident>(this);
-            dao.setClassAssocie(beansClass);
-        } else if (beansClass.equals(ZZOLDJMSPerteConnectionIncident.class)) {
-            dao = (T) new DAOIncident<ZZOLDJMSPerteConnectionIncident>(this);
-            dao.setClassAssocie(beansClass);
-        } else if (beansClass.equals(AbstrIncident.class)) {
+
+        
+        else if (beansClass.equals(AbstrIncident.class)) {
             dao = (T) new DAOIncident<AbstrIncident>(this);
             dao.setClassAssocie(beansClass);
         } else if (beansClass.equals(AnomalieCollecte.class)) {
@@ -240,13 +228,8 @@ public class DAOFactory<T extends AbstrDao> {
         } else if (beansClass.equals(ServerIncident.class)) {
             dao = (T) new DAOIncident<ServerIncident>(this);
             dao.setClassAssocie(beansClass);
-        } else if (beansClass.equals(ServeurSlave.class)) {
-            dao = (T) new DAOServeurSlave(this);
-            dao.setClassAssocie(beansClass);
-        } else if (beansClass.equals(ZZOLDJMSDiffusionIncident.class)) {
-            dao = (T) new DAOIncident<ZZOLDJMSDiffusionIncident>(this);
-            dao.setClassAssocie(beansClass);
-        } else if (beansClass.equals(Conf.class)) {
+        } 
+        else if (beansClass.equals(Conf.class)) {
             dao = (T) daoConf;
         } else if (beansClass.equals(Item.class)) {
             dao = (T) getDaoItem();
@@ -296,18 +279,6 @@ public class DAOFactory<T extends AbstrDao> {
             throw new UnsupportedOperationException("La tâche envoyée n'est pas incidable."); //To change body of generated methods, choose Tools | Templates.
         }
 
-
-//        if (tache.getClass().equals(TacheLancerConnectionJMS.class)) {
-//            DAOIncident<JMSPerteConnectionIncident> dao = new DAOIncident<JMSPerteConnectionIncident>(this);
-//            dao.setClassAssocie(ZZOLDJMSPerteConnectionIncident.class);
-//            return (T) dao;
-//        } else if (tache.getClass().equals(TacheSynchroRecupItem.class)) {
-//            DAOIncident<SynchroIncident> dao = new DAOIncident<SynchroIncident>(this);
-//            dao.setClassAssocie(SynchroIncident.class);
-//            return (T) dao;
-//        }
-
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public EntityManagerFactory getEmf() {

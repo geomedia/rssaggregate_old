@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -192,15 +191,5 @@ public class FluxType implements Serializable, BeanSynchronise {
         }
     }
 
-    /**
-     * *
-     * Retourne true car toute modification d'un {@link FluxType} doit systématiquement être répercuté sur les serveur
-     * esclaves.
-     *
-     * @return
-     */
-    @Override
-    public Boolean synchroImperative() {
-        return true;
-    }
+
 }

@@ -21,12 +21,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import rssagregator.beans.Conf;
 import rssagregator.beans.Flux;
-import rssagregator.beans.Item;
-import rssagregator.beans.form.ConfForm;
 import rssagregator.dao.DAOConf;
 import rssagregator.dao.DAOFactory;
-import rssagregator.services.ServiceSynchro;
-import rssagregator.services.tache.TacheSynchroHebdomadaire;
 import rssagregator.utils.ServletTool;
 import rssagregator.utils.XMLTool;
 
@@ -160,46 +156,48 @@ public class ConfigSrvl extends HttpServlet {
          * =====================================================================================
          * ......................... ACTION : IMPORT FLUX
          *////***=================================================================================
-        if (action.equals("importflux") && !daoConf.getConfCourante().getMaster()) {
-
-            URL url = new URL("http://" + daoConf.getConfCourante().getHostMaster() + ":8080/RSSAgregate/flux/list?vue=fluxXMLsync");
-            URLConnection connection = url.openConnection();
-            connection.connect();
-
-            InputStream in = new BufferedInputStream(connection.getInputStream());
-            Object serialisation = XMLTool.unSerialize(in);
-            List<Flux> listflux = (List<Flux>) serialisation;
-            request.setAttribute("listfluximporte", listflux);
-            int i;
-            for (i = 0; i < listflux.size(); i++) {
-                try {
-                    DAOFactory.getInstance().getDAOFlux().creer(listflux.get(i));
-                } catch (Exception ex) {
-                    Logger.getLogger(ConfigSrvl.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        } /**
+//        if (action.equals("importflux") && !daoConf.getConfCourante().getMaster()) {
+//
+//            URL url = new URL("http://" + daoConf.getConfCourante().getHostMaster() + ":8080/RSSAgregate/flux/list?vue=fluxXMLsync");
+//            URLConnection connection = url.openConnection();
+//            connection.connect();
+//
+//            InputStream in = new BufferedInputStream(connection.getInputStream());
+//            Object serialisation = XMLTool.unSerialize(in);
+//            List<Flux> listflux = (List<Flux>) serialisation;
+//            request.setAttribute("listfluximporte", listflux);
+//            int i;
+//            for (i = 0; i < listflux.size(); i++) {
+//                try {
+//                    DAOFactory.getInstance().getDAOFlux().creer(listflux.get(i));
+//                } catch (Exception ex) {
+//                    Logger.getLogger(ConfigSrvl.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//            }
+//        } 
+        
+        /**
          * *=====================================================================================
          * ............................ACTION : RELOAD JMS //
          * ======================================================================================
          */
-        else if (action.equals("jmsreload")) {
-            String msg = ""; // Il s'agit du message devant informer l'utilisateur sur le relancement du serveur JMS
-
-            try {
-                ServiceSynchro.getInstance().openConnection();
-                msg = "OK";
-            } catch (NamingException ex) {
-                Logger.getLogger(ConfigSrvl.class.getName()).log(Level.SEVERE, null, ex);
-                msg = "erreur : " + ex;
-            } catch (JMSException ex) {
-                Logger.getLogger(ConfigSrvl.class.getName()).log(Level.SEVERE, null, ex);
-                msg = "erreur : " + ex;
-            }
-            request.setAttribute("msg", msg);
-            jsp = "/WEB-INF/configJMSinfo.jsp"; // C'est une vue retournant un message texte comprennant le message en paramettre plus haut.
-            
-        }
+//        else if (action.equals("jmsreload")) {
+//            String msg = ""; // Il s'agit du message devant informer l'utilisateur sur le relancement du serveur JMS
+//
+//            try {
+//                ServiceSynchro.getInstance().openConnection();
+//                msg = "OK";
+//            } catch (NamingException ex) {
+//                Logger.getLogger(ConfigSrvl.class.getName()).log(Level.SEVERE, null, ex);
+//                msg = "erreur : " + ex;
+//            } catch (JMSException ex) {
+//                Logger.getLogger(ConfigSrvl.class.getName()).log(Level.SEVERE, null, ex);
+//                msg = "erreur : " + ex;
+//            }
+//            request.setAttribute("msg", msg);
+//            jsp = "/WEB-INF/configJMSinfo.jsp"; // C'est une vue retournant un message texte comprennant le message en paramettre plus haut.
+//            
+//        }
         
         
         if(vue ==null || vue.isEmpty()){

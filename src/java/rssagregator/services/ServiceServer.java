@@ -4,7 +4,6 @@
  */
 package rssagregator.services;
 
-import rssagregator.services.tache.AbstrTache;
 
 /**
  * Cette classe permet de gérer le lancement et le maintient des services de
@@ -22,7 +21,6 @@ public class ServiceServer extends ServiceImpl {
      */
     private Boolean isStart;
     private ServiceCollecteur serviceCollecteur;
-    private ServiceSynchro serviceJMS;
     private static ServiceServer instance = new ServiceServer(true, 10000);
     private ServiceMailNotifier serviceMail;
     /**

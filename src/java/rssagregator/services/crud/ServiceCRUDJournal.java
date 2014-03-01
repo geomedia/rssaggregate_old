@@ -13,7 +13,6 @@ import rssagregator.dao.DAOFactory;
 import rssagregator.dao.DaoFlux;
 import rssagregator.dao.DaoJournal;
 import rssagregator.services.ServiceCollecteur;
-import rssagregator.services.ServiceSynchro;
 import rssagregator.utils.ExceptionTool;
 
 /**
@@ -122,7 +121,7 @@ public class ServiceCRUDJournal extends ServiceCRUDBeansSynchro {
         try {
             journal.setFluxLie(new ArrayList<Flux>()); // Les flux sont déjà supprimé en cas de suppression, l'ORM tente de merger toutes les entités liées au journal. Cela pose problème. On retire donc la liste des flux du journal pour sa suppression
             daoJournal.remove(journal);
-            ServiceSynchro.getInstance().diffuser(journal, "rem"); // On diffuse l'action auprès de la synch. Si erreur le commit n'aura pas lieu
+//            ServiceSynchro.getInstance().diffuser(journal, "rem"); // On diffuse l'action auprès de la synch. Si erreur le commit n'aura pas lieu
             daoJournal.commit();
             // Il faut aussi supprimer les flux du service de collecte.
             List<Flux> fluxs = journal.getFluxLie();

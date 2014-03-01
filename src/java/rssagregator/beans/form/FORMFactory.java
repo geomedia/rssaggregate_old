@@ -9,7 +9,6 @@ import rssagregator.beans.Flux;
 import rssagregator.beans.FluxType;
 import rssagregator.beans.Item;
 import rssagregator.beans.Journal;
-import rssagregator.beans.ServeurSlave;
 import rssagregator.beans.UserAccount;
 import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.incident.CollecteIncident;
@@ -81,9 +80,11 @@ public class FORMFactory {
             form = new FluxTypeForm();
         } else if (beansClass.equals(UserAccount.class)) {
             form = new UserForm();
-        } else if (beansClass.equals(ServeurSlave.class)) {
-            form = new ServeurSlaveForm();
-        } else if (AbstrIncident.class.isAssignableFrom(beansClass)) {
+        } 
+//        else if (beansClass.equals(ServeurSlave.class)) {
+//            form = new ServeurSlaveForm();
+//        } 
+        else if (AbstrIncident.class.isAssignableFrom(beansClass)) {
             form = new IncidentForm();
         } else if (beansClass.equals(Conf.class)) {
             form = new ConfForm();

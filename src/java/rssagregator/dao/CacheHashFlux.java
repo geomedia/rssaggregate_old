@@ -62,6 +62,7 @@ public class CacheHashFlux {
                 query.setParameter("idfl", flux.getID());
                 query.setFirstResult(0);
                 query.setMaxResults(500);
+             
 
                 List<String> listResu = query.getResultList();
 

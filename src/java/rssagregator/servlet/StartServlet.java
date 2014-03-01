@@ -17,11 +17,9 @@ import javax.servlet.ServletContextListener;
 import rssagregator.beans.Conf;
 import rssagregator.dao.DAOConf;
 import rssagregator.dao.DAOFactory;
-import rssagregator.dao.DaoFlux;
 import rssagregator.services.ServiceCollecteur;
 import rssagregator.services.ServiceMailNotifier;
 import rssagregator.services.ServiceServer;
-import rssagregator.services.ServiceSynchro;
 import rssagregator.utils.PropertyLoader;
 import rssagregator.utils.ServiceXMLTool;
 
@@ -135,7 +133,7 @@ public class StartServlet implements ServletContextListener {
         // Lancement de la collecte
         ServiceCollecteur.getInstance().lancerService();
         ServiceMailNotifier.getInstance().lancerService();
-        ServiceSynchro.getInstance().lancerService();
+//        ServiceSynchro.getInstance().lancerService();
         ServiceServer.getInstance().lancerService();
 
 
@@ -149,7 +147,7 @@ public class StartServlet implements ServletContextListener {
         ServiceCollecteur.getInstance().stopService();
         ServiceServer.getInstance().stopService();
         ServiceMailNotifier.getInstance().stopService();
-        ServiceSynchro.getInstance().stopService();
+//        ServiceSynchro.getInstance().stopService();
 
 //        es.shutdown();
 //        logger.debug("[OK] Fermeture du daemoncentral");

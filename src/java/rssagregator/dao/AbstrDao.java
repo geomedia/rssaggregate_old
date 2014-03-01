@@ -22,9 +22,7 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.apache.poi.util.Beta;
-import rssagregator.beans.BeanSynchronise;
 import rssagregator.beans.Journal;
-import rssagregator.services.ServiceSynchro;
 
 /**
  * Toutes les DAO doivent hériter de cette class abstraite. Elle définit les actions de base (modifier, créer, find...)
@@ -295,19 +293,19 @@ public abstract class AbstrDao<T> {
         if (retour != null && retour instanceof Long && (Long) retour >= 0) {
 //            EntityTransaction tr = em.getTransaction();
 //            tr.begin();
-            em.merge(obj);
-            try {
-                // Si il s'agit d'un beans devant être synchronisé On lance la diff
-                if (BeanSynchronise.class.isAssignableFrom(obj.getClass())) {
-                    ServiceSynchro.getInstance().diffuser(obj, "mod");
-                }
-//                tr.commit();
-                //En cas d'échec de la synchronisation, on rollback la modification.
-            } catch (Exception e) {
-                logger.error("erreur lors de la modification d'un beans : " + e + "\n trace : " + e.getStackTrace());
-//                tr.rollback();
-                throw e;
-            }
+//            em.merge(obj);
+//            try {
+//                // Si il s'agit d'un beans devant être synchronisé On lance la diff
+//                if (BeanSynchronise.class.isAssignableFrom(obj.getClass())) {
+//                    ServiceSynchro.getInstance().diffuser(obj, "mod");
+//                }
+////                tr.commit();
+//                //En cas d'échec de la synchronisation, on rollback la modification.
+//            } catch (Exception e) {
+//                logger.error("erreur lors de la modification d'un beans : " + e + "\n trace : " + e.getStackTrace());
+////                tr.rollback();
+//                throw e;
+//            }
         }
     }
 

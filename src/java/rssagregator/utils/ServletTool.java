@@ -19,7 +19,6 @@ import rssagregator.dao.AbstrDao;
 import rssagregator.dao.DAOFactory;
 import rssagregator.services.crud.AbstrServiceCRUD;
 import rssagregator.services.crud.ServiceCRUDFactory;
-import rssagregator.services.ServiceSynchro;
 
 /**
  * Une série de methode static pouvant être utilisée dans les Servlet du projet.
@@ -74,42 +73,42 @@ public class ServletTool {
         }
     }
 
-    /**
-     * *
-     * Cette méthode est utilisée par les servlet pour vérifier si un utilisateur a acces non à la page demandée. Elle
-     * va s'intéresser a plusieurs paramettre : <ul>
-     * <li>JMS : Si le serveur JMS n'est pas joignable on va refuser a l'utilisateur de lancer des action type add mod
-     * del. En effet celles ci se serait pas répercuté sur les serveur esclave.</li>
-     * <li>action l'action demandé par l'utilisateur Elle est récupéré a partir de l'url envoyé</li>
-     * </ul>
-     *
-     * @param request : un tableau d'objet. La première case permet de savoir si l'acces est accepté ou non ; la seconde
-     * contient une chaine de caractère avec le potentiel message d'erreur en cas de refus d'acces.
-     * @return
-     */
-    public static boolean accesControl(HttpServletRequest request) {
-
-        // On commence par récupérer l'action 
-        String action = (String) request.getAttribute("action");
-        Conf conf = DAOFactory.getInstance().getDAOConf().getConfCourante();
-
-        //Pour les action de modification (add, mod del)
-        if (action.equals("add") || action.equals("mod") || action.equals("del")) {
-            //On vérifie le statut JMS
-            Boolean statutJMS = ServiceSynchro.getInstance().getStatutConnection();
-            // Si le serveur est maitre, qu'il possede des esclaves et que la connection JMS n'est pas active
-            if (conf.getMaster() && conf.getServeurSlave().size() > 0 && !statutJMS) {
-                request.setAttribute("accesmsg", "La connection n'est pas active. Votre action demande que la connection JMS soit active afin de répercuter les éventuelles moficications sur les serveurs esclaves");
-                return false;
-            }
-            // Si c'est un serveur esclaves, on refuse des modification par les servlet. Les entitées ne doivent être rajouté que par synchronisation JMS
-            if (!conf.getMaster()) {
-                request.setAttribute("accesmsg", "Il s'agit d'un serveur esclave ! Vous ne devez pas ajouter d'entités sur un serveur esclave. Allez sur le serveur maitre pour faire vos modifications. Celles ci seront répercuté par la synchronisation");
-                return false;
-            }
-        }
-        return true;
-    }
+//    /**
+//     * *
+//     * Cette méthode est utilisée par les servlet pour vérifier si un utilisateur a acces non à la page demandée. Elle
+//     * va s'intéresser a plusieurs paramettre : <ul>
+//     * <li>JMS : Si le serveur JMS n'est pas joignable on va refuser a l'utilisateur de lancer des action type add mod
+//     * del. En effet celles ci se serait pas répercuté sur les serveur esclave.</li>
+//     * <li>action l'action demandé par l'utilisateur Elle est récupéré a partir de l'url envoyé</li>
+//     * </ul>
+//     *
+//     * @param request : un tableau d'objet. La première case permet de savoir si l'acces est accepté ou non ; la seconde
+//     * contient une chaine de caractère avec le potentiel message d'erreur en cas de refus d'acces.
+//     * @return
+//     */
+//    public static boolean accesControl(HttpServletRequest request) {
+//
+//        // On commence par récupérer l'action 
+//        String action = (String) request.getAttribute("action");
+//        Conf conf = DAOFactory.getInstance().getDAOConf().getConfCourante();
+//
+//        //Pour les action de modification (add, mod del)
+//        if (action.equals("add") || action.equals("mod") || action.equals("del")) {
+//            //On vérifie le statut JMS
+//            Boolean statutJMS = ServiceSynchro.getInstance().getStatutConnection();
+//            // Si le serveur est maitre, qu'il possede des esclaves et que la connection JMS n'est pas active
+//            if (conf.getMaster() && conf.getServeurSlave().size() > 0 && !statutJMS) {
+//                request.setAttribute("accesmsg", "La connection n'est pas active. Votre action demande que la connection JMS soit active afin de répercuter les éventuelles moficications sur les serveurs esclaves");
+//                return false;
+//            }
+//            // Si c'est un serveur esclaves, on refuse des modification par les servlet. Les entitées ne doivent être rajouté que par synchronisation JMS
+//            if (!conf.getMaster()) {
+//                request.setAttribute("accesmsg", "Il s'agit d'un serveur esclave ! Vous ne devez pas ajouter d'entités sur un serveur esclave. Allez sur le serveur maitre pour faire vos modifications. Celles ci seront répercuté par la synchronisation");
+//                return false;
+//            }
+//        }
+//        return true;
+//    }
 
     /**
      * *

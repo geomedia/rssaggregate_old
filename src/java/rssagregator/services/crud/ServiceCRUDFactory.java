@@ -8,7 +8,6 @@ import rssagregator.beans.Flux;
 import rssagregator.beans.FluxType;
 import rssagregator.beans.Item;
 import rssagregator.beans.Journal;
-import rssagregator.beans.ServeurSlave;
 import rssagregator.beans.UserAccount;
 import rssagregator.beans.incident.AbstrIncident;
 import rssagregator.beans.traitement.ComportementCollecte;
@@ -67,9 +66,10 @@ public class ServiceCRUDFactory {
                 serviceCrud = serviceCrudIncident;
             } else if (beans.equals(ComportementCollecte.class)) {
                 serviceCrud = serviceCRUDComportement;
-            } else if (beans.equals(ServeurSlave.class)) {
-                serviceCrud = serviceCRUDBeansBasique;
             }
+//            else if (beans.equals(ServeurSlave.class)) {
+//                serviceCrud = serviceCRUDBeansBasique;
+//            }
         }
 
         if (serviceCrud != null) {

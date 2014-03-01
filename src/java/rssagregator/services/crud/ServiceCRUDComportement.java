@@ -8,7 +8,6 @@ import rssagregator.beans.exception.HasChildren;
 import rssagregator.beans.traitement.ComportementCollecte;
 import rssagregator.dao.DAOComportementCollecte;
 import rssagregator.dao.DAOFactory;
-import rssagregator.services.ServiceSynchro;
 
 /**
  *
@@ -40,7 +39,7 @@ public class ServiceCRUDComportement extends ServiceCRUDBeansSynchro {
             
             dao.beginTransaction();
             dao.remove(obj);
-            ServiceSynchro.getInstance().diffuser(obj, "rem");
+//            ServiceSynchro.getInstance().diffuser(obj, "rem");
             dao.commit();
             
         } else {

@@ -26,7 +26,6 @@ import org.apache.poi.util.Beta;
 import org.eclipse.persistence.annotations.Index;
 import rssagregator.beans.exception.IncompleteBeanExeption;
 import rssagregator.beans.traitement.AbstrRaffineur;
-import rssagregator.services.ServiceSynchro;
 import rssagregator.utils.ExceptionTool;
 
 /**

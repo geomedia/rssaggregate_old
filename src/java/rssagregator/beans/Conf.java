@@ -1,8 +1,6 @@
 package rssagregator.beans;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.Duration;
@@ -20,7 +18,7 @@ public class Conf implements Serializable {
 
     public Conf() {
     this.active = true;
-    this.serveurSlave = new ArrayList<ServeurSlave>();
+//    this.serveurSlave = new ArrayList<ServeurSlave>();
     }
     
     
@@ -29,15 +27,15 @@ public class Conf implements Serializable {
 //    @GeneratedValue(strategy = GenerationType.AUTO)
 //    private Long ID;
     
-    /***
-     * Le nom du serveur. Permet la configuration dans le serveur JMS
-     */
-    String servname;
-    
-    /***
-     * L'host du provider JMS pour la synchronisation.
-     */
-    String jmsprovider;
+//    /***
+//     * Le nom du serveur. Permet la configuration dans le serveur JMS
+//     */
+//    String servname;
+//    
+//    /***
+//     * L'host du provider JMS pour la synchronisation.
+//     */
+//    String jmsprovider;
     
     
     /***
@@ -46,29 +44,29 @@ public class Conf implements Serializable {
     Boolean prod;
     
 
+//    /**
+//     * Delai au bout duquel les données doivent être stoquées supprimée de la
+//     * base de données. Si 0 pas de durée. Ce int est un nombre de jours
+//     */ 
+//    private Integer purgeDuration;
     /**
-     * Delai au bout duquel les données doivent être stoquées supprimée de la
-     * base de données. Si 0 pas de durée. Ce int est un nombre de jours
-     */ 
-    private Integer purgeDuration;
-    /**
-     * Statut du serveur. Peut prendre deux valeurs, 1 pour maitre 0 pour esclave
-     */
-    private Boolean master;
-    /**
-     * Les serveur slaves doivent connaitre l'ip du serveur maitre (seul lui est
-     * autorisé à effecter la récup). Il est ainsi indispensable de remplir ce
-     * champs dans les serveurs esclaves. Pour le serveru maitre on inscrira
-     * simplement localhost. Ce localhost pourra être simplement complété lors
-     * de la configuration du serveru en maitre (attribution du paramètre
-     * statutServer)
-     */
-    private String hostMaster;
-    /**
-     * *
-     * Liste des serveur esclaves utiles au serveur maitre
-     */
-    private List<ServeurSlave> serveurSlave;
+//     * Statut du serveur. Peut prendre deux valeurs, 1 pour maitre 0 pour esclave
+//     */
+//    private Boolean master;
+//    /**
+//     * Les serveur slaves doivent connaitre l'ip du serveur maitre (seul lui est
+//     * autorisé à effecter la récup). Il est ainsi indispensable de remplir ce
+//     * champs dans les serveurs esclaves. Pour le serveru maitre on inscrira
+//     * simplement localhost. Ce localhost pourra être simplement complété lors
+//     * de la configuration du serveru en maitre (attribution du paramètre
+//     * statutServer)
+//     */
+//    private String hostMaster;
+//    /**
+//     * *
+//     * Liste des serveur esclaves utiles au serveur maitre
+//     */
+//    private List<ServeurSlave> serveurSlave;
 
     /***
      * L'adresse http du server exemple http://ip/RSSAgregade
@@ -96,29 +94,29 @@ public class Conf implements Serializable {
         throw new UnsupportedOperationException("Non Implémenté");
     }
 
-    public Integer getPurgeDuration() {
-        return purgeDuration;
-    }
+//    public Integer getPurgeDuration() {
+//        return purgeDuration;
+//    }
+//
+//    public void setPurgeDuration(Integer purgeDuration) {
+//        this.purgeDuration = purgeDuration;
+//    }
+//
+//    public String getHostMaster() {
+//        return hostMaster;
+//    }
+//
+//    public void setHostMaster(String hostMaster) {
+//        this.hostMaster = hostMaster;
+//    }
 
-    public void setPurgeDuration(Integer purgeDuration) {
-        this.purgeDuration = purgeDuration;
-    }
+//    public List<ServeurSlave> getServeurSlave() {
+//        return serveurSlave;
+//    }
 
-    public String getHostMaster() {
-        return hostMaster;
-    }
-
-    public void setHostMaster(String hostMaster) {
-        this.hostMaster = hostMaster;
-    }
-
-    public List<ServeurSlave> getServeurSlave() {
-        return serveurSlave;
-    }
-
-    public void setServeurSlave(List<ServeurSlave> ServeurSlave) {
-        this.serveurSlave = ServeurSlave;
-    }
+//    public void setServeurSlave(List<ServeurSlave> ServeurSlave) {
+//        this.serveurSlave = ServeurSlave;
+//    }
 
     public Boolean getProd() {
         return prod;
@@ -147,29 +145,29 @@ public class Conf implements Serializable {
         this.active = active;
     }
 
-    public String getServname() {
-        return servname;
-    }
-
-    public void setServname(String servname) {
-        this.servname = servname;
-    }
-
-    public String getJmsprovider() {
-        return jmsprovider;
-    }
-
-    public void setJmsprovider(String jmsprovider) {
-        this.jmsprovider = jmsprovider;
-    }
-
-    public Boolean getMaster() {
-        return master;
-    }
-
-    public void setMaster(Boolean master) {
-        this.master = master;
-    }
+//    public String getServname() {
+//        return servname;
+//    }
+//
+//    public void setServname(String servname) {
+//        this.servname = servname;
+//    }
+//
+//    public String getJmsprovider() {
+//        return jmsprovider;
+//    }
+//
+//    public void setJmsprovider(String jmsprovider) {
+//        this.jmsprovider = jmsprovider;
+//    }
+//
+//    public Boolean getMaster() {
+//        return master;
+//    }
+//
+//    public void setMaster(Boolean master) {
+//        this.master = master;
+//    }
 
     public String getServurl() {
         return servurl;

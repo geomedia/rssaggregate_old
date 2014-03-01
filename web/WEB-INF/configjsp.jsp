@@ -13,8 +13,6 @@ Author     : clem-->
         <div id="logo">
             <!--<h1>Administration des <span>Flux</span></h1></div></div>-->
             <h1>Administration du<span> serveur</span></h1>
-
-
         </div></div></div>
 
 
@@ -22,10 +20,7 @@ Author     : clem-->
     <p><a href="${rootpath}config">générale</a></p>
     <p><a href="${rootpath}ComportementCollecte">Gérer les compotement </a></p>
     <p><a href="${rootpath}TypeFluxSrvl">Gérer les types de flux </a></p>
-    <p><a href="${rootpath}user">Gérer les utilisateurs </a></p>
-    <p><a href="${rootpath}slave">Gérer les serveurs esclave</a></p>
-    <c:if test="${!master}"><p><a href="${rootpath}config/importflux">Obtenir flux du serveur maitre</a></p></c:if>
-    <c:if test="${master}"><p><a href="${rootpath}config/importitem">Récupérer les données des serveurs esclaces</a></p></c:if>
+    <p><a href="${rootpath}user/recherche/">Gérer les utilisateurs </a></p>
                     </div> 
 
                     <div id="content">
@@ -179,11 +174,8 @@ Author     : clem-->
                                     </c:when>
 
                                     <c:when test="${action=='read'}">
-                                        <c:if test="${admin=='true'}">
-                                            <p><a href="${rootpath}${srlvtname}/mod?id=1">Editer</a></p>
-                                        </c:if>
-                                        <p><strong>Nom du serveur : </strong>${conf.servname}</p>
-                                        <p><strong>Maitre : </strong><c:if test="${conf.master==true}">OUI</c:if><c:if test="${conf.master==false}">NON</c:if></p>
+       
+                          
 
                                     </c:when>
 

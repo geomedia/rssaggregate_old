@@ -29,7 +29,7 @@ import rssagregator.services.tache.TacheDecouverteAjoutFlux;
 //@Customizer(JournalEntityLisner.class) 
 //@Cacheable(value = false)
 @XmlRootElement
-public class Journal extends Bean implements Serializable, BeanSynchronise {
+public class Journal extends Bean implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -371,17 +371,7 @@ public class Journal extends Bean implements Serializable, BeanSynchronise {
     
 
 
-    /**
-     * *
-     * La redéfinition de cette méthode renvoie toujour true pour un {@link Journal}. Les journaux doivent ainsi
-     * systématiquement être synchronisé du serveur maitre vers les serveur esclaves.
-     *
-     * @return
-     */
-    @Override
-    public Boolean synchroImperative() {
-        return true;
-    }
+
 
     /**
      * Renvoie le nom du journal.

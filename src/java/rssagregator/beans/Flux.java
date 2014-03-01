@@ -61,7 +61,7 @@ import rssagregator.dao.DaoFlux;
 @Entity()
 @Table(name = "flux")
 @XmlRootElement
-public class Flux extends Bean implements Observer, Serializable, BeanSynchronise, Cloneable {
+public class Flux extends Bean implements Observer, Serializable, Cloneable {
     public static final String PROP_ACTIVE = "active";
     
     
@@ -536,13 +536,6 @@ public class Flux extends Bean implements Observer, Serializable, BeanSynchronis
         return outline;
     }
 
-    @Override
-    /**
-     * renvoie toujours true
-     */
-    public Boolean synchroImperative() {
-        return true;
-    }
 
     /***
      * Retourne la dernière période de captation du flux

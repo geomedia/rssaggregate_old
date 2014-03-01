@@ -7,12 +7,11 @@ package rssagregator.services.tache;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
-import org.apache.log4j.Level;
 import rssagregator.services.AbstrService;
 import rssagregator.services.ServiceCollecteur;
 import rssagregator.services.ServiceMailNotifier;
 import rssagregator.services.ServiceServer;
-import rssagregator.services.ServiceSynchro;
+//import rssagregator.services.ServiceSynchro;
 import rssagregator.utils.PropertyLoader;
 
 /**
@@ -130,17 +129,8 @@ public class TacheFactory {
             maxExecuteTime = TacheVerifFluxNotificationMail_maxExecuteTime;
             typeSchedule = TacheVerifFluxNotificationMail_typeSchedule;
             service = ServiceMailNotifier.getInstance();
-        } else if (c.equals(ZZOLDTacheLancerConnectionJMS.class)) {
-            newTache = new ZZOLDTacheLancerConnectionJMS();
-            maxExecuteTime = TacheLancerConnectionJMS_maxExecuteTime;
-            typeSchedule = TacheLancerConnectionJMS_typeSchedule;
-            service = ServiceSynchro.getInstance();
-        } else if (c.equals(TacheSynchroHebdomadaire.class)) {
-            newTache = new TacheSynchroHebdomadaire();
-            service = ServiceSynchro.getInstance();
-            typeSchedule = TacheSynchroHebdomadaire_typeSchedule;
-            maxExecuteTime = TacheSynchroHebdomadaire_maxExecuteTime;
-        } else if (c.equals(TacheDetectDeadLock.class)) {
+        } 
+        else if (c.equals(TacheDetectDeadLock.class)) {
             newTache = new TacheDetectDeadLock();
             service = ServiceServer.getInstance();
             maxExecuteTime = TacheDetectDeadLock_maxExecuteTime;
@@ -158,11 +148,6 @@ public class TacheFactory {
             typeSchedule = TacheCalculQualiteFluxLancementTous_typeSchedule;
         }
         
-        else if (c.equals(ZZOLDTacheRaffiner.class)){
-            newTache = new ZZOLDTacheRaffiner();
-            service = ServiceCollecteur.getInstance();
-            maxExecuteTime = 200;
-        }
         else if(c.equals(TacheRaffiner2.class)){
             newTache = new TacheRaffiner2();
             service = ServiceCollecteur.getInstance();

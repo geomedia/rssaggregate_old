@@ -33,7 +33,6 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.ws.http.HTTPException;
 import org.apache.poi.util.Beta;
 import org.reflections.Reflections;
-import rssagregator.beans.BeanSynchronise;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.beans.form.ComportementCollecteForm;
@@ -63,7 +62,7 @@ import rssagregator.dao.DaoItem;
 //@Cacheable(true)
 //@Cache(type = CacheType.FULL, coordinationType = CacheCoordinationType.INVALIDATE_CHANGED_OBJECTS, isolation = CacheIsolationType.SHARED)
 @XmlRootElement
-public class ComportementCollecte implements Serializable, Cloneable, BeanSynchronise {
+public class ComportementCollecte implements Serializable, Cloneable {
 
     @Transient
     org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(ComportementCollecte.class);
@@ -662,17 +661,6 @@ public class ComportementCollecte implements Serializable, Cloneable, BeanSynchr
         return this.clone();
     }
 
-//    @Override
-//    /***
-//     * Enregistre le Comportement de collecte auprès du service JMS pour assurer sa diffussion sur les serveurs esclaves (la synchronisation)
-//     */
-//    public void enregistrerAupresdesService() {
-//        this.addObserver(ServiceSynchro.getInstance());
-//    }
-    @Override
-    public Boolean synchroImperative() {
-        return true;
-    }
 
     @Override
     public int hashCode() {

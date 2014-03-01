@@ -85,67 +85,9 @@ public class DAOConf extends AbstrDao {
         } else {
             throw new Exception("Impossible de lire la valeur de active");
         }
-
-        //Chargement du nom du serveur
-        String servname = prop.getProperty("servname");
-        conf.setServname(servname);
-
-        //Chargement du jmsprovider
-        String jmsprovider = prop.getProperty("jmsprovider");
-        conf.setJmsprovider(jmsprovider);
-
-
-        // Chargement du statut (master ou slave)
-        String statut = prop.getProperty("master");
-        if (statut.equals("1")) {
-            conf.setMaster(true);
-        } else if (statut.equals("0")) {
-            conf.setMaster(false);
-        } else {
-            throw new Exception("Impossible de charger la valeur master dans le fichier properties");
-        }
-
-        // Chargement de la liste des serveur esclave si le serveur est maitre
-        if (conf.getMaster()) {
-            // ----> Les serveur Slave sont retournés dans la base de données
-//            String slaveserver = prop.getProperty("slaveserver"); //PropertyLoader.loadProperti("conf.properties", "slaveserver");
-//            String[] slavetab = slaveserver.split("; ");
-//            for (int i = 0; i < slavetab.length; i++) {
-//                String string = slavetab[i];
-//                String split[] = string.split(" ");
-//                ServeurSlave serveurSlave = new ServeurSlave();
-//                serveurSlave.setServHost(split[0]);
-//                serveurSlave.setLogin(split[1]);
-//                serveurSlave.setPass(split[2]);
-//                serveurSlave.setUrl(split[3]);
-//                conf.getServeurSlave().add(serveurSlave);
-//            }
-
-        } else { // Si c'est un serveur esclave
-            String purgeDuration = prop.getProperty("purgeDuration");
-            try {
-                Integer val = new Integer(purgeDuration);
-                conf.setPurgeDuration(val);
-            } catch (Exception e) {
-                throw new Exception("impossible de lire la valeur purgeduration dans le fichier conf.properties");
-            }
-
-            String hostMaster = prop.getProperty("hostMaster");
-            conf.setHostMaster(hostMaster);
-        }
-
-        //----------Récupération de la durée avant purge
-        String s = prop.getProperty("purgeDuration");
-        try {
-            Integer val = new Integer(s);
-            conf.setPurgeDuration(Integer.MIN_VALUE);
-        } catch (Exception e) {
-            throw new Exception("Impossible de charger la durée avant purge dans la configuration");
-        }
-        
         
         //----------Récupération du statut prod
-        s =prop.getProperty("prod");
+       String s =prop.getProperty("prod");
         if(s != null && s.isEmpty() && s.equals("true")){
             conf.setProd(Boolean.TRUE);
         }
@@ -153,11 +95,6 @@ public class DAOConf extends AbstrDao {
             conf.setProd(false);
         }
         
-
-        //--------------Chargement du host maitre
-        s = prop.getProperty("hostMaster");
-        conf.setHostMaster(s);
-
 
         //-----------Chargement de l'adresse http du server
         s = prop.getProperty("servurl");
@@ -228,26 +165,11 @@ public class DAOConf extends AbstrDao {
         
         Properties prop = new Properties();
 
-        //-----------------NOM DU SERVER
-        if (conf.getServname() != null && !conf.getServname().isEmpty()) {
-            prop.setProperty("servname", conf.getServname());
-        }
-
         //--------------- Enregistrement du statut actif//innactif
         if (conf.getActive()) {
             prop.setProperty("active", "1");
         } else {
             prop.setProperty("active", "0");
-        }
-
-        //-------------JMX Provider
-        prop.setProperty("jmsprovider", conf.getJmsprovider());
-
-        //--------------Master statut
-        if (conf.getMaster()) {
-            prop.setProperty("master", "1");
-        } else {
-            prop.setProperty("master", "0");
         }
 
         //------------------Serveur slave
@@ -265,16 +187,6 @@ public class DAOConf extends AbstrDao {
 //        }
 //
 //        prop.setProperty("slaveserver", chaine);
-
-        //-------------Durée de purge
-        if (conf.getPurgeDuration() != null) {
-            prop.setProperty("purgeDuration", conf.getPurgeDuration().toString());
-        }
-
-        //-------------------Host du serveur maitre
-        if (conf.getHostMaster() != null) {
-            prop.setProperty("hostMaster", conf.getHostMaster());
-        }
 
         //-------------adresse HTTP du Serveur
         if (conf.getServurl() != null) {

@@ -6,10 +6,8 @@ package rssagregator.services.crud;
 
 import java.util.List;
 import javax.persistence.EntityManager;
-import rssagregator.beans.BeanSynchronise;
 import rssagregator.beans.exception.ArgumentIncorrect;
 import rssagregator.dao.DAOFactory;
-import rssagregator.services.ServiceSynchro;
 import rssagregator.utils.ExceptionTool;
 import rssagregator.utils.TransactionTool;
 
@@ -74,7 +72,7 @@ public class ServiceCRUDBeansSynchro extends AbstrServiceCRUD {
         boolean err = false;
         try {
             em.persist(obj);
-            ServiceSynchro.getInstance().diffuser(obj, "add");
+//            ServiceSynchro.getInstance().diffuser(obj, "add");
         } catch (Exception e) {
             err = true;
             throw e;
@@ -122,7 +120,7 @@ public class ServiceCRUDBeansSynchro extends AbstrServiceCRUD {
 
         try {
             em.merge(obj);
-            ServiceSynchro.getInstance().diffuser(obj, "mod");
+//            ServiceSynchro.getInstance().diffuser(obj, "mod");
         } catch (Exception e) {
             logger.error("erreur lors de la modification", e);
             throw e;
@@ -172,9 +170,9 @@ public class ServiceCRUDBeansSynchro extends AbstrServiceCRUD {
         checkSynchronisableBeans(obj);
 
         try {
-            
+//            
             em.remove(em.merge(obj));
-            ServiceSynchro.getInstance().diffuser(obj, "rem");
+//            ServiceSynchro.getInstance().diffuser(obj, "rem");
         } catch (Exception e) {
             logger.error("Erreur lors de la suppression", e);
             throw e;
@@ -190,9 +188,9 @@ public class ServiceCRUDBeansSynchro extends AbstrServiceCRUD {
      * @throws ArgumentIncorrect
      */
     protected void checkSynchronisableBeans(Object obj) throws ArgumentIncorrect {
-        if (!BeanSynchronise.class.isAssignableFrom(obj.getClass())) {
-            throw new ArgumentIncorrect("Ce beans n'est pas synchronisable");
-        }
+//        if (!BeanSynchronise.class.isAssignableFrom(obj.getClass())) {
+//            throw new ArgumentIncorrect("Ce beans n'est pas synchronisable");
+//        }
     }
 
     @Override

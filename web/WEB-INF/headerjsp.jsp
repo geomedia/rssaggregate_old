@@ -1,5 +1,4 @@
 <%@page import="java.util.Properties"%>
-<%@page import="rssagregator.services.ServiceSynchro"%>
 <%@page import="rssagregator.beans.UserAccount"%>
 
 <%@page import="rssagregator.dao.DAOFactory"%>
@@ -87,13 +86,14 @@
 
                 <a href ="/RSSAgregate/index" style="display: block;">
                     <%
-                        if (DAOFactory.getInstance().getDAOConf().getConfCourante().getMaster()) {
+//                        if (DAOFactory.getInstance().getDAOConf().getConfCourante().getMaster()) {
+//                            out.println("<img src=\"/RSSAgregate/ress/img/logo_mastervert.png\"/>");
+//                            request.setAttribute("master", true);
+//                        } else {
+//                            out.println("<img src=\"/RSSAgregate/ress/img/logo_masterrouge.png\"/>");
                             out.println("<img src=\"/RSSAgregate/ress/img/logo_mastervert.png\"/>");
-                            request.setAttribute("master", true);
-                        } else {
-                            out.println("<img src=\"/RSSAgregate/ress/img/logo_masterrouge.png\"/>");
                             request.setAttribute("master", false);
-                        }
+//                        }
                     %>
                 </a>
             </div>
@@ -117,12 +117,11 @@
                 %>
 
 
-                <!--                Statut JMS <span id="JMSstat"><%
-                    if (ServiceSynchro.getInstance().getStatutConnection()) {
-                        out.println("OK");
-                    } else {
-                        out.println("Erreur");
-                %></span>
+                <!--                Statut JMS <span id="JMSstat">
+                
+ 
+                
+                </span>
             <button type="button" id="jmsrecoBT">Reconnection</button>
             <span id="pinfoJMS"></span>
                 -->
@@ -130,9 +129,7 @@
 
             </div>
 
-            <%
-                }
-            %>
+
 
         </header>
         <div style="clear: both"></div>
@@ -173,25 +170,24 @@
                 </li>
 
 
-                <c:if test="${admin == 'true'}"><li <c:if test="${navmenu=='user'}"> class="current_page_item"</c:if>><a href="${rootpath}user/recherche">Utilisateurs</a>
-                            <ul>
-                                <li><a href="${rootpath}user/recherche">Recherche</a></li>
-                            <li><a href="${rootpath}user/add">Ajouter</a></li>
-                        </ul>
-                    </li></c:if>
+
 
 
                 <c:if test="${admin == 'true'}"><li <c:if test="${navmenu=='config'}"> class="current_page_item"</c:if>><a href="${rootpath}config/read?id=1">Configuration</a>
                             <ul>
                                 <li <c:if test="${navmenu=='ComportementCollecte'}"> class="current_page_item"</c:if>><a href="${rootpath}ComportementCollecte/recherche">Comportement de collecte</a>
-
                                 </li>
                                 <li><a href="${rootpath}LogView">Afficher les logs</a></li>
                             <li><a href="${rootpath}ServiceCtrl">Gestion des services</a></li>
+                            <li><a href="${rootpath}user/recherche">Gestion des utilisateurs</a></li>
+                            
                         </ul>
 
 
                     </li></c:if>
+                    
+                    
+                    
                 <li <c:if test="${navmenu=='aide'}"> class="current_page_item"</c:if>><a href="${rootpath}aide.jsp">Aide</a></li>  
                 </ul>  
             </nav> 

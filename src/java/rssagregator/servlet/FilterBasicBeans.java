@@ -17,7 +17,6 @@ import javax.servlet.http.HttpSession;
 import rssagregator.beans.Conf;
 import rssagregator.beans.UserAccount;
 import rssagregator.dao.DAOFactory;
-import rssagregator.services.ServiceSynchro;
 
 /**
  * C'est un filtre appliqué aux servlet : <ul>
@@ -67,17 +66,18 @@ public class FilterBasicBeans implements Filter {
             //Pour les action de modification (add, mod, rem)
             if (action.equals("add") || action.equals("mod") || action.equals("rem")) {
                 //On vérifie le statut JMS
-                Boolean statutJMS = ServiceSynchro.getInstance().getStatutConnection();
+//                Boolean statutJMS = ServiceSynchro.getInstance().getStatutConnection();
                 // Si le serveur est maitre, qu'il possede des esclaves et que la connection JMS n'est pas active
-                if (conf.getMaster() && conf.getServeurSlave().size() > 0 && !statutJMS) {
-                    request.setAttribute("accesmsg", "<strong>La connection JMS n'est pas active</strong>. Votre action demande que la connection JMS soit active afin de répercuter les éventuelles moficications sur les serveurs esclaves");
-                    request.getRequestDispatcher("/erreurHTML.jsp").forward(request, response);
-                } // Si c'est un serveur esclaves, on refuse des modification par les servlet. Les entitées ne doivent être rajouté que par synchronisation JMS
-                else if (!conf.getMaster()) {
-                    request.setAttribute("accesmsg", "Il s'agit d'un serveur esclave ! Vous ne devez pas ajouter d'entités sur un serveur esclave. Allez sur le serveur maitre pour faire vos modifications. Celles ci seront répercuté par la synchronisation");
-                    response.sendRedirect(request.getContextPath() + "/erreurHTML.jps");
-                } //Si c'est un utilisateur non administrateur On refuse
-                else if (u != null && !u.getAdminstatut()) {
+//                if (conf.getMaster() && conf.getServeurSlave().size() > 0 && !statutJMS) {
+//                    request.setAttribute("accesmsg", "<strong>La connection JMS n'est pas active</strong>. Votre action demande que la connection JMS soit active afin de répercuter les éventuelles moficications sur les serveurs esclaves");
+//                    request.getRequestDispatcher("/erreurHTML.jsp").forward(request, response);
+//                } // Si c'est un serveur esclaves, on refuse des modification par les servlet. Les entitées ne doivent être rajouté que par synchronisation JMS
+//                else if (!conf.getMaster()) {
+//                    request.setAttribute("accesmsg", "Il s'agit d'un serveur esclave ! Vous ne devez pas ajouter d'entités sur un serveur esclave. Allez sur le serveur maitre pour faire vos modifications. Celles ci seront répercuté par la synchronisation");
+//                    response.sendRedirect(request.getContextPath() + "/erreurHTML.jps");
+//                } //Si c'est un utilisateur non administrateur On refuse
+                
+                if (u != null && !u.getAdminstatut()) {
                     request.setAttribute("accesmsg", "Vous n'avez pas la permission");
                     request.getRequestDispatcher("/erreurHTML.jsp").forward(request, response);
                 } else { // Si action mod add rem et tout ok on passe

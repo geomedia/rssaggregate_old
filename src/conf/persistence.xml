@@ -15,7 +15,7 @@
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
     <!--<non-jta-data-source>postconf</non-jta-data-source>-->
     <!--<non-jta-data-source/>-->
-    <class>rssagregator.beans.Journal</class>
+<!--    <class>rssagregator.beans.Journal</class>
     <class>rssagregator.beans.incident.CollecteIncident</class>
     <class>rssagregator.beans.traitement.MediatorCollecteAction</class>
     <class>rssagregator.beans.traitement.AbstrParseur</class>
@@ -26,6 +26,8 @@
     <class>rssagregator.beans.traitement.AbstrDedoublonneur</class>
     <class>rssagregator.beans.FluxPeriodeCaptation</class>
     <class>rssagregator.beans.ItemRaffinee</class>
+        <class>rssagregator.beans.Flurssagregator.beans.Flux</class>
+    <class>rssagregator.beans.Flurssagregator.beans.Item</class>-->
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <!--<shared-cache-mode>ALL</shared-cache-mode>-->
     <shared-cache-mode>NONE</shared-cache-mode>
@@ -34,8 +36,7 @@
     <!--=============================================================================================================-->
     <!--        <class>rssagregator.Truc</class>
         <class>rssagregator.services.ServiceSynchro</class>-->
-    <class>rssagregator.beans.Flurssagregator.beans.Flux</class>
-    <class>rssagregator.beans.Flurssagregator.beans.Item</class>
+
     <properties>
       <property name="eclipselink.weaving" value="false"/>
       <property name="eclipselink.ddl-generation" value="create-tables"/>
@@ -55,8 +56,8 @@
       <!--=============================================================================================================-->
       <!--.....Configuration des logs de Eclipse Link. Comme pour le reste de l'application, on va utiliser log4j.....-->
       <!--=============================================================================================================-->
-      <property name="eclipselink.logging.logger" value="org.eclipse.persistence.logging.CommonsLoggingSessionLog"/>
-      <property name="eclipselink.logging.level" value="WARNING"/>
+<!--      <property name="eclipselink.logging.logger" value="org.eclipse.persistence.logging.CommonsLoggingSessionLog"/>
+      <property name="eclipselink.logging.level" value="WARNING"/>-->
       <!--==============================================================================================================-->
       <!--Configuration du cache coordination-->
       <!--==============================================================================================================-->
