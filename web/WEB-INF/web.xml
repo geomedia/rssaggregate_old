@@ -23,29 +23,6 @@
 
 
     
-    
-<!--    <servlet>
-        <servlet-name>Index</servlet-name>
-        <servlet-class>rssagregator.servlet.IndexSrvlt</servlet-class>
-    </servlet>-->
-
-    
-<!--    <resource-env-ref>
-        <resource-env-ref-name>jms/ConnectionFactory</resource-env-ref-name>
-        <resource-env-ref-type>org.apache.activemq.ActiveMQConnectionFactory</resource-env-ref-type>   
-    </resource-env-ref>
-    
-    <resource-env-ref>
-        <resource-env-ref-name>jms/topic/MyTopicClem</resource-env-ref-name>
-        <resource-env-ref-type>org.apache.activemq.command.ActiveMQTopic</resource-env-ref-type>   
-    </resource-env-ref>-->
-    
-    
-    
-    <!--    <resource-env-ref>
-        <resource-env-ref-name>testlink</resource-env-ref-name>
-        <resource-env-ref-type>java.lang.String</resource-env-ref-type>
-    </resource-env-ref>-->
     <resource-ref>
         <res-ref-name>clem</res-ref-name>
         <res-type>java.lang.String</res-type>

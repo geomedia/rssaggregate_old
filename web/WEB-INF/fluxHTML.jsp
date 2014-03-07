@@ -154,7 +154,7 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
                                     mtype: "GET",
                                     colNames: ["ID", 'nom', "Journal", "Type", "active", "created"],
                                     colModel: [
-                                        {name: "ID", key: true, width: 55, hidden: true},
+                                        {name: "ID", key: true, width: 55, hidden: false,  search: true, searchoptions: {sopt: ['eq']}},
                                         {name: "nom", width: 55, search: true, formatter: myLinkFormatter, searchoptions: {sopt: ['cn', 'eq']}},
                                         {name: "journalLie", width: 90, searchoptions: {sopt: ['cn', 'eq']}},
                                         {name: "typeFlux", title: 'Type', search: true, width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
@@ -162,6 +162,7 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
                                         {name: "created", width: 80, align: "right", stype: 'select', editoptions: {value: {'': 'tous', 'autre': 'autre', 'quotidien': 'quotidien'}}},
                                     ],
                                     pager: "#pager",
+                                    ignoreCase : true,
                                     rowNum: 10,
                                     rowList: [30, 50, 100, 150, 300, 500],
                                     sortname: "invid",
@@ -846,7 +847,7 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
 
 
                                     </fieldset>
-                                    <input type="submit" value="Parsssser"/>
+                                    <input type="submit" value="Parser"/>
 
 
                                 </form>

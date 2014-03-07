@@ -114,19 +114,12 @@ $(document).ready(function() {
 
 
 
-
-
-
-
     /***
      * 
      */
     $('#selectionPeriod').on('change', function truc2() {
 
-
         id = $('#selectionPeriod').val();
-
-
 
         // Requête en ajax
 
@@ -346,6 +339,8 @@ $(document).ready(function() {
     $('#formParse').on('submit', function() {
 //        alert('Cap');
 
+alert("Le serveur va tenter de parser votre fichier. Une grille récapitulant les résultat apparaitre. La procédure peut prendre du temps.");
+
         //Soumission des paramettres de parse en AJAX
         $.ajax({
             url: $(this).attr('action'), // le nom du fichier indiqué dans le formulaire
@@ -444,8 +439,8 @@ $(document).ready(function() {
 
                 });
                 $('#preSave').empty();
-                
-                
+
+
                 $('#preSave').append("<h2>Appercut des items parsées</h2>\n\
 <form method=\"POST\" id=\"formSave\">\n\
 <input type=\"hidden\" name=\"phase\" value=\"saveItem\" />\n\
@@ -456,7 +451,7 @@ $(document).ready(function() {
                 $('#formSave').on("submit", function() {
 
 
-                    alert("toto");
+                    alert("Vous avez demandé à enregistrer les flux. Cette procédure peut prendre du temps. Une fenetre surgira lorsque l'action sera terminée. Fermez maintenant ce pop up");
                     $.ajax({
                         url: $(this).attr('action'), // le nom du fichier indiqué dans le formulaire
                         type: $(this).attr('method'), // la méthode indiquée dans le formulaire (get ou post)
@@ -466,6 +461,9 @@ $(document).ready(function() {
                         success: function(html) {
                             $('#infoResultats').append(html);
                             alert(html);
+                        },
+                        error: function(request, status, error) {
+                            alert(request.responseText);
                         }
                     })
 

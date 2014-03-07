@@ -107,16 +107,12 @@ public class JournauxSrvl extends HttpServlet {
         } //---------------------------------ACTION LIST --------------------------------------
         else if (action.equals("list")) {
             DaoJournal dao = DAOFactory.getInstance().getDaoJournal();
-
             AbstrForm form = null;
             try {
                 form = FORMFactory.getInstance().getForm(Journal.class, "list");
-
             } catch (Exception ex) {
                 Logger.getLogger(JournauxSrvl.class.getName()).log(Level.SEVERE, null, ex);
             }
-
-
 
             try {
                 form.parseListeRequete(request, dao);

@@ -203,7 +203,7 @@ $(document).ready(function() {
 
                     $('#dia').remove();
                     $('nav').append('<div id="dia" title="Information sur le traitement"><p><label>Supprimer HTML</label> <input type="checkbox" id="suppHtml"/><br />\n\
-<label>Utiliser le \ comme caractère d\'échapement</label><input type="checkbox" id="escape"/>\n\
+<label>Utiliser le \\ comme caractère d\'échapement</label><input type="checkbox" id="escape"/>\n\
 <p>L\'export des données peut prendre plusieurs minutes. Si cette export dure plus de 20 secondes vous serez automatiquement redigé vers le répertoire contenant vos fichiers résultats bien que la tache d\'export ne soit pas nécessairement terminée. Recharger cette page par la suite pour voir tous les fichiers</p>\n\
 </p></div>');
                     $('#dia').dialog({minHeight: 300, minWidth: 400, closeText: "hide", show: "fade", dialogClass: "alert"});

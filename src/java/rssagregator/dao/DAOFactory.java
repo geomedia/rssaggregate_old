@@ -259,13 +259,7 @@ public class DAOFactory<T extends AbstrDao> {
      * @throws UnsupportedOperationException : si la tache envoyé n'inplémenta pas incidable ou si la factory n'est pas
      * capable de générer une tao pour la tâche
      */
-    /**
-     * *
-     *
-     * @param tache
-     * @return
-     * @throws TypeNotPresentException
-     */
+
     public T getDAOFromTask(AbstrTache tache) {
 
         IncidentFactory s = new IncidentFactory();

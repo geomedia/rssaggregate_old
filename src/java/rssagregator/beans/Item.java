@@ -114,6 +114,11 @@ public class Item extends Bean implements Serializable, Comparable<Item>, Conten
     @Index
     @Column(name = "link", length = 2000)
     private String link;
+    
+    @Column(name = "imported")
+    private boolean imported;
+    
+    
 //    /**
 //     * Cette variable n'est pas encore implémenté.
 //     * <ul>
@@ -704,4 +709,20 @@ public class Item extends Bean implements Serializable, Comparable<Item>, Conten
             return false;
         }
     }
+
+    public boolean isImported() {
+        return imported;
+    }
+
+    public void setImported(boolean imported) {
+        this.imported = imported;
+    }
+
+
+    
+    
+    
+    
+    
+    
 }

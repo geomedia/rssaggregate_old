@@ -32,11 +32,11 @@ public class TacheRaffinerPeriodique extends TacheImpl<TacheRaffinerPeriodique> 
 //            Query q = em.createQuery("SELECT i FROM Item i WHERE i.itemRaffinee IS NULL");
 //            Query q = em.createQuery("SELECT i FROM Item i");
 //            Query q = em.createQuery("SELECT i FROM Item i LEFT JOIN i.doublon d WHERE d IS NULL");
-             Query q = em.createQuery("SELECT i FROM Item i LEFT JOIN i.doublon d WHERE d.ID IS NULL");
+            Query q = em.createQuery("SELECT i FROM Item i LEFT JOIN FETCH i.doublon d, i.listFlux fl WHERE d.ID IS NULL");
 //             Query q = em.createQuery("SELECT i FROM Item i LEFT JOIN i.doublon d, i.listFlux fl, fl.journalLie j WHERE d.ID IS NULL AND j.ID=1756");
-            
-            
-            
+
+
+
             q.setFirstResult(0);
             q.setMaxResults(150);
 
@@ -45,21 +45,27 @@ public class TacheRaffinerPeriodique extends TacheImpl<TacheRaffinerPeriodique> 
                 encore = false;
                 break;
             }
-            
+
             //---------------------
             // Dédoublonnage par tache plusieurs
             //---------------------
-            TacheRaffinerPlusieurs raffinerPlusieurs = (TacheRaffinerPlusieurs) TacheFactory.getInstance().getNewTask(TacheRaffinerPlusieurs.class,false);
+            TacheRaffinerPlusieurs raffinerPlusieurs = (TacheRaffinerPlusieurs) TacheFactory.getInstance().getNewTask(TacheRaffinerPlusieurs.class, false);
             raffinerPlusieurs.setItemARaffiner(items);
             raffinerPlusieurs.setComportement(items.get(0).getListFlux().get(0).getMediatorFlux());
-                    ServiceCollecteur.getInstance().getTacheProducteur().produire(raffinerPlusieurs);
-                    synchronized(raffinerPlusieurs){
-                        raffinerPlusieurs.wait(20*1000);
-                    }
+            ServiceCollecteur.getInstance().getTacheProducteur().produire(raffinerPlusieurs);
+            synchronized (raffinerPlusieurs) {
+                raffinerPlusieurs.wait(60 * 1000);
+            }
+
+
+
+            // On retire les items de l'em pou réviter prob memoire
+            for (int i = 0; i < items.size(); i++) {
+                Item item = items.get(i);
+                em.detach(item);
+            }
             
-            
-            
-            
+
 //            for (int i = 0; i < items.size(); i++) {
 //                Item item = items.get(i);
 //      

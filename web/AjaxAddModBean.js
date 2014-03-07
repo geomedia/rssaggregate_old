@@ -8,7 +8,7 @@ $(document).ready(function() {
     $('#beanForm').on('submit', function() {
 
         $('#dia').remove();
-        $('nav').append('<div id="dia" title="Information sur le traitement"><p><strong>Oppération en cours</strong></p></div>');
+        $('nav').append('<div id="dia" title="Information sur le traitement"><p><strong>Opération en cours</strong></p></div>');
         $('#dia').dialog({minHeight: 300, minWidth: 400, closeText: "hide", show: "fade", dialogClass: "alert"});
 
 
@@ -32,9 +32,8 @@ $(document).ready(function() {
                         var redirUrl = html['redirUrl'];
 //                    alert("Action réussie. Vous allez être redirigé vers  : " + redirUrl);
                         $('#dia').empty();
-                        $('#dia').append('<p><strong>Oppération effectué</strong></p><p>Vous allez être redirigé dans 3 secondes à l\'adresse <a href="' + redirUrl + '">' + redirUrl + '</a></p>');
+                        $('#dia').append('<p><strong>Opération effectuée</strong></p><p>Vous allez être redirigé dans 3 secondes à l\'adresse <a href="' + redirUrl + '">' + redirUrl + '</a></p>');
 
-//                        $('nav').append('<div id="dia" title="tttitre"><p><strong>Oppération effectué</strong></p><p>Vous allez être redirigé dans 3 secondes à l\'adresse <a href="' + redirUrl + '">' + redirUrl + '</a></p></div>');
                         $('#dia').dialog({minHeight: 300, minWidth: 400, closeText: "hide", show: "fade", dialogClass: "alert"});
 //                    $('#page').empty();
 //            setTimeout("location.href = 'http://zouzou}';",3000);

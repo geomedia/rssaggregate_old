@@ -4,27 +4,16 @@
  */
 package rssagregator.servlet;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.jms.JMSException;
-import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import rssagregator.beans.Conf;
-import rssagregator.beans.Flux;
 import rssagregator.dao.DAOConf;
 import rssagregator.dao.DAOFactory;
 import rssagregator.utils.ServletTool;
-import rssagregator.utils.XMLTool;
 
 /**
  * La Servlet utilisée pour rediriger les requetes de l'utilisateur relatif à la
@@ -71,17 +60,10 @@ public class ConfigSrvl extends HttpServlet {
         request.setAttribute("navmenu", "config");
          request.setAttribute("srlvtname", ATT_SERV_NAME);
         
-
-
         String action = ServletTool.configAction(request, "mod");
 
-
         Conf confcourante = null;
-//        ConfForm form = new ConfForm();
-        DAOConf daoConf = DAOFactory.getInstance().getDAOConf();
-
         confcourante = DAOFactory.getInstance().getDAOConf().getConfCourante();
-
 
         // Configuration de la vue
         vue = request.getParameter("vue");
@@ -99,26 +81,6 @@ public class ConfigSrvl extends HttpServlet {
             //Si l'utilisateur à posté on bind
             
             ServletTool.actionMOD(request, ATT_BEANS, ATT_FORM, Conf.class, Boolean.TRUE);
-//            if (request.getMethod().equals("POST")) {
-//                confcourante = (Conf) form.bind(request, confcourante, Conf.class);
-//            }
-//
-//            request.setAttribute(ATT_FORM, form);
-//            request.setAttribute(ATT_BEANS, confcourante);
-//
-//            // SAUVEGARDE SI INFOS 
-//            if (form.getValide()) {
-//                try {
-//                    DAOFactory.getInstance().getDAOConf().modifierConf(confcourante);
-//                    // Il faut notifier le changement pour recharger le service de reception
-////                    confcourante.forceNotifyObserver();
-////                DAOFactory.getInstance().getDAOConf().forceNotifyObservers();
-//                    ServletTool.redir(request, "config/mod", "Modification de la config effectuée", Boolean.FALSE);
-//
-//                } catch (Exception ex) {
-//                    Logger.getLogger(ConfigSrvl.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-//            }
         }
                 /**
          * *=====================================================================================
@@ -129,76 +91,6 @@ public class ConfigSrvl extends HttpServlet {
             ServletTool.actionREAD(request, Conf.class, ATT_BEANS);
         }
 
-        /**
-         * *=====================================================================================
-         * . ....................................ACTION : IMPORT ITEM
-         *///=====================================================================================
-//        if (action.equals("importitem") && confcourante.getMaster()) {
-//            // On lance manuellement la tâche de Synchro
-////            ScheduledExecutorService es = Executors.newSingleThreadScheduledExecutor();
-//            
-//            TacheSynchroHebdomadaire recupItem = new TacheSynchroHebdomadaire(ServiceSynchro.getInstance());
-//            List<Item> list = null;
-//            try {
-//                TacheSynchroHebdomadaire fut = recupItem.call();
-//                request.setAttribute("tacheGenerale", fut);
-//                
-//                
-////                list = fut.getItemTrouvees(); // TODO il faudra mettre un delai limite lors qu'on aura fait des test grandeur nature.
-////                list = recupItem.call();
-//                request.setAttribute("listitemtrouve", list);
-//            } catch (Exception ex) {
-//                Logger.getLogger(ConfigSrvl.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//        }
-
-        /**
-         * =====================================================================================
-         * ......................... ACTION : IMPORT FLUX
-         *////***=================================================================================
-//        if (action.equals("importflux") && !daoConf.getConfCourante().getMaster()) {
-//
-//            URL url = new URL("http://" + daoConf.getConfCourante().getHostMaster() + ":8080/RSSAgregate/flux/list?vue=fluxXMLsync");
-//            URLConnection connection = url.openConnection();
-//            connection.connect();
-//
-//            InputStream in = new BufferedInputStream(connection.getInputStream());
-//            Object serialisation = XMLTool.unSerialize(in);
-//            List<Flux> listflux = (List<Flux>) serialisation;
-//            request.setAttribute("listfluximporte", listflux);
-//            int i;
-//            for (i = 0; i < listflux.size(); i++) {
-//                try {
-//                    DAOFactory.getInstance().getDAOFlux().creer(listflux.get(i));
-//                } catch (Exception ex) {
-//                    Logger.getLogger(ConfigSrvl.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-//            }
-//        } 
-        
-        /**
-         * *=====================================================================================
-         * ............................ACTION : RELOAD JMS //
-         * ======================================================================================
-         */
-//        else if (action.equals("jmsreload")) {
-//            String msg = ""; // Il s'agit du message devant informer l'utilisateur sur le relancement du serveur JMS
-//
-//            try {
-//                ServiceSynchro.getInstance().openConnection();
-//                msg = "OK";
-//            } catch (NamingException ex) {
-//                Logger.getLogger(ConfigSrvl.class.getName()).log(Level.SEVERE, null, ex);
-//                msg = "erreur : " + ex;
-//            } catch (JMSException ex) {
-//                Logger.getLogger(ConfigSrvl.class.getName()).log(Level.SEVERE, null, ex);
-//                msg = "erreur : " + ex;
-//            }
-//            request.setAttribute("msg", msg);
-//            jsp = "/WEB-INF/configJMSinfo.jsp"; // C'est une vue retournant un message texte comprennant le message en paramettre plus haut.
-//            
-//        }
-        
         
         if(vue ==null || vue.isEmpty()){
             jsp = "/WEB-INF/configjsp.jsp";

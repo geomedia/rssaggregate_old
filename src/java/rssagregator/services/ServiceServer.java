@@ -49,25 +49,7 @@ public class ServiceServer extends ServiceImpl {
         return instance;
     }
 
-    /**
-     * Démarre le service. Commence par charger la conf et des informations dans
-     * la base de données avant de lancer les services (Collecteur, JMS pour la
-     * sync, mail). termine sur une boucle infinie permettant d'écrire toute les
-     * x seconces dans un fichier still alive
-     */
-//    @Override
-//    public void run() {
-//      
-//        while (isStart) {
-//            try {
-//                Thread.sleep(daemonTime);
-//            } catch (InterruptedException ex) {
-//                Logger.getLogger(ServiceServer.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//        }
-//
-//
-//    }
+
     /**
      * *
      * Boolen critère de la boucle infinie du daemon. tant qu'il est vrai le

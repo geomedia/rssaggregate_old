@@ -92,7 +92,6 @@ public class StartServlet implements ServletContextListener {
         try {
             daoconf.verifRootAccount();
 
-            //            executorServiceAdministratif.submit(serviceJMS);
         } catch (IOException ex) {
             Logger.getLogger(ServiceServer.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {

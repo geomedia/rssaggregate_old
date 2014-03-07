@@ -57,7 +57,7 @@ import rssagregator.utils.ServletTool;
  * @author clem
  */
 @WebServlet(name = "Flux", urlPatterns = {"/flux/*"})
-@MultipartConfig(maxFileSize = 10485760, maxRequestSize = 52428800, fileSizeThreshold = 1048576) // Nécessaire pour l'envoie de fichier CSV
+@MultipartConfig(maxFileSize = 104857600, maxRequestSize = 524288000, fileSizeThreshold = 1048576) // Nécessaire pour l'envoie de fichier CSV
 public class FluxSrvl extends HttpServlet {
     
     public static final String ATT_FORM = "form";
@@ -189,6 +189,7 @@ public class FluxSrvl extends HttpServlet {
         } // Si l'action est liste, on récupère la liste des flux
         //-------------------------------------------------------- ACTION LIST --------------------------------------------------------
         else if (action.equals("list")) {
+         
             //            // Restriction en fonction du journal
             try {
                 Long idJournal = new Long(request.getParameter("journalid"));
@@ -274,10 +275,13 @@ public class FluxSrvl extends HttpServlet {
             }
             
             if (request.getMethod().equals("POST")) {
+                System.out.println("POST");
 
                 //---------------> Phase : upload
                 if (phase != null && phase.equals("upload")) {
+                    System.out.println("Phase upload");
                     try {
+                        System.out.println("Try upload");
                         HttpSession session = request.getSession();
 
                         // Dans cette phase, on récupère le fichier, puis on instancie le collecteur pour le flux et l'on associe le fichier a ce comportement qui sera utilisé dans la phase suivant : le parsing
@@ -308,7 +312,7 @@ public class FluxSrvl extends HttpServlet {
                             session.setAttribute("visitor", visitorCollecteActionCSV);
                             
                             visitorCollecteActionCSV.setByteCSV(resu);
-                            
+                            System.out.println("Fin upload");
                         }
                     } catch (Exception e) {
                         
@@ -352,8 +356,6 @@ public class FluxSrvl extends HttpServlet {
                     try {
                         //On récupère les items précédemment checké dans la requête
                         HttpSession session = request.getSession();
-                        
-                        
                         VisitorCollecteActionCSV visiteur = (VisitorCollecteActionCSV) session.getAttribute("visitor");
                         //Récupération du flux
 

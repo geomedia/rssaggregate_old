@@ -14,7 +14,6 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import rssagregator.beans.Flux;
-import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.beans.incident.NotificationAjoutFlux;
 import rssagregator.services.tache.TacheAlerteMail;
 
@@ -246,89 +245,8 @@ public class DAOIncident<T> extends AbstrDao {
         DAOIncident<NotificationAjoutFlux> dao = new DAOIncident<NotificationAjoutFlux>(DAOFactory.getInstance());
         dao.findNotificationAjoutFluxFromFlux(fl);
 
-//        DAOIncident<JMSPerteConnectionIncident> dao = new DAOIncident<JMSPerteConnectionIncident>(DAOFactory.getInstance());
-//        dao.setClos(false);
-//        List l = dao.findCriteria(JMSPerteConnectionIncident.class);
-//        for (int i = 0; i < l.size(); i++) {
-//            Object object = l.get(i);
-//        }
     }
 
-//        @Override
-//    public CollecteIncident find(Long id) {
-//            
-//            
-//        return super.find(id); //To change body of generated methods, choose Tools | Templates.
-//    }
-//    
-//    
-//    
-//    public Integer findnbMax(Class<T> T) {
-//
-//        CriteriaBuilder cb = em.getCriteriaBuilder();
-//
-//        CriteriaQuery cq = cb.createQuery(T);
-//        Root<CollecteIncident> root = cq.from(T);
-//        List<Predicate> listWhere = new ArrayList<Predicate>();
-//
-//
-//        if (clos != null) {
-//            if (clos) {
-//                listWhere.add(cb.isNotNull(root.get("dateFin")));
-//            } else {
-//                listWhere.add(cb.isNull(root.get("dateFin")));
-//            }
-//        }
-//
-//
-//
-//        // On applique les wheres
-//        int i;
-//        if (listWhere.size() == 1) {
-//            cq.where(listWhere.get(0));
-//        } else if (listWhere.size() > 1) {
-//            Predicate pr = cb.and(listWhere.get(0));
-//            for (i = 1; i < listWhere.size(); i++) {
-//                pr = cb.and(pr, listWhere.get(i));
-//            }
-//            cq.where(pr);
-//        }
-//
-//
-//
-//
-//
-////        return tq.getResultList();
-//
-//
-//
-//
-//
-////        
-////        CriteriaBuilder cb = em.getCriteriaBuilder();
-////
-////        CriteriaQuery cq = cb.createQuery(CollecteIncident.class);
-////        Root root = cq.from(CollecteIncident.class);
-//
-//        //La jointure avec whereclause
-////        if (j != null) {
-////            Join join = root.join("journalLie");
-////            cq.where(cb.equal(join.get("ID"), j.getID()));
-////        }
-//
-//
-//        cq.select(cb.count(root));
-//
-//        Query query = em.createQuery(cq);
-//        List resu = query.getResultList();
-//
-//        try {
-//            Integer retour = new Integer(resu.get(0).toString());
-//            return retour;
-//        } catch (Exception e) {
-//            return null;
-//        }
-//    }
 
     public Boolean getClos() {
         return clos;

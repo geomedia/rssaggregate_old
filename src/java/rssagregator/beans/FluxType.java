@@ -25,7 +25,7 @@ import org.eclipse.persistence.annotations.CascadeOnDelete;
 @Entity
 //@Cacheable(value = false)
 @XmlRootElement
-public class FluxType implements Serializable, BeanSynchronise {
+public class FluxType implements Serializable {
 
     
     public static void main(String[] args) {

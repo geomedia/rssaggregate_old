@@ -87,7 +87,12 @@ public class CSVMacker implements Callable<Object> {
     public Object call() throws Exception {
 
         // Création du répertoire ou serotn stoqué les fichier exporté par l'utilisateur
-        createUniqRep();
+        try {
+        createUniqRep();            
+        } catch (Exception e) {
+            logger.debug("erreur", e);
+        }
+
 
 //        CSVWriter cSVWriter = new CSVWriter(fileWriter, '\t', '"', '\\');
         DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
@@ -331,11 +336,15 @@ public class CSVMacker implements Callable<Object> {
      * Crée le répertoire dans lequel seront stoqué les fichier d'export.
      */
     private void createUniqRep() {
+        
         String repName = "EXPORT--" + rssagregator.utils.FileUtils.contructMailFileName() + "/";
         exportPath = webDir + "upload/" + repName;
+        System.out.println("Path " + exportPath);
         new File(exportPath).mkdir();
 
         Conf c = DAOFactory.getInstance().getDAOConf().getConfCourante();
+        System.out.println("c.getServurl()" + c.getServurl());
+        
         redirPath = c.getServurl() + "/upload/" + repName + "/";
     }
 

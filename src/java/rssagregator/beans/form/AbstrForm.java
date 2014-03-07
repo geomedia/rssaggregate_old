@@ -372,6 +372,7 @@ public abstract class AbstrForm {
             String filter = request.getParameter("filters");
             JSONObject obj = new JSONObject();
             JSONParser parse = new JSONParser();
+            
             try {
                 JSONObject obj2 = (JSONObject) parse.parse(filter);
                 JSONArray rules = (JSONArray) obj2.get("rules");
@@ -418,115 +419,94 @@ public abstract class AbstrForm {
                 try {
                     JSONObject obj2 = (JSONObject) parse.parse(filter);
                     JSONArray rules = (JSONArray) obj2.get("spefield");
-                    for (int i = 0; i < rules.size(); i++) {
-                        JSONObject obj = (JSONObject) rules.get(i);
-                        String field = (String) obj.get("field");
-                        String op = (String) obj.get("op");
-
-                        /**
-                         * *
-                         * On parse un critère IN
-                         */
-                        if (op.equals("in")) {
-                            Object object = beanClass.newInstance(); // On va le farfouiller avec beansutils il y a suremebnt plus élégent mais on n'a pas trouvé commen manier simplement dans la class en dehors de la réflexion classqiue
-                            //Récupération du field
-                            Class c = PropertyUtils.getPropertyType(object, field);
-
-                            if (List.class.isAssignableFrom(c)) {
-
-                                SearchFilter newFilter = new SearchFilter();
-
-                                Field stringListField = Item.class.getDeclaredField(field);
-                                ParameterizedType stringListType = (ParameterizedType) stringListField.getGenericType();
-                                Class<?> classDeLalist = (Class<?>) stringListType.getActualTypeArguments()[0];
-
-                                String ids = "";
-                                if (obj.get("data").getClass().equals(JSONArray.class)) { // Si c'est un tableau json on le met en string
-                                    ids = ((JSONArray) obj.get("data")).toString();
-                                    if (ids.length() > 2) {
-                                        ids = ids.substring(1, ids.length() - 1);
-                                    }
-                                }
-
-                                AbstrDao daoDutypedeLarg = DAOFactory.getInstance().getDaoFromType(classDeLalist);
-
-                                List<Long> listId = new ArrayList<Long>();
-                                try {
-                                    listId = ServletTool.parseidFromRequest(null, ids);
-                                } catch (Exception e) {
-                                    logger.debug("err", e);
-                                }
-
-                                List whereData = new ArrayList();
-                                for (int j = 0; j < listId.size(); j++) {
-                                    Object oo = classDeLalist.newInstance();
-                                    PropertyUtils.setProperty(oo, "ID", listId.get(j));
-                                    whereData.add(oo);
-
-                                }
-                                newFilter.setData(whereData);
-                                newFilter.setType(List.class);
-                                newFilter.setOp("in");
-                                newFilter.setField(field);
-                                filters.getFilters().add(newFilter);
-
-                            }
-                        }
+                    if (rules != null) {
 
 
-                        if (op.equals("inn")) {
-                            SearchFilter nouveauFiltre = new SearchFilter();
-                            nouveauFiltre.setOp(op);
-                            nouveauFiltre.setField(field);
-                            nouveauFiltre.setData("NULL");
-                            nouveauFiltre.setType(String.class);
-                            filters.getFilters().add(nouveauFiltre);
+                        for (int i = 0; i < rules.size(); i++) {
+                            
+                            JSONObject obj = (JSONObject) rules.get(i);
+                            String field = (String) obj.get("field");
+                            String op = (String) obj.get("op");
 
-                        } else if (op.equals("isn")) {
-                            SearchFilter nouveauFiltre = new SearchFilter();
-                            nouveauFiltre.setOp(op);
-                            nouveauFiltre.setField(field);
-                            nouveauFiltre.setData("NULL"); // Is not ne demande pas de data mais ca va gueler sinon
-                            nouveauFiltre.setType(String.class);
-                            filters.getFilters().add(nouveauFiltre);
-
-
-                        } else if (op.equals("lt")) {
-                            SearchFilter newfilter = new SearchFilter();
-                            newfilter.setOp("lt");
-                            newfilter.setField(field);
-
-
-                            Object object = beanClass.newInstance();
-//                            Object prop = PropertyUtils.getPropertyType(object, field);
-                            Class c = PropertyUtils.getPropertyType(object, field);
-
-
-                            if (c.equals(Date.class)) {
-                                DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
-
-                                DateTime dt = fmt.parseDateTime((String) obj.get("data"));
-                                newfilter.setData(dt.toDate());
-                            } else {
-                                newfilter.setData(obj.get("data"));
-                            }
-
-                            newfilter.setType(c);
-
-                            filters.getFilters().add(newfilter);
-
-                        } else if (op.equals("gt")) {
-                            try {
-
-                                SearchFilter newfilter = new SearchFilter();
-                                newfilter.setOp(op);
-                                newfilter.setField(field);
-
-                                // récup du type du champ
-                                Object object = beanClass.newInstance();
+                            /**
+                             * *
+                             * On parse un critère IN
+                             */
+                            if (op.equals("in")) {
+                                Object object = beanClass.newInstance(); // On va le farfouiller avec beansutils il y a suremebnt plus élégent mais on n'a pas trouvé commen manier simplement dans la class en dehors de la réflexion classqiue
+                                //Récupération du field
                                 Class c = PropertyUtils.getPropertyType(object, field);
 
-                                newfilter.setType(c);
+                                if (List.class.isAssignableFrom(c)) {
+
+                                    SearchFilter newFilter = new SearchFilter();
+
+                                    Field stringListField = Item.class.getDeclaredField(field);
+                                    ParameterizedType stringListType = (ParameterizedType) stringListField.getGenericType();
+                                    Class<?> classDeLalist = (Class<?>) stringListType.getActualTypeArguments()[0];
+
+                                    String ids = "";
+                                    if (obj.get("data").getClass().equals(JSONArray.class)) { // Si c'est un tableau json on le met en string
+                                        ids = ((JSONArray) obj.get("data")).toString();
+                                        if (ids.length() > 2) {
+                                            ids = ids.substring(1, ids.length() - 1);
+                                        }
+                                    }
+
+                                    AbstrDao daoDutypedeLarg = DAOFactory.getInstance().getDaoFromType(classDeLalist);
+
+                                    List<Long> listId = new ArrayList<Long>();
+                                    try {
+                                        listId = ServletTool.parseidFromRequest(null, ids);
+                                    } catch (Exception e) {
+                                        logger.debug("err", e);
+                                    }
+
+                                    List whereData = new ArrayList();
+                                    for (int j = 0; j < listId.size(); j++) {
+                                        Object oo = classDeLalist.newInstance();
+                                        PropertyUtils.setProperty(oo, "ID", listId.get(j));
+                                        whereData.add(oo);
+
+                                    }
+                                    newFilter.setData(whereData);
+                                    newFilter.setType(List.class);
+                                    newFilter.setOp("in");
+                                    newFilter.setField(field);
+                                    filters.getFilters().add(newFilter);
+
+                                }
+                            }
+
+
+                            if (op.equals("inn")) {
+                                SearchFilter nouveauFiltre = new SearchFilter();
+                                nouveauFiltre.setOp(op);
+                                nouveauFiltre.setField(field);
+                                nouveauFiltre.setData("NULL");
+                                nouveauFiltre.setType(String.class);
+                                filters.getFilters().add(nouveauFiltre);
+
+                            } else if (op.equals("isn")) {
+                                SearchFilter nouveauFiltre = new SearchFilter();
+                                nouveauFiltre.setOp(op);
+                                nouveauFiltre.setField(field);
+                                nouveauFiltre.setData("NULL"); // Is not ne demande pas de data mais ca va gueler sinon
+                                nouveauFiltre.setType(String.class);
+                                filters.getFilters().add(nouveauFiltre);
+
+
+                            } else if (op.equals("lt")) {
+                                SearchFilter newfilter = new SearchFilter();
+                                newfilter.setOp("lt");
+                                newfilter.setField(field);
+
+
+                                Object object = beanClass.newInstance();
+//                            Object prop = PropertyUtils.getPropertyType(object, field);
+                                Class c = PropertyUtils.getPropertyType(object, field);
+
+
                                 if (c.equals(Date.class)) {
                                     DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -536,9 +516,35 @@ public abstract class AbstrForm {
                                     newfilter.setData(obj.get("data"));
                                 }
 
+                                newfilter.setType(c);
+
                                 filters.getFilters().add(newfilter);
-                            } catch (Exception e) {
-                                logger.debug("err", e);
+
+                            } else if (op.equals("gt")) {
+                                try {
+
+                                    SearchFilter newfilter = new SearchFilter();
+                                    newfilter.setOp(op);
+                                    newfilter.setField(field);
+
+                                    // récup du type du champ
+                                    Object object = beanClass.newInstance();
+                                    Class c = PropertyUtils.getPropertyType(object, field);
+
+                                    newfilter.setType(c);
+                                    if (c.equals(Date.class)) {
+                                        DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+
+                                        DateTime dt = fmt.parseDateTime((String) obj.get("data"));
+                                        newfilter.setData(dt.toDate());
+                                    } else {
+                                        newfilter.setData(obj.get("data"));
+                                    }
+
+                                    filters.getFilters().add(newfilter);
+                                } catch (Exception e) {
+                                    logger.debug("err", e);
+                                }
                             }
                         }
                     }

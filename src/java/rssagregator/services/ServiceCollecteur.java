@@ -550,43 +550,25 @@ public class ServiceCollecteur extends ServiceImpl {
 
         // A la fin d'un tache récup on lance des tache de rafinage
 
-        if (o.getClass().equals(TacheRecupCallable.class)) { // Cette partie est désactivé pour le moement
-
-            TacheRecupCallable recupCallable = (TacheRecupCallable) o;
-            List<Item> listItem = recupCallable.getNouvellesItems();
-
-
-//            List<Future> listFuture = new ArrayList<Future>();
-            for (int i = 0; i < listItem.size(); i++) {
-
-                Item item = listItem.get(i);
-                
-                TacheRaffiner2 raffiner2 = (TacheRaffiner2) TacheFactory.getInstance().getNewTask(TacheRaffiner2.class, false);
-                raffiner2.setComportementCollecte(recupCallable.getFlux().getMediatorFlux());
-                raffiner2.setItem(item);
-                raffiner2.setSchedule(false);
-                tacheProducteur.produireMaintenant(raffiner2);
-                
-                
-                
-                // Si la nouvelle item ne possède pas d'item raffiné on lance une tache dédié a cela
-//                if (item.getItemRaffinee() == null) {
+//        if (o.getClass().equals(TacheRecupCallable.class)) { // Cette partie est désactivé pour le moement
 //
-//                    
-//                    //TODO : Le rafinnage est pour l'instant désactivé
-//                    TacheRaffiner raffiner = (TacheRaffiner) TacheFactory.getInstance().getNewTask(TacheRaffiner.class, false);
-//                    raffiner.setItem(item);
-//                    raffiner.setComportementCollecte(recupCallable.getFlux().getMediatorFlux());
-//                    
-//                    raffiner.setSchedule(false);
+//            TacheRecupCallable recupCallable = (TacheRecupCallable) o;
+//            List<Item> listItem = recupCallable.getNouvellesItems();
 //
-//                    tacheProducteur.produireMaintenant(raffiner);
 //
-//                }
-                
-                
-            }
-        }
+////            List<Future> listFuture = new ArrayList<Future>();
+//            for (int i = 0; i < listItem.size(); i++) {
+//
+//                Item item = listItem.get(i);
+//                
+//                TacheRaffiner2 raffiner2 = (TacheRaffiner2) TacheFactory.getInstance().getNewTask(TacheRaffiner2.class, false);
+//                raffiner2.setComportementCollecte(recupCallable.getFlux().getMediatorFlux());
+//                raffiner2.setItem(item);
+//                raffiner2.setSchedule(false);
+//                tacheProducteur.produireMaintenant(raffiner2);
+//                
+//            }
+//        }
     }
 
     /**

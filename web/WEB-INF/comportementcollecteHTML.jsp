@@ -121,6 +121,7 @@
 
                                 <fieldset>
                                     <legend>Raffineur</legend>
+                                    <p>/!\Les raffineurs ne sont pas pour l'instant fonctionnel. Leur activation n'entrainera aucun travail...</p>
                                 <c:forEach items="${raffSet}" var="raf">
 
                                     <c:set var="use" value="false"></c:set>

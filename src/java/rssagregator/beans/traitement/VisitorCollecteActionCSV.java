@@ -121,10 +121,18 @@ public class VisitorCollecteActionCSV extends VisitorCollecteFlux implements Com
             
             // On execute en laissant 120 secondes
             try {
-                futurDedoub.get(120, TimeUnit.SECONDS);
+                futurDedoub.get(400, TimeUnit.SECONDS);
             } catch (Exception e) {
                 throw e;
             }
+            
+            // On définit a importé la valeur du champs
+            for (int i = 0; i < listItem.size(); i++) {
+                Item item = listItem.get(i);
+                item.setImported(true);
+            }
+            
+            
 
         } catch (Exception e) {
             logger.info("erreur lors de lu traitement : " + e);

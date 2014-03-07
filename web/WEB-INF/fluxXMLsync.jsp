@@ -11,12 +11,8 @@
 
 <%
     List<Flux> listFlux = (List<Flux>) request.getAttribute("listflux");
-    int i;
     String listSerialise = XMLTool.serialise(listFlux);
-//    System.out.println("je suis la");
     out.clear();
-//    out.print("coucou");
        out.print(listSerialise);
     out.flush();
- 
 %>

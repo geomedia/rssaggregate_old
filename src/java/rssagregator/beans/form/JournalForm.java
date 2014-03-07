@@ -247,6 +247,7 @@ public class JournalForm extends AbstrForm {
     @Override
     public void parseListeRequete(HttpServletRequest request, AbstrDao dao) throws Exception {
         this.recupStandartFilters(request, dao, filtersList);
+//        this.recupSpeFilters(request, dao, filtersList);
 
     }
 }

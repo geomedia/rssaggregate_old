@@ -86,9 +86,9 @@ public class FORMFactory {
 //        } 
         else if (AbstrIncident.class.isAssignableFrom(beansClass)) {
             form = new IncidentForm();
-        } else if (beansClass.equals(Conf.class)) {
-            form = new ConfForm();
-        } else if (beansClass.equals(Item.class)) {
+        }
+        
+        else if (beansClass.equals(Item.class)) {
             form = new ItemForm();
         }
 

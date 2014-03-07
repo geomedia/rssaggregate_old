@@ -89,16 +89,18 @@
                                 $("#list").jqGrid({
                                     url: "${rootpath}journaux/list?vue=grid",
                                     datatype: "json",
+//                                          loadonce: true,
                                     mtype: "GET",
                                     colNames: ["ID", "nom", "langue", "pays", "typeJournal", "urlAccueil"],
                                     colModel: [
-                                        {name: "ID", width: 55, hidden: false, searchoptions: {sopt: ['cn', 'eq']}},
+                                        {name: "ID", width: 55,search: true, hidden: false, searchoptions: {sopt: ['eq']}},
                                         {name: "nom", classtype: 'clem', sorttype: 'float', width: 90, formatter: myLinkFormatter, searchoptions: {sopt: ['cn', 'eq']}},
                                         {name: "langue", index: 'langue', key: true, search: true, width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
                                         {name: "pays", width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
                                         {name: "typeJournal", width: 80, align: "right", stype: 'select', editoptions: {value: {'': 'tous', 'autre': 'autre', 'quotidien': 'quotidien'}}},
                                         {name: "urlAccueil", width: 150, sortable: true, searchoptions: {sopt: ['cn', 'eq']}}
                                     ],
+                                            ignoreCase : true,
                                     pager: "#pager",
                                     rowNum: 10,
                                     rowList: [10, 20, 30],
