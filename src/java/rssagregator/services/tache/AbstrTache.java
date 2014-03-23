@@ -355,7 +355,7 @@ public abstract class AbstrTache<T> extends Observable implements Callable<T> {
 
                 DateTime next = new DateTime().withHourOfDay(this.heureSchedule).withMinuteOfHour(this.minuteSchedule);
 
-                if (next.isBefore(new DateTime())) {
+                if (next.isBefore(new DateTime().plusMinutes(1))) {
                     next = next.plusDays(1);
                 }
                 this.nextExecution = next.toDate();

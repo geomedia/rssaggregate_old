@@ -73,6 +73,7 @@ public class ServiceCRUDFlux extends ServiceCRUDBeansSynchro {
     protected ServiceCRUDFlux() {
     }
 
+    
     /**
      * *
      * Cette méthode n'est pas utilisé au profit de la méthode {@link #SupprimerListFlux(java.util.List, java.lang.Boolean, javax.persistence.EntityManager)
@@ -83,91 +84,7 @@ public class ServiceCRUDFlux extends ServiceCRUDBeansSynchro {
      */
     @Override
     public void supprimer(Object obj) throws Exception {
-        
         throw new UnsupportedOperationException("Pas implémenter utilisez plutot SupprimerListFlux");
-//
-//        Flux flux = (Flux) obj;
-//        DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
-//        daoItem.beginTransaction();
-//        DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
-//        daoFlux.setEm(daoItem.getEm()); // On donne a la daoflux le même Entity manager afin d'avoir une trasaction unique pour toute la procédure
-//
-//        Boolean err = false;
-//        List<Item> items = daoItem.itemLieAuFlux(flux);
-//
-//        int i;
-//        for (i = 0; i < items.size(); i++) {
-//            Item item = items.get(i);
-//
-//            //Supppression des items qui vont devenir orphelines
-//            if (item.getListFlux().size() < 2) {
-//                // On supprimer la relation 
-//                item.getListFlux().clear();
-//                try {
-//                    daoItem.modifier(item);
-//                    daoItem.remove(item);
-//                } catch (Exception e) {
-//                    err = true;
-//                    logger.debug("Erreur lors de la suppression", e);
-//                }
-//
-//            } else { // Sinon on détach le flux
-//                item.getListFlux().remove(flux);
-//
-//                try {
-//                    daoItem.modifier(item);
-//                } catch (Exception ex) {
-//                    err = true;
-//                    logger.debug("Erreur lors de la modification", ex);
-//                }
-//            }
-//        }
-//        // On va supprimer le flux si la procédure de suppression des items s'est déroulée correctement
-//        flux.setItem(new ArrayList<Item>());
-//
-////        DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
-////        daoFlux.beginTransaction();
-//        daoFlux.setEm(daoItem.getEm());
-////        daoFlux.setTr(daoItem.getTr());
-//
-//        try {
-//            daoFlux.remove(flux);
-//        } catch (IllegalArgumentException ex) {
-//            err = true;
-//            Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
-//        } catch (TransactionRequiredException ex) {
-//            err = true;
-//            Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
-//        } catch (Exception ex) {
-//            err = true;
-//            Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//
-//        // Tous le monde est OK, Alors on commit
-//        if (!err) {
-//            try {
-//                daoItem.commit();
-//            } catch (Exception e) {
-//                logger.debug("Erreur lors du comit de l'item", e);
-//            }
-//
-//
-//            try {
-//                daoFlux.commit();
-//                ServiceCollecteur.getInstance().getCacheHashFlux().removeFlux(flux);
-//                // Le flux doit se notifier auprès du service de collecte
-//                ServiceCollecteur collecteur = ServiceCollecteur.getInstance();
-//                collecteur.retirerFluxDuService(flux);
-////                flux.enregistrerAupresdesService();
-////                flux.forceChangeStatut();
-////                flux.notifyObservers("rem");
-//            } catch (Exception e) {
-//                logger.debug("erreur", e);
-//            }
-//
-//        } else {
-//            throw new Exception("Erreur lors de la suppression");
-//        }
     }
 
     /**

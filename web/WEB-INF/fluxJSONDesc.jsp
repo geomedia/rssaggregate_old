@@ -39,7 +39,6 @@
 
     out.clear();
     out.print(export.toJSONString());
-    System.out.println(export.toJSONString());
     out.flush();
 
 %>

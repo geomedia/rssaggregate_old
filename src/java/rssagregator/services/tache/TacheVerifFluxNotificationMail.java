@@ -58,9 +58,15 @@ public class TacheVerifFluxNotificationMail extends TacheImpl<TacheVerifFluxNoti
             String txtMail = VelocityTemplateLoad.rendu("rssagregator/services/mailtemplate/MailAlertTemplate.vsl", vCtxt);
             mailSendTask.setContent(txtMail);
             
+            ServiceMailNotifier.getInstance().getTacheProducteur().produireMaintenant(mailSendTask);
+            synchronized(mailSendTask){
+                mailSendTask.wait(30*1000);
+            }
+            
 
-            Future<TacheEnvoyerMail> fut = serviceMail.submit(mailSendTask); // On envoi le mail en lui laissant 30 secondes
-            fut.get(30, TimeUnit.SECONDS);
+//            Future<TacheEnvoyerMail> fut = serviceMail.submit(mailSendTask); // On envoi le mail en lui laissant 30 secondes
+//            fut.get(30, TimeUnit.SECONDS);
+            System.out.println("FIN");
         }
     }
 

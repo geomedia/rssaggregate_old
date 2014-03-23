@@ -7,6 +7,7 @@ package rssagregator.services;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.List;
+import java.util.Observable;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
@@ -32,9 +33,6 @@ public class ServiceMailNotifier extends ServiceImpl {
 //    private ScheduledExecutorService executorService;
     private Properties propertiesMail;
     private final static String MAILER_VERSION = "Java";
-    protected org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(ServiceMailNotifier.class);
-    
-    
     
 
     /**
@@ -129,5 +127,13 @@ public class ServiceMailNotifier extends ServiceImpl {
  
         ServiceMailNotifier.getTestInstance().writeMailtoFile(null);
     }
+    
+    
+        @Override
+    public void update(Observable o, Object arg) {
+
+
+        super.update(o, arg);
+        }
     
 }

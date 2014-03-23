@@ -4,10 +4,6 @@
  */
 package rssagregator.beans.form;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -17,12 +13,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import org.reflections.Reflections;
-import rssagregator.beans.traitement.AbstrDedoublonneur;
 import rssagregator.beans.traitement.AbstrRaffineur;
-import rssagregator.beans.traitement.Dedoubloneur;
 import rssagregator.beans.traitement.ComportementCollecte;
-import rssagregator.beans.traitement.Requester;
-import rssagregator.beans.traitement.RomeParse;
 
 /**
  * Le formulaire permettant de valider et binder un beans {@link ComportementCollecte}
@@ -42,7 +34,7 @@ public class ComportementCollecteForm extends AbstrForm {
     private Boolean dedoubCategory;
     private String comportement_nom;
     private String comportement_desc;
-    private Boolean defaut;
+//    private Boolean defaut;
     private List<Class> raffClass = new ArrayList<Class>();
 
     protected ComportementCollecteForm() {
@@ -101,7 +93,7 @@ public class ComportementCollecteForm extends AbstrForm {
 
             collecte.setNom(comportement_nom);
             collecte.setDescription(comportement_desc);
-            collecte.setDefaut(defaut);
+//            collecte.setDefaut(defaut);
 
 
 //            Fixation de la valeur actif innactif des raffineur en conction de la selection utilisateur.
@@ -262,13 +254,13 @@ public class ComportementCollecteForm extends AbstrForm {
             comportement_desc = s;
         }
 
-        //----------> COMPORTEMNENT PAR DEFAUT
-        s = request.getParameter("defaut");
-        if (s == null || s.isEmpty()) {
-            defaut = false;
-        } else {
-            defaut = true;
-        }
+//        //----------> COMPORTEMNENT PAR DEFAUT
+//        s = request.getParameter("defaut");
+//        if (s == null || s.isEmpty()) {
+//            defaut = false;
+//        } else {
+//            defaut = true;
+//        }
 
         //----> Raffineur
         System.out.println("=================");

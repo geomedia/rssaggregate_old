@@ -54,8 +54,7 @@
                         <form method="POST" id="beanForm">
                             <fieldset>
                                 <legend>Information propre au comportement</legend>
-                                <label>Comportement utilisé par défaut :</label>
-                                <input type="checkbox" name="defaut" <c:if test="${bean.defaut}"> checked="true"</c:if> /><br />
+                             
 
                                     <label> Nom du comportement<span class="requis">*</span> : </label>
                                     <input type="text" name="comportement_nom" value="${bean.nom}"/><span class="erreur" id="errcomportement_nom"></span><br/>

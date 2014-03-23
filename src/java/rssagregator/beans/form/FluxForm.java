@@ -232,12 +232,14 @@ public class FluxForm extends AbstrForm {
         //----------> NOM DU FLUX
         s = request.getParameter("nom");
         if (s != null && !s.isEmpty()) {
-            if (!s.matches("^[a-zA-Z0-9 -]*$")) {
-                erreurs.put("nom", new String[]{"N'utilisez que des caractères alpha numéric", "Incorrect"});
-            } else {
-                nom = s;
-            }
-
+//            if (!s.matches("^[a-zA-Z0-9 -()\\.:]*$")) {
+//                erreurs.put("nom", new String[]{"N'utilisez que des caractères alpha numéric", "Incorrect"});
+//            } else {
+            nom = s;
+//            }
+        }
+        else{
+            erreurs.put("nom", new String[]{ERR_NE_PEUT_ETRE_NULL, ERR_NE_PEUT_ETRE_NULL});
         }
 
         //-----------> FLUX PARENT

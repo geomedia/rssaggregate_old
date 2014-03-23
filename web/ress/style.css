@@ -223,22 +223,18 @@ a:hover {
 
 #page {
     overflow: hidden;
-    width: 90%;
+    /*width: 90%;*/
+    /*width: 80em;;*/
     margin: 0px auto;
-    padding: 30px 0px;
+    padding: 30px 20px 0px 20px;
+    width: 100%;
 }
 
 /* Content */
 
 #content {
     float: left;
-    /*width: 540px;*/
-    /*min-width: 50%;*/
-    /*width: 100%;*/
-    width: auto;
-    min-width: 70%
-        /*max-width: 100%*/
-
+width: 80%
 }
 
 .post {
@@ -247,7 +243,15 @@ a:hover {
     border: 1px solid #E7DFD7;
     border-radius: 8px;
     background: #F8F8F8;
+    /*width: 75em;*/
+    /*width: 100%*/
+    width: available
 }
+
+#gbox_list{
+    width: 99%;
+}
+
 
 .post-bgtop {
 }
@@ -322,9 +326,11 @@ a:hover {
     background: #F8F8F8;
 }
 
+
+
 #sidebar {
     float: left;
-    width: 230px;
+    width: 8%;
     margin-right: 30px;
     padding: 40px 30px 0px 30px;
     color: #787878;
@@ -488,12 +494,24 @@ form{
 
 .connectedSortable{
     border-style: solid;
-    padding-top: 10px;
-    padding-bottom: 10px;
     border-width: thin;
-    width: 300px; height: 200px; overflow: auto
+    width: 10em; height: 20em; 
+    /*overflow: auto;*/
+    /*overflow-x: scroll;*/
+    overflow-y: scroll;
+    padding-left: 2px;
+    padding: 2px 2px 2px 2px;
+ 
 
 }
+
+
+ul.connectedSortable li{
+/*    max-width: 12em;*/
+     word-wrap: break-word;
+}
+
+
 
 
 .ui-jqgrid tr.jqgrow td {

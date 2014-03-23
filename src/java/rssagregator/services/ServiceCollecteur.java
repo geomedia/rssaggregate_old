@@ -7,7 +7,6 @@ package rssagregator.services;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Observable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -17,7 +16,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
-import javax.persistence.TransactionRequiredException;
 import rssagregator.beans.Flux;
 import rssagregator.beans.Item;
 import rssagregator.beans.Journal;
@@ -26,14 +24,12 @@ import rssagregator.beans.exception.IncompleteBeanExeption;
 import rssagregator.beans.traitement.VisitorHTTP;
 import rssagregator.dao.CacheHashFlux;
 import rssagregator.dao.DAOFactory;
-import rssagregator.dao.DaoFlux;
 import rssagregator.dao.DaoItem;
 import rssagregator.dao.DaoJournal;
 import rssagregator.services.tache.TacheDecouverteAjoutFlux;
 import rssagregator.services.tache.TacheFactory;
 import rssagregator.services.tache.TacheRecupCallable;
 import rssagregator.services.tache.AbstrTache;
-import rssagregator.services.tache.TacheRaffiner2;
 
 /**
  * Cette classe permet d'instancier le service de collecte du projet. Elle est organisée autours de deux objets
@@ -389,94 +385,7 @@ public class ServiceCollecteur extends ServiceImpl {
 //            DAOFactory.getInstance().getEntityManager().refresh(flux);
     }
 
-    /**
-     * *
-     * Cette méthode lance la mise à jour manuelle de chacun des flux envoyés en parametres. Attends les résultat et
-     * renvoi la liste des tâche executées pour la récupération.
-     *
-     * @param listFlux Liste de flux pour lequels il faut lancer une mise à jour manuelle
-     * @throws Exception
-     */
-//    public List<TacheRecupCallable> majManuellAll(List<Flux> listFlux) throws Exception {
-////        int i;
-////
-////        // Construction de la liste des tâches a soumettre
-////        List<TacheRecupListFlux> listeRecupListFluxs = new ArrayList<TacheRecupListFlux>();
-////        TacheRecupListFlux recupDesSansJournaux = new TacheRecupListFlux();
-////
-////        List<TacheRecupCallable> taches = new ArrayList<TacheRecupCallable>();
-////        for (i = 0; i < listFlux.size(); i++) {
-////
-////            Flux f = listFlux.get(i);
-////
-////
-////            TacheRecupCallable task = (TacheRecupCallable) TacheFactory.getInstance().getNewTask(TacheRecupCallable.class, Boolean.FALSE);
-////            task.setFlux(listFlux.get(i));
-////            taches.add(task);
-////
-////            // Si le flux n'a pas de journal
-////            if (f.getJournalLie() == null) {
-////                recupDesSansJournaux.getTaches().add(task);
-////
-////            } else {
-////                boolean trouve = false;
-////                for (int j = 0; j < listeRecupListFluxs.size(); j++) {
-////                    TacheRecupListFlux tacheRecupList = listeRecupListFluxs.get(j);
-////                    if (tacheRecupList.getJournalId().equals(f.getJournalLie().getID())) {
-////                        trouve = true;
-////                        tacheRecupList.getTaches().add(task);
-////                    }
-////                }
-////
-////                if (!trouve) {
-////                    TacheRecupListFlux trlf = new TacheRecupListFlux();
-////                    trlf.getTaches().add(task);
-////                    listeRecupListFluxs.add(trlf);
-////                }
-////            }
-////
-//////            taches.add(task);
-////        }
-////
-////        if (!recupDesSansJournaux.getTaches().isEmpty()) {
-////            listeRecupListFluxs.add(recupDesSansJournaux);
-////        }
-////
-////        ExecutorService es = Executors.newFixedThreadPool(10);
-////
-////        // On execute
-////
-////        for (int j = 0; j < listeRecupListFluxs.size(); j++) {
-////            TacheRecupListFlux tacheJournal = listeRecupListFluxs.get(j);
-////            es.submit(tacheJournal);
-////
-////        }
-////
-////
-////        es.shutdown();
-////
-////
-////
-//////
-//////        // Soumission des tâche dans le pool prioritairez
-//////        List<Future> lf = new ArrayList<Future>();
-//////        for (int j = 0; j < taches.size(); j++) {
-//////            TacheRecupCallable tacheRecupCallable = taches.get(j);
-//////            Future fut = poolPrioritaire.submit(tacheRecupCallable);
-//////            lf.add(fut);
-//////            addTask(tacheRecupCallable, fut);
-//////        }
-//////
-//////
-//////        // Attente des résultats
-//////        for (int j = 0; j < lf.size(); j++) { // Il faut attendre la terminaison de toutes les tache envoyé
-//////            Future future = lf.get(j);
-//////            future.get();
-//////        }
-////
-////        return taches;
-//        return null;
-//    }
+
     /**
      * *
      * Cette méthode lance la mise à jour manuelle de chacun des flux envoyés en parametres. Attends les résultat et
@@ -814,89 +723,89 @@ public class ServiceCollecteur extends ServiceImpl {
 
     }
 
-    /**
-     * *
-     * Méthode permettant de supprimer le flux. L'ensemble des items du flux sont parcourues. Si les items sont seules,
-     * elle sont supprimées. Si elles appartiennent à un autre flux, on retire le flux de l'item, puis on modifie
-     * l'item.
-     *
-     * @param flux
-     */
-    @Deprecated //----> C'est maintenant dans le service CRUD
-    public void removeFluxWithItem(Flux flux) throws Exception {
-
-        DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
-        daoItem.beginTransaction();
-        Boolean err = false;
-
-
-        List<Item> items = daoItem.itemLieAuFlux(flux);
-
-        int i;
-        for (i = 0; i < items.size(); i++) {
-            Item item = items.get(i);
-
-            //Supppression des items qui vont devenir orphelines
-            if (item.getListFlux().size() < 2) {
-                // On supprimer la relation 
-                item.getListFlux().clear();
-                try {
-                    daoItem.modifier(item);
-                    daoItem.remove(item);
-                } catch (Exception e) {
-                    err = true;
-                    logger.debug("Erreur lors de la suppression", e);
-                }
-
-            } else { // Sinon on détach le flux
-                item.getListFlux().remove(flux);
-
-                try {
-                    daoItem.modifier(item);
-                } catch (Exception ex) {
-                    err = true;
-                    logger.debug("Erreur lors de la modification", ex);
-                }
-            }
-        }
-        // On va supprimer le flux si la procédure de suppression des items s'est déroulée correctement
-        flux.setItem(new ArrayList<Item>());
-
-        DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
-        daoFlux.beginTransaction();
-
-        try {
-            daoFlux.remove(flux);
-        } catch (IllegalArgumentException ex) {
-            err = true;
-            Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (TransactionRequiredException ex) {
-            err = true;
-            Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
-            err = true;
-            Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        // Tous le monde est OK, Alors on commit
-        if (!err) {
-            try {
-                daoItem.commit();
-            } catch (Exception e) {
-                logger.debug("Erreur lors du comit de l'item", e);
-            }
-
-            try {
-                daoFlux.commit();
-                cacheHashFlux.removeFlux(flux);
-            } catch (Exception e) {
-                logger.debug("erreur", e);
-            }
-
-        } else {
-            throw new Exception("Erreur lors de la suppression");
-        }
-    }
+//    /**
+//     * *
+//     * Méthode permettant de supprimer le flux. L'ensemble des items du flux sont parcourues. Si les items sont seules,
+//     * elle sont supprimées. Si elles appartiennent à un autre flux, on retire le flux de l'item, puis on modifie
+//     * l'item.
+//     *
+//     * @param flux
+//     */
+//    @Deprecated //----> C'est maintenant dans le service CRUD
+//    public void removeFluxWithItem(Flux flux) throws Exception {
+//
+//        DaoItem daoItem = DAOFactory.getInstance().getDaoItem();
+//        daoItem.beginTransaction();
+//        Boolean err = false;
+//
+//
+//        List<Item> items = daoItem.itemLieAuFlux(flux);
+//
+//        int i;
+//        for (i = 0; i < items.size(); i++) {
+//            Item item = items.get(i);
+//
+//            //Supppression des items qui vont devenir orphelines
+//            if (item.getListFlux().size() < 2) {
+//                // On supprimer la relation 
+//                item.getListFlux().clear();
+//                try {
+//                    daoItem.modifier(item);
+//                    daoItem.remove(item);
+//                } catch (Exception e) {
+//                    err = true;
+//                    logger.debug("Erreur lors de la suppression", e);
+//                }
+//
+//            } else { // Sinon on détach le flux
+//                item.getListFlux().remove(flux);
+//
+//                try {
+//                    daoItem.modifier(item);
+//                } catch (Exception ex) {
+//                    err = true;
+//                    logger.debug("Erreur lors de la modification", ex);
+//                }
+//            }
+//        }
+//        // On va supprimer le flux si la procédure de suppression des items s'est déroulée correctement
+//        flux.setItem(new ArrayList<Item>());
+//
+//        DaoFlux daoFlux = DAOFactory.getInstance().getDAOFlux();
+//        daoFlux.beginTransaction();
+//
+//        try {
+//            daoFlux.remove(flux);
+//        } catch (IllegalArgumentException ex) {
+//            err = true;
+//            Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (TransactionRequiredException ex) {
+//            err = true;
+//            Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (Exception ex) {
+//            err = true;
+//            Logger.getLogger(ServiceCollecteur.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//
+//        // Tous le monde est OK, Alors on commit
+//        if (!err) {
+//            try {
+//                daoItem.commit();
+//            } catch (Exception e) {
+//                logger.debug("Erreur lors du comit de l'item", e);
+//            }
+//
+//            try {
+//                daoFlux.commit();
+//                cacheHashFlux.removeFlux(flux);
+//            } catch (Exception e) {
+//                logger.debug("erreur", e);
+//            }
+//
+//        } else {
+//            throw new Exception("Erreur lors de la suppression");
+//        }
+//    }
 
     /**
      * *

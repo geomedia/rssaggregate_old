@@ -41,7 +41,7 @@ public class DAOComportementCollecte extends AbstrDao {
     @Override
     public void creer(Object obj) throws Exception {
         super.creer(obj);
-        configDefault((ComportementCollecte) obj);
+//        configDefault((ComportementCollecte) obj);
 
     }
 
@@ -60,31 +60,31 @@ public class DAOComportementCollecte extends AbstrDao {
 
 //        ComportementCollecte objMed = (ComportementCollecte) obj;
         // Si le comportment modifié est comportement par défaut, il faut vérifier que les autres comportement du système ne sont pas eux aussi comportement par defaut
-        configDefault((ComportementCollecte) obj);
+//        configDefault((ComportementCollecte) obj);
     }
 
-    /**
-     * *
-     * Si le comportement envoyé est dit par defaut, la méthode parcours l'ensemble des autres comportement pour leur
-     * enlever cette particularitée
-     *
-     * @param mediator : le comportement de capture qui vient d'être configuré comme par défaut
-     */
-    public void configDefault(ComportementCollecte mediator) {
-        if (mediator.getDefaut()) {
-            List<Object> listMed = findall();
-            int i;
-            for (i = 0; i < listMed.size(); i++) {
-                ComportementCollecte med = (ComportementCollecte) listMed.get(i);
-                if (med.getDefaut() && med.getID() != mediator.getID()) {
-                    med.setDefaut(false);
-                    try {
-                        modifier(med);
-                    } catch (Exception ex) {
-                        Logger.getLogger(DAOComportementCollecte.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            }
-        }
-    }
+//    /**
+//     * *
+//     * Si le comportement envoyé est dit par defaut, la méthode parcours l'ensemble des autres comportement pour leur
+//     * enlever cette particularitée
+//     *
+//     * @param mediator : le comportement de capture qui vient d'être configuré comme par défaut
+//     */
+//    public void configDefault(ComportementCollecte mediator) {
+//        if (mediator.getDefaut()) {
+//            List<Object> listMed = findall();
+//            int i;
+//            for (i = 0; i < listMed.size(); i++) {
+//                ComportementCollecte med = (ComportementCollecte) listMed.get(i);
+//                if (med.getDefaut() && med.getID() != mediator.getID()) {
+//                    med.setDefaut(false);
+//                    try {
+//                        modifier(med);
+//                    } catch (Exception ex) {
+//                        Logger.getLogger(DAOComportementCollecte.class.getName()).log(Level.SEVERE, null, ex);
+//                    }
+//                }
+//            }
+//        }
+//    }
 }

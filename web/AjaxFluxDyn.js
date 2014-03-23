@@ -339,7 +339,7 @@ $(document).ready(function() {
     $('#formParse').on('submit', function() {
 //        alert('Cap');
 
-alert("Le serveur va tenter de parser votre fichier. Une grille récapitulant les résultat apparaitre. La procédure peut prendre du temps.");
+        alert("Le serveur va tenter de parser votre fichier. Une grille récapitulant les résultat apparaitre. La procédure peut prendre du temps.");
 
         //Soumission des paramettres de parse en AJAX
         $.ajax({
@@ -349,41 +349,7 @@ alert("Le serveur va tenter de parser votre fichier. Une grille récapitulant le
 //            data: "filters=" + filterJson, // je sérialise les données (voir plus loin), ici les $_POST
             dataType: 'json',
             success: function(html) {
-//                $('#container').highcharts(html);
-//                alert(JSON.stringify(html));
-
-                // On va maintenant afficher une grid avec toutes 
-//                alert('succes');
-//                var mydata = [{id: "1", name: "foo"}, {ID: "2", titre: "bar"}];
-
-//                var mydata;
-//                for(i=0;i<html['rows'].length; i++){
-//                    truc = html['rows']
-//                    alert(JSON.stringify(truc[i]));
-//                }
-
-//var mydata= {"total": null, "page": null, "records": null, "rows": [
-//        {"cell": [null,
-//                "Cavani, le matador indispensable au PSG",
-//                "FOOTBALL - Auteur d'un doublé contre Saint-Etienne (2-1), Edinson Cavani n'en finit plus d'éclabousser les matches de toute sa classe et sa grinta. L'Uruguayen, plus gros transfert de la Ligue 1, fait honneur à son statut.",
-//                ["dd", "dd"],
-//                1387468793000]}
-//    ]
-//};
-
-//var mydata=  [{ID: "s", titre :"a"}];
-//var mydata=  [["s", "a"],["d", "d"]];
-                /*[null,
-                 "Cavani, le matador indispensable au PSG",
-                 "FOOTBALL - Auteur d'un doublé contre Saint-Etienne (2-1), Edinson Cavani n'en finit plus d'éclabousser les matches de toute sa classe et sa grinta. L'Uruguayen, plus gros transfert de la Ligue 1, fait honneur à son statut.",
-                 ["dd", "dd"],
-                 1387468793000]
-                 
-                 ;*/
-
-
                 $('#list').jqGrid('GridUnload');
-
                 $("#list").jqGrid({
                     loadonce: true,
                     datatype: "local",
@@ -402,12 +368,6 @@ alert("Le serveur va tenter de parser votre fichier. Une grille récapitulant le
 //                        {name: "flux", index: 'flux', key: true, search: true, width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
                         {name: "dateRecup", formatter: dateFormatter},
                         {name: "datePub", formatter: dateFormatter}
-
-
-
-                        //                            {name: "pays", width: 80, align: "right", searchoptions: {sopt: ['cn', 'eq']}},
-                        //                            {name: "typeJournal", width: 80, align: "right", stype: 'select', editoptions: {value: {'': 'tous', 'autre': 'autre', 'quotidien': 'quotidien'}}},
-                        //                            {name: "urlAccueil", width: 150, sortable: true, searchoptions: {sopt: ['cn', 'eq']}}
                     ],
                     pager: '#pager',
                     rowNum: 10,
@@ -426,12 +386,6 @@ alert("Le serveur va tenter de parser votre fichier. Une grille récapitulant le
                     ident: "\t",
                     height: 500,
                     search: true,
-                    //                        search: {
-                    //                            modal: true,
-                    //                            Find: 'txt recherche',
-                    //                            multipleSearch: true,
-                    //                            sFilter: 'lalalalaa'
-                    //                        },
                     multipleSearch: true,
                     postData: {
                         filters: {groupOp: "AND", rules: [/*{field: "titre", op: "gt", data: "truc"}, {field: "nom", op: "lt", data: "ss"}*/]}
@@ -447,10 +401,7 @@ alert("Le serveur va tenter de parser votre fichier. Une grille récapitulant le
 <input type=\"submit\" value=\"Enregistrer les items dans la base de donneés\"/>\n\
 </form>");
 
-
                 $('#formSave').on("submit", function() {
-
-
                     alert("Vous avez demandé à enregistrer les flux. Cette procédure peut prendre du temps. Une fenetre surgira lorsque l'action sera terminée. Fermez maintenant ce pop up");
                     $.ajax({
                         url: $(this).attr('action'), // le nom du fichier indiqué dans le formulaire
@@ -471,27 +422,42 @@ alert("Le serveur va tenter de parser votre fichier. Une grille récapitulant le
                     return false;
                 });
 
-//                      <h2>Appercut des items parsées</h2>
-
                 function  dateFormatter(cellvalue, options, rowObjcet, l4) {
-
                     var datePub = $.datepicker.formatDate('yy-mm-dd ', new Date(cellvalue));
                     return datePub;
                 }
-
             }
         });
-
-
-
-
         return false;
     }
 
-
-
-
     );
+
+
+    /***
+     * Lors du changement de sélection du journal, on met automatiquement à jour de nom du flux
+     */
+    $('#journalLie').on('change', function() {
+        majNomFlux();
+
+    });
+
+    $('#typeFlux').on('change', function() {
+
+        majNomFlux();
+
+    });
+
+    function majNomFlux() {
+        journalStr = $('#journalLie option:selected').text();
+        typeStr = $('#typeFlux option:selected').text();
+
+        $('#nom').val(journalStr + " - " + typeStr);
+
+
+
+    }
+
 
 
 

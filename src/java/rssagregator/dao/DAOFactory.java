@@ -4,8 +4,6 @@
  */
 package rssagregator.dao;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -22,14 +20,16 @@ import rssagregator.beans.incident.CollecteIncident;
 import rssagregator.beans.incident.Incidable;
 import rssagregator.beans.incident.IncidentDecouverteRSS;
 import rssagregator.beans.incident.IncidentFactory;
-//import rssagregator.beans.incident.MailIncident;
 import rssagregator.beans.incident.NotificationAjoutFlux;
 import rssagregator.beans.incident.RecupIncident;
 import rssagregator.beans.incident.ServerIncident;
 import rssagregator.beans.traitement.ComportementCollecte;
 import rssagregator.services.tache.AbstrTache;
+import rssagregator.servlet.StartServlet;
 
 /**
+ * La factory permettant de générer des DAO ainsi que des EntytiManager ainsi que de gérer l'EntityManagerFactory et
+ * initialiser le context de persistence EclipseLink. C'est un Singleton
  *
  * @author clem
  */
@@ -42,11 +42,17 @@ public class DAOFactory<T extends AbstrDao> {
      */
     public static String PERSISTENCE_UNIT_NAME = "RSSAgregatePU2";
 //    private static DAOFactory instance = new DAOFactory();
+    /**
+     * *
+     * La DEOFactory est un singleton. Ici la référence de l'instance
+     */
     private static DAOFactory instance;
-    public List<EntityManager> listEm = new ArrayList<EntityManager>();
-    EntityManager em;
     private DAOConf daoConf;
-//     private static DaoItem daoItem;
+    /**
+     * *
+     * L'EntityManagerFactory utilisé. Il n'est instancié qu'une fois pou rtoute la durée de vie de l'application. C'est
+     * lui qui va permettre de générer des Entitymanager
+     */
     EntityManagerFactory emf;
 
     public static DAOFactory getInstance() {
@@ -67,14 +73,6 @@ public class DAOFactory<T extends AbstrDao> {
     private DAOFactory() {
         System.out.println("---->CREATION PERSISTENCE CONTEXR PU : " + PERSISTENCE_UNIT_NAME);
         emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
-
-
-        em = emf.createEntityManager();
-
-
-        // Attention aux singleton et au multi threading
-//        daoItem = new DaoItem(this);
-//        daoflux = new DaoFlux(this);
         daoConf = new DAOConf(this);
     }
 
@@ -83,45 +81,39 @@ public class DAOFactory<T extends AbstrDao> {
 
         PERSISTENCE_UNIT_NAME = pu;
         emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
-
-        em = emf.createEntityManager();
         daoConf = new DAOConf(this);
-
     }
 
-    /***
+    /**
+     * *
      * Renvoie une nouvelle daoflux avec un em instanciée.
-     * @return 
+     *
+     * @return
      */
     public DaoFlux getDAOFlux() {
-
         DaoFlux daof = new DaoFlux(this, true);
         daof.setClassAssocie(Flux.class);
         return daof;
-//        return daoFlux;
     }
 
-    
-    /***
+    /**
+     * *
      * Charger renvoi une dao flux avec ou non un em préchargé
+     *
      * @param withEm true si on en veut un em. Sinon false
-     * @return 
+     * @return
      */
     public DaoFlux getDAOFlux(boolean withEm) {
         DaoFlux daof;
-            daof = new DaoFlux(this, withEm);
-//        }
-//        DaoFlux daof = new DaoFlux(this);
+        daof = new DaoFlux(this, withEm);
         daof.setClassAssocie(Flux.class);
         return daof;
-//        return daoFlux;
     }
 
     public DAOConf getDAOConf() {
         if (daoConf == null) {
             daoConf = new DAOConf(this);
         }
-
         return daoConf;
     }
 
@@ -132,26 +124,17 @@ public class DAOFactory<T extends AbstrDao> {
 
     public DaoItem getDaoItem() {
 
-//        if (daoItem == null) {
-//            daoItem = new DaoItem(this);
-//        }
-////        DaoItem daoItem = new DaoItem(this);
-//        return daoItem;
-
         DaoItem dao = new DaoItem(this);
         dao.setClassAssocie(Item.class);
         return dao;
     }
-    
-        public DaoItem getDaoItem(boolean withEm) {
+
+    public DaoItem getDaoItem(boolean withEm) {
 
         DaoItem dao = new DaoItem(this, withEm);
         dao.setClassAssocie(Item.class);
         return dao;
     }
-        
-    
-    
 
     public DAOGenerique getDAOGenerique() {
         return new DAOGenerique(this);
@@ -166,9 +149,7 @@ public class DAOFactory<T extends AbstrDao> {
     }
 
     public EntityManager getEntityManager() {
-
         EntityManager nEm = emf.createEntityManager();
-//        em = emf.createEntityManager();
         return nEm;
     }
 
@@ -179,7 +160,7 @@ public class DAOFactory<T extends AbstrDao> {
 
     /**
      * *
-     * Instancie et retourne une dao a partir du type de beans envoyé en argument. Si on envoie un flux, on obtient une
+     * Instancie et retourne une dao à partir du type de beans envoyé en argument. Si on envoie un flux, on obtient une
      * daoFLUX
      *
      * @param beansClass : La class du beans devant être géré par la dao
@@ -192,11 +173,9 @@ public class DAOFactory<T extends AbstrDao> {
 
         if (beansClass.equals(Flux.class)) {
             dao = (T) getDAOFlux();
-//            return (T) getDAOFlux();
         } else if (CollecteIncident.class.equals(beansClass)) {
             dao = (T) new DAOIncident<CollecteIncident>(this);
             dao.setClassAssocie(CollecteIncident.class);
-//            dao = (T) getDAOIncident();
         } else if (beansClass.equals(RecupIncident.class)) {
             dao = (T) new DAOIncident<RecupIncident>(this);
             dao.setClassAssocie(RecupIncident.class);
@@ -210,13 +189,7 @@ public class DAOFactory<T extends AbstrDao> {
             dao = (T) d;
         } else if (beansClass.equals(UserAccount.class)) {
             dao = (T) getDAOUser();
-        } //        else if (beansClass.equals(MailIncident.class)) {
-        //            dao = (T) new DAOIncident<MailIncident>(this);
-        //            dao.setClassAssocie(beansClass);
-        //        } 
-
-        
-        else if (beansClass.equals(AbstrIncident.class)) {
+        } else if (beansClass.equals(AbstrIncident.class)) {
             dao = (T) new DAOIncident<AbstrIncident>(this);
             dao.setClassAssocie(beansClass);
         } else if (beansClass.equals(AnomalieCollecte.class)) {
@@ -228,8 +201,7 @@ public class DAOFactory<T extends AbstrDao> {
         } else if (beansClass.equals(ServerIncident.class)) {
             dao = (T) new DAOIncident<ServerIncident>(this);
             dao.setClassAssocie(beansClass);
-        } 
-        else if (beansClass.equals(Conf.class)) {
+        } else if (beansClass.equals(Conf.class)) {
             dao = (T) daoConf;
         } else if (beansClass.equals(Item.class)) {
             dao = (T) getDaoItem();
@@ -240,7 +212,6 @@ public class DAOFactory<T extends AbstrDao> {
             dao = (T) new DAOIncident<IncidentDecouverteRSS>(this);
             dao.setClassAssocie(IncidentDecouverteRSS.class);
         }
-
 
         if (dao != null) {
             return dao;
@@ -259,7 +230,6 @@ public class DAOFactory<T extends AbstrDao> {
      * @throws UnsupportedOperationException : si la tache envoyé n'inplémenta pas incidable ou si la factory n'est pas
      * capable de générer une tao pour la tâche
      */
-
     public T getDAOFromTask(AbstrTache tache) {
 
         IncidentFactory s = new IncidentFactory();
@@ -272,7 +242,6 @@ public class DAOFactory<T extends AbstrDao> {
         } else {
             throw new UnsupportedOperationException("La tâche envoyée n'est pas incidable."); //To change body of generated methods, choose Tools | Templates.
         }
-
     }
 
     public EntityManagerFactory getEmf() {
@@ -285,7 +254,7 @@ public class DAOFactory<T extends AbstrDao> {
 
     /**
      * *
-     * Fermer L'Entity Manager factory. Doit être lancé à la fermeture de l'application
+     * Fermer L'Entity Manager factory. Doit être lancé à la fermeture de l'application. Voir la {@link StartServlet}
      */
     public void closeEMF() {
 

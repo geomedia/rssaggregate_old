@@ -465,7 +465,7 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
 
                                 <br />
                                 <label title="La rubrique du journal concernée : international, A la Une ... Pour ajouter des types de flux allez dans la configuration générale">Type de flux<span class="requis">*</span></label>
-                                <select name="typeFlux">
+                                <select name="typeFlux" id="typeFlux">
                                     <option value=""></option>
                                     <c:forEach items="${listtypeflux}" var="typeflux">
                                         <option<c:if test="${bean.typeFlux.denomination==typeflux.denomination}"> selected="true" </c:if> value="${typeflux.ID}">${typeflux.denomination}</option>
@@ -473,8 +473,8 @@ Cette JSP est utilisée pour afficher les informations relatives aux flux a l'ut
                                 </select><span class="erreur" id="errtypeFlux"></span>
                                 <br />
 
-                                <label for="nom" title="Paramettre facultatif : Par défaut le flux sera nommé en fonction du journal et du type de flux sélectionné. Ce paramettre permet de forcer un nom">Nom du flux : </label>
-                                <input type="text" name="nom" value="${bean.nom}" />
+                                <label for="nom" title="Nom a afficher pour le flux. Par défaut exemple 'nom de journal' - 'type de flux'">Nom du flux <span class="requis">*</span>: </label>
+                                <input type="text" name="nom" id="nom" value="${bean.nom}" />
                                 <span class="erreur" id="errnom"></span>
 
                                 <br />

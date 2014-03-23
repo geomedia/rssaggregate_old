@@ -18,7 +18,8 @@ import javax.servlet.http.HttpServletResponse;
 import rssagregator.services.AbstrService;
 
 /**
- *
+ *Servlet point d'acces permettant d'obtenir des information sur les services, notamment les taches schedulée. 
+ * 
  * @author clem
  */
 @WebServlet(name = "ServiceCtrl", urlPatterns = {"/ServiceCtrl"})
@@ -37,10 +38,6 @@ public class ServiceCtrl extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        PrintWriter out = response.getWriter();
-        
-        
-        
         
         // On récupère le nom du service.
         String servicename = request.getParameter("servicename");
@@ -48,16 +45,13 @@ public class ServiceCtrl extends HttpServlet {
         try {
         c = Class.forName("rssagregator.services." + servicename);            
         } catch (Exception e) {
-
-//            logger.debug("Impossible de récupérer la class " , e);
+            logger.debug("Impossible de récupérer la class " , e);
         }
-
         
         if(c != null){
             try {
                 // Récupération de l'instance
                 Method methode = c.getMethod("getInstance");
-                
                 AbstrService instance = (AbstrService) methode.invoke(c);
                 request.setAttribute("service", instance);
                 
@@ -75,11 +69,7 @@ public class ServiceCtrl extends HttpServlet {
             
         }
         this.getServletContext().getRequestDispatcher("/WEB-INF/serviceCtrl.jsp").forward(request, response);
-        
-        
-
     }
-
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP

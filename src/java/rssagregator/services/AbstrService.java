@@ -139,6 +139,7 @@ public abstract class AbstrService implements Observer {
      */
 //    @Deprecated
     public Future submit(AbstrTache tache) {
+        
         if (tache == null) {
             throw new NullPointerException("Impossible de soumettre une tache null");
         }
@@ -222,8 +223,17 @@ public abstract class AbstrService implements Observer {
 
         if (tache.getSchedule()) {
             synchronized (tacheGereeParLeService) {
-                tacheGereeParLeService.add(tache);
-                return true;
+                if(                tacheGereeParLeService.contains(tache)){
+//                    System.out.println("JE contient deja " + tache);
+                }
+                else{
+//                    System.out.println("Je contiens pas " + tache);
+                            tacheGereeParLeService.add(tache);
+                            return true;
+                }
+
+        
+//                return true;
             }
 
 

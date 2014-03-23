@@ -115,18 +115,19 @@
                                 </tr>
                                 <tr>
                                     <td>
-                                        <select id="journalSelection" style="width: 300px">
+                                        <label>Jounal :</label>
+                                        <select id="journalSelection" style="width: 10em">
                                             <option value="null">Journal : </option>
                                             <option id="tous">tous</option>
                                             <c:forEach items="${listJournaux}" var="j">
                                                 <option value="${j.ID}">${j}</option>
                                             </c:forEach>
-                                        </select>
+                                        </select><br />
                                         
                                         <label>Type : </label>
                                         
                                         
-                                        <select id="typeSelection">
+                                        <select id="typeSelection" style="width: 10em">
                                             <option value="null"></option>
                                             <c:forEach items="${listType}" var="ty">
                                                 <option value="${ty.ID}">${ty}</option>
@@ -138,7 +139,7 @@
                                     </td>
                                     <td>
 
-                                        <ul id="fluxSelection" name="oldid-flux" style="min-width: 300px; width: 400px" class="connectedSortable">
+                                        <ul id="fluxSelection" name="oldid-flux" style="width: 15em" class="connectedSortable">
                                             <c:forEach items="${listflux}" var="fl">
                                                 <li class="boxelement" value="${fl.ID}">${fl}</li>                                
                                                 </c:forEach>
@@ -151,7 +152,7 @@
                                         <button type="button" id="btAddAll">=></button><br />
                                         <button type="button" id="btRemAll"><=</button>
                                     </td>
-                                    <td><ul style="max-width: 300px; width: 300px" name="fluxSelection2" id="fluxSelection2" class="connectedSortable"></ul></td>
+                                    <td><ul style="min-width: 10em; width: 15em" name="fluxSelection2" id="fluxSelection2" class="connectedSortable"></ul></td>
                                 </tr>
 
                             </table>

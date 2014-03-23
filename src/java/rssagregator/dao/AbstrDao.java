@@ -4,7 +4,6 @@
  */
 package rssagregator.dao;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -18,30 +17,38 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import org.apache.poi.util.Beta;
 import rssagregator.beans.Journal;
 
 /**
- * Toutes les DAO doivent hériter de cette class abstraite. Elle définit les actions de base (modifier, créer, find...)
- * pouvant être redéfinit dans les DAO spécialisée pour la gestion d'une entitée particulière.
+ * <p>Toutes les DAO doivent hériter de cette class abstraite. Elle définit les actions de base (modifier, créer,
+ * find...) pouvant être redéfinit dans les DAO spécialisée pour la gestion d'une entitée particulière.</p>
+ * <p>Avec le développement de la couche service, la couche dao a perdu de son importance. Les simples crud peuvent être
+ * effectué directement depuis la couche service en utilisant un EntityManager de Eclipse Link. Seul les méthodes
+ * permettant de recherc</p>
  *
  * @author clem
  */
 public abstract class AbstrDao<T> {
 
+    /**
+     * *
+     * Entity manager utilisé par la dao
+     */
     protected EntityManager em;
+    /**
+     * *
+     * EMF utilisé pour obtenir la dao. Normalement cet EMF provient de la {@link DAOFactory}
+     */
     protected EntityManagerFactory emf;
-//    protected EntityTransaction tr;
-//    protected List<SearchFilter> criteriaSearchFilter = new ArrayList<SearchFilter>();
+    /**
+     * *
+     * Un objet perso permettant de générer des requete criteria. Les formulaire doivent permettrent de générer ces
+     * objet (le plus souvent en interprétant les paramettres envoyé par JQgrid) en fonction de la requete utilisateur.
+     * Les dao parcours ces objets pour effectuer des requêtes en se basant sur critéria.
+     */
     protected SearchFiltersList criteriaSearchFilters = new SearchFiltersList();
-//    protected String criteriaSidx; // La colonne sur laquel il faut ordonner les resultat
-//    protected String criteriaSord; // le sens de l'ordre asc desc
-//    protected Integer criteriaStartRow; //Premier enregistrement permettant de construire la limite
-//    protected Integer criteriaPage;  // Utile pour la dao ?
-//    protected Integer criteriaRow; // Nombre d'enregistrement pour construire la limite (second paramettre de la limite).
     /**
      * *
      * La persistence Unit définie dans la config d'Eclipse link. Voir le fichier persistence.xml
@@ -58,39 +65,31 @@ public abstract class AbstrDao<T> {
      * elle doit agir. Cette variable va peut être être supprimée au profit de la généricité pour une implémentation
      * plus standart
      */
-    @Beta
     protected Class classAssocie;
-    org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(AbstrDao.class);
+    /**
+     * *
+     * Le logger de la dao
+     */
+    org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
 
     /**
      * *
-     * Permet de créer l'entité envoyé en argument. Si le beans est un {@link BeanSynchronise}, la DAO va chercher à
-     * diffuser la création. En cas d'échec de diffusion elle va rollbacker la création afin de ne pas avoir d'entitée
-     * crée sur le serveur maître et absente sur les serveurs esclaves.
+     * Permet de créer l'entité envoyé en argument. Si le beans est un {@link BeanSynchronise}. L'initialisation de la
+     * transaction et le commit n'est pas génée par la méthode. C'est le role de la couche service de gérer la
+     * transaction.
      *
      * @param obj Le beans devant être persisté
      * @throws Exception
      */
     public void creer(Object obj) throws Exception {
-//        EntityTransaction tr = em.getTransaction();
-//        tr.begin();
         em.persist(obj);
-//        try {  ---> Effectuer la synchro est maintenant dans la couche service
-////            if (BeanSynchronise.class.isAssignableFrom(obj.getClass())) {
-////                ServiceSynchro.getInstance().diffuser(obj, "add");
-////            }
-////            tr.commit();
-//        } catch (Exception e) {
-//            logger.error("Echec de la suppression du beans : " + e);
-////            tr.rollback();
-//            throw e;
-//        }
     }
 
     /**
      * *
-     * Méthode interne à la dao utilisé par les méthode findCriteria et cptCriteria. C'est cette méthode qui construit
-     * la requete en observant les paramettres transmis à la dao
+     * Méthode interne à la dao utilisé par les méthodes findCriteria et cptCriteria. C'est cette méthode qui construit
+     * la requete en observant les paramettres transmis à la dao. L'objet {@link AbstrDao#criteriaSearchFilters} est
+     * parcouru.
      *
      * @param count
      * @return
@@ -223,7 +222,11 @@ public abstract class AbstrDao<T> {
     /**
      * *
      * Cette méthode est a redéclarer dans les classes fille. Elle permet d'ajouter des clause à la liste des clause.
-     * Les traitement spécifique de la méthode de recherche peuvent ainsi être complété par ce biais.
+     * Les traitement spécifique de la méthode de recherche peuvent ainsi être complété par ce biais. Permet de rendre
+     * compatible avec un ancien système ou de gérer l'ajout de clause critéria sans passer par
+     * {@link AbstrDao#criteriaSearchFilters}. Rappellons que le criteriaSearchFilters est une création perso pas un
+     * framework validé a toute épreuse. En passant par cette méthode on peut ainsi faire face a des cas particulier pas
+     * prévu dans la gestion du criteriaSearchFilters.
      *
      * @param cq
      * @param cb
@@ -231,20 +234,17 @@ public abstract class AbstrDao<T> {
      * @param listWhere
      */
     public void criteriaTraitementDeschampsSpecifique(CriteriaQuery cq, CriteriaBuilder cb, Root root, List<Predicate> listWhere) {
-        System.out.println("------> C'est Dans La ClAss MEREE :(");
-//        return cq; 
     }
 
     /**
      * *
-     * Lance une recherche en utilisant critéria. Il faut au préalable avoir fixé les critères dans la dao. pour cela,
-     * il faut utiliser les setters appropriés (
+     * Lance une recherche en utilisant critéria. Il faut au préalable avoir fixé les critères dans la dao (voir l'objet
+     * {@link AbstrDao#criteriaSearchFilters}.
      *
      * @return
      */
     public List<T> findCriteria() {
         TypedQuery<T> tq = gestionCriteria(false);
-
 
         if (criteriaSearchFilters.criteriaStartRow != null && criteriaSearchFilters.criteriaRow != null) {
             tq.setMaxResults(criteriaSearchFilters.criteriaRow);
@@ -258,7 +258,6 @@ public abstract class AbstrDao<T> {
     }
 
     public Integer cptCriteria() {
-//         CriteriaQuery<Journal> cq = gestionCriteria();
         TypedQuery<T> tq = gestionCriteria(true);
         List resu = tq.getResultList();
         try {
@@ -270,43 +269,24 @@ public abstract class AbstrDao<T> {
         }
     }
 
+    /**
+     * *
+     * Purge tout les critères criteria. Peut être redéfinit dans les dao filles
+     */
     public void initcriteria() {
-//            throw new UnsupportedOperationException("pas implémenté dans la classe abstraite");
+        criteriaSearchFilters = new SearchFiltersList();
     }
-
-    ;
 
     /**
      * *
-     * Permet la mofification de l'entitée envoyée en argument. Si le beans est un {@link BeanSynchronise}, la DAO va
-     * chercher à diffuser la création. En cas d'échec de diffusion elle va rollbacker la création afin de ne pas avoir
-     * d'entitée crée sur le serveur maître et absente sur les serveurs esclaves.
+     * Permet la mofification de l'entitée envoyée en argument.
      *
      * @param obj
      * @throws Exception
      */
     public void modifier(Object obj) throws Exception {
-        // Test si le flux possède bien un id
-        // On récupère l'id
-        Method getter = obj.getClass().getMethod("getID");
-        Object retour = getter.invoke(obj);
-        if (retour != null && retour instanceof Long && (Long) retour >= 0) {
-//            EntityTransaction tr = em.getTransaction();
-//            tr.begin();
-//            em.merge(obj);
-//            try {
-//                // Si il s'agit d'un beans devant être synchronisé On lance la diff
-//                if (BeanSynchronise.class.isAssignableFrom(obj.getClass())) {
-//                    ServiceSynchro.getInstance().diffuser(obj, "mod");
-//                }
-////                tr.commit();
-//                //En cas d'échec de la synchronisation, on rollback la modification.
-//            } catch (Exception e) {
-//                logger.error("erreur lors de la modification d'un beans : " + e + "\n trace : " + e.getStackTrace());
-////                tr.rollback();
-//                throw e;
-//            }
-        }
+        em.merge(obj);
+
     }
 
     /**
@@ -334,22 +314,7 @@ public abstract class AbstrDao<T> {
      * @param obj le bean à supprimé de la base de données
      */
     public void remove(Object obj) throws Exception {
-//        EntityTransaction tr = em.getTransaction();
-//        tr.begin();
-
         em.remove(em.merge(obj));
-
-
-//        try {
-//            if (BeanSynchronise.class.isAssignableFrom(obj.getClass())) {
-//                ServiceSynchro.getInstance().diffuser(obj, "rem");
-//            }
-//            tr.commit();
-//        } catch (Exception e) {
-//
-////            tr.rollback();
-//            logger.error("Erreur lors de la suppression du beans : " + e);
-//        }
     }
 
     /**
@@ -367,11 +332,9 @@ public abstract class AbstrDao<T> {
             List<Object> result = query.getResultList();
             return result;
         } catch (SecurityException ex) {
-            Logger.getLogger(AbstrDao.class.getName()).log(Level.SEVERE, null, ex);
-            logger.error("erreur lors de l'execution de la methode findAll : " + ex);
+            logger.error("erreur lors de l'execution de la methode findAll : ", ex);
         } catch (IllegalArgumentException ex) {
-            logger.error("erreur lors de l'execution de la methode findAll : " + ex);
-            Logger.getLogger(AbstrDao.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error("erreur lors de l'execution de la methode findAll : ", ex);
         }
         return null;
     }
@@ -403,52 +366,6 @@ public abstract class AbstrDao<T> {
         this.em = em;
     }
 
-//    public List<SearchFilter> getCriteriaSearchFilter() {
-//        return criteriaSearchFilter;
-//    }
-//
-//    public void setCriteriaSearchFilter(List<SearchFilter> criteriaSearchFilter) {
-//        this.criteriaSearchFilter = criteriaSearchFilter;
-//    }
-//    public String getCriteriaSidx() {
-//        return criteriaSidx;
-//    }
-//
-//    public void setCriteriaSidx(String criteriaSidx) {
-//        this.criteriaSidx = criteriaSidx;
-//    }
-//
-//    public String getCriteriaSord() {
-//        return criteriaSord;
-//    }
-//
-//    public void setCriteriaSord(String criteriaSord) {
-//        this.criteriaSord = criteriaSord;
-//    }
-//
-//    public Integer getCriteriaStartRow() {
-//        return criteriaStartRow;
-//    }
-//
-//    public void setCriteriaStartRow(Integer criteriaStartRow) {
-//        this.criteriaStartRow = criteriaStartRow;
-//    }
-//
-//    public Integer getCriteriaPage() {
-//        return criteriaPage;
-//    }
-//
-//    public void setCriteriaPage(Integer criteriaPage) {
-//        this.criteriaPage = criteriaPage;
-//    }
-//
-//    public Integer getCriteriaRow() {
-//        return criteriaRow;
-//    }
-//
-//    public void setCriteriaRow(Integer criteriaRow) {
-//        this.criteriaRow = criteriaRow;
-//    }
     public SearchFiltersList getCriteriaSearchFilters() {
         return criteriaSearchFilters;
     }
@@ -472,57 +389,31 @@ public abstract class AbstrDao<T> {
 //        em.getTransaction().commit();
     }
 
+    /**
+     * *
+     * Démarre une transaction pour l'em de la dao.
+     */
     public void beginTransaction() {
 //        tr = em.getTransaction();
         em.getTransaction().begin();
     }
 
+    /**
+     * *
+     * si l'em associé a la dao possède une transaction, on la rollback
+     */
     public void roolbackTransaction() {
         if (em.getTransaction().isActive()) {
             em.getTransaction().rollback();
         }
     }
 
-    //    public EntityTransaction getTr() {
-    //        return tr;
-    //    }
-    //
-    //    public void setTr(EntityTransaction tr) {
-    //    }
-    //    }
-    /**
-     * *
-     * On préfère s'assurer que toutes dao
-     *
-     * @throws Throwable
-     */
-//    @Override
-//    protected void finalize() throws Throwable {
-//
-//        logger.debug("Finalyse de " + this);
-//        
-//        if (em != null) {
-//
-//            if (em.isOpen()) {
-//                try {
-//                    em.close();
-//                    logger.debug("fermeture d'un em par finalyse");
-//                } catch (Exception e) {
-//                }
-//
-//            }
-//
-//        }
-//
-//        super.finalize(); //To change body of generated methods, choose Tools | Templates.
-//    }
     /**
      * *
      * Provoque la fermeture de l'Em de la dao
      */
     public void closeEm() {
         if (em != null) {
-
             if (em.isOpen()) {
                 try {
                     em.close();

@@ -82,15 +82,15 @@ public class ComportementCollecte implements Serializable, Cloneable {
      */
     @Column(name = "description", columnDefinition = "text")
     private String description;
-    /**
-     * *
-     * <p>Cette variable n'est pas encore correctement implémenté et va peut être être abandonnée.</p>
-     * Parmis toute les entités, une est considérée comme le comportement de collecte par defaut, ce boolean permet de
-     * déterminer ce comportement par défaut.
-     */
-    @Beta
-    @Column(name = "defaut")
-    protected Boolean defaut;
+//    /**
+//     * *
+//     * <p>Cette variable n'est pas encore correctement implémenté et va peut être être abandonnée.</p>
+//     * Parmis toute les entités, une est considérée comme le comportement de collecte par defaut, ce boolean permet de
+//     * déterminer ce comportement par défaut.
+//     */
+//    @Beta
+//    @Column(name = "defaut")
+//    protected Boolean defaut;
     /**
      * *
      * Le parseur propre au médiateur.
@@ -438,7 +438,7 @@ public class ComportementCollecte implements Serializable, Cloneable {
     public static ComportementCollecte getDefaultCollectAction() {
         ComportementCollecte collecteAction = new ComportementCollecte();
 
-        collecteAction.setDefaut(false);
+//        collecteAction.setDefaut(false);
         collecteAction.periodiciteCollecte = 3600;
         collecteAction.requesteur = Requester.getDefaulfInstance();
         collecteAction.parseur = RomeParse.getDefaultInstance();
@@ -572,13 +572,13 @@ public class ComportementCollecte implements Serializable, Cloneable {
         this.nbrItemCollecte = nbrItemCollecte;
     }
 
-    public Boolean getDefaut() {
-        return defaut;
-    }
-
-    public void setDefaut(Boolean defaut) {
-        this.defaut = defaut;
-    }
+//    public Boolean getDefaut() {
+//        return defaut;
+//    }
+//
+//    public void setDefaut(Boolean defaut) {
+//        this.defaut = defaut;
+//    }
 
     /**
      * *

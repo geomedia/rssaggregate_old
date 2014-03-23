@@ -31,35 +31,21 @@ public class DAOIncident<T> extends AbstrDao {
     List<Flux> criteriaFluxLie;
     private static final String REQ_FIND_ALL_AC_LIMIT = "SELECT i FROM incidentflux i LEFT JOIN i.fluxLie flux ORDER BY i.dateFin DESC";
 
-    //        private static final String REQ_FIND = "SELECT i FROM incidentflux i LEFT JOIN i.fluxLie flux WHERE id=:id";
-//    public DAOIncident() {
-//    }
-//JOIN item.listFlux flux
     protected DAOIncident(DAOFactory dAOFactory) {
-
-//       this.classAssocie = cc; 
-
-
-//        this.classAssocie = CollecteIncident.class;
         this.dAOFactory = dAOFactory;
         em = dAOFactory.getEntityManager();
-//        nullLastNotification = false;
-//        criteriaNotificationImperative = false;
-//        clos = false;
         criteriaFluxLie = new ArrayList<Flux>();
     }
 
     @Deprecated
     public List<T> findAllLimit(Long premier, Long nombre) {
         em = dAOFactory.getEntityManager();
-//        em.getTransaction().begin();
         Query query = em.createQuery(REQ_FIND_ALL_AC_LIMIT);
         query.setFirstResult(premier.intValue());
         query.setMaxResults(nombre.intValue());
         List<T> listResult = query.getResultList();
 
         return listResult;
-
     }
 
     /**
@@ -100,10 +86,6 @@ public class DAOIncident<T> extends AbstrDao {
         if (nullLastNotification != null && nullLastNotification) {
             listWhere.add(cb.isNull(root.get("lastNotification")));
         }
-
-//        if (criteriaNotificationImperative != null && criteriaNotificationImperative) {
-//            listWhere.add(cb.and(cb.equal(root.get("notificationImperative"), true)));
-//        }
 
         if (criteriaFluxLie != null && !criteriaFluxLie.isEmpty()) {
             Join joinFlux = root.join("fluxLie");
@@ -279,14 +261,6 @@ public class DAOIncident<T> extends AbstrDao {
     public void setNullLastNotification(Boolean nullLastNotification) {
         this.nullLastNotification = nullLastNotification;
     }
-
-//    public Boolean getCriteriaNotificationImperative() {
-//        return criteriaNotificationImperative;
-//    }
-//
-//    public void setCriteriaNotificationImperative(Boolean criteriaNotificationImperative) {
-//        this.criteriaNotificationImperative = criteriaNotificationImperative;
-//    }
 
     public List<Flux> getCriteriaFluxLie() {
         return criteriaFluxLie;

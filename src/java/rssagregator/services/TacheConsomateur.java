@@ -35,8 +35,6 @@ public class TacheConsomateur implements Runnable {
             while (run) {
                 synchronized (lock) {
 
-
-
                     boolean allaquire = true;
 //                    logger.debug("iteration " + this);
 
@@ -75,42 +73,6 @@ public class TacheConsomateur implements Runnable {
                 }
 
 
-//                while (!service.queueTacheALancer.isEmpty()) {
-//
-//                    // Nouvelle version
-//
-//                    AbstrTache t = service.queueTacheALancer.peek();
-//
-//                    if (t != null) {
-//                        boolean semPreconditionAquises = t.tryAcquireSem();
-//
-//                        if (semPreconditionAquises) { // Si la tache a pu acquerir ses pré condition
-//
-//                            SoumissionTache soumissionTache = new SoumissionTache();
-//                            soumissionTache.setTache(t);
-//                            es.submit(soumissionTache);
-//
-//                            // Supression de la tache du pool
-//                            service.queueTacheALancer.remove(t);
-//                        }
-//
-//
-//                    }
-//
-//
-////             while (!service.queueTacheALancer.isEmpty()) {
-//
-////                    //Ancienne version
-////                    
-////                    // On place la tache dans le pool d'execution, si elle n'est pas annulée
-////                                        AbstrTache t = service.queueTacheALancer.take(); // ce n'est pas la bonne
-////                    
-////                    if (!t.getAnnuler()) {
-////                        SoumissionTache soumissionTache = new SoumissionTache();
-////                        soumissionTache.tache = t;
-////                        es.submit(soumissionTache);
-////                    }
-//                }
             }
 
         } catch (InterruptedException e) {
@@ -154,8 +116,6 @@ public class TacheConsomateur implements Runnable {
         @Override
         public void run() {
             if (tache != null) {
-
-
 
                 try {
 //                   // Soumission de la tache

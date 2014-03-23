@@ -27,7 +27,7 @@ public class ServiceImpl extends AbstrService {
 //            logger.debug("Notification de la tache");
 
             // Si c'est une tache schedulé et pas annuler un demande la gestion du producteur de tache
-            if (castTache.getSchedule() && !castTache.getAnnuler()) {
+            if (castTache.getSchedule()!=null && castTache.getSchedule() && !castTache.getAnnuler()) {
                 this.tacheProducteur.produire(castTache);
             }
         }

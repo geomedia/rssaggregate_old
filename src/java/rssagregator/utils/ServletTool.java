@@ -11,7 +11,6 @@ import java.util.Map;
 import javax.persistence.NoResultException;
 import javax.servlet.http.HttpServletRequest;
 import rssagregator.beans.AbstrObservableBeans;
-import rssagregator.beans.Conf;
 import rssagregator.beans.Flux;
 import rssagregator.beans.form.AbstrForm;
 import rssagregator.beans.form.FORMFactory;
@@ -21,7 +20,7 @@ import rssagregator.services.crud.AbstrServiceCRUD;
 import rssagregator.services.crud.ServiceCRUDFactory;
 
 /**
- * Une série de methode static pouvant être utilisée dans les Servlet du projet.
+ * Une série de methode static pouvant être utilisée dans les Servlet du projet. Permet de gérer les action de base sur un beans en s'appuyant sur les serviceCRUD et les dao. 
  *
  * @author clem
  */
@@ -428,20 +427,6 @@ public class ServletTool {
 
                     service.modifier(bean);
 
-//                    dao.beginTransaction();
-//                    dao.modifier(bean);
-//                    dao.commit();
-//
-//                    if (bean instanceof Flux) {
-//                        Flux ff = (Flux) bean;
-//                    }
-//
-//                    if (notifiObserver && AbstrObservableBeans.class.isAssignableFrom(bean.getClass())) {
-//                        AbstrObservableBeans b = (AbstrObservableBeans) bean;
-//                        b.enregistrerAupresdesService();
-//                        b.forceChangeStatut();
-//                        b.notifyObservers();
-//                    }
                     //Si un type est précisé
                     String type = request.getParameter("type");
                     if (type == null) {
@@ -518,39 +503,6 @@ public class ServletTool {
         }
     }
 
-//    @Deprecated
-//    public static void actionADD2(HttpServletRequest request, String beansnameJSP, String formNameJSP, Class beansClass, Boolean notifiObserver) {
-//        String srlvtname = (String) request.getAttribute("srlvtname");
-//        try {
-//            Object o = null;
-//
-//            AbstrForm form = FORMFactory.getInstance().getForm(beansClass, "add");
-//            form.setAction("add");
-////            form.setAddAction(true);
-//            request.setAttribute(formNameJSP, form);
-//            AbstrDao dao = DAOFactory.getInstance().getDaoFromType(beansClass);
-//            if (request.getMethod().equals("POST")) {
-//                form.validate(request);
-//                request.setAttribute(beansnameJSP, o);
-//
-//                if (form.getValide()) {
-//                    o = form.bind(request, o, beansClass);
-//                    dao.creer(o);
-//                    if (notifiObserver && AbstrObservableBeans.class.isAssignableFrom(o.getClass())) {
-//                        AbstrObservableBeans aob = (AbstrObservableBeans) o;
-//                        aob.enregistrerAupresdesService();
-//                        aob.forceChangeStatut();
-//                        aob.notifyObservers("add");
-//                    }
-//                    redir(request, srlvtname + "/recherche", "AJOUT effectué : ", Boolean.FALSE);
-//                } else { // Si le formulaire n'est pas valide
-//                }
-//            }
-//
-//        } catch (Exception e) {
-//            redir(request, srlvtname + "/add", "ERREUR lors du traitement : " + e, Boolean.TRUE);
-//        }
-//    }
     public static void actionREM(HttpServletRequest request, Class beansClass, Boolean notifiObserver) {
         String srlvtname = (String) request.getAttribute("srlvtname");
         AbstrDao dao = DAOFactory.getInstance().getDaoFromType(beansClass);
@@ -567,14 +519,6 @@ public class ServletTool {
             //On tente la suppression
             serviceCRUD.supprimer(o);
 
-//            dao.remove(o);
-//            dao.commit();
-//            if (notifiObserver && beansClass.isAssignableFrom(AbstrObservableBeans.class)) {
-//                AbstrObservableBeans aob = (AbstrObservableBeans) o;
-//                aob.enregistrerAupresdesService();
-//                aob.forceChangeStatut();
-//                aob.notifyObservers("rem");
-//            }
             redir(request, srlvtname + "/recherche", "Suppression éffectué ! : ", Boolean.FALSE);
 
         } catch (ArithmeticException e) {

@@ -178,7 +178,7 @@ public class TacheEnvoyerMail extends TacheImpl<TacheEnvoyerMail> {
             } else { //------------ Sinon on crée le message en y entrant les variables 
                 message = new MimeMessage(session);
 
-                message.setFrom(new InternetAddress("clement.rillon@gmail.com"));
+                message.setFrom(new InternetAddress("rorepli@geomedia.huma-num.fr"));
                 message.setRecipients(Message.RecipientType.TO, toMailAdresses);
 
                 message.setSubject(subject);
