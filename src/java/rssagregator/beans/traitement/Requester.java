@@ -10,7 +10,7 @@ import javax.naming.TimeLimitExceededException;
 import javax.persistence.Entity;
 import javax.persistence.Transient;
 import javax.xml.ws.http.HTTPException;
-import sun.org.mozilla.javascript.Callable;
+//import sun.org.mozilla.javascript.Callable;
 
 
 /*
